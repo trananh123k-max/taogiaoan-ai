@@ -18,7 +18,7 @@ import {
 import fileSaver from 'file-saver';
 const saveAs = (fileSaver as any)?.saveAs || fileSaver;
 import { LessonPlanOutput, ImageSlot, StepDetail, MathFormulaFormatType } from '../types';
-import { formatPreschoolActivities, formatPreschoolMusicActivities, parseActivityPairs, detectPreschoolDomain, sanitizeStandardActivity } from './preschoolUtils';
+import { formatPreschoolActivities, formatPreschoolMusicActivities, parseActivityPairs, detectPreschoolDomain, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes } from './preschoolUtils';
 import { latexToDocxMath, splitTextAndMath } from './latexToDocxMath';
 
 // Global state for current math formula export format (default: 'word_equation' - Phương án 2)
@@ -3328,17 +3328,20 @@ function buildPreschoolDocxElements(
   // I. Mục đích - yêu cầu
   elements.push(createSectionHeading('I. Mục đích - yêu cầu', fontName, primaryColor));
   
+  const isNew8 = isPreschoolNew8Activity(plan.subject, plan.lessonTitle);
+  const cleanPreschoolText = (t: string) => (!isNew8 ? stripPreschoolCodes(t) : t);
+
   elements.push(createSubHeading('1. Kiến thức:', fontName));
-  plan.objectives.knowledge.forEach(k => elements.push(createDashListItem(k, fontName)));
+  plan.objectives.knowledge.forEach(k => elements.push(createDashListItem(cleanPreschoolText(k), fontName)));
 
   elements.push(createSubHeading('2. Kỹ năng:', fontName));
-  plan.objectives.subjectCompetencies.forEach(c => elements.push(createDashListItem(c, fontName)));
+  plan.objectives.subjectCompetencies.forEach(c => elements.push(createDashListItem(cleanPreschoolText(c), fontName)));
 
   elements.push(createSubHeading('3. Phẩm chất:', fontName));
-  plan.objectives.qualities.forEach(q => elements.push(createDashListItem(q, fontName)));
+  plan.objectives.qualities.forEach(q => elements.push(createDashListItem(cleanPreschoolText(q), fontName)));
 
   elements.push(createSubHeading('4. Năng lực:', fontName));
-  plan.objectives.generalCompetencies.forEach(c => elements.push(createDashListItem(c, fontName)));
+  plan.objectives.generalCompetencies.forEach(c => elements.push(createDashListItem(cleanPreschoolText(c), fontName)));
 
   // 5. Tích hợp Năng lực số (NLS) và 6. Tích hợp Trí tuệ nhân tạo (AI) nếu người dùng chọn tích hợp
   const hasNLS = (plan.objectives.digitalCompetencies || []).length > 0;

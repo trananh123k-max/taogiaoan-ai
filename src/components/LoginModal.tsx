@@ -15,6 +15,7 @@ import {
   Phone,
   CheckCircle2,
   Sparkles,
+  Clock,
 } from 'lucide-react';
 import {
   ManagedUserAccount,
@@ -325,12 +326,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         email: cleanUsername.includes('@') ? cleanUsername : undefined,
         phone: regPhone.trim() || undefined,
         role: 'teacher',
-        status: 'new',
+        status: 'active',
         accessCode: regPassword.trim(),
         createdAt: nowFormatted,
-        expiresAt: 'Chưa cấp',
+        expiresAt: 'Dùng thử',
         trialGenerations: 0,
-        maxTrialGenerations: 0,
+        maxTrialGenerations: 5,
         maxDevices: 2,
         authorizedDevices: [newDevice], // Automatically bind registration device
         notes: 'Người dùng tự đăng ký qua hệ thống',

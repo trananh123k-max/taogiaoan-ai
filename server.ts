@@ -1,5 +1,5 @@
 import { PRESCHOOL_CURRICULUM_MATRIX, PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE } from './src/data/preschoolCurriculum.js';
-import { formatPreschoolMusicActivities, formatPreschoolActivities, isPreschoolMusicPlan, sanitizeStandardActivity } from './src/utils/preschoolUtils.js';
+import { formatPreschoolMusicActivities, formatPreschoolActivities, isPreschoolMusicPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, sanitizePreschoolObjectives } from './src/utils/preschoolUtils.js';
 import { NLS_DICTIONARY } from './src/data/nlsDictionary';
 import { getVerifiedLessons } from './src/data/verifiedCurriculumList';
 import { getTextbookLessonStructure } from './src/data/textbookStructureDictionary';
@@ -1641,6 +1641,12 @@ function enforcePPCTCompetencies(
   if (!plan.competencyMatrix) plan.competencyMatrix = { nlsItems: [], aiItems: [] };
 
   const isPreschool = config.schoolLevel === 'Mầm non';
+  if (isPreschool) {
+    const isNew8 = isPreschoolNew8Activity(config.subject || plan.subject, config.lessonTitle || plan.lessonTitle);
+    if (!isNew8 && plan.objectives) {
+      sanitizePreschoolObjectives(plan.objectives);
+    }
+  }
   const isHighSchool = config.schoolLevel === 'THPT' || /thpt/i.test(config.schoolLevel || '') || /lớp\s*(?:10|11|12)/i.test(config.grade || plan.grade || '');
   const isMiddleSchool = config.schoolLevel === 'THCS' || /thcs/i.test(config.schoolLevel || '') || /lớp\s*(?:6|7|8|9)/i.test(config.grade || plan.grade || '');
   const isMiddleOrHighSchool = isMiddleSchool || isHighSchool;
@@ -2182,19 +2188,33 @@ MỤC ĐÍCH DUY NHẤT: BẢO TỒN NGUYÊN VẸN NỘI DUNG, HÌNH ẢNH, BÀI
   };
 
 
-  const yccdPreschool = MAM_NON_STANDARDS[lessonTitle] || '';
+  const isNew8Activity = isPreschoolNew8Activity(subject, lessonTitle);
+
+  const yccdPreschoolRaw = MAM_NON_STANDARDS[lessonTitle] || '';
+  const yccdPreschool = isNew8Activity ? yccdPreschoolRaw : stripPreschoolCodes(yccdPreschoolRaw);
   const yccdInstruction = yccdPreschool ? `\n- BẮT BUỘC sử dụng nguyên văn nội dung sau làm Yêu cầu cần đạt (Kiến thức/Kỹ năng): "${yccdPreschool}". KHÔNG ĐƯỢC TỰ BỊA THÊM.` : '';
 
   const nlsInstruction = config.enableNLS ? `\n- TÍCH HỢP NĂNG LỰC SỐ (NLS): Nếu người dùng chọn tích hợp NLS, BẮT BUỘC xuất vào mảng digitalCompetencies để hiển thị ở Mục "5. Tích hợp Năng lực số (NLS)". Mô tả rõ: Các hoạt động ứng dụng công nghệ, thiết bị số, màn hình tương tác hoặc hình ảnh/video mô phỏng phù hợp lứa tuổi mầm non (tuyệt đối KHÔNG dùng mã chỉ báo phổ thông).` : '';
   const aiInstruction = config.enableAI ? `\n- TÍCH HỢP TRÍ TUỆ NHÂN TẠO (AI): Nếu người dùng chọn tích hợp AI, BẮT BUỘC xuất vào mảng aiCompetencies để hiển thị ở Mục "6. Tích hợp Trí tuệ nhân tạo (AI)". Mô tả rõ: Giáo viên ứng dụng trợ lý AI tạo ra hình ảnh, âm thanh, câu chuyện, tranh ảnh minh họa sống động hoặc nhân vật ảo Robot trò chuyện với trẻ. Trẻ tương tác với AI thông qua sự hướng dẫn của giáo viên (tuyệt đối KHÔNG dùng mã chỉ báo phổ thông).` : '';
+
+  const preschoolObjectivesInstruction = isNew8Activity
+    ? `- ĐỐI VỚI 8 NỘI DUNG MỚI TÍCH HỢP (ÁP DỤNG CHUẨN YÊU CẦU THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT):
+  + BẮT BUỘC ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng mã chỉ báo của Quyết định số 388/QĐ-BGDĐT (giống như ví dụ NT 1.1, NT 1.2, TC 1.1, TC 1.2, TC 3.1, TX 3.2, TX 4.3, TX 4.4, NN 1.2, NN 2.2...).
+  + 1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ biết/nhận biết... (Mã: NT 1.1)")
+  + 2. Kỹ năng: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)")`
+    : `- ĐỐI VỚI GIÁO ÁN MẦM NON CŨ/TRUYỀN THỐNG (Văn học thơ/truyện, Làm quen chữ cái, Khám phá khoa học, Xã hội, Toán, Tạo hình, Âm nhạc, Thể chất, Tình cảm - KNXH...):
+  + BẮT BUỘC LẤY LẠI ĐÚNG MẪU GIÁO ÁN BAN ĐẦU TRƯỚC KHI CẬP NHẬT 8 LĨNH VỰC MỚI, GIỮ NGUYÊN ĐỊNH DẠNG BAN ĐẦU.
+  + TUYỆT ĐỐI KHÔNG ĐIỀN MÃ TIÊU CHÍ NÀO: KHÔNG ghi "(Mã: NN 5.1)", KHÔNG ghi "(Mã: NT 1.1)", KHÔNG ghi bất kỳ mã chỉ báo nào trong phần Kiến thức và Kỹ năng.
+  + 1. Kiến thức: Các gạch đầu dòng mô tả những gì trẻ biết, hiểu (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Trẻ biết tên bài thơ/bài hát...", "- Trẻ hiểu nội dung bài...".
+  + 2. Kỹ năng: Các gạch đầu dòng rèn luyện kỹ năng (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Rèn kỹ năng phát âm...", "- Phát triển kỹ năng vận động...".`;
 
   const preschoolPrompt = `\nĐẶC BIỆT QUAN TRỌNG ĐỐI VỚI CẤP MẦM NON:
 ${PRESCHOOL_CURRICULUM_MATRIX}
 ${PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE}
 ${yccdInstruction}${nlsInstruction}${aiInstruction}
 
-- BẮT BUỘC soạn theo Kế hoạch tổ chức hoạt động giáo dục Mầm non, TUYỆT ĐỐI KHÔNG dùng Công văn 5512. Bám sát Chương trình giáo dục mầm non thí điểm từ năm học 2026-2027 (Quyết định số 388/QĐ-BGDĐT ngày 12/02/2026 của BGD&ĐT).
-- ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng mã chỉ báo của Quyết định số 388/QĐ-BGDĐT (giống như ví dụ NT 1.1, NT 1.2, TC 1.1, TC 1.2, TC 3.1, TX 3.2, TX 4.3, TX 4.4, NN 1.2, NN 2.2...).
+- BẮT BUỘC soạn theo Kế hoạch tổ chức hoạt động giáo dục Mầm non, TUYỆT ĐỐI KHÔNG dùng Công văn 5512.
+${preschoolObjectivesInstruction}
 - Ngôn ngữ, hoạt động phải phù hợp với tâm lý lứa tuổi mầm non (cô và trẻ).
 - Tích hợp phát triển 4 phẩm chất cốt lõi: Yêu thương, Tôn trọng, Trung thực, Trách nhiệm.
 - Tích hợp phát triển 5 năng lực nền tảng: Giao tiếp, Hợp tác, Giải quyết vấn đề, Tự lực, Thích ứng.
@@ -2208,8 +2228,9 @@ ${yccdInstruction}${nlsInstruction}${aiInstruction}
   - Thích ứng: ...
 - CẤU TRÚC GIÁO ÁN PHẢI TUÂN THỦ NGHIÊM NGẶT FORM SAU:
 I. Mục đích - yêu cầu
-1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ biết/nhận biết... (Mã: NT 1.1)")
-2. Kỹ năng: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)")
+${isNew8Activity ? `1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đạt theo QĐ 388 (ví dụ: "- Trẻ biết/nhận biết... (Mã: NT 1.1)")
+2. Kỹ năng: Gắn mã tiêu chí yêu cầu cần đạt theo QĐ 388 (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)")` : `1. Kiến thức: (TUYỆT ĐỐI KHÔNG GẮN MÃ CHỈ BÁO, giữ nguyên định dạng mẫu giáo án ban đầu)
+2. Kỹ năng: (TUYỆT ĐỐI KHÔNG GẮN MÃ CHỈ BÁO, giữ nguyên định dạng mẫu giáo án ban đầu)`}
 3. Phẩm chất (Gắn với Yêu thương, Tôn trọng...):
 4. Năng lực (Gắn với Tự lực, Thích ứng...):
 5. Tích hợp Năng lực số (NLS): (Đưa vào trường digitalCompetencies nếu người dùng chọn tích hợp NLS, nếu không chọn để [])
@@ -2402,6 +2423,7 @@ QUY ĐỊNH BẮT BUỘC VỀ VỊ TRÍ ĐỀ MỤC SGK THEO CHUẨN CÔNG VĂN 
   // Task 1: Objectives & Equipment
   const taskObjectivesEquipment = async () => {
     let prompt = '';
+    const isNew8 = isPreschoolNew8Activity(subject, lessonTitle);
     if (isPreschool) {
       const nlsReq = config.enableNLS
         ? `- NẾU NGƯỜI DÙNG CHỌN TÍCH HỢP NLS (config.enableNLS = true): BẮT BUỘC đưa nội dung tích hợp NLS vào trường "digitalCompetencies" (để hiển thị mục 5. Tích hợp Năng lực số (NLS)). Mô tả rõ hoạt động ứng dụng công nghệ, thiết bị số, màn hình tương tác hoặc hình ảnh/video mô phỏng phù hợp lứa tuổi mầm non (tuyệt đối KHÔNG dùng mã chỉ báo phổ thông).`
@@ -2410,8 +2432,9 @@ QUY ĐỊNH BẮT BUỘC VỀ VỊ TRÍ ĐỀ MỤC SGK THEO CHUẨN CÔNG VĂN 
         ? `- NẾU NGƯỜI DÙNG CHỌN TÍCH HỢP AI (config.enableAI = true): BẮT BUỘC đưa nội dung tích hợp AI vào trường "aiCompetencies" (để hiển thị mục 6. Tích hợp Trí tuệ nhân tạo (AI)). Mô tả rõ giáo viên ứng dụng AI tạo tranh ảnh, âm thanh, câu chuyện sinh động hoặc nhân vật ảo Robot trò chuyện tương tác với trẻ dưới sự hướng dẫn của cô (tuyệt đối KHÔNG dùng mã chỉ báo phổ thông).`
         : `- KHÔNG chọn tích hợp AI: Để "aiCompetencies": [].`;
 
-      prompt = `${baseContext}
-Hãy soạn Mục I (MỤC ĐÍCH - YÊU CẦU) và Mục II (CHUẨN BỊ) theo CHUẨN MẦM NON MỚI (Quyết định số 388/QĐ-BGDĐT ngày 12/02/2026 của BGD&ĐT).
+      if (isNew8) {
+        prompt = `${baseContext}
+Hãy soạn Mục I (MỤC ĐÍCH - YÊU CẦU) và Mục II (CHUẨN BỊ) cho 8 NỘI DUNG MỚI TÍCH HỢP MẦM NON (ÁP DỤNG CHUẨN YÊU CẦU THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT).
 YÊU CẦU BẮT BUỘC:
 1. ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng mã chỉ báo của Quyết định số 388/QĐ-BGDĐT (ví dụ: NT 1.1, NT 1.2, TC 1.1, TC 1.2, TC 3.1, TX 3.2, TX 4.3, TX 4.4, NN 1.2, NN 2.2...).
 - Kiến thức (knowledge): Trẻ nhận biết, hiểu được gì... gắn với mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ nhận biết và gọi tên được... (Mã: NT 1.1)", "- Trẻ hiểu được nội dung... (Mã: NT 1.2)").
@@ -2443,6 +2466,42 @@ Yêu cầu: Trả về JSON với cấu trúc:
     "stemMaterials": []
   }
 }`;
+      } else {
+        prompt = `${baseContext}
+Hãy soạn Mục I (MỤC ĐÍCH - YÊU CẦU) và Mục II (CHUẨN BỊ) theo ĐÚNG MẪU GIÁO ÁN MẦM NON TRUYỀN THỐNG/BAN ĐẦU TRƯỚC KHI CẬP NHẬT 8 LĨNH VỰC MỚI.
+YÊU CẦU BẮT BUỘC:
+1. MỤC ĐÍCH - YÊU CẦU:
+- TUYỆT ĐỐI KHÔNG ĐIỀN MÃ TIÊU CHÍ NÀO: KHÔNG ghi "(Mã: NN 5.1)", KHÔNG ghi "(Mã: NT 1.1)", KHÔNG ghi bất kỳ mã chỉ báo nào trong phần Kiến thức và Kỹ năng. Giữ nguyên định dạng giáo án mầm non ban đầu.
+- Kiến thức (knowledge): Trẻ nhận biết, biết tên, hiểu nội dung... (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Trẻ biết tên bài thơ/bài hát/câu chuyện...", "- Trẻ hiểu nội dung bài học...".
+- Kỹ năng (subjectCompetencies): Rèn luyện và phát triển các kỹ năng (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Rèn kỹ năng phát âm rõ ràng, trả lời trọn câu...", "- Rèn kỹ năng vận động nhịp nhàng...", "- Phát triển khả năng chú ý và ghi nhớ có chủ định...".
+- Phẩm chất (qualities): BẮT BUỘC gắn với 4 phẩm chất cốt lõi (Yêu thương, Tôn trọng, Trung thực, Trách nhiệm). Ví dụ: "Yêu thương: ...", "Tôn trọng: ...".
+- Năng lực (generalCompetencies): BẮT BUỘC gắn với 5 năng lực nền tảng (Giao tiếp, Hợp tác, Giải quyết vấn đề, Tự lực, Thích ứng). Ví dụ: "Tự lực: ...", "Thích ứng: ...".
+2. TÍCH HỢP NĂNG LỰC SỐ VÀ TRÍ TUỆ NHÂN TẠO:
+${nlsReq}
+${aiReq}
+3. CHUẨN BỊ:
+- Chuẩn bị của cô (equipment.teacher): Bắt buộc có "- Môi trường và không gian: ...", "- Đồ dùng, học liệu của giáo viên: ...".
+- Chuẩn bị của trẻ (equipment.student): Trang phục, đồ dùng, tâm thế...
+
+Yêu cầu: Trả về JSON với cấu trúc:
+{
+  "objectives": {
+    "knowledge": ["- Trẻ biết...", "- Trẻ hiểu..."],
+    "subjectCompetencies": ["- Rèn kỹ năng...", "- Phát triển khả năng..."],
+    "generalCompetencies": ["Tự lực: ...", "Thích ứng: ...", "Giao tiếp: ..."],
+    "qualities": ["Yêu thương: ...", "Tôn trọng: ...", "Trung thực: ...", "Trách nhiệm: ..."],
+    "digitalCompetencies": ${config.enableNLS ? '["Mô tả hoạt động tích hợp Năng lực số (NLS) cho trẻ..."]' : '[]'},
+    "aiCompetencies": ${config.enableAI ? '["Mô tả hoạt động ứng dụng Trí tuệ nhân tạo (AI)..."]' : '[]'},
+    "stemCompetencies": []
+  },
+  "equipment": {
+    "teacher": ["- Môi trường và không gian: ...", "- Đồ dùng, học liệu của giáo viên: ..."],
+    "student": ["Trang phục, đồ dùng, tâm thế..."],
+    "digitalAssets": [],
+    "stemMaterials": []
+  }
+}`;
+      }
     } else {
       prompt = `${baseContext}
 Hãy soạn Mục I (MỤC TIÊU theo GDPT 2018, Công văn 5512, Thông tư 02/2025/TT-BGDĐT, Quyết định 2422/QĐ-BGDĐT) và Mục II (THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU).
@@ -2518,7 +2577,11 @@ Yêu cầu: Trả về JSON với cấu trúc:
       taskType: 'pedagogical',
       config: { responseMimeType: 'application/json' },
     });
-    return parseJSONRobust(res.text);
+    const parsed = parseJSONRobust(res.text);
+    if (isPreschool && !isNew8 && parsed?.objectives) {
+      sanitizePreschoolObjectives(parsed.objectives);
+    }
+    return parsed;
   };
 
   // Task 2: Activity 1 (Khởi động) & Activity 2 (Hình thành kiến thức mới)
@@ -3231,12 +3294,25 @@ const handleGenerateKHBD = async (req: express.Request, res: express.Response) =
       return res.json({ success: true, data: sectionalResult, lessonPlan: sectionalResult });
     }
 
+    const isNew8Activity = isPreschoolNew8Activity(config.subject, config.lessonTitle);
+
+    const preschoolObjectivesInstruction = isNew8Activity
+      ? `- ĐỐI VỚI 8 NỘI DUNG MỚI TÍCH HỢP (ÁP DỤNG CHUẨN YÊU CẦU THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT):
+  + BẮT BUỘC ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng mã chỉ báo của Quyết định số 388/QĐ-BGDĐT (giống như ví dụ NT 1.1, NT 1.2, TC 1.1, TC 1.2, TC 3.1, TX 3.2, TX 4.3, TX 4.4, NN 1.2, NN 2.2...).
+  + 1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ biết/nhận biết... (Mã: NT 1.1)")
+  + 2. Kỹ năng: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)")`
+      : `- ĐỐI VỚI GIÁO ÁN MẦM NON CŨ/TRUYỀN THỐNG (Văn học thơ/truyện, Làm quen chữ cái, Khám phá khoa học, Xã hội, Toán, Tạo hình, Âm nhạc, Thể chất, Tình cảm - KNXH...):
+  + BẮT BUỘC LẤY LẠI ĐÚNG MẪU GIÁO ÁN BAN ĐẦU TRƯỚC KHI CẬP NHẬT 8 LĨNH VỰC MỚI, GIỮ NGUYÊN ĐỊNH DẠNG BAN ĐẦU.
+  + TUYỆT ĐỐI KHÔNG ĐIỀN MÃ TIÊU CHÍ NÀO: KHÔNG ghi "(Mã: NN 5.1)", KHÔNG ghi "(Mã: NT 1.1)", KHÔNG ghi bất kỳ mã chỉ báo nào trong phần Kiến thức và Kỹ năng.
+  + 1. Kiến thức: Các gạch đầu dòng mô tả những gì trẻ biết, hiểu (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Trẻ biết tên bài thơ/bài hát...", "- Trẻ hiểu nội dung bài...".
+  + 2. Kỹ năng: Các gạch đầu dòng rèn luyện kỹ năng (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Rèn kỹ năng phát âm...", "- Phát triển kỹ năng vận động...".`;
+
     const preschoolPrompt = `\nĐẶC BIỆT QUAN TRỌNG ĐỐI VỚI CẤP MẦM NON:
 ${PRESCHOOL_CURRICULUM_MATRIX}
 ${PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE}
 
-- BẮT BUỘC soạn theo Kế hoạch tổ chức hoạt động giáo dục Mầm non, TUYỆT ĐỐI KHÔNG dùng Công văn 5512. Bám sát Chương trình giáo dục mầm non thí điểm từ năm học 2026-2027 (Quyết định số 388/QĐ-BGDĐT ngày 12/02/2026 của BGD&ĐT).
-- ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng mã chỉ báo của Quyết định số 388/QĐ-BGDĐT (giống như ví dụ NT 1.1, NT 1.2, TC 1.1, TC 1.2, TC 3.1, TX 3.2, TX 4.3, TX 4.4, NN 1.2, NN 2.2...).
+- BẮT BUỘC soạn theo Kế hoạch tổ chức hoạt động giáo dục Mầm non, TUYỆT ĐỐI KHÔNG dùng Công văn 5512.
+${preschoolObjectivesInstruction}
 - Ngôn ngữ, hoạt động phải phù hợp với tâm lý lứa tuổi mầm non (cô và trẻ).
 - Tích hợp phát triển 4 phẩm chất cốt lõi: Yêu thương, Tôn trọng, Trung thực, Trách nhiệm.
 - Tích hợp phát triển 5 năng lực nền tảng: Giao tiếp, Hợp tác, Giải quyết vấn đề, Tự lực, Thích ứng.
@@ -3250,8 +3326,9 @@ ${PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE}
   - Thích ứng: ...
 - CẤU TRÚC GIÁO ÁN PHẢI TUÂN THỦ NGHIÊM NGẶT FORM SAU:
 I. Mục đích - yêu cầu
-1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ nhận biết... (Mã: NT 1.1)")
-2. Kỹ năng: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện kỹ năng... (Mã: TC 1.1)")
+${isNew8Activity ? `1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đạt theo QĐ 388 (ví dụ: "- Trẻ biết/nhận biết... (Mã: NT 1.1)")
+2. Kỹ năng: Gắn mã tiêu chí yêu cầu cần đạt theo QĐ 388 (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)")` : `1. Kiến thức: (TUYỆT ĐỐI KHÔNG GẮN MÃ CHỈ BÁO, giữ nguyên định dạng mẫu giáo án ban đầu)
+2. Kỹ năng: (TUYỆT ĐỐI KHÔNG GẮN MÃ CHỈ BÁO, giữ nguyên định dạng mẫu giáo án ban đầu)`}
 3. Phẩm chất (Gắn với Yêu thương, Tôn trọng...):
 4. Năng lực (Gắn với Tự lực, Thích ứng...):
 5. Tích hợp Năng lực số (NLS): (Đưa vào trường digitalCompetencies nếu người dùng chọn tích hợp NLS, nếu không chọn để [])

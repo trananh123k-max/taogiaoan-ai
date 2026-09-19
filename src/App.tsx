@@ -396,14 +396,20 @@ export default function App() {
       return;
     }
 
-    if (accessStatus.isTrial && currentUser) {
+    if (accessStatus.isTrial) {
       const nextUsed = accessStatus.usedTrials + 1;
-      const updatedUser = { ...currentUser, trialGenerations: nextUsed };
-      setCurrentUser(updatedUser);
-      try {
-        localStorage.setItem('khbd_current_user', JSON.stringify(updatedUser));
-      } catch {}
-      saveUserAccountToFirestore(updatedUser);
+      if (currentUser) {
+        const updatedUser = { ...currentUser, trialGenerations: nextUsed };
+        setCurrentUser(updatedUser);
+        try {
+          localStorage.setItem('khbd_current_user', JSON.stringify(updatedUser));
+        } catch {}
+        saveUserAccountToFirestore(updatedUser);
+      } else {
+        try {
+          localStorage.setItem('khbd_guest_trial_generations', String(nextUsed));
+        } catch {}
+      }
 
       if (nextUsed >= accessStatus.maxTrials) {
         showToast(`Bạn đang sử dụng lượt dùng thử cuối cùng (${nextUsed}/${accessStatus.maxTrials} lượt)! Sau lượt này cần liên hệ Admin để cấp quyền.`, 'info');
@@ -720,6 +726,9 @@ export default function App() {
         onLogout={handleLogout}
         onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
         hasCustomApiKey={hasCustomApiKey}
+        onGenerate={handleGeneratePlan}
+        isGenerating={isGenerating}
+        elapsedSeconds={elapsedSeconds}
       />
 
       {/* Toast notification - positioned bottom-right so it never blocks top action buttons */}

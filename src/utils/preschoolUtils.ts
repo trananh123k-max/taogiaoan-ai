@@ -1080,3 +1080,135 @@ export function ensurePreschoolMusicInPlan(plan: any): any {
     activities: formatPreschoolMusicActivities(plan.activities, plan.lessonTitle || ''),
   };
 }
+
+export const MAM_NON_8_NEW_ACTIVITIES_LIST = [
+  'HOẠT ĐỘNG VUI CHƠI TRONG LỚP',
+  'HOẠT ĐỘNG NGOÀI TRỜI',
+  'TRÒ CHƠI VẬN ĐỘNG',
+  'HOẠT ĐỘNG GIÁO DỤC KỸ NĂNG',
+  'TRÒ CHƠI DÂN GIAN',
+  'HOẠT ĐỘNG TĂNG CƯỜNG TIẾNG VIỆT',
+  'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
+  'HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI'
+];
+
+export const PRESCHOOL_NEW_8_DOMAINS: PreschoolDomainType[] = [
+  'PLAY_INDOOR',
+  'OUTDOOR',
+  'PHYSICAL_GAME',
+  'SKILL_EDU',
+  'FOLK_GAME',
+  'VIETNAMESE_ENHANCE',
+  'LETTER_TRACING',
+  'LETTER_GAME'
+];
+
+/**
+ * Checks if a preschool subject or activity belongs to the 8 newly integrated activities
+ * that require Quyết định 388/QĐ-BGDĐT indicator codes (Mã: NT 1.1, TC 1.1...).
+ * For all traditional/old preschool lesson plans, returns false so codes are NOT applied.
+ */
+export function isPreschoolNew8Activity(
+  subject: string = '',
+  lessonTitle: string = '',
+  extraText: string = ''
+): boolean {
+  const s = (subject || '').trim();
+  const t = (lessonTitle || '').trim();
+  const text = `${s} ${t} ${extraText}`.toLowerCase();
+
+  // 1. Direct match against MAM_NON_8_NEW_ACTIVITIES_LIST
+  for (const act of MAM_NON_8_NEW_ACTIVITIES_LIST) {
+    if (s.toLowerCase() === act.toLowerCase() || s.toLowerCase().includes(act.toLowerCase())) {
+      return true;
+    }
+  }
+
+  // 2. Clear exclusions: Old traditional preschool subjects must NOT be classified as new 8
+  const isOldSubject = 
+    s.includes('VĂN HỌC') || s.includes('văn học') ||
+    s.includes('THƠ') || s.includes('thơ') ||
+    s.includes('TRUYỆN') || s.includes('truyện') ||
+    (s.includes('CHỮ CÁI') && !text.includes('tập tô') && !text.includes('trò chơi chữ') && !text.includes('trò chơi với chữ')) ||
+    s.includes('KHOA HỌC') || s.includes('khoa học') ||
+    s.includes('TOÁN') || s.includes('toán') ||
+    s.includes('TẠO HÌNH') || s.includes('tạo hình') ||
+    s.includes('ÂM NHẠC') || s.includes('âm nhạc') ||
+    (s.includes('thể chất') && !text.includes('trò chơi'));
+
+  if (isOldSubject) {
+    // If the subject explicitly selected is an old subject, only treat as new if title clearly specifies one of the 8 new activities
+    const isExplicitNewTitle = 
+      t.includes('vui chơi trong lớp') || t.includes('hoạt động góc') ||
+      t.includes('ngoài trời') ||
+      t.includes('trò chơi vận động') ||
+      t.includes('giáo dục kỹ năng') || t.includes('kỹ năng sống') ||
+      t.includes('trò chơi dân gian') ||
+      t.includes('tăng cường tiếng việt') || t.includes('tctv') ||
+      t.includes('tập tô') || t.includes('tô chữ cái') ||
+      t.includes('trò chơi chữ cái') || t.includes('trò chơi với chữ cái');
+    
+    if (!isExplicitNewTitle) {
+      return false;
+    }
+  }
+
+  // 3. Keyword matches for the 8 new activities
+  if (
+    text.includes('vui chơi trong lớp') ||
+    text.includes('hoạt động góc') ||
+    text.includes('ngoài trời') ||
+    text.includes('trò chơi vận động') ||
+    text.includes('giáo dục kỹ năng') ||
+    text.includes('kỹ năng sống') ||
+    text.includes('trò chơi dân gian') ||
+    text.includes('tăng cường tiếng việt') ||
+    text.includes('tctv') ||
+    text.includes('tập tô') ||
+    text.includes('tô chữ cái') ||
+    text.includes('trò chơi chữ cái') ||
+    text.includes('trò chơi với chữ cái')
+  ) {
+    return true;
+  }
+
+  const domain = detectPreschoolDomain(subject, lessonTitle, extraText);
+  return PRESCHOOL_NEW_8_DOMAINS.includes(domain.domainType);
+}
+
+/**
+ * Remove indicator codes like (Mã: NT 1.1), (Mã: NN 5.1), [Mã: ...], [TC 3.1, TC 3.3] from preschool objectives
+ * Used exclusively for OLD / TRADITIONAL preschool lesson plans so they strictly preserve
+ * the original format before QĐ 388 was introduced.
+ */
+export function stripPreschoolCodes(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/\s*\([Mm][ããá]\s*:[^)]+\)/gi, '')
+    .replace(/\s*\[[Mm][ããá]\s*:[^\]]+\]/gi, '')
+    .replace(/\s*\(MÃ\s*:[^)]+\)/gi, '')
+    .replace(/\s*\[MÃ\s*:[^\]]+\]/gi, '')
+    .replace(/\s*\(mã\s*:[^)]+\)/gi, '')
+    .replace(/\s*\[(?:TC|TX|NN|NT|NgT|KN|QP)\s*[\d\.,\s]+\]/gi, '')
+    .replace(/\s*\((?:TC|TX|NN|NT|NgT|KN|QP)\s*[\d\.,\s]+\)/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+export function sanitizePreschoolObjectives(objectives: any, isNew8Activity: boolean = false): any {
+  if (!objectives || isNew8Activity) return objectives;
+  if (Array.isArray(objectives.knowledge)) {
+    objectives.knowledge = objectives.knowledge.map((k: string) => stripPreschoolCodes(k));
+  }
+  if (Array.isArray(objectives.subjectCompetencies)) {
+    objectives.subjectCompetencies = objectives.subjectCompetencies.map((c: string) => stripPreschoolCodes(c));
+  }
+  if (Array.isArray(objectives.generalCompetencies)) {
+    objectives.generalCompetencies = objectives.generalCompetencies.map((g: string) => stripPreschoolCodes(g));
+  }
+  if (Array.isArray(objectives.qualities)) {
+    objectives.qualities = objectives.qualities.map((q: string) => stripPreschoolCodes(q));
+  }
+  return objectives;
+}
+

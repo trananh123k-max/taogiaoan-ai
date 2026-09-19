@@ -13,6 +13,7 @@ import {
   Key,
   AlertTriangle,
   ShieldCheck,
+  XCircle,
 } from 'lucide-react';
 import { ManagedUserAccount } from '../utils/firebase';
 import { getUserInitials } from '../utils/avatarUtils';
@@ -37,6 +38,9 @@ interface HeaderProps {
   onLogout?: () => void;
   onOpenApiKeyModal?: () => void;
   hasCustomApiKey?: boolean;
+  onGenerate?: () => void;
+  isGenerating?: boolean;
+  elapsedSeconds?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -52,6 +56,9 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
   onOpenApiKeyModal,
   hasCustomApiKey = false,
+  onGenerate,
+  isGenerating = false,
+  elapsedSeconds = 0,
 }) => {
   const currentRole = currentUser ? currentUser.role : userRole;
   const isTeacher = currentRole === 'teacher';
@@ -89,6 +96,36 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Right: Dynamic Role & User info according to logged in account */}
           <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* SOẠN BÀI DẠY Main Action Button - Prominently positioned next to API Key */}
+            {onGenerate && (
+              <button
+                type="button"
+                onClick={onGenerate}
+                className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 text-xs font-black rounded-lg transition-all cursor-pointer shadow-md border active:scale-95 ${
+                  isGenerating
+                    ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-400 animate-pulse shadow-rose-950/40'
+                    : 'bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 hover:from-amber-500 hover:to-amber-700 text-white border-amber-400/80 shadow-amber-950/40'
+                }`}
+                title={
+                  isGenerating
+                    ? 'Bấm để hủy soạn bài dạy ngay lập tức'
+                    : 'Bấm để bắt đầu soạn bài dạy'
+                }
+              >
+                {isGenerating ? (
+                  <>
+                    <XCircle className="w-3.5 h-3.5 text-white" />
+                    <span>HỦY ({String(Math.floor((elapsedSeconds || 0) / 60)).padStart(2, '0')}:{String((elapsedSeconds || 0) % 60).padStart(2, '0')}s)</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5 text-amber-200 shrink-0" />
+                    <span className="tracking-wide">SOẠN BÀI DẠY</span>
+                  </>
+                )}
+              </button>
+            )}
+
             {/* API Key Management Button */}
             {onOpenApiKeyModal && (
               <button

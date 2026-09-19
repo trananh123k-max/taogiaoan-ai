@@ -79,25 +79,52 @@ export function getUserAccessStatus(
     ? customApiKeyProvided
     : (typeof window !== 'undefined' ? Boolean(localStorage.getItem('khbd_custom_gemini_api_key')?.trim()) : false);
 
-  // 1. Admin or null fallback
+  // 1. Guest / Not logged in fallback - Provide 5 free trial generations
   if (!user) {
+    const guestUsed = typeof window !== 'undefined'
+      ? Math.max(0, Number(localStorage.getItem('khbd_guest_trial_generations')) || 0)
+      : 0;
+    const maxTrials = 5;
+    const remainingTrials = Math.max(0, maxTrials - guestUsed);
+    const isOutOfTrials = remainingTrials <= 0;
+
+    if (isOutOfTrials) {
+      return {
+        isAllowed: false,
+        isAdmin: false,
+        isTrial: true,
+        isExpired: false,
+        isOutOfTrials: true,
+        isLocked: false,
+        isSubscription: false,
+        requiresCustomApiKey: false,
+        hasCustomApiKey: hasCustomKey,
+        usedTrials: guestUsed,
+        maxTrials,
+        remainingTrials: 0,
+        expiresAt: 'Dùng thử (Hết lượt)',
+        reason: 'Bạn đã sử dụng hết 5 lượt dùng thử miễn phí. Vui lòng đăng nhập tài khoản hoặc liên hệ Quản trị viên để được cấp thêm quyền!',
+        badgeText: 'Hết lượt dùng thử',
+        badgeVariant: 'error',
+      };
+    }
+
     return {
-      isAllowed: false,
+      isAllowed: true,
       isAdmin: false,
       isTrial: true,
       isExpired: false,
-      isOutOfTrials: true,
+      isOutOfTrials: false,
       isLocked: false,
       isSubscription: false,
       requiresCustomApiKey: false,
       hasCustomApiKey: hasCustomKey,
-      usedTrials: 0,
-      maxTrials: 5,
-      remainingTrials: 0,
-      expiresAt: 'Chưa cấp',
-      reason: 'Vui lòng đăng nhập để sử dụng tính năng soạn giáo án!',
-      badgeText: 'Chưa đăng nhập',
-      badgeVariant: 'error',
+      usedTrials: guestUsed,
+      maxTrials,
+      remainingTrials,
+      expiresAt: `Dùng thử (Còn ${remainingTrials} lượt)`,
+      badgeText: `Dùng thử: Còn ${remainingTrials} lượt`,
+      badgeVariant: 'warning',
     };
   }
 
@@ -144,8 +171,14 @@ export function getUserAccessStatus(
     };
   }
 
-  // 2.5. New registered account pending activation
-  if (user.status === 'new' || ((user.expiresAt === 'Chưa cấp' || !user.expiresAt) && (!user.maxTrialGenerations || user.maxTrialGenerations === 0))) {
+  // 2.5. New registered account - grant default 5 trial generations if not set yet
+  const maxTrials = user.maxTrialGenerations !== undefined && !isNaN(Number(user.maxTrialGenerations))
+    ? Number(user.maxTrialGenerations)
+    : 5;
+  const usedTrials = Number(user.trialGenerations) || 0;
+  const remainingTrials = Math.max(0, maxTrials - usedTrials);
+
+  if (user.status === 'new' && maxTrials === 0) {
     return {
       isAllowed: false,
       isAdmin: false,
@@ -158,7 +191,7 @@ export function getUserAccessStatus(
       requiresCustomApiKey: false,
       hasCustomApiKey: hasCustomKey,
       usedTrials: user.trialGenerations || 0,
-      maxTrials: user.maxTrialGenerations || 0,
+      maxTrials: 0,
       remainingTrials: 0,
       expiresAt: 'Chờ cấp quyền',
       reason: 'Tài khoản mới tạo thành công. Vui lòng liên hệ Ban Quản Trị (Admin) để được kích hoạt số lượt dùng thử hoặc ngày sử dụng!',

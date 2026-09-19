@@ -25,7 +25,7 @@ import { PreschoolSingleTable } from './PreschoolSingleTable';
 import { CompetencyMatrixView } from './CompetencyMatrixView';
 import { exportLessonPlanToDocx, getPreschoolHeaderInfo, formatHomeworkText, formatMathPeriodHeader, parseMathLessonHeader } from '../utils/docxExporter';
 import { exportLessonPlanToPptx } from '../utils/pptxExporter';
-import { formatPreschoolActivities, formatPreschoolMusicActivities, isPreschoolPlan, sanitizeStandardActivity } from '../utils/preschoolUtils';
+import { formatPreschoolActivities, formatPreschoolMusicActivities, isPreschoolPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes } from '../utils/preschoolUtils';
 import { MathRenderer } from './MathRenderer';
 import { WorksheetRenderer } from './WorksheetRenderer';
 import { StepProgress } from '../App';
@@ -350,7 +350,7 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
           Chưa có Giáo án được soạn
         </h3>
         <p className="text-sm text-slate-600 max-w-md mb-6 leading-relaxed">
-          Khu vực xem trước đang trống. Hệ thống sẽ hiển thị nội dung quá trình soạn giáo án tại đây sau khi bạn bấm <strong>"SOẠN BÀI DẠY"</strong> ở cột bên trái.
+          Khu vực xem trước đang trống. Hệ thống sẽ hiển thị nội dung quá trình soạn giáo án tại đây sau khi bạn bấm <strong>"SOẠN BÀI DẠY"</strong> ở thanh tiêu đề phía trên hoặc cột bên trái.
         </p>
       </div>
     );
@@ -382,7 +382,15 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
     }
   };
 
-  const cleanItem = (text: string) => text.replace(/^[-•*]\s*/, '');
+  const isPreschool = (plan as any)?.schoolLevel === 'Mầm non';
+  const isNew8 = isPreschoolNew8Activity(plan.subject, plan.lessonTitle);
+  const cleanItem = (text: string) => {
+    let t = text.replace(/^[-•*]\s*/, '');
+    if (isPreschool && !isNew8) {
+      t = stripPreschoolCodes(t);
+    }
+    return t;
+  };
 
   const isMath = /toán|math/i.test(plan.subject || '') || /toán|math/i.test(plan.lessonTitle || '');
   const mathHeader = parseMathLessonHeader(plan.lessonTitle);
