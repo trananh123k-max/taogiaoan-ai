@@ -56,7 +56,7 @@ function getServerApiKeys(): string[] {
     keys.push(...extractKeysFromInput(process.env.GEMINI_API_KEYS));
   }
   for (let i = 1; i <= 10; i++) {
-    const k = process.env[`GEMINI_API_KEY_${i}`];
+    const k = process.env[`GEMINI_API_KEY_${i}`] || process.env[`GEMINI_API_KEY-${i}`] || process.env[`GEMINI_API_KEY${i}`];
     if (k && k.trim()) {
       keys.push(...extractKeysFromInput(k));
     }
