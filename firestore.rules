@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // User profile and account details
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+
+    // User accounts management
+    match /user_accounts/{accountId} {
+      allow read, write: if true;
+    }
+    
+    // Uploaded textbooks and lesson documents
+    match /textbooks/{bookId} {
+      allow read, write: if true;
+    }
+
+    // Distribution curriculum PPCT
+    match /ppct/{ppctId} {
+      allow read, write: if true;
+    }
+    
+    // Repository settings
+    match /repository_settings/{settingId} {
+      allow read, write: if true;
+    }
+
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

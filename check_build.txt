@@ -1,0 +1,107 @@
+function buildActivitiesSection(
+  activities: LessonPlanOutput['activities'],
+  slotMap: Map<string, ImageSlot>,
+  fontName: string,
+  periods?: number,
+  isPreschool: boolean = false,
+  tableLayout: string = 'two_column'
+): (Paragraph | Table)[] {
+  const elements: (Paragraph | Table)[] = [];
+  const processedActivities = isPreschool ? (activities || []) : (activities || []).map((act, idx) => sanitizeStandardActivity(act, idx));
+
+  processedActivities.forEach(act => {
+    // Multi-period clear separation header
+    if (periods && periods >= 2) {
+      if (act.index === 1) {
+        elements.push(
+          new Paragraph({
+            heading: HeadingLevel.HEADING_2,
+            spacing: { before: 140, after: 60 },
+            children: [
+              new TextRun({
+                text: '[TIẾT 1] KHỞI ĐỘNG VÀ HÌNH THÀNH KIẾN THỨC MỚI',
+                bold: true,
+                size: 28,
+                font: fontName,
+                color: '003366',
+              }),
+            ],
+          })
+        );
+      } else if (act.index === 3) {
+        elements.push(
+          new Paragraph({
+            heading: HeadingLevel.HEADING_2,
+            spacing: { before: 180, after: 60 },
+            children: [
+              new TextRun({
+                text: '[TIẾT 2] LUYỆN TẬP VÀ VẬN DỤNG',
+                bold: true,
+                size: 28,
+                font: fontName,
+                color: '003366',
+              }),
+            ],
+          })
+        );
+      }
+    }
+
+    // Activity Title (WITHOUT specific duration string as requested)
+    const actNameDisplay = act.name.replace(/\[TIẾT\s*\d+\]\s*/i, '');
+    elements.push(
+      new Paragraph({
+        heading: HeadingLevel.HEADING_2,
+        spacing: { before: 80, after: 25 },
+        children: [
+          new TextRun({
+            text: actNameDisplay.toUpperCase(),
+            bold: true,
+            size: 28, // 14pt
+            font: fontName,
+          }),
+        ],
+      })
+    );
+
+    // Goal, Content, Product info
+    elements.push(
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 15, after: 15 },
+        children: [
+          new TextRun({ text: 'a) Mục tiêu: ', bold: true, font: fontName }),
+          new TextRun({ text: act.objective, font: fontName }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 15, after: 15 },
+        children: [
+          new TextRun({ text: 'b) Nội dung: ', bold: true, font: fontName }),
+          new TextRun({ text: act.content, font: fontName }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { before: 15, after: 15 },
+        children: [
+          new TextRun({ text: 'c) Sản phẩm: ', bold: true, font: fontName }),
+          new TextRun({ text: act.productSummary, font: fontName }),
+        ],
+      }),
+      new Paragraph({
+        spacing: { before: 20, after: 30 },
+        keepNext: true,
+        children: [
+          new TextRun({ text: 'd) Tổ chức thực hiện:', bold: true, font: fontName }),
+        ],
+      })
+    );
+
+    // 2-Column Table for 4 steps (No gray shading to save printer ink)
+    const activityTable = createTwoColumnPedagogicalTable(act, slotMap, fontName, isPreschool);
+    elements.push(activityTable);
+  });
+
+  return elements;

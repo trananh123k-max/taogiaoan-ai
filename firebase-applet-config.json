@@ -1,0 +1,10 @@
+{
+  "projectId": "khbd-ai",
+  "appId": "1:210610932939:web:f214ab25754dd57ab65f4e",
+  "apiKey": "AIzaSyBSytcNRlremX5HlTghfQ0tcsel6tXKFjs",
+  "authDomain": "khbd-ai.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "khbd-ai.firebasestorage.app",
+  "messagingSenderId": "210610932939",
+  "measurementId": "G-PDW3NLD58C"
+}

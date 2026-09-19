@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "UserProfile": {
+      "collection": "users",
+      "description": "User profile, teacher information, bank account details and custom repository settings",
+      "fields": {
+        "userId": { "type": "string", "description": "Unique user or device ID" },
+        "fullName": { "type": "string", "description": "Teacher full name" },
+        "email": { "type": "string", "description": "Email address" },
+        "phone": { "type": "string", "description": "Contact phone number" },
+        "schoolName": { "type": "string", "description": "School or institution" },
+        "department": { "type": "string", "description": "Academic department or subject group" },
+        "customWarehouseName": { "type": "string", "description": "Custom name for the user's Firebase repository" },
+        "bankAccountNumber": { "type": "string", "description": "Bank account number for user disbursements/record" },
+        "bankName": { "type": "string", "description": "Name of the bank (e.g., Vietcombank, MB Bank, BIDV)" },
+        "bankAccountHolder": { "type": "string", "description": "Full name of the bank account holder in uppercase" },
+        "bankBranch": { "type": "string", "description": "Bank branch or province" },
+        "taxCode": { "type": "string", "description": "Personal or teacher tax code" },
+        "updatedAt": { "type": "string", "description": "Last update ISO string" }
+      }
+    },
+    "Textbook": {
+      "collection": "textbooks",
+      "description": "Uploaded textbooks and digital pedagogical references",
+      "fields": {
+        "id": { "type": "string", "description": "Unique book document ID" },
+        "title": { "type": "string", "description": "Textbook or lesson title" },
+        "grade": { "type": "string", "description": "Grade level (e.g. Lớp 10)" },
+        "subject": { "type": "string", "description": "Subject (e.g. Toán học, Tin học)" },
+        "bookSeries": { "type": "string", "description": "Textbook series (Kết nối tri thức với cuộc sống)" },
+        "chapter": { "type": "string", "description": "Chapter or unit name" },
+        "summary": { "type": "string", "description": "Summary or key content" },
+        "fileName": { "type": "string", "description": "Original file name" },
+        "fileSize": { "type": "string", "description": "Formatted file size" },
+        "uploaderId": { "type": "string", "description": "User ID of uploader" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      }
+    }
+  }
+}

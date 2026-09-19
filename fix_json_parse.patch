@@ -1,0 +1,27 @@
+--- server.ts
++++ server.ts
+@@ -107,6 +107,24 @@
+   throw lastError || new Error('Không thể kết nối đến Gemini AI sau nhiều lần thử.');
+ }
+ 
++function parseJSONRobust(text: string) {
++  try {
++    return JSON.parse(text);
++  } catch (e) {
++    let fixedText = text.trim();
++    const closures = ['', '}', ']}', '}]', '}}', ']}}', '}]}', '}}]', '}}]}', ']}}]}', '"]}', '"}'];
++    for (const closure of closures) {
++      try {
++        return JSON.parse(fixedText + closure);
++      } catch (err) {}
++    }
++    const lastBrace = fixedText.lastIndexOf('}');
++    if (lastBrace !== -1) {
++      try { return JSON.parse(fixedText.substring(0, lastBrace + 1)); } catch (err) {}
++    }
++    return {};
++  }
++}
++
+ // Health check
+ app.get('/api/health', (req, res) => {

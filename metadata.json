@@ -1,0 +1,6 @@
+{
+  "name": "KHBD AI PRO",
+  "description": "Hệ thống soạn Kế hoạch bài dạy và Giáo án điện tử đa cấp học, tích hợp NLS và AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
