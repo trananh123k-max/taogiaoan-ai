@@ -1,0 +1,2269 @@
+{
+  "books": [
+    {
+      "volume": "Cả năm / Không phân tập",
+      "summary": "Sách giáo khoa Toán học Lớp 9 gồm 31 bài học.",
+      "fileName": "SGK TOÁN 9 TẬP 1.pdf",
+      "lessons": [
+        "Bài 1: Phương trình quy về phương trình bậc nhất một ẩn",
+        "Bài 2: Phương trình bậc hai một ẩn",
+        "Bài 3: Định lí Viète và ứng dụng",
+        "Bài 4: Giải bài toán bằng cách lập phương trình",
+        "Bài 5: Bất đẳng thức và tính chất",
+        "Bài 6: Bất phương trình bậc nhất một ẩn",
+        "Bài 7: Căn bậc hai và căn bậc ba",
+        "Bài 8: Khai căn bậc hai của một tích và khai căn bậc hai của một thương",
+        "Bài 9: Biến đổi đơn giản và rút gọn biểu thức chứa căn thức bậc hai",
+        "Bài 10: Tỉ số lượng giác của góc nhọn",
+        "Bài 11: Một số hệ thức cạnh và góc trong tam giác vuông",
+        "Bài 12: Hình nón",
+        "Bài 13: Hình trụ",
+        "Bài 14: Hình cầu",
+        "Bài 15: Hàm số y = ax^2 (a khác 0)",
+        "Bài 16: Phương trình đường thẳng và parabol",
+        "Bài 17: Phương trình bậc hai một ẩn",
+        "Bài 18: Hàm số bậc hai và đồ thị",
+        "Bài 19: Phương trình bậc hai một ẩn",
+        "Bài 20: Vị trí tương đối giữa đường thẳng và đường tròn",
+        "Bài 21: Tiếp tuyến của đường tròn",
+        "Bài 22: Góc nội tiếp",
+        "Bài 23: Góc tạo bởi tiếp tuyến và dây cung",
+        "Bài 24: Góc có đỉnh ở bên trong hay bên ngoài đường tròn",
+        "Bài 25: Cung và dây cung",
+        "Bài 26: Tứ giác nội tiếp",
+        "Bài 27: Đường tròn ngoại tiếp và đường tròn nội tiếp",
+        "Bài 28: Đường tròn ngoại tiếp và đường tròn nội tiếp của đa giác",
+        "Bài 29: Công thức tính diện tích hình quạt tròn và hình vành khuyên",
+        "Bài 30: Xác suất của biến cố trong một số mô hình đơn giản",
+        "Bài 31: Mối liên hệ giữa thống kê và xác suất"
+      ],
+      "title": "SGK Toán học Lớp 9 - SGK TOÁN 9 TẬP 1.pdf",
+      "updatedAt": "2026-09-01T08:40:52.360Z",
+      "grade": "Lớp 9",
+      "fileSize": "19.32 MB",
+      "uploadedAt": "1/9/2026",
+      "subject": "Toán học",
+      "bookSeries": "Kết nối tri thức với cuộc sống",
+      "id": "sgk_1788252052359_wz4nr"
+    },
+    {
+      "fileSize": "19.32 MB",
+      "id": "sgk_1788252138011_k0h2i",
+      "summary": "Sách giáo khoa Toán học Lớp 9 gồm 31 bài học.",
+      "lessons": [
+        "Bài 1: Phương trình quy về phương trình bậc nhất một ẩn",
+        "Bài 2: Phương trình bậc nhất hai ẩn. Hệ hai phương trình bậc nhất hai ẩn",
+        "Bài 3: Giải hệ hai phương trình bậc nhất hai ẩn",
+        "Bài 4: Giải bài toán bằng cách lập hệ phương trình",
+        "Bài 5: Bài tập cuối chương I",
+        "Bài 6: Hàm số y = ax² (a ≠ 0)",
+        "Bài 7: Phương trình bậc hai một ẩn",
+        "Bài 8: Giải bài toán bằng cách lập phương trình",
+        "Bài 9: Bài tập cuối chương II",
+        "Bài 10: Tỉ số lượng giác của góc nhọn",
+        "Bài 11: Tỉ số lượng giác của góc nhọn (tiếp theo)",
+        "Bài 12: Một số hệ thức giữa cạnh, góc trong tam giác vuông và ứng dụng",
+        "Bài 13: Mở đầu về đường tròn",
+        "Bài 14: Cung và dây của một đường tròn",
+        "Bài 15: Độ dài cung và diện tích hình quạt tròn, hình vành khăn",
+        "Bài 16: Bài tập cuối chương III",
+        "Bài 17: Rà soát các vấn đề cần lưu ý khi giải quyết bài toán thực tế",
+        "Bài 18: Hàm số y = ax + b (a ≠ 0)",
+        "Bài 19: Phương trình bậc hai một ẩn và định lí Viète",
+        "Bài 20: Giải bài toán bằng cách lập phương trình",
+        "Bài 21: Bài tập cuối chương IV",
+        "Bài 22: Góc nội tiếp và góc tạo bởi tia tiếp tuyến và dây cung",
+        "Bài 23: Góc có đỉnh ở bên trong hay bên ngoài đường tròn",
+        "Bài 24: Hình bình hành và hình chữ nhật",
+        "Bài 25: Hình thoi và hình vuông",
+        "Bài 26: Bài tập cuối chương V",
+        "Bài 27: Tần số và tần số tương đối",
+        "Bài 28: Tần số tích lũy và tần số tương đối tích lũy",
+        "Bài 29: Bài tập cuối chương VI",
+        "Bài 30: Xác suất của biến cố trong một số mô hình xác suất đơn giản",
+        "Bài 31: Bài tập cuối chương VII"
+      ],
+      "volume": "Cả năm / Không phân tập",
+      "title": "SGK Toán học Lớp 9 - SGK TOÁN 9 TẬP 1.pdf",
+      "subject": "Toán học",
+      "uploadedAt": "1/9/2026",
+      "grade": "Lớp 9",
+      "fileName": "SGK TOÁN 9 TẬP 1.pdf",
+      "updatedAt": "2026-09-01T08:42:18.013Z",
+      "bookSeries": "Kết nối tri thức với cuộc sống"
+    },
+    {
+      "fileSize": "19.52 MB",
+      "subject": "Tin học",
+      "updatedAt": "2026-09-01T13:05:13.709Z",
+      "title": "SGK Tin học Lớp 9 - SGK TIN HỌC 9 KNTT.pdf",
+      "lessons": [
+        "Bài 1: Thông tin trong môi trường số",
+        "Bài 2: Thông tin và dữ liệu",
+        "Bài 3: Thực hành kết nối thiết bị số với máy tính",
+        "Bài 4: Hệ điều hành",
+        "Bài 5: Thực hành khám phá hệ điều hành",
+        "Bài 6: Quản lí tệp và thư mục",
+        "Bài 7: Phần mềm máy tính",
+        "Bài 8: Thực hành sử dụng phần mềm máy tính",
+        "Bài 9: Làm quen với phần mềm chỉnh sửa ảnh",
+        "Bài 10: Thực hành chỉnh sửa ảnh",
+        "Bài 11: Làm quen với phần mềm làm video",
+        "Bài 12: Thực hành làm video",
+        "Bài 13: Đạo đức, pháp luật và văn hoá trong môi trường số",
+        "Bài 14: Bảo vệ dữ liệu cá nhân",
+        "Bài 15: Công nghệ kĩ thuật số",
+        "Bài 16: Mạng thông tin toàn cầu",
+        "Bài 17: Thực hành sử dụng dịch vụ trên mạng",
+        "Bài 18: Các dịch vụ trực tuyến",
+        "Bài 19: Thực hành tìm kiếm và khai thác thông tin",
+        "Bài 20: Hệ thống thông tin",
+        "Bài 21: Thực hành xây dựng hệ thống thông tin",
+        "Bài 22: Thuật toán",
+        "Bài 23: Thực hành giải quyết vấn đề với thuật toán",
+        "Bài 24: Lập trình với Python",
+        "Bài 25: Các câu lệnh điều khiển",
+        "Bài 26: Thực hành lập trình với câu lệnh điều khiển",
+        "Bài 27: Hàm và thủ tục",
+        "Bài 28: Thực hành lập trình với hàm và thủ tục",
+        "Bài 29: Cấu trúc dữ liệu danh sách",
+        "Bài 30: Thực hành lập trình với danh sách"
+      ],
+      "grade": "Lớp 9",
+      "uploadedAt": "1/9/2026",
+      "id": "sgk_1788267913706_g2xe15",
+      "summary": "Sách giáo khoa Tin học Lớp 9 gồm 30 bài học.",
+      "volume": "Cả năm / Không phân tập",
+      "fileName": "SGK TIN HỌC 9 KNTT.pdf",
+      "bookSeries": "Kết nối tri thức với cuộc sống"
+    },
+    {
+      "id": "sgk_1788270902374_9xcui",
+      "volume": "Cả năm / Không phân tập",
+      "summary": "Sách giáo khoa Tin học Lớp 9 gồm 32 bài học.",
+      "fileSize": "19.52 MB",
+      "title": "SGK Tin học Lớp 9 - SGK TIN HỌC 9 KNTT.pdf",
+      "lessons": [
+        "Bài 1: Thông tin trong môi trường số",
+        "Bài 2: Thông tin và dữ liệu",
+        "Bài 3: Thực hành kết nối thiết bị số với máy tính",
+        "Bài 4: Hệ nhị phân và dữ liệu số",
+        "Bài 5: Thực hành khám phá phần mềm mô phỏng mạng",
+        "Bài 6: Bảo vệ dữ liệu và định danh cá nhân",
+        "Bài 7: Thực hành phòng tránh các nguy cơ trên Internet",
+        "Bài 8: Trình bày thông tin bằng bảng",
+        "Bài 9: Trình bày thông tin bằng sơ đồ tư duy",
+        "Bài 10: Thực hành tạo và quản lí sơ đồ tư duy",
+        "Bài 11: Thực hành tạo trình chiếu",
+        "Bài 12: Thực hành thiết kế bài trình chiếu",
+        "Bài 13: Thực hành chỉnh sửa và trình bày bài trình chiếu",
+        "Bài 14: Kịch bản và sản phẩm đa phương tiện",
+        "Bài 15: Thực hành tạo sản phẩm đa phương tiện",
+        "Bài 16: Thực hành tổng hợp tạo sản phẩm đa phương tiện",
+        "Bài 17: Lưu trữ và truyền tải dữ liệu",
+        "Bài 18: Các phương thức giao tiếp trực tuyến",
+        "Bài 19: Thực hành tìm kiếm, khai thác thông tin",
+        "Bài 20: Thực hành tổng hợp sử dụng mạng Internet",
+        "Bài 21: Làm quen với ngôn ngữ lập trình bậc cao",
+        "Bài 22: Các phần tử cơ bản của ngôn ngữ lập trình",
+        "Bài 23: Thực hành làm quen với chương trình",
+        "Bài 24: Biến và kiểu dữ liệu",
+        "Bài 25: Thực hành sử dụng biến và kiểu dữ liệu",
+        "Bài 26: Các phép toán và biểu thức",
+        "Bài 27: Thực hành tính toán với biểu thức",
+        "Bài 28: Cấu trúc rẽ nhánh",
+        "Bài 29: Thực hành cấu trúc rẽ nhánh",
+        "Bài 30: Cấu trúc lặp",
+        "Bài 31: Thực hành cấu trúc lặp",
+        "Bài 32: Dự án học tập: Thiết kế chương trình giải quyết vấn đề"
+      ],
+      "grade": "Lớp 9",
+      "fileName": "SGK TIN HỌC 9 KNTT.pdf",
+      "subject": "Tin học",
+      "updatedAt": "2026-09-01T13:55:02.377Z",
+      "uploadedAt": "1/9/2026",
+      "bookSeries": "Kết nối tri thức với cuộc sống"
+    },
+    {
+      "fileName": "SGK TOÁN 10 TẬP 1.pdf",
+      "subject": "Toán học",
+      "id": "sgk_1788528638872_skqsfp",
+      "volume": "Cả năm / Không phân tập",
+      "title": "SGK Toán học Lớp 10 - SGK TOÁN 10 TẬP 1.pdf",
+      "bookSeries": "Kết nối tri thức với cuộc sống",
+      "summary": "Sách giáo khoa Toán học Lớp 10 gồm 27 bài học.",
+      "fileSize": "14.37 MB",
+      "grade": "Lớp 10",
+      "updatedAt": "2026-09-04T13:30:38.873Z",
+      "uploadedAt": "4/9/2026",
+      "lessons": [
+        "Bài 1: Mệnh đề",
+        "Bài 2: Tập hợp",
+        "Bài 3: Phép toán trên tập hợp",
+        "Bài 4: Bất phương trình bậc nhất hai ẩn",
+        "Bài 5: Hệ bất phương trình bậc nhất hai ẩn",
+        "Bài 6: Hệ thức lượng trong tam giác",
+        "Bài 7: Các khái niệm mở đầu",
+        "Bài 8: Tổng và hiệu của hai vectơ",
+        "Bài 9: Tích của một vectơ với một số",
+        "Bài 10: Vectơ trong mặt phẳng toạ độ",
+        "Bài 11: Tích vô hướng của hai vectơ",
+        "Bài 12: Số gần đúng và sai số",
+        "Bài 13: Các số đặc trưng đo xu thế trung tâm",
+        "Bài 14: Các số đặc trưng đo độ phân tán",
+        "Bài 15: Hàm số",
+        "Bài 16: Hàm số bậc hai",
+        "Bài 17: Dấu của tam thức bậc hai",
+        "Bài 18: Phương trình quy về phương trình bậc hai",
+        "Bài 19: Phương trình đường thẳng",
+        "Bài 20: Vị trí tương đối giữa hai đường thẳng. Góc và khoảng cách",
+        "Bài 21: Đường tròn trong mặt phẳng toạ độ",
+        "Bài 22: Ba đường conic",
+        "Bài 23: Quy tắc đếm",
+        "Bài 24: Hoán vị, chỉnh hợp và tổ hợp",
+        "Bài 25: Nhị thức Newton",
+        "Bài 26: Biến cố và định nghĩa cổ điển của xác suất",
+        "Bài 27: Thực hành tính xác suất theo định nghĩa cổ điển"
+      ]
+    },
+    {
+      "updatedAt": "2026-09-08T08:19:59.835Z",
+      "uploadedAt": "8/9/2026",
+      "bookSeries": "Kết nối tri thức với cuộc sống",
+      "fileSize": "0.67 MB",
+      "subject": "Khoa học tự nhiên (KHTN)",
+      "id": "sgk_1788855599823_jwfl6b",
+      "lessons": [
+        "Bài 1: Giới thiệu về Khoa học tự nhiên",
+        "Bài 2: An toàn trong phòng thực hành",
+        "Bài 3: Sử dụng kính lúp",
+        "Bài 4: Sử dụng kính hiển vi quang học",
+        "Bài 5: Đo chiều dài",
+        "Bài 6: Đo khối lượng",
+        "Bài 7: Đo thời gian",
+        "Bài 8: Đo nhiệt độ",
+        "Bài 9: Sự đa dạng của chất",
+        "Bài 10: Các thể của chất và sự chuyển thể",
+        "Bài 11: Oxygen và không khí",
+        "Bài 12: Một số vật liệu",
+        "Bài 13: Một số nguyên liệu",
+        "Bài 14: Một số nhiên liệu",
+        "Bài 15: Chất tinh khiết và hỗn hợp",
+        "Bài 16: Một số phương pháp tách chất ra khỏi hỗn hợp",
+        "Bài 17: Tế bào – Đơn vị cơ bản của sự sống",
+        "Bài 18: Thực hành: Quan sát tế bào sinh vật",
+        "Bài 19: Cấu tạo và chức năng các thành phần của tế bào",
+        "Bài 20: Sự lớn lên và sinh sản của tế bào",
+        "Bài 21: Thực hành: Quan sát sinh vật",
+        "Bài 22: Phân loại thế giới sống",
+        "Bài 23: Virus",
+        "Bài 24: Vi khuẩn",
+        "Bài 25: Thực hành: Quan sát vi khuẩn",
+        "Bài 26: Nấm",
+        "Bài 27: Thực vật",
+        "Bài 28: Thực hành: Làm tiêu bản quan sát các nhóm thực vật",
+        "Bài 29: Động vật",
+        "Bài 30: Thực hành: Quan sát động vật",
+        "Bài 31: Lực và tác dụng của lực",
+        "Bài 32: Lực ma sát",
+        "Bài 33: Lực hấp dẫn",
+        "Bài 34: Lực và biến dạng",
+        "Bài 35: Lực và sự thay đổi chuyển động",
+        "Bài 36: Tác dụng của lực trong một số trường hợp thực tế",
+        "Bài 37: Lực xuất hiện trong các tình huống thực tế",
+        "Bài 38: Các dạng năng lượng",
+        "Bài 39: Sự chuyển hóa năng lượng",
+        "Bài 40: Năng lượng và sự sống",
+        "Bài 41: Năng lượng tái tạo",
+        "Bài 42: Bảo toàn năng lượng và sử dụng năng lượng hiệu quả",
+        "Bài 43: Chuyển động nhìn thấy của Mặt Trời",
+        "Bài 44: Chuyển động nhìn thấy của Mặt Trăng",
+        "Bài 45: Hệ Mặt Trời",
+        "Bài 46: Ngân Hà"
+      ],
+      "volume": "Cả năm / Không phân tập",
+      "grade": "Lớp 6",
+      "summary": "Sách giáo khoa Khoa học tự nhiên (KHTN) Lớp 6 gồm 46 bài học.",
+      "fileName": "Nhiều màu sắc Họa tiết và Hình dạng Trừu tượng Lời chúc mừng Bạn thân nhất Bản thuyết trình Vui nhộn.pdf",
+      "title": "SGK Khoa học tự nhiên (KHTN) Lớp 6 - Nhiều màu sắc Họa tiết và Hình dạng Trừu tượng Lời chúc mừng Bạn thân nhất Bản thuyết trình Vui nhộn.pdf"
+    }
+  ],
+  "ppcts": [
+    {
+      "id": "ppct_tinhoc_6_phuluc03",
+      "title": "Phân phối chương trình Tin học 6 - Kết nối tri thức",
+      "subject": "Tin học",
+      "grade": "Lớp 6",
+      "fileName": "Phu_luc_03__TIN HỌC 6 KNTT.pdf",
+      "fileSize": "1.24 MB",
+      "uploadedAt": "01/08/2025",
+      "summary": "Kế hoạch dạy học môn Tin học Lớp 6 (Bộ Kết nối tri thức với cuộc sống). Tổng số: 35 tiết/năm (1 tiết/tuần).",
+      "lessonConfigs": [
+        {
+          "lessonTitle": "Bài 1: Thông tin và dữ liệu",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin"
+          ],
+          "integratedAI": [
+            "Mạch A (NLa). Tư duy lấy con người làm trung tâm"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 2: Xử lí thông tin",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "5. Giải quyết vấn đề"
+          ],
+          "integratedAI": [
+            "Mạch C (NLc). Các kĩ thuật và ứng dụng AI"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 3: Thông tin trong máy tính",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin"
+          ],
+          "hasStemIntegration": true,
+          "stemTopic": "Mã hóa thông tin nhị phân và biểu diễn số"
+        },
+        {
+          "lessonTitle": "Bài 4: Mạng máy tính",
+          "periods": 2,
+          "integratedNLS": [
+            "2. Giao tiếp và hợp tác"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 5: Internet",
+          "periods": 2,
+          "integratedNLS": [
+            "2. Giao tiếp và hợp tác",
+            "4. An toàn"
+          ],
+          "integratedAI": [
+            "Mạch B (NLb). Đạo đức AI & Trách nhiệm xã hội"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 6: Mạng thông tin toàn cầu",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 7: Tìm kiếm thông tin trên Internet",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "6. Ứng dụng trí tuệ nhân tạo (AI)"
+          ],
+          "integratedAI": [
+            "Mạch C (NLc). Các kĩ thuật và ứng dụng AI"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 8: Thư điện tử",
+          "periods": 2,
+          "integratedNLS": [
+            "2. Giao tiếp và hợp tác",
+            "4. An toàn"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 9: An toàn thông tin trên Internet",
+          "periods": 2,
+          "integratedNLS": [
+            "4. An toàn"
+          ],
+          "integratedAI": [
+            "Mạch B (NLb). Đạo đức AI & Trách nhiệm xã hội"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 10: Sơ đồ tư duy",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số",
+            "5. Giải quyết vấn đề"
+          ],
+          "hasStemIntegration": true,
+          "stemTopic": "Thiết kế sơ đồ tư duy giải quyết dự án học tập"
+        },
+        {
+          "lessonTitle": "Bài 11: Định dạng văn bản",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 12: Trình bày thông tin ở dạng bảng",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 13: Tìm kiếm và thay thế",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "5. Giải quyết vấn đề"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 14: Thực hành tổng hợp: Hoàn thiện sổ lưu niệm",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số",
+            "2. Giao tiếp và hợp tác"
+          ],
+          "hasStemIntegration": true,
+          "stemTopic": "Dự án Sổ tay lưu niệm học sinh điện tử"
+        },
+        {
+          "lessonTitle": "Bài 15: Thuật toán",
+          "periods": 2,
+          "integratedNLS": [
+            "5. Giải quyết vấn đề"
+          ],
+          "integratedAI": [
+            "Mạch D (NLd). Thiết kế hệ thống AI & Tác nhân AI"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 16: Các cấu trúc điều khiển",
+          "periods": 2,
+          "integratedNLS": [
+            "5. Giải quyết vấn đề"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 17: Chương trình máy tính",
+          "periods": 3,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số",
+            "5. Giải quyết vấn đề"
+          ],
+          "integratedAI": [
+            "Mạch D (NLd). Thiết kế hệ thống AI & Tác nhân AI"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppct_tinhoc_7_phuluc03",
+      "title": "Phân phối chương trình Tin học 7 - Kết nối tri thức",
+      "subject": "Tin học",
+      "grade": "Lớp 7",
+      "fileName": "Phu_luc_03__TIN HỌC 7 KNTT.pdf",
+      "fileSize": "1.18 MB",
+      "uploadedAt": "01/08/2025",
+      "summary": "Kế hoạch dạy học môn Tin học Lớp 7 (Bộ Kết nối tri thức với cuộc sống). Tổng số: 35 tiết/năm (1 tiết/tuần).",
+      "lessonConfigs": [
+        {
+          "lessonTitle": "Bài 1: Thiết bị vào - ra",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 2: Phần mềm ứng dụng",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "5. Giải quyết vấn đề"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 3: Quản lý dữ liệu trong máy tính",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "4. An toàn"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 4: Mạng xã hội và một số kênh trao đổi thông tin trên Internet",
+          "periods": 2,
+          "integratedNLS": [
+            "2. Giao tiếp và hợp tác",
+            "4. An toàn"
+          ],
+          "integratedAI": [
+            "Mạch B (NLb). Đạo đức AI & Trách nhiệm xã hội"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 5: Ứng xử trên mạng",
+          "periods": 2,
+          "integratedNLS": [
+            "4. An toàn",
+            "2. Giao tiếp và hợp tác"
+          ],
+          "integratedAI": [
+            "Mạch B (NLb). Đạo đức AI & Trách nhiệm xã hội"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 6: Làm quen với phần mềm bảng tính",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 7: Tính toán tự động trên bảng tính",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "5. Giải quyết vấn đề"
+          ],
+          "hasStemIntegration": true,
+          "stemTopic": "Bảng tính quản lý thu chi chi tiêu gia đình/lớp học"
+        },
+        {
+          "lessonTitle": "Bài 8: Công cụ hỗ trợ tính toán",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "5. Giải quyết vấn đề"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 9: Trình bày bảng tính",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 10: Hoàn thiện bảng tính",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số",
+            "5. Giải quyết vấn đề"
+          ],
+          "hasStemIntegration": true,
+          "stemTopic": "Báo cáo thống kê số liệu điểm số và xếp loại"
+        },
+        {
+          "lessonTitle": "Bài 11: Tạo bài trình chiếu",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 12: Định dạng đối tượng trên trang chiếu",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 13: Thực hành: Hoàn thiện bài trình chiếu",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số",
+            "2. Giao tiếp và hợp tác"
+          ],
+          "hasStemIntegration": true,
+          "stemTopic": "Thuyết trình đa phương tiện về trường lớp thân thiện"
+        },
+        {
+          "lessonTitle": "Bài 14: Thuật toán tìm kiếm tuần tự",
+          "periods": 2,
+          "integratedNLS": [
+            "5. Giải quyết vấn đề"
+          ],
+          "integratedAI": [
+            "Mạch C (NLc). Các kĩ thuật và ứng dụng AI"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 15: Thuật toán tìm kiếm nhị phân",
+          "periods": 2,
+          "integratedNLS": [
+            "5. Giải quyết vấn đề"
+          ],
+          "integratedAI": [
+            "Mạch C (NLc). Các kĩ thuật và ứng dụng AI"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 16: Thuật toán sắp xếp",
+          "periods": 3,
+          "integratedNLS": [
+            "5. Giải quyết vấn đề"
+          ],
+          "integratedAI": [
+            "Mạch D (NLd). Thiết kế hệ thống AI & Tác nhân AI"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppct_tinhoc_8_phuluc03",
+      "title": "Phân phối chương trình Tin học 8 - Kết nối tri thức",
+      "subject": "Tin học",
+      "grade": "Lớp 8",
+      "fileName": "Phu_luc_03__TIN HỌC 8 KNTT.pdf",
+      "fileSize": "1.35 MB",
+      "uploadedAt": "01/08/2025",
+      "summary": "Kế hoạch dạy học môn Tin học Lớp 8 (Bộ Kết nối tri thức với cuộc sống). Tổng số: 35 tiết/năm (1 tiết/tuần).",
+      "lessonConfigs": [
+        {
+          "lessonTitle": "Bài 1: Lược sử công cụ tính toán",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin"
+          ],
+          "integratedAI": [
+            "Mạch A (NLa). Tư duy lấy con người làm trung tâm"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 2: Thông tin trong môi trường số",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "4. An toàn"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 3: Thực hành: Khai thác thông tin số",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "6. Ứng dụng trí tuệ nhân tạo (AI)"
+          ],
+          "integratedAI": [
+            "Mạch C (NLc). Các kĩ thuật và ứng dụng AI"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 4: Đạo đức và văn hoá trong sử dụng công nghệ kĩ thuật số",
+          "periods": 2,
+          "integratedNLS": [
+            "4. An toàn",
+            "2. Giao tiếp và hợp tác"
+          ],
+          "integratedAI": [
+            "Mạch B (NLb). Đạo đức AI & Trách nhiệm xã hội"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 5: Sử dụng bảng tính giải quyết bài toán thực tế",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "5. Giải quyết vấn đề"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 6: Sắp xếp và lọc dữ liệu",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "5. Giải quyết vấn đề"
+          ],
+          "hasStemIntegration": true,
+          "stemTopic": "Phân tích và lọc dữ liệu điều tra môi trường trường học"
+        },
+        {
+          "lessonTitle": "Bài 7: Trực quan hóa dữ liệu bằng biểu đồ",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số",
+            "1. Khai thác dữ liệu và thông tin"
+          ],
+          "hasStemIntegration": true,
+          "stemTopic": "Biểu đồ hóa số liệu dự báo thời tiết và nhiệt độ"
+        },
+        {
+          "lessonTitle": "Bài 8a: Làm việc với danh sách dạng liệt kê và hình ảnh trong văn bản",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 9a: Tạo đầu trang, chân trang cho văn bản",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 10a: Sử dụng bản mẫu, tạo bài trình chiếu",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số",
+            "2. Giao tiếp và hợp tác"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 8b: Làm quen với phần mềm chỉnh sửa ảnh",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 9b: Thay đổi kích thước, màu sắc và ghép ảnh",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 10b: Thêm văn bản, tạo hiệu ứng cho ảnh",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 11b: Thực hành tổng hợp",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số",
+            "5. Giải quyết vấn đề"
+          ],
+          "hasStemIntegration": true,
+          "stemTopic": "Thiết kế Infographic và Poster tuyên truyền số"
+        },
+        {
+          "lessonTitle": "Bài 12: Từ thuật toán đến chương trình",
+          "periods": 2,
+          "integratedNLS": [
+            "5. Giải quyết vấn đề"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 13: Biểu diễn dữ liệu",
+          "periods": 2,
+          "integratedNLS": [
+            "5. Giải quyết vấn đề"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 14: Cấu trúc điều khiển",
+          "periods": 2,
+          "integratedNLS": [
+            "5. Giải quyết vấn đề"
+          ],
+          "integratedAI": [
+            "Mạch D (NLd). Thiết kế hệ thống AI & Tác nhân AI"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 15: Gỡ lỗi",
+          "periods": 2,
+          "integratedNLS": [
+            "5. Giải quyết vấn đề"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 16: Tin học và nghề nghiệp",
+          "periods": 1,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "6. Ứng dụng trí tuệ nhân tạo (AI)"
+          ],
+          "integratedAI": [
+            "Mạch A (NLa). Tư duy lấy con người làm trung tâm",
+            "Mạch B (NLb). Đạo đức AI & Trách nhiệm xã hội"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppct_tinhoc_9_phuluc03",
+      "title": "Phân phối chương trình Tin học 9 - Kết nối tri thức",
+      "subject": "Tin học",
+      "grade": "Lớp 9",
+      "fileName": "Phu_luc_03__TIN HỌC 9 KNTT.pdf",
+      "fileSize": "1.42 MB",
+      "uploadedAt": "01/08/2025",
+      "summary": "Kế hoạch dạy học môn Tin học Lớp 9 (Bộ Kết nối tri thức với cuộc sống). Tổng số: 35 tiết/năm (1 tiết/tuần).",
+      "lessonConfigs": [
+        {
+          "lessonTitle": "Bài 1: Thế giới kĩ thuật số",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin"
+          ],
+          "integratedAI": [
+            "Mạch A (NLa). Tư duy lấy con người làm trung tâm"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 2: Thông tin trong giải quyết vấn đề",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "5. Giải quyết vấn đề"
+          ],
+          "integratedAI": [
+            "Mạch C (NLc). Các kĩ thuật và ứng dụng AI"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 3: Thực hành: Đánh giá chất lượng thông tin",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "4. An toàn"
+          ],
+          "integratedAI": [
+            "Mạch B (NLb). Đạo đức AI & Trách nhiệm xã hội"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 4: Một số vấn đề pháp lí về sử dụng dịch vụ Internet",
+          "periods": 2,
+          "integratedNLS": [
+            "4. An toàn",
+            "2. Giao tiếp và hợp tác"
+          ],
+          "integratedAI": [
+            "Mạch B (NLb). Đạo đức AI & Trách nhiệm xã hội"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 5: Tìm hiểu phần mềm mô phỏng",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "5. Giải quyết vấn đề"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 6: Thực hành: Khai thác phần mềm mô phỏng",
+          "periods": 2,
+          "integratedNLS": [
+            "5. Giải quyết vấn đề"
+          ],
+          "hasStemIntegration": true,
+          "stemTopic": "Mô phỏng quy luật khoa học tự nhiên bằng phần mềm"
+        },
+        {
+          "lessonTitle": "Bài 7: Trình bày thông tin trong trao đổi và hợp tác",
+          "periods": 2,
+          "integratedNLS": [
+            "2. Giao tiếp và hợp tác",
+            "3. Sáng tạo nội dung số"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 8: Thực hành: Sử dụng công cụ trực quan trình bày thông tin trong trao đổi và hợp tác",
+          "periods": 2,
+          "integratedNLS": [
+            "2. Giao tiếp và hợp tác",
+            "3. Sáng tạo nội dung số"
+          ],
+          "hasStemIntegration": true,
+          "stemTopic": "Xây dựng bài trình chiếu số phục vụ học tập nhóm"
+        },
+        {
+          "lessonTitle": "Bài 9a: Sử dụng công cụ xác thực dữ liệu",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "5. Giải quyết vấn đề"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 10a: Sử dụng hàm COUNTIF",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "5. Giải quyết vấn đề"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 11a: Sử dụng hàm SUMIF",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "5. Giải quyết vấn đề"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 12a: Sử dụng hàm IF",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "5. Giải quyết vấn đề"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 13a: Hoàn thiện bảng tính quản lí tài chính gia đình",
+          "periods": 2,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "5. Giải quyết vấn đề"
+          ],
+          "hasStemIntegration": true,
+          "stemTopic": "Mô hình phân tích tài chính gia đình và quản lý chi tiêu"
+        },
+        {
+          "lessonTitle": "Bài 9b: Các chức năng chính của phần mềm làm video",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 10b: Chuẩn bị dữ liệu và dựng video",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 11b: Thực hành: Dựng video theo kịch bản",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số",
+            "2. Giao tiếp và hợp tác"
+          ],
+          "hasStemIntegration": true,
+          "stemTopic": "Sản xuất Video ngắn giới thiệu di sản văn hóa địa phương"
+        },
+        {
+          "lessonTitle": "Bài 12b: Hoàn thành việc dựng video",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 13b: Biên tập và xuất video",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 14: Giải quyết vấn đề",
+          "periods": 2,
+          "integratedNLS": [
+            "5. Giải quyết vấn đề"
+          ],
+          "integratedAI": [
+            "Mạch D (NLd). Thiết kế hệ thống AI & Tác nhân AI"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 15: Bài toán tin học",
+          "periods": 2,
+          "integratedNLS": [
+            "5. Giải quyết vấn đề"
+          ],
+          "integratedAI": [
+            "Mạch D (NLd). Thiết kế hệ thống AI & Tác nhân AI"
+          ]
+        },
+        {
+          "lessonTitle": "Bài 16: Thực hành: Lập chương trình máy tính",
+          "periods": 2,
+          "integratedNLS": [
+            "3. Sáng tạo nội dung số",
+            "5. Giải quyết vấn đề"
+          ],
+          "hasStemIntegration": true,
+          "stemTopic": "Dự án STEM Phần mềm trắc nghiệm kiến thức thông minh"
+        },
+        {
+          "lessonTitle": "Bài 17: Tin học và các ngành nghề",
+          "periods": 1,
+          "integratedNLS": [
+            "1. Khai thác dữ liệu và thông tin",
+            "6. Ứng dụng trí tuệ nhân tạo (AI)"
+          ],
+          "integratedAI": [
+            "Mạch A (NLa). Tư duy lấy con người làm trung tâm",
+            "Mạch C (NLc). Các kĩ thuật và ứng dụng AI"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppct_hdtn_9_sinh_hoat_duoi_co",
+      "title": "Phân phối chương trình HĐTN, HN 9 - Sinh hoạt dưới cờ",
+      "subject": "Hoạt động trải nghiệm, hướng nghiệp (HĐTN-HN)",
+      "grade": "Lớp 9",
+      "volume": "Sinh hoạt dưới cờ (Chào cờ)",
+      "fileName": "PPCT_HDTN_9_Sinh_hoat_duoi_co.pdf",
+      "fileSize": "1.45 MB",
+      "uploadedAt": "01/08/2025",
+      "summary": "Kế hoạch dạy học môn Hoạt động trải nghiệm, hướng nghiệp Lớp 9 - Phân môn Sinh hoạt dưới cờ (Bộ Kết nối tri thức với cuộc sống). Tổng số 35 tiết (1 tiết/tuần từ Tiết 1 đến Tiết 35).",
+      "lessonConfigs": [
+        {
+          "lessonTitle": "Tiết 1: Tham gia tìm hiểu về hiện tượng bắt nạt học đường",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 2: Tham gia cuộc phát động “Xây dựng truyền thống nhà trường” của đoàn TNCS Hồ Chí Minh",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 3: Lễ khai giảng năm học mới",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 4: Tham gia hoạt động tập thể với chủ đề: “Giới trẻ hiện nay và các quy tắc giao tiếp, ứng xử trong xã hội”",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 5: Tham gia hoạt động tập thể với chủ đề: Nét đẹp trong giao tiếp ứng xử",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 6: Tìm hiểu biểu hiện của khả năng thích nghi với những thay đổi trong cuộc sống",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 7: Tranh biện và thương thuyết về một số vấn đề mà HS THCS hiện nay đang quan tâm",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 8: Trách nhiệm với nhiệm vụ được giao",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 9: Chia sẻ kết quả thực hiện có trách nhiệm các nhiệm vụ được giao",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 10: Tham luận về chủ đề: “Những căng thẳng và áp lực học sinh lớp 9 thường gặp phải trong cuộc sống”",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 11: Diễn đàn về kĩ năng ứng phó với căng thẳng và áp lực",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 12: Biểu diễn tiểu phẩm thể hiện kĩ năng ứng phó với căng thẳng và áp lực học sinh lớp 9 thường gặp phải trong cuộc sống",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 13: Diễn đàn về chủ đề “Tạo động lực cho bản thân trong các hoạt động”",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 14: Giao lưu với những người truyền cảm hứng, tạo động lực",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 15: Trao đổi về chủ đề: “Học sinh THCS với việc xây dựng ngân sách cá nhân hợp lí”",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 16: Giao lưu: Những con người tự chủ",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 17: Trao đổi về chủ đề: “Học sinh THCS với việc xây dựng ngân sách cá nhân hợp lí”",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 18: Giao lưu về chủ đề “Bầu không khí vui vẻ, yêu thương trong gia đình”",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 19: Giao lưu trao đổi về cách sắp xếp khoa học công việc gia đình",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 20: Chia sẻ về biện pháp phát triển kinh tế gia đình",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 21: Tìm hiểu về mạng lưới quan hệ cộng đồng và phát triển mạng lưới cộng đồng ở địa phương",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 22: Diễn đàn về chủ đề “Giao tiếp thông minh và an toàn trên mạng xã hội”",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 23: Tham gia hoạt động truyền thông nâng cao nhận thức của cộng đồng về vấn đề học đường",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 24: Tìm hiểu về cách thiết kế sản phẩm giới thiệu vẻ đẹp danh lam thắng cảnh, cảnh quan thiên nhiên của đất nước",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 25: Tìm hiểu về cách thực hiện đề tài khảo sát về nguyên nhân gây ô nhiễm môi trường tại địa bàn sinh sống",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 26: Phòng chống ô nhiễm và bảo vệ môi trường - Hướng dẫn ôn tập KTGHKII",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 27: Trao đổi về chủ đề “Thực trạng ô nhiễm môi trường và các biện pháp phòng chống ô nhiễm, bảo vệ môi trường”",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 28: Trao đổi về chủ đề “Các biện pháp phòng chống ô nhiễm, bảo vệ môi trường”",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 29: Giới thiệu các nghề có xu hướng phát triển trong tương lai và yêu cầu chung của các nghề đó",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 30: Trao đổi về chủ đề “Nên chọn nghề mình quan tâm hay chọn nghề theo trào lưu của xã hội”",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 31: Giao lưu với cựu học sinh thành đạt trong nghề nghiệp",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 32: Hệ thống các cơ sở giáo dục nghề nghiệp của trung ương và địa phương",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 33: Chia sẻ kết quả tham vấn thầy cô, người thân và quyết định lựa chọn con đường tiếp theo sau THCS của bản thân. HDHS ôn tập Kt cuối HK II",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 34: Tham gia ngày hội tư vấn hướng nghiệp dành cho học sinh cuối cấp THCS",
+          "periods": 1
+        },
+        {
+          "lessonTitle": "Tiết 35: Tổng kết năm Học",
+          "periods": 1
+        }
+      ]
+    }
+  ],
+  "userAccounts": [
+    {
+      "id": "user_admin_01",
+      "username": "admin@123",
+      "fullName": "Quản Trị Viên Hệ Thống (Admin)",
+      "email": "admin@123",
+      "phone": "0978468986",
+      "schoolName": "Ban Quản Trị Hệ Thống KHBD AI PRO",
+      "role": "admin",
+      "status": "active",
+      "accessCode": "111111",
+      "createdAt": "01/01/2025",
+      "expiresAt": "Vĩnh viễn",
+      "notes": "Tài khoản Quản trị viên cấp cao",
+      "lastLogin": "23:52:10 19/9/2026",
+      "maxDevices": 10,
+      "authorizedDevices": [
+        {
+          "appName": "KHBD AI PRO",
+          "firstLogin": "21:07:12 29/8/2026",
+          "deviceId": "MC-5A2512D2-1Q3L",
+          "usedApps": [
+            "KHBD AI PRO"
+          ],
+          "deviceName": "Windows PC (1536x864, 8 Cores)",
+          "lastActive": "15:34:47 2/9/2026",
+          "browser": "Edge, Chrome",
+          "os": "Windows PC"
+        }
+      ],
+      "maxTrialGenerations": 9999,
+      "trialGenerations": 0,
+      "loginCountToday": 5,
+      "activeSecondsToday": 611,
+      "activeMinutesToday": 10,
+      "totalLoginCount": 13,
+      "loginLogs": [
+        {
+          "timestamp": "23:52:10 19/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "19/9/2026"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "21:06:19 19/9/2026",
+          "date": "19/9/2026"
+        },
+        {
+          "timestamp": "20:22:15 19/9/2026",
+          "date": "19/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "timestamp": "19:19:03 19/9/2026",
+          "date": "19/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "timestamp": "10:14:56 19/9/2026",
+          "date": "19/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "16:12:24 5/9/2026",
+          "date": "5/9/2026"
+        },
+        {
+          "date": "2/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "15:34:48 2/9/2026"
+        },
+        {
+          "deviceName": "Windows PC (1280x720, 8 Cores)",
+          "date": "2/9/2026",
+          "timestamp": "15:34:47 2/9/2026"
+        },
+        {
+          "date": "1/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "21:25:14 1/9/2026"
+        },
+        {
+          "timestamp": "12:02:08 1/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "1/9/2026"
+        },
+        {
+          "date": "30/8/2026",
+          "deviceName": "Windows PC (1536x864, 8 Cores)",
+          "timestamp": "19:39:57 30/8/2026"
+        },
+        {
+          "timestamp": "19:36:46 30/8/2026",
+          "date": "30/8/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "timestamp": "21:07:12 29/8/2026",
+          "date": "29/8/2026",
+          "deviceName": "Windows PC (1536x864, 8 Cores)"
+        }
+      ],
+      "lastActiveTimestamp": 1789836789705,
+      "updatedAt": "2026-09-19T16:53:10.704Z",
+      "lastActiveDate": "19/9/2026",
+      "lastLoginDate": "19/9/2026",
+      "avatar": "data:image/jpeg;base64,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"
+    },
+    {
+      "role": "teacher",
+      "lastLogin": "20:00:15 13/9/2026",
+      "accessCode": "123456",
+      "maxDevices": 2,
+      "expiresAt": "19/09/2027",
+      "lastActiveDate": "13/9/2026",
+      "lastLoginDate": "13/9/2026",
+      "loginCountToday": 0,
+      "status": "active",
+      "activeSecondsToday": 0,
+      "lastActiveTimestamp": 1789304513358,
+      "updatedAt": "2026-09-19T14:08:32.030Z",
+      "fullName": "Duyên",
+      "createdAt": "13/9/2026",
+      "notes": "Người dùng tự đăng ký qua hệ thống",
+      "activeMinutesToday": 0,
+      "maxTrialGenerations": 9999,
+      "loginLogs": [
+        {
+          "timestamp": "20:00:15 13/9/2026",
+          "date": "13/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "date": "13/9/2026",
+          "deviceName": "Windows PC (1536x864, 4 Cores) (Edge)",
+          "timestamp": "09:24:46 13/9/2026"
+        },
+        {
+          "timestamp": "09:22:50 13/9/2026",
+          "date": "13/9/2026",
+          "deviceName": "Windows PC (1536x864, 4 Cores) (Edge)"
+        }
+      ],
+      "trialGenerations": 0,
+      "id": "user_1789266143500_3hh57",
+      "authorizedDevices": [
+        {
+          "usedApps": [
+            "KHBD AI PRO"
+          ],
+          "firstLogin": "09:22:23 13/9/2026",
+          "hardwareSig": "Windows PC|1920x1080|4|Etc/GMT-7|intel hd graphics 620",
+          "os": "Windows PC",
+          "browser": "Edge",
+          "deviceName": "Windows PC (1536x864, 4 Cores)",
+          "lastActive": "09:24:46 13/9/2026",
+          "deviceId": "MC-4CF72B98-5E9B528D",
+          "appName": "KHBD AI PRO"
+        }
+      ],
+      "totalLoginCount": 3,
+      "schoolName": "Trường Mâm non Lũng Phìn",
+      "username": "chauduyen"
+    },
+    {
+      "activeSecondsToday": 0,
+      "status": "active",
+      "trialGenerations": 0,
+      "loginLogs": [
+        {
+          "timestamp": "12:08:05 15/9/2026",
+          "date": "15/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "timestamp": "12:43:08 14/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "14/9/2026"
+        },
+        {
+          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)",
+          "timestamp": "19:39:40 13/9/2026",
+          "date": "13/9/2026"
+        }
+      ],
+      "lastActiveTimestamp": 1789449384220,
+      "totalLoginCount": 3,
+      "activeMinutesToday": 0,
+      "lastActiveDate": "15/9/2026",
+      "maxTrialGenerations": 9999,
+      "id": "user_1789303171124_2fhtx",
+      "updatedAt": "2026-09-19T13:25:10.962Z",
+      "fullName": "Bùi Thị Thư",
+      "schoolName": "Trường Mầm non Lũng Phìn",
+      "role": "teacher",
+      "accessCode": "123456",
+      "expiresAt": "19/09/2027",
+      "notes": "Người dùng tự đăng ký qua hệ thống",
+      "authorizedDevices": [
+        {
+          "usedApps": [
+            "KHBD AI PRO"
+          ],
+          "appName": "KHBD AI PRO",
+          "os": "Windows PC",
+          "deviceName": "Windows PC (1366x768, 4 Cores)",
+          "lastActive": "19:39:40 13/9/2026",
+          "firstLogin": "19:39:31 13/9/2026",
+          "browser": "Chrome",
+          "deviceId": "MC-0726C010-6847C8C5",
+          "hardwareSig": "Windows PC|1366x768|4|Etc/GMT-7|intel hd graphics 620"
+        }
+      ],
+      "loginCountToday": 0,
+      "maxDevices": 2,
+      "username": "buithithu",
+      "createdAt": "13/9/2026",
+      "lastLoginDate": "15/9/2026",
+      "lastLogin": "12:08:05 15/9/2026"
+    },
+    {
+      "authorizedDevices": [
+        {
+          "firstLogin": "21:31:58 3/9/2026",
+          "browser": "Chrome",
+          "os": "Windows PC",
+          "lastActive": "21:57:43 3/9/2026",
+          "deviceName": "Windows PC (1366x768, 8 Cores)",
+          "deviceId": "MC-0FC15719-2574B7B2"
+        }
+      ],
+      "totalLoginCount": 4,
+      "lastActiveDate": "3/9/2026",
+      "trialGenerations": 0,
+      "activeMinutesToday": 0,
+      "createdAt": "3/9/2026",
+      "role": "teacher",
+      "lastLoginDate": "3/9/2026",
+      "maxTrialGenerations": 9999,
+      "id": "user_1788445918140_eordk",
+      "schoolName": "Trường mầm non Tân Thành",
+      "lastActiveTimestamp": 1788448304775,
+      "fullName": "Ngô Thị Dương Thảo",
+      "accessCode": "151089",
+      "expiresAt": "03/09/2027",
+      "loginCountToday": 0,
+      "updatedAt": "2026-09-03T15:13:45.779Z",
+      "status": "active",
+      "loginLogs": [
+        {
+          "deviceName": "Windows PC (1366x768, 8 Cores)",
+          "date": "3/9/2026",
+          "timestamp": "21:57:43 3/9/2026"
+        },
+        {
+          "date": "3/9/2026",
+          "deviceName": "Windows PC (1366x768, 8 Cores)",
+          "timestamp": "21:55:45 3/9/2026"
+        },
+        {
+          "date": "3/9/2026",
+          "deviceName": "Windows PC (1366x768, 8 Cores)",
+          "timestamp": "21:48:14 3/9/2026"
+        },
+        {
+          "deviceName": "Windows PC (1366x768, 8 Cores)",
+          "date": "3/9/2026",
+          "timestamp": "21:32:11 3/9/2026"
+        }
+      ],
+      "phone": "0339592685",
+      "activeSecondsToday": 0,
+      "notes": "Người dùng tự đăng ký qua hệ thống",
+      "username": "ngoduongthao@gmail.com",
+      "lastLogin": "21:57:55 3/9/2026",
+      "email": "ngoduongthao@gmail.com",
+      "maxDevices": 2,
+      "avatar": "data:image/svg+xml;utf8,%0A%20%20%20%20%20%20%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%0A%20%20%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g3%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23be185d%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23831843%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2248%22%20fill%3D%22url(%23g3)%22%20stroke%3D%22%23fbcfe8%22%20stroke-width%3D%224%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M30%2036%20C28%2048%2030%2062%2036%2066%20C38%2052%2038%2040%2042%2034%20Z%22%20fill%3D%22%23334155%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M70%2036%20C72%2048%2070%2062%2064%2066%20C62%2052%2062%2040%2058%2034%20Z%22%20fill%3D%22%23334155%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%2250%22%20cy%3D%2240%22%20r%3D%2217%22%20fill%3D%22%23fed7aa%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M32%2034%20C36%2022%2064%2022%2068%2034%20C58%2028%2042%2028%2032%2034%20Z%22%20fill%3D%22%23334155%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%2243%22%20cy%3D%2240%22%20r%3D%222.5%22%20fill%3D%22%231e293b%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%2257%22%20cy%3D%2240%22%20r%3D%222.5%22%20fill%3D%22%231e293b%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M46%2047%20Q50%2051%2054%2047%22%20stroke%3D%22%23e11d48%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M26%2082%20C28%2065%2038%2060%2050%2060%20C62%2060%2072%2065%2074%2082%20Z%22%20fill%3D%22%23f43f5e%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%2250%22%20cy%3D%2268%22%20r%3D%223%22%20fill%3D%22%23fef08a%22%2F%3E%0A%20%20%20%20%20%20%3C%2Fsvg%3E%0A%20%20%20%20"
+    },
+    {
+      "lastLoginDate": "2/9/2026",
+      "lastLogin": "06:20:02 2/9/2026",
+      "lastActiveDate": "2/9/2026",
+      "createdAt": "2/9/2026",
+      "expiresAt": "02/09/2027",
+      "fullName": "Lương Lạc",
+      "maxDevices": 1,
+      "username": "luonglac1991@gmail.com",
+      "activeSecondsToday": 0,
+      "notes": "Người dùng tự đăng ký qua hệ thống",
+      "loginLogs": [
+        {
+          "timestamp": "06:20:01 2/9/2026",
+          "deviceName": "Windows PC (1280x720, 8 Cores)",
+          "date": "2/9/2026"
+        }
+      ],
+      "loginCountToday": 0,
+      "id": "user_1788340794409_77g7k",
+      "authorizedDevices": [
+        {
+          "browser": "Edge",
+          "lastActive": "06:20:01 2/9/2026",
+          "os": "Windows PC",
+          "deviceId": "MC-14AE0370-12E9E11F",
+          "deviceName": "Windows PC (1280x720, 8 Cores)",
+          "firstLogin": "06:19:54 2/9/2026"
+        }
+      ],
+      "activeMinutesToday": 0,
+      "accessCode": "lac@150790",
+      "status": "active",
+      "maxTrialGenerations": 9999,
+      "role": "teacher",
+      "schoolName": "Mầm non Tân Thành",
+      "totalLoginCount": 1,
+      "email": "luonglac1991@gmail.com",
+      "trialGenerations": 0,
+      "lastActiveTimestamp": 1788342651680,
+      "updatedAt": "2026-09-03T14:38:43.533Z"
+    },
+    {
+      "id": "user_1788419148557",
+      "fullName": "Nguyễn Hằng",
+      "username": "nguyenhang4794@gmail.com",
+      "email": "nguyenhang4794@gmail.com",
+      "schoolName": "Trường Mầm Non Tân Thành",
+      "role": "teacher",
+      "status": "active",
+      "accessCode": "123456",
+      "createdAt": "3/9/2026",
+      "expiresAt": "03/09/2027",
+      "maxDevices": 1,
+      "trialGenerations": 0,
+      "maxTrialGenerations": 9999,
+      "lastLogin": "Chưa đăng nhập",
+      "authorizedDevices": [],
+      "updatedAt": "2026-09-04T04:37:03.699Z",
+      "loginCountToday": 0,
+      "activeSecondsToday": 0,
+      "activeMinutesToday": 0,
+      "totalLoginCount": 0,
+      "loginLogs": [],
+      "lastActiveDate": "4/9/2026",
+      "lastLoginDate": "4/9/2026",
+      "lastActiveTimestamp": 1788496622699,
+      "avatar": "data:image/svg+xml;utf8,%0A%20%20%20%20%20%20%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%0A%20%20%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g3%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23be185d%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23831843%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2248%22%20fill%3D%22url(%23g3)%22%20stroke%3D%22%23fbcfe8%22%20stroke-width%3D%224%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M30%2036%20C28%2048%2030%2062%2036%2066%20C38%2052%2038%2040%2042%2034%20Z%22%20fill%3D%22%23334155%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M70%2036%20C72%2048%2070%2062%2064%2066%20C62%2052%2062%2040%2058%2034%20Z%22%20fill%3D%22%23334155%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%2250%22%20cy%3D%2240%22%20r%3D%2217%22%20fill%3D%22%23fed7aa%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M32%2034%20C36%2022%2064%2022%2068%2034%20C58%2028%2042%2028%2032%2034%20Z%22%20fill%3D%22%23334155%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%2243%22%20cy%3D%2240%22%20r%3D%222.5%22%20fill%3D%22%231e293b%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%2257%22%20cy%3D%2240%22%20r%3D%222.5%22%20fill%3D%22%231e293b%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M46%2047%20Q50%2051%2054%2047%22%20stroke%3D%22%23e11d48%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M26%2082%20C28%2065%2038%2060%2050%2060%20C62%2060%2072%2065%2074%2082%20Z%22%20fill%3D%22%23f43f5e%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%2250%22%20cy%3D%2268%22%20r%3D%223%22%20fill%3D%22%23fef08a%22%2F%3E%0A%20%20%20%20%20%20%3C%2Fsvg%3E%0A%20%20%20%20"
+    },
+    {
+      "id": "user_1788425363016",
+      "fullName": "Quỳnh",
+      "username": "Quynhluc17@gmail.com",
+      "email": "Quynhluc17@gmail.com",
+      "schoolName": "Trường Mầm Non Tân Thành",
+      "role": "teacher",
+      "status": "active",
+      "accessCode": "123456",
+      "createdAt": "3/9/2026",
+      "expiresAt": "03/09/2027",
+      "maxDevices": 1,
+      "trialGenerations": 0,
+      "maxTrialGenerations": 9999,
+      "lastLogin": "21:43:12 3/9/2026",
+      "authorizedDevices": [
+        {
+          "firstLogin": "21:12:04 3/9/2026",
+          "deviceName": "Windows PC (1440x900, 4 Cores)",
+          "deviceId": "MC-25436ADF-5F5F1504",
+          "lastActive": "21:12:04 3/9/2026",
+          "browser": "Chrome",
+          "os": "Windows PC"
+        }
+      ],
+      "updatedAt": "2026-09-03T14:48:42.107Z",
+      "loginCountToday": 0,
+      "activeSecondsToday": 0,
+      "activeMinutesToday": 0,
+      "totalLoginCount": 1,
+      "loginLogs": [
+        {
+          "date": "3/9/2026",
+          "timestamp": "21:12:04 3/9/2026",
+          "deviceName": "Windows PC (1440x900, 4 Cores)"
+        }
+      ],
+      "lastActiveDate": "3/9/2026",
+      "lastLoginDate": "3/9/2026",
+      "lastActiveTimestamp": 1788446911110
+    },
+    {
+      "loginLogs": [],
+      "expiresAt": "01/10/2027",
+      "role": "teacher",
+      "updatedAt": "2026-09-03T01:25:07.545Z",
+      "username": "nguyencanhmntt@gmail.com",
+      "phone": "0393632882",
+      "fullName": "Nguyễn Thị Cảnh",
+      "activeMinutesToday": 0,
+      "activeSecondsToday": 0,
+      "authorizedDevices": [],
+      "schoolName": "Trường Mầm Non Tân Thành",
+      "status": "active",
+      "totalLoginCount": 0,
+      "email": "nguyencanhmntt@gmail.com",
+      "loginCountToday": 0,
+      "notes": "Giáo viên Trường Mầm Non Tân Thành (Cấp 1 năm)",
+      "id": "user_1788234674019",
+      "accessCode": "canh@2010",
+      "lastLogin": "12:07:28 1/9/2026",
+      "createdAt": "01/09/2026",
+      "maxDevices": 2,
+      "lastLoginDate": "1/9/2026",
+      "lastActiveDate": "1/9/2026",
+      "trialGenerations": 0,
+      "lastActiveTimestamp": 1788269632941,
+      "maxTrialGenerations": 9999
+    },
+    {
+      "id": "user_1788265236823",
+      "fullName": "Trần Hồng",
+      "username": "tranhong",
+      "schoolName": "Trường Mầm Non Tân Thành",
+      "role": "teacher",
+      "status": "active",
+      "accessCode": "123456",
+      "createdAt": "1/9/2026",
+      "expiresAt": "Vĩnh viễn",
+      "maxDevices": 10,
+      "trialGenerations": 0,
+      "maxTrialGenerations": 9999,
+      "lastLogin": "15:20:01 2/9/2026",
+      "authorizedDevices": [
+        {
+          "deviceName": "Windows PC (1280x720, 8 Cores)",
+          "lastActive": "15:20:00 2/9/2026",
+          "deviceId": "MC-04C3AC77-555C9248",
+          "os": "Windows PC",
+          "firstLogin": "15:20:00 2/9/2026",
+          "browser": "Chrome"
+        }
+      ],
+      "loginCountToday": 0,
+      "activeSecondsToday": 0,
+      "activeMinutesToday": 0,
+      "totalLoginCount": 1,
+      "loginLogs": [
+        {
+          "timestamp": "15:20:00 2/9/2026",
+          "date": "2/9/2026",
+          "deviceName": "Windows PC (1280x720, 8 Cores)"
+        }
+      ],
+      "updatedAt": "2026-09-02T08:34:27.234Z",
+      "lastLoginDate": "2/9/2026",
+      "lastActiveTimestamp": 1788337311076,
+      "lastActiveDate": "2/9/2026"
+    },
+    {
+      "id": "user_1788258456694",
+      "fullName": "Nguyễn Tuyển",
+      "username": "tuyenmap",
+      "schoolName": "Trường Mầm Non Tân Thành",
+      "role": "teacher",
+      "status": "active",
+      "accessCode": "tuyenmap@123",
+      "createdAt": "1/9/2026",
+      "expiresAt": "Chưa cấp",
+      "maxDevices": 1,
+      "trialGenerations": 0,
+      "maxTrialGenerations": 5,
+      "lastLogin": "Chưa đăng nhập",
+      "authorizedDevices": [],
+      "loginCountToday": 0,
+      "activeSecondsToday": 0,
+      "activeMinutesToday": 0,
+      "totalLoginCount": 0,
+      "loginLogs": [],
+      "updatedAt": "2026-09-01T13:39:43.847Z"
+    },
+    {
+      "id": "user_1788004121726",
+      "loginLogs": [],
+      "phone": "0375377106",
+      "expiresAt": "30/9/2027",
+      "lastLoginDate": "1/9/2026",
+      "updatedAt": "2026-09-01T14:25:16.611Z",
+      "lastActiveTimestamp": 1788252493163,
+      "lastActiveDate": "1/9/2026",
+      "authorizedDevices": [],
+      "fullName": "Hoàng Nhâm",
+      "schoolName": "THCS Tân Loan",
+      "loginCountToday": 0,
+      "totalLoginCount": 0,
+      "username": "hoangnham119@gmail.com",
+      "email": "hoangnham119@gmail.com",
+      "activeSecondsToday": 0,
+      "activeMinutesToday": 0,
+      "accessCode": "Nham@123",
+      "notes": "Giáo viên THCS Tân Loan",
+      "createdAt": "2026-08-29T11:48:53.611Z",
+      "lastLogin": "15:40:32 1/9/2026",
+      "status": "active",
+      "role": "teacher",
+      "maxDevices": 2,
+      "validUntil": "30/9/2027",
+      "password": "Nham@123",
+      "maxTrialGenerations": 9999,
+      "trialGenerations": 0
+    },
+    {
+      "expiresAt": "31/8/2027",
+      "email": "kimoanhmntanthanh@gmail.com",
+      "notes": "Đồng tác giả",
+      "loginLogs": [
+        {
+          "timestamp": "20:29:01 1/9/2026",
+          "date": "1/9/2026",
+          "deviceName": "Windows PC (1280x720, 8 Cores)"
+        }
+      ],
+      "fullName": "Mạc Thị Kim Oanh",
+      "updatedAt": "2026-09-03T15:53:04.040Z",
+      "username": "kimoanhmntanthanh@gmail.com",
+      "authorizedDevices": [
+        {
+          "lastActive": "20:29:01 1/9/2026",
+          "os": "Windows PC",
+          "deviceName": "Windows PC (1280x720, 8 Cores)",
+          "firstLogin": "20:29:01 1/9/2026",
+          "browser": "Edge",
+          "deviceId": "MC-32E215B1-4BCB1456"
+        }
+      ],
+      "accessCode": "1Dungoanh@",
+      "loginCountToday": 0,
+      "activeSecondsToday": 0,
+      "activeMinutesToday": 0,
+      "status": "active",
+      "maxDevices": 2,
+      "totalLoginCount": 1,
+      "id": "user_1788142854562",
+      "lastLogin": "20:29:02 1/9/2026",
+      "schoolName": "Trường Mầm Non Tân Thành",
+      "createdAt": "31/8/2026",
+      "phone": "0919369363",
+      "role": "teacher",
+      "lastLoginDate": "1/9/2026",
+      "lastActiveDate": "3/9/2026",
+      "lastActiveTimestamp": 1788450674146,
+      "maxTrialGenerations": 9999,
+      "trialGenerations": 0
+    },
+    {
+      "id": "user_tuyenmap_01",
+      "username": "tuyenmap",
+      "fullName": "Tuyển Mập",
+      "email": "tuyenmap@gmail.com",
+      "schoolName": "Trường Mầm Non Tân Thành",
+      "role": "teacher",
+      "status": "active",
+      "accessCode": "tuyenmap@123",
+      "createdAt": "02/09/2026",
+      "expiresAt": "02/09/2027",
+      "notes": "Giáo viên Trường Mầm Non Tân Thành",
+      "lastLogin": "02/09/2026",
+      "maxDevices": 2,
+      "authorizedDevices": [],
+      "maxTrialGenerations": 9999,
+      "trialGenerations": 0,
+      "updatedAt": "2026-09-03T14:39:19.933Z",
+      "activeMinutesToday": 0,
+      "lastActiveDate": "2/9/2026",
+      "lastActiveTimestamp": 1788357520668,
+      "loginLogs": [],
+      "totalLoginCount": 0,
+      "activeSecondsToday": 0,
+      "lastLoginDate": "2/9/2026",
+      "loginCountToday": 0
+    },
+    {
+      "id": "user_1788398870643",
+      "username": "hoangthidan86@gmail.com",
+      "fullName": "Hoàng Thị Dân",
+      "email": "hoangthidan86@gmail.com",
+      "phone": "0986123456",
+      "schoolName": "Trường Mầm Non Tân Thành",
+      "role": "teacher",
+      "status": "active",
+      "accessCode": "Dan@123",
+      "createdAt": "01/09/2026",
+      "expiresAt": "02/09/2027",
+      "notes": "Giáo viên Trường Mầm Non Tân Thành (Cấp 1 năm)",
+      "lastLogin": "Chưa có",
+      "maxDevices": 2,
+      "authorizedDevices": [],
+      "maxTrialGenerations": 9999,
+      "trialGenerations": 0,
+      "loginLogs": [],
+      "activeSecondsToday": 0,
+      "totalLoginCount": 0,
+      "loginCountToday": 0,
+      "updatedAt": "2026-09-03T15:35:09.261Z",
+      "activeMinutesToday": 0,
+      "lastLoginDate": "3/9/2026",
+      "lastActiveDate": "3/9/2026",
+      "lastActiveTimestamp": 1788421013868
+    },
+    {
+      "id": "user_1788449791927",
+      "lastLogin": "Chưa đăng nhập",
+      "loginLogs": [],
+      "status": "active",
+      "loginCountToday": 0,
+      "totalLoginCount": 0,
+      "updatedAt": "2026-09-03T15:36:31.927Z",
+      "maxTrialGenerations": 9999,
+      "accessCode": "123456",
+      "activeSecondsToday": 0,
+      "username": "khuonghanhgas@gmail.com",
+      "trialGenerations": 0,
+      "fullName": "Hạnh",
+      "maxDevices": 1,
+      "schoolName": "Trường Mầm non Tân Thành",
+      "authorizedDevices": [],
+      "activeMinutesToday": 0,
+      "role": "teacher",
+      "email": "khuonghanhgas@gmail.com",
+      "expiresAt": "03/09/2027",
+      "createdAt": "3/9/2026",
+      "lastLoginDate": "8/9/2026",
+      "lastActiveDate": "8/9/2026",
+      "lastActiveTimestamp": 1788855922167
+    },
+    {
+      "email": "dothuyqx2@gmail.com",
+      "phone": "0912780778",
+      "loginCountToday": 0,
+      "authorizedDevices": [
+        {
+          "lastActive": "20:34:05 4/9/2026",
+          "os": "Windows PC",
+          "deviceName": "Windows PC (1280x720, 8 Cores)",
+          "firstLogin": "20:33:54 4/9/2026",
+          "browser": "Chrome",
+          "deviceId": "MC-49F9A3C6-7ED6BEAB"
+        }
+      ],
+      "id": "user_1788528834865_f3co5",
+      "lastLogin": "20:34:05 4/9/2026",
+      "status": "active",
+      "maxDevices": 2,
+      "lastActiveDate": "4/9/2026",
+      "lastLoginDate": "4/9/2026",
+      "lastActiveTimestamp": 1788529124715,
+      "activeSecondsToday": 0,
+      "fullName": "Đỗ Thị Thuỷ",
+      "role": "teacher",
+      "accessCode": "Thuy123456789@",
+      "totalLoginCount": 1,
+      "maxTrialGenerations": 5,
+      "trialGenerations": 0,
+      "loginLogs": [
+        {
+          "timestamp": "20:34:05 4/9/2026",
+          "date": "4/9/2026",
+          "deviceName": "Windows PC (1280x720, 8 Cores)"
+        }
+      ],
+      "schoolName": "Trường THPT Quảng Xương 2",
+      "activeMinutesToday": 0,
+      "createdAt": "4/9/2026",
+      "expiresAt": "Chưa cấp",
+      "updatedAt": "2026-09-04T13:38:45.702Z",
+      "username": "dothuyqx2@gmail.com",
+      "notes": "Người dùng tự đăng ký qua hệ thống"
+    },
+    {
+      "createdAt": "5/9/2026",
+      "expiresAt": "05/09/2027",
+      "authorizedDevices": [
+        {
+          "browser": "Chrome",
+          "os": "Windows PC",
+          "deviceName": "Windows PC (1366x768, 4 Cores)",
+          "usedApps": [
+            "KHBD AI PRO"
+          ],
+          "lastActive": "09:05:30 13/9/2026",
+          "deviceId": "MC-6246449F-B893BCC",
+          "firstLogin": "11:41:44 6/9/2026",
+          "appName": "KHBD AI PRO",
+          "hardwareSig": "Windows PC|1366x768|4|Asia/Saigon|intel hd graphics 620"
+        }
+      ],
+      "maxTrialGenerations": 9999,
+      "maxDevices": 1,
+      "schoolName": "Trường MN Tân Thành",
+      "id": "user_1788599666292",
+      "status": "active",
+      "accessCode": "123456",
+      "role": "teacher",
+      "email": "havu50625@gmail.com",
+      "updatedAt": "2026-09-13T02:06:11.038Z",
+      "trialGenerations": 0,
+      "fullName": "vũ hà",
+      "username": "havu50625@gmail.com",
+      "lastLogin": "09:05:31 13/9/2026",
+      "loginCountToday": 0,
+      "activeSecondsToday": 0,
+      "activeMinutesToday": 0,
+      "totalLoginCount": 4,
+      "loginLogs": [
+        {
+          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)",
+          "timestamp": "09:05:30 13/9/2026",
+          "date": "13/9/2026"
+        },
+        {
+          "timestamp": "09:04:51 13/9/2026",
+          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)",
+          "date": "13/9/2026"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "09:04:12 13/9/2026",
+          "date": "13/9/2026"
+        },
+        {
+          "deviceName": "Windows PC (1366x768, 4 Cores)",
+          "date": "6/9/2026",
+          "timestamp": "11:41:44 6/9/2026"
+        }
+      ],
+      "lastLoginDate": "13/9/2026",
+      "lastActiveTimestamp": 1789265160041,
+      "lastActiveDate": "13/9/2026"
+    },
+    {
+      "maxTrialGenerations": 9999,
+      "lastLogin": "22:27:53 5/9/2026",
+      "lastActiveDate": "5/9/2026",
+      "avatar": "data:image/jpeg;base64,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",
+      "id": "user_1788599930158",
+      "activeMinutesToday": 0,
+      "maxDevices": 1,
+      "lastLoginDate": "5/9/2026",
+      "loginCountToday": 0,
+      "status": "active",
+      "trialGenerations": 0,
+      "username": "phamtuoiqa@gmail.com",
+      "authorizedDevices": [
+        {
+          "os": "Windows PC",
+          "lastActive": "22:27:50 5/9/2026",
+          "browser": "Chrome",
+          "deviceName": "Windows PC (1280x720, 4 Cores)",
+          "firstLogin": "22:27:50 5/9/2026",
+          "deviceId": "MC-25865955-3304083A"
+        }
+      ],
+      "role": "teacher",
+      "activeSecondsToday": 0,
+      "loginLogs": [
+        {
+          "deviceName": "Windows PC (1280x720, 4 Cores)",
+          "timestamp": "22:27:50 5/9/2026",
+          "date": "5/9/2026"
+        }
+      ],
+      "schoolName": "trương MN Tân Thành",
+      "updatedAt": "2026-09-05T15:50:43.247Z",
+      "totalLoginCount": 1,
+      "fullName": "Phạm Tươi",
+      "email": "phamtuoiqa@gmail.com",
+      "lastActiveTimestamp": 1788623442255,
+      "accessCode": "Phamtuoi93@",
+      "expiresAt": "05/09/2027",
+      "createdAt": "5/9/2026"
+    },
+    {
+      "lastLoginDate": "8/9/2026",
+      "activeMinutesToday": 0,
+      "id": "user_1788601678326",
+      "lastActiveDate": "8/9/2026",
+      "loginLogs": [
+        {
+          "timestamp": "12:17:16 8/9/2026",
+          "date": "8/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "deviceName": "Windows PC (1280x720, 4 Cores)",
+          "timestamp": "00:11:02 6/9/2026",
+          "date": "6/9/2026"
+        },
+        {
+          "deviceName": "Windows PC (1280x720, 4 Cores)",
+          "timestamp": "23:10:34 5/9/2026",
+          "date": "5/9/2026"
+        }
+      ],
+      "status": "active",
+      "maxTrialGenerations": 9999,
+      "activeSecondsToday": 0,
+      "lastLogin": "12:17:16 8/9/2026",
+      "loginCountToday": 0,
+      "totalLoginCount": 3,
+      "trialGenerations": 0,
+      "role": "teacher",
+      "expiresAt": "05/09/2027",
+      "createdAt": "5/9/2026",
+      "email": "haiyen1305tq@gmail.com",
+      "maxDevices": 1,
+      "schoolName": "Trường MN Tân Thành",
+      "lastActiveTimestamp": 1788847160693,
+      "accessCode": "123456",
+      "updatedAt": "2026-09-08T06:00:20.686Z",
+      "username": "haiyen1305tq@gmail.com",
+      "fullName": "Nguyễn Yến",
+      "authorizedDevices": [
+        {
+          "firstLogin": "23:10:34 5/9/2026",
+          "lastActive": "00:11:02 6/9/2026",
+          "deviceName": "Windows PC (1280x720, 4 Cores)",
+          "browser": "Edge",
+          "os": "Windows PC",
+          "deviceId": "MC-19CFC661-6E7D7990"
+        }
+      ]
+    },
+    {
+      "lastLogin": "10:32:39 6/9/2026",
+      "createdAt": "5/9/2026",
+      "expiresAt": "05/09/2027",
+      "username": "Truongthaolinh22tq@gmail.com",
+      "activeMinutesToday": 0,
+      "accessCode": "123456",
+      "role": "teacher",
+      "totalLoginCount": 1,
+      "schoolName": "Trường mầm non Tân Thành",
+      "loginCountToday": 0,
+      "fullName": "Linh",
+      "activeSecondsToday": 0,
+      "email": "Truongthaolinh22tq@gmail.com",
+      "loginLogs": [
+        {
+          "date": "6/9/2026",
+          "timestamp": "09:46:36 6/9/2026",
+          "deviceName": "Windows PC (1280x720, 12 Cores)"
+        }
+      ],
+      "updatedAt": "2026-09-06T03:34:29.320Z",
+      "status": "active",
+      "maxTrialGenerations": 9999,
+      "trialGenerations": 0,
+      "authorizedDevices": [
+        {
+          "os": "Windows PC",
+          "firstLogin": "09:46:36 6/9/2026",
+          "deviceName": "Windows PC (1280x720, 12 Cores)",
+          "lastActive": "09:46:36 6/9/2026",
+          "browser": "Edge",
+          "deviceId": "MC-44B27909-5150B2C2"
+        }
+      ],
+      "lastLoginDate": "6/9/2026",
+      "maxDevices": 1,
+      "lastActiveTimestamp": 1788665668320,
+      "lastActiveDate": "6/9/2026",
+      "id": "user_1788603465407"
+    },
+    {
+      "lastActiveTimestamp": 1789743801430,
+      "username": "trieuailan190319995@gmail.com",
+      "updatedAt": "2026-09-18T15:04:21.422Z",
+      "phone": "0386985163",
+      "authorizedDevices": [
+        {
+          "firstLogin": "18:02:50 6/9/2026",
+          "lastActive": "18:02:58 6/9/2026",
+          "os": "macOS Apple",
+          "deviceName": "macOS Apple (1440x900, 8 Cores)",
+          "browser": "Chrome",
+          "deviceId": "MC-3CC767B9-501B157C"
+        }
+      ],
+      "maxDevices": 2,
+      "expiresAt": "Chưa cấp",
+      "schoolName": "mầm non tân thành",
+      "activeMinutesToday": 0,
+      "activeSecondsToday": 0,
+      "trialGenerations": 0,
+      "maxTrialGenerations": 0,
+      "lastLoginDate": "17/9/2026",
+      "loginCountToday": 0,
+      "loginLogs": [
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "07:55:29 17/9/2026",
+          "date": "17/9/2026"
+        },
+        {
+          "timestamp": "18:02:58 6/9/2026",
+          "date": "6/9/2026",
+          "deviceName": "macOS Apple (1440x900, 8 Cores)"
+        }
+      ],
+      "fullName": "triệu ái làn",
+      "notes": "Người dùng tự đăng ký qua hệ thống",
+      "id": "user_1788692570117_y5584",
+      "role": "teacher",
+      "totalLoginCount": 2,
+      "accessCode": "baongoc",
+      "createdAt": "6/9/2026",
+      "status": "new",
+      "lastLogin": "07:55:29 17/9/2026",
+      "email": "trieuailan190319995@gmail.com",
+      "lastActiveDate": "18/9/2026"
+    },
+    {
+      "loginCountToday": 0,
+      "status": "active",
+      "lastActiveTimestamp": 1788912717440,
+      "trialGenerations": 4,
+      "id": "user_1788855767464_ief7w",
+      "authorizedDevices": [
+        {
+          "deviceName": "Windows PC (1536x864, 8 Cores)",
+          "deviceId": "MC-49854C2B-7D7BE142",
+          "lastActive": "17:36:07 8/9/2026",
+          "os": "Windows PC",
+          "browser": "Chrome, Edge",
+          "firstLogin": "15:22:47 8/9/2026"
+        }
+      ],
+      "schoolName": "TH THCS IA NAN",
+      "activeMinutesToday": 0,
+      "activeSecondsToday": 0,
+      "maxDevices": 2,
+      "lastLoginDate": "8/9/2026",
+      "accessCode": "231996",
+      "loginLogs": [
+        {
+          "timestamp": "17:36:07 8/9/2026",
+          "date": "8/9/2026",
+          "deviceName": "Windows PC (1536x864, 8 Cores)"
+        },
+        {
+          "timestamp": "17:33:32 8/9/2026",
+          "deviceName": "Windows PC (1536x864, 8 Cores)",
+          "date": "8/9/2026"
+        },
+        {
+          "timestamp": "15:22:56 8/9/2026",
+          "deviceName": "Windows PC (1536x864, 8 Cores)",
+          "date": "8/9/2026"
+        }
+      ],
+      "createdAt": "8/9/2026",
+      "lastLogin": "17:36:07 8/9/2026",
+      "updatedAt": "2026-09-09T00:12:57.430Z",
+      "username": "nguyenha1996gl@gmail.com",
+      "email": "nguyenha1996gl@gmail.com",
+      "lastActiveDate": "9/9/2026",
+      "totalLoginCount": 3,
+      "notes": "Người dùng tự đăng ký qua hệ thống",
+      "fullName": "NGUYỄN THỊ HÀ",
+      "maxTrialGenerations": 5,
+      "expiresAt": "Chưa cấp",
+      "phone": "0355833753",
+      "role": "teacher"
+    },
+    {
+      "activeMinutesToday": 0,
+      "notes": "Người dùng tự đăng ký qua hệ thống",
+      "updatedAt": "2026-09-14T12:31:20.748Z",
+      "createdAt": "13/9/2026",
+      "loginCountToday": 0,
+      "maxDevices": 2,
+      "accessCode": "123456",
+      "role": "teacher",
+      "lastActiveTimestamp": 1789389047228,
+      "loginLogs": [
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "14/9/2026",
+          "timestamp": "19:28:57 14/9/2026"
+        },
+        {
+          "deviceName": "Windows PC (1536x864, 4 Cores) (Chrome)",
+          "date": "13/9/2026",
+          "timestamp": "08:41:18 13/9/2026"
+        }
+      ],
+      "fullName": "Hà Bích Ngọc",
+      "trialGenerations": 4,
+      "expiresAt": "Chưa cấp",
+      "status": "active",
+      "totalLoginCount": 2,
+      "maxTrialGenerations": 5,
+      "lastLogin": "19:28:57 14/9/2026",
+      "lastLoginDate": "14/9/2026",
+      "schoolName": "Trường Mầm non Lũng Phìn",
+      "lastActiveDate": "14/9/2026",
+      "id": "user_1789263667839_wyexm",
+      "authorizedDevices": [
+        {
+          "usedApps": [
+            "KHBD AI PRO"
+          ],
+          "browser": "Chrome",
+          "firstLogin": "08:41:07 13/9/2026",
+          "deviceId": "MC-16A10238-5BDC31A9",
+          "hardwareSig": "Windows PC|1920x1080|4|Asia/Saigon|intel uhd graphics",
+          "deviceName": "Windows PC (1536x864, 4 Cores)",
+          "os": "Windows PC",
+          "lastActive": "08:41:18 13/9/2026",
+          "appName": "KHBD AI PRO"
+        }
+      ],
+      "username": "habichngoc",
+      "activeSecondsToday": 0
+    },
+    {
+      "email": "khoa@gmail.com",
+      "loginLogs": [],
+      "maxDevices": 2,
+      "activeSecondsToday": 0,
+      "totalLoginCount": 0,
+      "loginCountToday": 0,
+      "role": "teacher",
+      "fullName": "Thầy/Cô khoa",
+      "status": "active",
+      "username": "khoa@gmail.com",
+      "updatedAt": "2026-09-13T02:04:13.417Z",
+      "id": "user_1787926907679",
+      "createdAt": "28/8/2026",
+      "lastLogin": "21:21:47 28/8/2026",
+      "activeMinutesToday": 0,
+      "expiresAt": "31/12/2026",
+      "schoolName": "Trường THCS / THPT",
+      "authorizedDevices": [
+        {
+          "deviceName": "Windows PC (1536x864, 12 Cores)",
+          "deviceId": "MC-4AD9CFBC-I45U",
+          "lastActive": "21:21:47 28/8/2026",
+          "firstLogin": "21:21:47 28/8/2026",
+          "browser": "Edge",
+          "os": "Windows PC"
+        }
+      ]
+    },
+    {
+      "activeMinutesToday": 0,
+      "loginCountToday": 0,
+      "lastLogin": "20:05:30 16/9/2026",
+      "lastActiveDate": "16/9/2026",
+      "createdAt": "16/9/2026",
+      "activeSecondsToday": 0,
+      "maxDevices": 2,
+      "accessCode": "Thao1994@",
+      "notes": "Người dùng tự đăng ký qua hệ thống",
+      "status": "new",
+      "expiresAt": "Chưa cấp",
+      "updatedAt": "2026-09-16T13:05:50.196Z",
+      "username": "vuongthithao",
+      "loginLogs": [
+        {
+          "timestamp": "20:05:29 16/9/2026",
+          "deviceName": "Windows PC (1536x864, 8 Cores) (Edge)",
+          "date": "16/9/2026"
+        }
+      ],
+      "id": "user_1789563886757_2ewyq",
+      "role": "teacher",
+      "totalLoginCount": 1,
+      "fullName": "Vương Thị Thảo",
+      "phone": "0367382085",
+      "lastLoginDate": "16/9/2026",
+      "trialGenerations": 0,
+      "schoolName": "MN Tân Thành",
+      "maxTrialGenerations": 0,
+      "authorizedDevices": [
+        {
+          "usedApps": [
+            "KHBD AI PRO"
+          ],
+          "hardwareSig": "Windows PC|1920x1080|8|Etc/GMT-7|intel uhd graphics 620",
+          "lastActive": "20:05:29 16/9/2026",
+          "deviceName": "Windows PC (1536x864, 8 Cores)",
+          "browser": "Edge",
+          "firstLogin": "20:04:46 16/9/2026",
+          "deviceId": "MC-2DE031EF-2CC54B06",
+          "appName": "KHBD AI PRO",
+          "os": "Windows PC"
+        }
+      ],
+      "lastActiveTimestamp": 1789563949194
+    }
+  ],
+  "deletedUserIds": [
+    "lathithuhien95hytq@gmail.com",
+    "lathithuhien95hytq@gmail.co",
+    "maitt.tinhoc@edu.vn",
+    "nguyenvanan.toan@edu.vn",
+    "user_1788258597741",
+    "user_1788260675886",
+    "user_teacher_02",
+    "user_teacher_01",
+    "user_1788446756908",
+    "ngoduo ngthao@gmail.com",
+    "user_admin_02",
+    "trananh123k@gmail.com"
+  ],
+  "lastUpdated": "2026-09-19T16:53:14.970Z"
+}

@@ -24,7 +24,7 @@ import { ApiKeyModal } from './components/ApiKeyModal';
 import { UserManagementModal } from './components/UserManagementModal';
 import { UserProfileModal } from './components/UserProfileModal';
 import { ContactAdminModal } from './components/ContactAdminModal';
-import { getApiHeaders, getStoredApiKey } from './utils/apiKeyManager';
+import { getApiHeaders, getStoredApiKey, setStoredApiKey } from './utils/apiKeyManager';
 import { getUserAccessStatus } from './utils/userAccess';
 import {
   ManagedUserAccount,
@@ -318,6 +318,21 @@ export default function App() {
     setIsLoggedIn(true);
     setCurrentUser(account);
     setUserRole(account.role);
+
+    // Sync API Key from account: If the account has an API Key, load it immediately into session & state
+    const effectiveKey = account.apiKey || account.customApiKey;
+    if (effectiveKey) {
+      setStoredApiKey(effectiveKey);
+      setHasCustomApiKey(true);
+    } else {
+      const existingLocalKey = getStoredApiKey();
+      if (existingLocalKey) {
+        account.apiKey = existingLocalKey;
+        account.customApiKey = existingLocalKey;
+        saveUserAccountToFirestore(account);
+      }
+    }
+
     setAllUserAccounts((prev) =>
       sanitizeUserAccounts([
         account,

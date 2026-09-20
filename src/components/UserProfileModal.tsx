@@ -808,8 +808,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 )}
               </div>
 
-              {/* Thông tin tài khoản thêm */}
-              <div className="pt-2 border-t border-slate-200 grid grid-cols-2 gap-3 text-xs">
+              {/* Thông tin tài khoản & API Key */}
+              <div className="pt-2 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                   <span className="text-[10px] text-slate-500 flex items-center gap-1">
                     <Calendar className="w-3 h-3 text-slate-400" /> Ngày cấp tài khoản
@@ -826,6 +826,65 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       : (currentUser.expiresAt || 'Vĩnh viễn')}
                   </p>
                 </div>
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                    <KeyRound className="w-3 h-3 text-amber-600" /> API Key Gemini
+                  </span>
+                  <p className="font-bold text-slate-800 mt-0.5 font-mono text-[11px] truncate" title={currentUser.apiKey || currentUser.customApiKey || 'Chưa liên kết'}>
+                    {(currentUser.apiKey || currentUser.customApiKey) ? (
+                      <span className="text-emerald-700 font-semibold">
+                        {(currentUser.apiKey || currentUser.customApiKey || '').slice(0, 8)}... (Đã lưu)
+                      </span>
+                    ) : (
+                      <span className="text-slate-400 font-normal italic">Chưa gắn theo tài khoản</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {/* Lịch sử đăng nhập theo tài khoản */}
+              <div className="pt-2 border-t border-slate-200">
+                <h4 className="text-xs font-bold text-slate-800 mb-2 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Activity className="w-3.5 h-3.5 text-amber-700" />
+                    Lịch sử đăng nhập ({Array.isArray(currentUser.loginLogs) ? currentUser.loginLogs.length : 0} phiên)
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    Tổng lượt đăng nhập: <strong className="text-slate-800">{currentUser.totalLoginCount || 1}</strong>
+                  </span>
+                </h4>
+                {(!currentUser.loginLogs || currentUser.loginLogs.length === 0) ? (
+                  <div className="p-4 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-400 text-xs">
+                    Chưa có nhật ký đăng nhập chi tiết.
+                  </div>
+                ) : (
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                    {currentUser.loginLogs.slice(0, 20).map((log, idx) => (
+                      <div
+                        key={idx}
+                        className="p-2 px-3 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center justify-between text-[11px] hover:bg-slate-100/70 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-600 shrink-0" />
+                          <span className="font-medium text-slate-800">{log.deviceName || 'Máy tính'}</span>
+                          {log.action && (
+                            <span className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 text-[9px] font-bold">
+                              {log.action}
+                            </span>
+                          )}
+                          {log.appName && (
+                            <span className="px-1.5 py-0.2 rounded bg-slate-200 text-slate-700 text-[9px]">
+                              {log.appName}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-slate-500 font-mono text-[10px] shrink-0">
+                          {log.timestamp}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}

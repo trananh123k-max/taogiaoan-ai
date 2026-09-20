@@ -25,6 +25,7 @@ import {
   parseKeysFromInput,
   ApiKeyStatusResult,
 } from '../utils/apiKeyManager';
+import { saveUserAccountToFirestore } from '../utils/firebase';
 
 interface ApiKeyModalProps {
   isOpen: boolean;
@@ -96,21 +97,61 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const cleanKeys = parseKeysFromInput(apiKeyInput);
     if (cleanKeys.length === 0 && !isAdminUser) {
       alert('Thầy cô vui lòng nhập ít nhất 1 mã API Key Gemini cá nhân để sử dụng.');
       return;
     }
-    setStoredApiKey(cleanKeys.join('\n'));
+    const combinedKey = cleanKeys.join('\n');
+    setStoredApiKey(combinedKey);
+
+    // Save directly into user account so key persists across Render deploys & account logins!
+    try {
+      const userStr = localStorage.getItem('khbd_current_user');
+      if (userStr) {
+        const u = JSON.parse(userStr);
+        if (u && u.id) {
+          const updatedUser = {
+            ...u,
+            apiKey: combinedKey || undefined,
+            customApiKey: combinedKey || undefined,
+          };
+          localStorage.setItem('khbd_current_user', JSON.stringify(updatedUser));
+          await saveUserAccountToFirestore(updatedUser);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to sync apiKey to user account:', e);
+    }
+
     if (onKeySaved) onKeySaved();
     onClose();
   };
 
-  const handleClear = () => {
+  const handleClear = async () => {
     clearStoredApiKey();
     setApiKeyInput('');
     setTestResult(null);
+
+    try {
+      const userStr = localStorage.getItem('khbd_current_user');
+      if (userStr) {
+        const u = JSON.parse(userStr);
+        if (u && u.id) {
+          const updatedUser = {
+            ...u,
+            apiKey: undefined,
+            customApiKey: undefined,
+          };
+          localStorage.setItem('khbd_current_user', JSON.stringify(updatedUser));
+          await saveUserAccountToFirestore(updatedUser);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to clear apiKey from user account:', e);
+    }
+
     if (onKeySaved) onKeySaved();
   };
 

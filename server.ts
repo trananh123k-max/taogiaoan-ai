@@ -698,11 +698,17 @@ app.get('/api/health', (req, res) => {
 // SERVER-SIDE GLOBAL REPOSITORY STORAGE (Books, PPCT, Users)
 // ==========================================
 const REPO_FILE = path.join(process.cwd(), 'data_repository.json');
+const SEED_REPO_FILE = path.join(process.cwd(), 'data_repository.seed.json');
 
 function getStoredRepository(): { books: any[]; ppcts: any[]; userAccounts: any[]; deletedUserIds: string[] } {
   try {
-    if (fs.existsSync(REPO_FILE)) {
-      const raw = fs.readFileSync(REPO_FILE, 'utf-8');
+    let sourceFile = REPO_FILE;
+    if (!fs.existsSync(REPO_FILE) && fs.existsSync(SEED_REPO_FILE)) {
+      sourceFile = SEED_REPO_FILE;
+    }
+
+    if (fs.existsSync(sourceFile)) {
+      const raw = fs.readFileSync(sourceFile, 'utf-8');
       const parsed = JSON.parse(raw);
       const deletedUserIds: string[] = Array.isArray(parsed.deletedUserIds) ? parsed.deletedUserIds : [];
       const deletedSet = new Set(deletedUserIds.map((k: string) => String(k).trim().toLowerCase()));
@@ -725,7 +731,17 @@ function getStoredRepository(): { books: any[]; ppcts: any[]; userAccounts: any[
         finalBooks = SEED_SAMPLE_BOOKS;
       }
 
-      const rawUsers = Array.isArray(parsed.userAccounts) ? parsed.userAccounts : [];
+      let rawUsers = Array.isArray(parsed.userAccounts) ? parsed.userAccounts : [];
+      // If active REPO_FILE had 0 users but SEED_REPO_FILE has users, recover them!
+      if (rawUsers.length === 0 && sourceFile !== SEED_REPO_FILE && fs.existsSync(SEED_REPO_FILE)) {
+        try {
+          const seedParsed = JSON.parse(fs.readFileSync(SEED_REPO_FILE, 'utf-8'));
+          if (Array.isArray(seedParsed.userAccounts) && seedParsed.userAccounts.length > 0) {
+            rawUsers = seedParsed.userAccounts;
+          }
+        } catch {}
+      }
+
       const cleanedUsers = rawUsers.filter((u: any) => {
         if (!u) return false;
         const id = (u.id || '').trim().toLowerCase();
@@ -758,7 +774,59 @@ function saveStoredRepository(data: { books?: any[]; ppcts?: any[]; userAccounts
     );
     const deletedSet = new Set(deletedUserIds.map((k: string) => String(k).trim().toLowerCase()));
 
-    const rawUsers = data.userAccounts !== undefined ? data.userAccounts : current.userAccounts;
+    let rawUsers = data.userAccounts !== undefined ? data.userAccounts : current.userAccounts;
+    // Guard: When updating accounts, preserve existing granted dates, API keys, and login logs!
+    if (data.userAccounts && current.userAccounts && current.userAccounts.length > 0) {
+      const currentMap = new Map<string, any>();
+      for (const cu of current.userAccounts) {
+        if (cu) {
+          if (cu.id) currentMap.set(String(cu.id).toLowerCase(), cu);
+          if (cu.username) currentMap.set(String(cu.username).toLowerCase(), cu);
+        }
+      }
+
+      rawUsers = rawUsers.map((nu: any) => {
+        if (!nu) return nu;
+        const key = String(nu.id || nu.username || '').toLowerCase();
+        const cu = currentMap.get(key);
+        if (!cu) return nu;
+
+        // Preserve API key
+        const apiKey = nu.apiKey || nu.customApiKey || cu.apiKey || cu.customApiKey;
+        // Preserve granted expiresAt
+        const isGranted = (d?: string) => d && d !== 'Chưa cấp' && !String(d).toLowerCase().includes('dùng thử');
+        let expiresAt = nu.expiresAt;
+        if (!isGranted(expiresAt) && isGranted(cu.expiresAt)) {
+          expiresAt = cu.expiresAt;
+        }
+
+        // Merge login history logs
+        const cLogs = Array.isArray(cu.loginLogs) ? cu.loginLogs : [];
+        const nLogs = Array.isArray(nu.loginLogs) ? nu.loginLogs : [];
+        const combinedLogs = [...nLogs, ...cLogs];
+        const seenLogKeys = new Set<string>();
+        const mergedLogs: any[] = [];
+        for (const l of combinedLogs) {
+          if (!l || !l.timestamp) continue;
+          const k = `${l.timestamp}_${l.deviceName || ''}_${l.action || ''}`;
+          if (!seenLogKeys.has(k)) {
+            seenLogKeys.add(k);
+            mergedLogs.push(l);
+          }
+        }
+
+        return {
+          ...cu,
+          ...nu,
+          expiresAt: expiresAt || cu.expiresAt,
+          apiKey,
+          customApiKey: apiKey,
+          loginLogs: mergedLogs.slice(0, 50),
+          totalLoginCount: Math.max(nu.totalLoginCount || 0, cu.totalLoginCount || 0, mergedLogs.length),
+        };
+      });
+    }
+
     const cleanedUsers = rawUsers.filter((u: any) => {
       if (!u) return false;
       const uId = (u.id || '').trim().toLowerCase();
@@ -775,6 +843,10 @@ function saveStoredRepository(data: { books?: any[]; ppcts?: any[]; userAccounts
       lastUpdated: new Date().toISOString(),
     };
     fs.writeFileSync(REPO_FILE, JSON.stringify(updated, null, 2), 'utf-8');
+    // Also save backup to seed file for Render container migrations
+    try {
+      fs.writeFileSync(SEED_REPO_FILE, JSON.stringify(updated, null, 2), 'utf-8');
+    } catch {}
   } catch (e) {
     console.error('[Server Repo] Error writing to data_repository.json:', e);
   }
@@ -888,7 +960,53 @@ app.post('/api/repository/save-user', (req, res) => {
       return res.status(400).json({ success: false, error: 'Thiếu thông tin tài khoản' });
     }
     const repo = getStoredRepository();
-    const updatedUsers = [account, ...repo.userAccounts.filter((u) => u.id !== account.id)];
+    const existing = repo.userAccounts.find(
+      (u) =>
+        u.id === account.id ||
+        (u.username && account.username && u.username.toLowerCase() === account.username.toLowerCase())
+    );
+
+    let finalAccount = account;
+    if (existing) {
+      const apiKey = account.apiKey || account.customApiKey || existing.apiKey || existing.customApiKey;
+      const isGranted = (d?: string) => d && d !== 'Chưa cấp' && !String(d).toLowerCase().includes('dùng thử');
+      let expiresAt = account.expiresAt;
+      if (!isGranted(expiresAt) && isGranted(existing.expiresAt)) {
+        expiresAt = existing.expiresAt;
+      }
+      const cLogs = Array.isArray(existing.loginLogs) ? existing.loginLogs : [];
+      const nLogs = Array.isArray(account.loginLogs) ? account.loginLogs : [];
+      const combinedLogs = [...nLogs, ...cLogs];
+      const seenLogKeys = new Set<string>();
+      const mergedLogs: any[] = [];
+      for (const l of combinedLogs) {
+        if (!l || !l.timestamp) continue;
+        const k = `${l.timestamp}_${l.deviceName || ''}_${l.action || ''}`;
+        if (!seenLogKeys.has(k)) {
+          seenLogKeys.add(k);
+          mergedLogs.push(l);
+        }
+      }
+
+      finalAccount = {
+        ...existing,
+        ...account,
+        expiresAt: expiresAt || existing.expiresAt,
+        apiKey,
+        customApiKey: apiKey,
+        loginLogs: mergedLogs.slice(0, 50),
+        totalLoginCount: Math.max(account.totalLoginCount || 0, existing.totalLoginCount || 0, mergedLogs.length),
+      };
+    }
+
+    const updatedUsers = [
+      finalAccount,
+      ...repo.userAccounts.filter(
+        (u) =>
+          u.id !== finalAccount.id &&
+          (!finalAccount.username || !u.username || u.username.toLowerCase() !== finalAccount.username.toLowerCase())
+      ),
+    ];
     
     const toUnban = [account.id, account.username, account.email].filter(Boolean).map(k => String(k).trim().toLowerCase());
     const updatedDeletedIds = (repo.deletedUserIds || []).filter(id => !toUnban.includes(String(id).trim().toLowerCase()));

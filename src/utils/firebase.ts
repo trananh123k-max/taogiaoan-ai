@@ -112,6 +112,10 @@ export interface LoginHistoryLog {
   timestamp: string;
   date: string;
   deviceName: string;
+  browser?: string;
+  os?: string;
+  action?: string;
+  appName?: string;
 }
 
 export interface ManagedUserAccount {
@@ -127,6 +131,8 @@ export interface ManagedUserAccount {
   accessCode?: string; // Mật khẩu / Mã kích hoạt
   createdAt: string; // Ngày cấp tài khoản
   expiresAt?: string; // Ngày hết hạn (hoặc 'Vĩnh viễn')
+  apiKey?: string; // Mã Gemini API Key cá nhân/được cấp riêng cho tài khoản
+  customApiKey?: string; // Tương thích ngược với customApiKey
   notes?: string; // Ghi chú của Admin
   lastLogin?: string; // Đăng nhập gần nhất
   maxDevices?: number; // Giới hạn số máy đăng nhập (mặc định 2 máy)
@@ -252,10 +258,15 @@ export function sanitizeUserAccounts(list: ManagedUserAccount[]): ManagedUserAcc
       : 0;
     const activeMinutesToday = Math.floor(activeSecondsToday / 60);
 
+    const apiKey = item.apiKey || (item as any).customApiKey;
+    const customApiKey = (item as any).customApiKey || apiKey;
+
     result.push({
       ...item,
       accessCode: item.accessCode || (item as any).password,
       expiresAt: item.expiresAt || (item as any).validUntil || 'Chưa cấp',
+      apiKey,
+      customApiKey,
       maxDevices: item.maxDevices !== undefined ? item.maxDevices : (item.role === 'admin' ? 10 : 2),
       authorizedDevices: deduplicateAuthorizedDevices(Array.isArray(item.authorizedDevices) ? item.authorizedDevices : []),
       loginCountToday,
@@ -427,6 +438,37 @@ export function mergeTwoAccounts(existing: ManagedUserAccount, incoming: Managed
     base.maxTrialGenerations = maxTrials;
   }
 
+  // Preserve API Key: Keep granted or saved API Key, never overwrite with empty
+  const effectiveApiKey = incoming.apiKey || incoming.customApiKey || existing.apiKey || existing.customApiKey;
+  if (effectiveApiKey) {
+    base.apiKey = effectiveApiKey;
+    base.customApiKey = effectiveApiKey;
+  }
+
+  // Preserve and merge loginLogs without losing historical records
+  const eLogs = Array.isArray(existing.loginLogs) ? existing.loginLogs : [];
+  const iLogs = Array.isArray(incoming.loginLogs) ? incoming.loginLogs : [];
+  const combinedLogs = [...iLogs, ...eLogs];
+  const seenLogKeys = new Set<string>();
+  const mergedLogs: LoginHistoryLog[] = [];
+  for (const l of combinedLogs) {
+    if (!l || !l.timestamp) continue;
+    const k = `${l.timestamp}_${l.deviceName || ''}_${l.action || ''}`;
+    if (!seenLogKeys.has(k)) {
+      seenLogKeys.add(k);
+      mergedLogs.push(l);
+    }
+  }
+  base.loginLogs = mergedLogs.slice(0, 50);
+  base.totalLoginCount = Math.max(existing.totalLoginCount || 0, incoming.totalLoginCount || 0, base.loginLogs.length);
+
+  // Preserve avatar if base holds empty
+  if (!base.avatar && existing.avatar) {
+    base.avatar = existing.avatar;
+  } else if (!base.avatar && incoming.avatar) {
+    base.avatar = incoming.avatar;
+  }
+
   // Preserve real school name if base holds a placeholder default string
   const isDefaultSchool = (s?: string) => !s || s === 'Trường THCS / THPT' || s === 'Trường THCS & THPT' || s === 'Chưa cập nhật trường' || s === 'Trường THCS';
   if (existing.schoolName && !isDefaultSchool(existing.schoolName) && isDefaultSchool(base.schoolName)) {
@@ -502,7 +544,8 @@ export function subscribeToUserAccounts(callback: (accounts: ManagedUserAccount[
         const uEmail = (a.email || '').trim().toLowerCase();
         return !deletedKeys.has(uId) && !deletedKeys.has(uUsername) && (!uEmail || !deletedKeys.has(uEmail));
       });
-      const merged = mergeAccountLists(DEFAULT_USER_ACCOUNTS, validServer);
+      const currentLocal = getLocalCachedAccounts();
+      const merged = mergeAccountLists(DEFAULT_USER_ACCOUNTS, currentLocal, validServer);
       try {
         localStorage.setItem('khbd_managed_user_accounts', JSON.stringify(merged));
       } catch {}
@@ -571,7 +614,8 @@ export async function loadUserAccountsFromFirestore(): Promise<ManagedUserAccoun
     return !deletedKeys.has(uId) && !deletedKeys.has(uUsername) && (!uEmail || !deletedKeys.has(uEmail));
   });
 
-  const merged = mergeAccountLists(DEFAULT_USER_ACCOUNTS, validFirestore);
+  const localCached = getLocalCachedAccounts();
+  const merged = mergeAccountLists(DEFAULT_USER_ACCOUNTS, localCached, validFirestore);
 
   try {
     localStorage.setItem('khbd_managed_user_accounts', JSON.stringify(merged));
@@ -696,11 +740,26 @@ export async function saveUserAccountToFirestore(
         (a.id && account.id && a.id.toLowerCase() === account.id.toLowerCase()) ||
         (a.username && account.username && a.username.toLowerCase() === account.username.toLowerCase())
     );
-    if (existing && isExplicitGrantedDate(existing.expiresAt) && !isExplicitGrantedDate(account.expiresAt)) {
-      safeAccount.expiresAt = existing.expiresAt;
-      safeAccount.maxTrialGenerations = Math.max(existing.maxTrialGenerations ?? 9999, 9999);
-      if (existing.status === 'active' && safeAccount.status === 'new') {
-        safeAccount.status = 'active';
+    if (existing) {
+      if (isExplicitGrantedDate(existing.expiresAt) && !isExplicitGrantedDate(account.expiresAt)) {
+        safeAccount.expiresAt = existing.expiresAt;
+        safeAccount.maxTrialGenerations = Math.max(existing.maxTrialGenerations ?? 9999, 9999);
+        if (existing.status === 'active' && safeAccount.status === 'new') {
+          safeAccount.status = 'active';
+        }
+      }
+      // Preserve API key if safeAccount didn't specify one
+      if (!safeAccount.apiKey && !safeAccount.customApiKey && (existing.apiKey || existing.customApiKey)) {
+        safeAccount.apiKey = existing.apiKey || existing.customApiKey;
+        safeAccount.customApiKey = existing.apiKey || existing.customApiKey;
+      }
+      // Preserve loginLogs if safeAccount was passed without them or with empty
+      if ((!safeAccount.loginLogs || safeAccount.loginLogs.length === 0) && Array.isArray(existing.loginLogs) && existing.loginLogs.length > 0) {
+        safeAccount.loginLogs = existing.loginLogs;
+      }
+      // Preserve totalLoginCount
+      if (!safeAccount.totalLoginCount && existing.totalLoginCount) {
+        safeAccount.totalLoginCount = existing.totalLoginCount;
       }
     }
   }
@@ -789,18 +848,35 @@ export async function checkAndAuthorizeDevice(
   const newTodayCount = isSameDay ? (account.loginCountToday || 0) + 1 : 1;
   const newTotalCount = (account.totalLoginCount || 0) + 1;
 
+  const effectiveApiKey = account.apiKey || account.customApiKey || existingCached?.apiKey || existingCached?.customApiKey;
+
+  // 2. Check if current machine matches any already authorized device on this account:
+  // Checks exact deviceId, hardwareSig, or physical hardware specs (same OS, CPU cores, resolution)
+  const existingIndex = devices.findIndex((d) => isSamePhysicalMachine(d, machine));
+
   const currentAppName = (machine as any).appName || 'KHBD AI PRO';
   const newLog: LoginHistoryLog = {
     timestamp: nowStr,
     date: todayDateStr,
     deviceName: `${machine.deviceName || 'Máy tính'}${machine.browser ? ` (${machine.browser})` : ''}`,
+    browser: machine.browser,
+    os: machine.os,
+    action: existingIndex >= 0 ? 'Đăng nhập hệ thống' : 'Đăng nhập thiết bị mới',
+    appName: currentAppName,
   };
-  const existingLogs = Array.isArray(account.loginLogs) ? account.loginLogs : [];
-  const updatedLogs = [newLog, ...existingLogs].slice(0, 50);
 
-  // 2. Check if current machine matches any already authorized device on this account:
-  // Checks exact deviceId, hardwareSig, or physical hardware specs (same OS, CPU cores, resolution)
-  const existingIndex = devices.findIndex((d) => isSamePhysicalMachine(d, machine));
+  const cachedLogs = Array.isArray(existingCached?.loginLogs) ? existingCached.loginLogs : [];
+  const accountLogs = Array.isArray(account.loginLogs) ? account.loginLogs : [];
+  const allExistingLogs = [...accountLogs, ...cachedLogs];
+  const seenL = new Set<string>();
+  const deduplicatedLogs = allExistingLogs.filter((l) => {
+    if (!l || !l.timestamp) return false;
+    const k = `${l.timestamp}_${l.deviceName || ''}_${l.action || ''}`;
+    if (seenL.has(k)) return false;
+    seenL.add(k);
+    return true;
+  });
+  const updatedLogs = [newLog, ...deduplicatedLogs.filter(l => l.timestamp !== nowStr)].slice(0, 50);
 
   if (existingIndex >= 0) {
     // Already recognized physical machine! (Could be a 2nd application, different browser, or new tab on the same PC)
@@ -839,10 +915,12 @@ export async function checkAndAuthorizeDevice(
       expiresAt: effectiveExpiresAt,
       maxTrialGenerations: effectiveMaxTrials,
       status: effectiveStatus,
+      apiKey: effectiveApiKey,
+      customApiKey: effectiveApiKey,
       lastLogin: nowStr,
       lastLoginDate: todayDateStr,
       loginCountToday: newTodayCount,
-      totalLoginCount: newTotalCount,
+      totalLoginCount: Math.max(newTotalCount, updatedLogs.length),
       loginLogs: updatedLogs,
       authorizedDevices: devices,
     };
@@ -877,10 +955,12 @@ export async function checkAndAuthorizeDevice(
     expiresAt: effectiveExpiresAt,
     maxTrialGenerations: effectiveMaxTrials,
     status: effectiveStatus,
+    apiKey: effectiveApiKey,
+    customApiKey: effectiveApiKey,
     lastLogin: nowStr,
     lastLoginDate: todayDateStr,
     loginCountToday: newTodayCount,
-    totalLoginCount: newTotalCount,
+    totalLoginCount: Math.max(newTotalCount, updatedLogs.length),
     loginLogs: updatedLogs,
     authorizedDevices: updatedDevices,
   };
@@ -1010,12 +1090,19 @@ export async function recordUserHeartbeat(account: ManagedUserAccount, addSecond
     existingCached && existingCached.status === 'active' && account.status === 'new'
       ? 'active'
       : account.status;
+  const effectiveApiKey =
+    account.apiKey ||
+    account.customApiKey ||
+    existingCached?.apiKey ||
+    existingCached?.customApiKey;
 
   const updatedAccount: ManagedUserAccount = {
     ...account,
     expiresAt: effectiveExpiresAt,
     maxTrialGenerations: effectiveMaxTrials,
     status: effectiveStatus,
+    apiKey: effectiveApiKey,
+    customApiKey: effectiveApiKey,
     lastLogin: nowStr,
     lastLoginDate: todayDateStr,
     lastActiveDate: todayDateStr,
