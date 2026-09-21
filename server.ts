@@ -1,5 +1,5 @@
 import { PRESCHOOL_CURRICULUM_MATRIX, PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE } from './src/data/preschoolCurriculum.js';
-import { formatPreschoolMusicActivities, formatPreschoolActivities, isPreschoolMusicPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, sanitizePreschoolObjectives } from './src/utils/preschoolUtils.js';
+import { formatPreschoolMusicActivities, formatPreschoolActivities, isPreschoolMusicPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, sanitizePreschoolObjectives, analyzePreschoolAgeProfile } from './src/utils/preschoolUtils.js';
 import { NLS_DICTIONARY } from './src/data/nlsDictionary';
 import { getVerifiedLessons } from './src/data/verifiedCurriculumList';
 import { getTextbookLessonStructure } from './src/data/textbookStructureDictionary';
@@ -2326,9 +2326,28 @@ MỤC ĐÍCH DUY NHẤT: BẢO TỒN NGUYÊN VẸN NỘI DUNG, HÌNH ẢNH, BÀI
   + 1. Kiến thức: Các gạch đầu dòng mô tả những gì trẻ biết, hiểu (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Trẻ biết tên bài thơ/bài hát...", "- Trẻ hiểu nội dung bài...".
   + 2. Kỹ năng: Các gạch đầu dòng rèn luyện kỹ năng (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Rèn kỹ năng phát âm...", "- Phát triển kỹ năng vận động...".`;
 
+  const preschoolAgeProfile = isPreschool ? analyzePreschoolAgeProfile(grade || 'Mẫu giáo lớn (5-6 tuổi)') : null;
+  const ageSpecificInstruction = preschoolAgeProfile ? `
+=============================================================================
+ĐẶC BIỆT CHÚ Ý - PHÂN TÍCH VÀ CĂN CHỈNH TOÀN BỘ GIÁO ÁN THEO ĐỘ TUỔI: "${preschoolAgeProfile.rawGrade}" (${preschoolAgeProfile.standardName})
+=============================================================================
+- ĐỘ TUỔI THỰC TẾ CỦA LỚP: "${preschoolAgeProfile.rawGrade}".
+- THỜI LƯỢNG HOẠT ĐỘNG CHUẨN ĐÚNG ĐỘ TUỔI: ${preschoolAgeProfile.recommendedDuration}.
+- ĐẶC ĐIỂM TÂM SINH LÝ & MỨC ĐỘ TẬP TRUNG: ${preschoolAgeProfile.developmentalTraits.join('; ')}.
+- TRỌNG TÂM NHẬN THỨC & PHÁT TRIỂN: ${preschoolAgeProfile.cognitiveFocus}.
+- ĐẶC ĐIỂM NGÔN NGỮ, LỜI NÓI CÔ VÀ TRẺ: ${preschoolAgeProfile.languageAndSpeech}.
+- VẬN ĐỘNG & THAO TÁC HỌC LIỆU: ${preschoolAgeProfile.motorSkills}.
+- PHƯƠNG PHÁP SƯ PHẠM ĐỀ XUẤT: ${preschoolAgeProfile.pedagogicalStrategy}.
+- HƯỚNG DẪN BIÊN SOẠN RIÊNG BIỆT CHO ĐỘ TUỔI NÀY:
+${preschoolAgeProfile.promptGuidance}
+- BẮT BUỘC TUÂN THỦ: Mọi câu hỏi của cô, thao tác của trẻ, mức độ kiến thức, kỹ năng và sản phẩm dự kiến trong giáo án BẮT BUỘC PHẢI VỪA SỨC, ĐÚNG VỚI ĐẶC ĐIỂM TÂM LÝ LỨA TUỔI "${preschoolAgeProfile.rawGrade}". Cột "Hoạt động của trẻ" phải phản ánh đúng từ ngữ, phản xạ và hành động chân thực của trẻ ở lứa tuổi này.
+=============================================================================
+` : '';
+
   const preschoolPrompt = `\nĐẶC BIỆT QUAN TRỌNG ĐỐI VỚI CẤP MẦM NON:
 ${PRESCHOOL_CURRICULUM_MATRIX}
 ${PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE}
+${ageSpecificInstruction}
 ${yccdInstruction}${nlsInstruction}${aiInstruction}
 
 - BẮT BUỘC soạn theo Kế hoạch tổ chức hoạt động giáo dục Mầm non, TUYỆT ĐỐI KHÔNG dùng Công văn 5512.
@@ -3281,6 +3300,7 @@ Trả về JSON dạng:
     subject: subject,
     grade: grade,
     schoolLevel: config.schoolLevel || '',
+    duration: isPreschool ? (preschoolAgeProfile?.recommendedDuration || '30 – 35 phút') : undefined,
     bookSeries: bookSeries,
     periods: periods,
     lessonTotalPeriods: totalPeriods,
@@ -3425,9 +3445,28 @@ const handleGenerateKHBD = async (req: express.Request, res: express.Response) =
   + 1. Kiến thức: Các gạch đầu dòng mô tả những gì trẻ biết, hiểu (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Trẻ biết tên bài thơ/bài hát...", "- Trẻ hiểu nội dung bài...".
   + 2. Kỹ năng: Các gạch đầu dòng rèn luyện kỹ năng (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Rèn kỹ năng phát âm...", "- Phát triển kỹ năng vận động...".`;
 
+    const preschoolAgeProfile = isPreschool ? analyzePreschoolAgeProfile(config.grade || 'Mẫu giáo lớn (5-6 tuổi)') : null;
+    const ageSpecificInstruction = preschoolAgeProfile ? `
+=============================================================================
+ĐẶC BIỆT CHÚ Ý - PHÂN TÍCH VÀ CĂN CHỈNH TOÀN BỘ GIÁO ÁN THEO ĐỘ TUỔI: "${preschoolAgeProfile.rawGrade}" (${preschoolAgeProfile.standardName})
+=============================================================================
+- ĐỘ TUỔI THỰC TẾ CỦA LỚP: "${preschoolAgeProfile.rawGrade}".
+- THỜI LƯỢNG HOẠT ĐỘNG CHUẨN ĐÚNG ĐỘ TUỔI: ${preschoolAgeProfile.recommendedDuration}.
+- ĐẶC ĐIỂM TÂM SINH LÝ & MỨC ĐỘ TẬP TRUNG: ${preschoolAgeProfile.developmentalTraits.join('; ')}.
+- TRỌNG TÂM NHẬN THỨC & PHÁT TRIỂN: ${preschoolAgeProfile.cognitiveFocus}.
+- ĐẶC ĐIỂM NGÔN NGỮ, LỜI NÓI CÔ VÀ TRẺ: ${preschoolAgeProfile.languageAndSpeech}.
+- VẬN ĐỘNG & THAO TÁC HỌC LIỆU: ${preschoolAgeProfile.motorSkills}.
+- PHƯƠNG PHÁP SƯ PHẠM ĐỀ XUẤT: ${preschoolAgeProfile.pedagogicalStrategy}.
+- HƯỚNG DẪN BIÊN SOẠN RIÊNG BIỆT CHO ĐỘ TUỔI NÀY:
+${preschoolAgeProfile.promptGuidance}
+- BẮT BUỘC TUÂN THỦ: Mọi câu hỏi của cô, thao tác của trẻ, mức độ kiến thức, kỹ năng và sản phẩm dự kiến trong giáo án BẮT BUỘC PHẢI VỪA SỨC, ĐÚNG VỚI ĐẶC ĐIỂM TÂM LÝ LỨA TUỔI "${preschoolAgeProfile.rawGrade}". Cột "Hoạt động của trẻ" phải phản ánh đúng từ ngữ, phản xạ và hành động chân thực của trẻ ở lứa tuổi này.
+=============================================================================
+` : '';
+
     const preschoolPrompt = `\nĐẶC BIỆT QUAN TRỌNG ĐỐI VỚI CẤP MẦM NON:
 ${PRESCHOOL_CURRICULUM_MATRIX}
 ${PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE}
+${ageSpecificInstruction}
 
 - BẮT BUỘC soạn theo Kế hoạch tổ chức hoạt động giáo dục Mầm non, TUYỆT ĐỐI KHÔNG dùng Công văn 5512.
 ${preschoolObjectivesInstruction}
@@ -3787,6 +3826,12 @@ ${isPreschool
     const parsed = parseJSONRobust(responseText || '{}');
     if (parsed.appendix?.worksheetContent) {
       parsed.appendix.worksheetContent = cleanWorksheetContent(parsed.appendix.worksheetContent);
+    }
+    if (config.grade) {
+      parsed.grade = config.grade;
+    }
+    if (isPreschool) {
+      parsed.duration = preschoolAgeProfile?.recommendedDuration || parsed.duration || '30 – 35 phút';
     }
     parsed.generatedAt = new Date().toISOString();
     parsed.imageSlotsUsed = config.imageSlots || [];

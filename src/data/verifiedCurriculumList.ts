@@ -3262,5 +3262,33 @@ export function getVerifiedLessons(
     };
   }
 
+  // 4. Intelligent fuzzy matching for custom preschool grades (Mầm non)
+  const lowerGrade = cleanGrade.toLowerCase();
+  let fallbackPreschoolGrade = '';
+  if (
+    lowerGrade.includes('nhà trẻ') ||
+    lowerGrade.includes('nhóm trẻ') ||
+    lowerGrade.includes('tháng') ||
+    lowerGrade.includes('12') ||
+    lowerGrade.includes('18') ||
+    lowerGrade.includes('24') ||
+    lowerGrade.includes('36')
+  ) {
+    fallbackPreschoolGrade = 'Nhà trẻ (24-36 tháng)';
+  } else if (lowerGrade.includes('3-4') || lowerGrade.includes('3 – 4') || lowerGrade.includes('bé') || lowerGrade.includes('mầm')) {
+    fallbackPreschoolGrade = 'Mẫu giáo bé (3-4 tuổi)';
+  } else if (lowerGrade.includes('4-5') || lowerGrade.includes('4 – 5') || lowerGrade.includes('nhỡ') || lowerGrade.includes('chồi')) {
+    fallbackPreschoolGrade = 'Mẫu giáo nhỡ (4-5 tuổi)';
+  } else if (lowerGrade.includes('5-6') || lowerGrade.includes('5 – 6') || lowerGrade.includes('lớn') || lowerGrade.includes('lá') || lowerGrade.includes('ghép')) {
+    fallbackPreschoolGrade = 'Mẫu giáo lớn (5-6 tuổi)';
+  }
+
+  if (fallbackPreschoolGrade) {
+    const fallbackKey = `${mappedSubj}_${fallbackPreschoolGrade}`;
+    if (VERIFIED_KNTT_CURRICULUM[fallbackKey]) {
+      return VERIFIED_KNTT_CURRICULUM[fallbackKey];
+    }
+  }
+
   return null;
 }

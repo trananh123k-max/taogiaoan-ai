@@ -1212,3 +1212,201 @@ export function sanitizePreschoolObjectives(objectives: any, isNew8Activity: boo
   return objectives;
 }
 
+export interface PreschoolAgeProfile {
+  rawGrade: string;
+  category: 'INFANT_TODDLER' | 'MAM_3_4' | 'CHOI_4_5' | 'LA_5_6' | 'MIXED_AGE' | 'CUSTOM';
+  standardName: string;
+  recommendedDuration: string;
+  developmentalTraits: string[];
+  cognitiveFocus: string;
+  languageAndSpeech: string;
+  motorSkills: string;
+  pedagogicalStrategy: string;
+  promptGuidance: string;
+}
+
+/**
+ * Intelligent Preschool Age Profile Analyzer
+ * Deeply analyzes any custom or standard preschool age/grade input to deduce exact
+ * developmental psychology, cognitive abilities, attention span, teacher speech,
+ * expected child behavior, and pedagogical recommendations.
+ */
+export function analyzePreschoolAgeProfile(grade: string = ''): PreschoolAgeProfile {
+  const g = (grade || '').trim();
+  const lower = g.toLowerCase();
+
+  // 1. Kiểm tra lớp ghép / nhiều độ tuổi (ví dụ: Lớp ghép 3-5 tuổi, Ghép 4-5 và 5-6 tuổi...)
+  const isMixed = lower.includes('ghép') || 
+                  (lower.includes('tuổi') && (lower.includes('&') || lower.includes('và') || lower.includes('+') || /\d\s*-\s*\d.*(?:\&|\bvà\b|\+).*\d\s*-\s*\d/.test(lower)));
+  
+  if (isMixed) {
+    return {
+      rawGrade: g,
+      category: 'MIXED_AGE',
+      standardName: 'Lớp mầm non ghép độ tuổi',
+      recommendedDuration: '25 – 30 phút',
+      developmentalTraits: [
+        'Lớp học bao gồm các trẻ có nhiều lứa tuổi khác nhau (thường chênh nhau 1-2 tuổi)',
+        'Mức độ nhận thức, ngôn ngữ và khả năng vận động không đồng đều giữa các nhóm trẻ',
+        'Trẻ lớn có xu hướng thể hiện và che chở cho trẻ nhỏ; trẻ nhỏ học hỏi rất nhanh từ việc quan sát bạn lớn'
+      ],
+      cognitiveFocus: 'Thiết kế mục tiêu phân hóa 2 mức: Mức cơ bản cho nhóm trẻ nhỏ tuổi hơn và Mức mở rộng/nâng cao cho nhóm trẻ lớn tuổi hơn.',
+      languageAndSpeech: 'Cô dùng ngôn ngữ gần gũi, giao tiếp đa tầng; khuyến khích trẻ lớn giải thích hoặc trò chuyện cùng trẻ nhỏ.',
+      motorSkills: 'Đa dạng hóa bài tập và dụng cụ: đồ dùng to dễ thao tác cho trẻ nhỏ, đồ dùng tinh xảo hơn cho trẻ lớn.',
+      pedagogicalStrategy: 'DẠY HỌC PHÂN HÓA: Tổ chức hoạt động chung ở phần mở đầu và kết thúc. Ở phần Khám phá/Trải nghiệm và Thực hành, giao 2 mức độ nhiệm vụ rõ rệt (Nhóm 1: trẻ nhỏ; Nhóm 2: trẻ lớn). Cô luân phiên hướng dẫn trực tiếp nhóm nhỏ và gợi ý nhóm lớn làm việc độc lập.',
+      promptGuidance: `BẮT BUỘC THIẾT KẾ GIÁO ÁN PHÂN HÓA ĐỘ TUỔI CHO LỚP GHÉP (${g}):
+- Trong phần Mục đích - yêu cầu (Kiến thức, Kỹ năng): Ghi rõ yêu cầu phân hóa cho từng nhóm tuổi (ví dụ: Với trẻ nhỏ tuổi hơn...; Với trẻ lớn tuổi hơn...).
+- Trong Bảng Tiến trình hoạt động (Đặc biệt ở Bước 2 Khám phá - Trải nghiệm và Bước 4 Thực hành - Vận dụng):
+  + Tách rõ hành động của cô và trẻ theo từng nhóm:
+    * Nhóm trẻ nhỏ hơn: Làm quen thao tác cơ bản, nhận biết trực quan, cô trực tiếp hỗ trợ, động viên âu yếm.
+    * Nhóm trẻ lớn hơn: Tự thực hiện nhiệm vụ nâng cao hơn, sáng tạo hơn, hoặc hỗ trợ bạn nhỏ.
+- Đồ dùng chuẩn bị phải có phân loại phù hợp cho cả 2 nhóm độ tuổi.`
+    };
+  }
+
+  // 2. Kiểm tra Nhóm trẻ / Nhà trẻ (dưới 36 tháng, ví dụ: 3-12 tháng, 12-18 tháng, 18-24 tháng, 24-36 tháng)
+  const isToddler = lower.includes('nhà trẻ') || 
+                    lower.includes('nhóm trẻ') || 
+                    lower.includes('tháng') || 
+                    lower.includes('dưới 3 tuổi') ||
+                    lower.includes('0-1') || lower.includes('1-2') || lower.includes('2-3') ||
+                    lower.includes('12-24') || lower.includes('18-24') || lower.includes('24-36') ||
+                    lower.includes('12 - 24') || lower.includes('18 - 24') || lower.includes('24 - 36') || 
+                    lower.includes('12-18') || lower.includes('12 - 18');
+
+  if (isToddler) {
+    let subAgeNote = '24 – 36 tháng';
+    if (lower.includes('12-18') || lower.includes('12 - 18')) subAgeNote = '12 – 18 tháng';
+    else if (lower.includes('18-24') || lower.includes('18 - 24')) subAgeNote = '18 – 24 tháng';
+    else if (lower.includes('3-12') || lower.includes('3 - 12') || lower.includes('dưới 12')) subAgeNote = '3 – 12 tháng';
+
+    return {
+      rawGrade: g,
+      category: 'INFANT_TODDLER',
+      standardName: `Khối Nhà trẻ (${subAgeNote})`,
+      recommendedDuration: '15 – 20 phút',
+      developmentalTraits: [
+        'Khả năng chú ý có chủ định rất ngắn (chỉ 5 – 7 phút/hoạt động liên tục), nhanh chán và dễ bị phân tán',
+        'Tư duy trực quan hành động: Trẻ nhận thức sự vật trực tiếp thông qua cầm nắm, sờ, nhìn, nghe và bắt chước',
+        'Cảm xúc chi phối hành vi, trẻ rất cần tình cảm ấm áp, sự vỗ về, yêu thương che chở của cô giáo'
+      ],
+      cognitiveFocus: 'Tập trung vào "Nhận biết tập nói": Nhận biết tên gọi, màu sắc nổi bật (đỏ, vàng), kích thước to - nhỏ, số lượng 1 và nhiều; nhận biết các bộ phận cơ thể và đồ chơi gần gũi.',
+      languageAndSpeech: 'Trẻ phát âm từ đơn, từ đôi (1-2 từ). Cô nói chậm rãi, giọng điệu ngọt ngào, ấm áp, câu ngắn gọn, nhắc lại từ khóa 3-4 lần để trẻ nhắc lại.',
+      motorSkills: 'Vận động thô: đi, chạy trong đường hẹp, bò chui, nhún nhảy, lăn/bắt bóng. Vận động tinh: cầm nắm, nhặt hạt to, vò giấy, chấm màu ngón tay.',
+      pedagogicalStrategy: 'PHƯƠNG PHÁP TRỰC QUAN - TÌNH CẢM - HÀNH ĐỘNG: Cô làm mẫu nhiều lần kết hợp lời nói dịu dàng; tạo cơ hội cho từng trẻ được thao tác trực tiếp trên vật thật; khen ngợi ngay lập tức bằng cái ôm hoặc vỗ tay.',
+      promptGuidance: `BẮT BUỘC SOẠN GIÁO ÁN ĐẶC THÙ CHO KHỐI NHÀ TRẺ (${g}):
+- Thời gian hoạt động: Chuẩn 15 – 20 phút (Tuyệt đối không kéo dài làm trẻ mệt mỏi).
+- Mục đích - yêu cầu:
+  + Kiến thức: Trẻ nhận biết và gọi tên được đối tượng, màu sắc (Đỏ/Vàng), kích thước (To/Nhỏ), phát âm rõ tên đối tượng.
+  + Kỹ năng: Rèn kỹ năng phát âm từ đơn/từ đôi, rèn sự khéo léo của đôi bàn tay và các giác quan.
+- Hệ thống câu hỏi của cô: Cực kỳ ngắn gọn, gần gũi, kèm động tác minh họa (ví dụ: "Đây là gì nhỉ?", "Quả bóng màu gì đây các con?", "Con phát âm cùng cô nào: Quả bóng!").
+- Lời trẻ dự kiến (Cột Hoạt động của trẻ): Chỉ là các từ đơn, từ đôi hoặc cử chỉ bắt chước (Ví dụ: "Quả bóng ạ", "Màu đỏ ạ", "Trẻ sờ vào quả bóng", "Trẻ nhún nhảy theo nhạc"). Tuyệt đối KHÔNG viết câu trả lời dài dòng, suy luận phức tạp.
+- Thái độ của cô: Hết sức dịu dàng, âu yếm, thường xuyên khen ngợi, ôm và vuốt ve động viên trẻ.`
+    };
+  }
+
+  // 3. Kiểm tra Mẫu giáo bé (3 - 4 tuổi, Lớp Mầm)
+  const isMam = lower.includes('mầm') || 
+                lower.includes('3-4') || lower.includes('3 - 4') || 
+                lower.includes('mẫu giáo bé') || lower.includes('mg bé') || lower.includes('3 tuổi');
+
+  if (isMam) {
+    return {
+      rawGrade: g,
+      category: 'MAM_3_4',
+      standardName: 'Khối Mẫu giáo bé - Lớp Mầm (3 – 4 tuổi)',
+      recommendedDuration: '20 – 25 phút',
+      developmentalTraits: [
+        'Trẻ bước vào giai đoạn mẫu giáo đầu tiên, bắt đầu hình thành ý thức cá nhân và bước đầu hòa nhập tập thể',
+        'Tư duy trực quan hình tượng sơ khai kết hợp tư duy trực quan hành động',
+        'Khả năng tập trung khoảng 15 – 20 phút, bắt đầu biết tham gia trò chơi có quy tắc đơn giản'
+      ],
+      cognitiveFocus: 'Nhận biết phân biệt 4 hình học phẳng (tròn, vuông, tam giác, chữ nhật); đếm trong phạm vi 3; so sánh to - nhỏ, cao - thấp; phân biệt cảm xúc vui - buồn; khám phá công dụng đồ dùng quen thuộc.',
+      languageAndSpeech: 'Trẻ diễn đạt câu ngắn 3 – 5 từ; cô rèn cho trẻ thói quen trả lời tròn câu có chủ ngữ vị ngữ (ví dụ: "Thưa cô, con thưa cô...").',
+      motorSkills: 'Đi thăng bằng trên ghế, tung bắt bóng 2 tay, bò chui qua cổng, xé dải giấy, nặn khối tròn, lăn dài.',
+      pedagogicalStrategy: 'Dạy học thông qua trò chơi và hình tượng trực quan sinh động; sử dụng nhân vật rối/thú bông để tạo tình huống kích thích trẻ nói; cô hướng dẫn rõ từng thao tác và cho trẻ thực hành nhiều lần.',
+      promptGuidance: `BẮT BUỘC SOẠN GIÁO ÁN ĐẶC THÙ CHO LỚP MẦM / MẪU GIÁO BÉ 3 – 4 TUỔI (${g}):
+- Thời gian hoạt động: Chuẩn 20 – 25 phút.
+- Mục đích - yêu cầu: Đặt mục tiêu vừa sức lứa tuổi 3 – 4 tuổi; rèn kỹ năng diễn đạt câu đủ ý và kỹ năng tự phục vụ cơ bản.
+- Lời nói của cô: Dẫn dắt lôi cuốn, tạo bất ngờ (hộp quà, bài hát vui nhộn, nhân vật hoạt hình).
+- Lời nói của trẻ: Câu nói ngắn 3 – 5 từ, tròn vành rõ chữ, có dạ thưa lễ phép (ví dụ: "Dạ, màu xanh ạ", "Con thưa cô là hình tròn ạ").
+- Tiến trình 5 bước: Khởi động sinh động, Khám phá trải nghiệm thực tế với vật thật, Thực hành có trò chơi củng cố hào hứng.`
+    };
+  }
+
+  // 4. Kiểm tra Mẫu giáo nhỡ (4 - 5 tuổi, Lớp Chồi)
+  const isChoi = lower.includes('chồi') || 
+                 lower.includes('4-5') || lower.includes('4 - 5') || 
+                 lower.includes('mẫu giáo nhỡ') || lower.includes('mg nhỡ') || lower.includes('4 tuổi');
+
+  if (isChoi) {
+    return {
+      rawGrade: g,
+      category: 'CHOI_4_5',
+      standardName: 'Khối Mẫu giáo nhỡ - Lớp Chồi (4 – 5 tuổi)',
+      recommendedDuration: '25 – 30 phút',
+      developmentalTraits: [
+        'Trẻ rất tò mò, thích khám phá, đặt nhiều câu hỏi "Tại sao?", "Để làm gì?"',
+        'Khả năng tập trung được kéo dài từ 20 – 25 phút; bắt đầu biết hợp tác, chia sẻ và nhường nhịn bạn bè',
+        'Tư duy trực quan hình tượng phát triển mạnh; có khả năng so sánh, phân loại theo 2 dấu hiệu'
+      ],
+      cognitiveFocus: 'Đếm đến 4 hoặc 5, so sánh kích thước 3 đối tượng, phân loại đồ vật theo 2 dấu hiệu (hình dạng và màu sắc/chất liệu); khám phá quy luật tự nhiên gần gũi; thể hiện tình cảm với gia đình, thầy cô.',
+      languageAndSpeech: 'Ngôn ngữ mạch lạc, nói câu ghép đơn giản, biết dùng từ nối "vì... nên...", biết biểu cảm khi đọc thơ hoặc kể chuyện.',
+      motorSkills: 'Bật liên tục về phía trước, trèo thang, phối hợp vận động tay - mắt khéo léo, cắt bằng kéo theo đường thẳng, xếp hình sáng tạo.',
+      pedagogicalStrategy: 'DẠY HỌC GỢI MỞ & TRẢI NGHIỆM: Đặt câu hỏi mở kích thích tư duy giải quyết vấn đề; tổ chức hoạt động nhóm nhỏ 3-4 bạn; trẻ được tự do nêu ý kiến và tự tay thử nghiệm trước khi cô kết luận.',
+      promptGuidance: `BẮT BUỘC SOẠN GIÁO ÁN ĐẶC THÙ CHO LỚP CHỒI / MẪU GIÁO NHỠ 4 – 5 TUỔI (${g}):
+- Thời gian hoạt động: Chuẩn 25 – 30 phút.
+- Hệ thống câu hỏi của cô: Tăng cường câu hỏi mở dạng "Theo các con điều gì sẽ xảy ra?", "Làm thế nào để...?", "Vì sao con biết?".
+- Cột Hoạt động của trẻ: Trẻ chủ động nêu suy nghĩ, tranh luận nhẹ nhàng với bạn, biết giải thích lý do ngắn gọn.
+- Kỹ năng hợp tác: Thiết kế phần thực hành/trò chơi có sự phối hợp nhóm đôi hoặc chia tổ thi đua.`
+    };
+  }
+
+  // 5. Kiểm tra Mẫu giáo lớn (5 - 6 tuổi, Lớp Lá, Tiền tiểu học)
+  const isLa = lower.includes('lá') || 
+               lower.includes('5-6') || lower.includes('5 - 6') || 
+               lower.includes('mẫu giáo lớn') || lower.includes('mg lớn') || lower.includes('5 tuổi') || lower.includes('tiền tiểu học');
+
+  if (isLa || lower.includes('mầm non')) {
+    return {
+      rawGrade: g,
+      category: 'LA_5_6',
+      standardName: 'Khối Mẫu giáo lớn - Lớp Lá (5 – 6 tuổi - Chuẩn bị vào lớp Một)',
+      recommendedDuration: '30 – 35 phút',
+      developmentalTraits: [
+        'Khả năng chú ý có chủ định cao, tập trung được 25 – 30 phút liên tục',
+        'Tư duy trực quan hình tượng đạt mức độ hoàn thiện cao, xuất hiện mầm mống của tư duy logic trừu tượng',
+        'Tính tự lập, ý thức trách nhiệm và tính kỷ luật tăng cao; chuẩn bị sẵn sàng tâm thế bước vào lớp Một'
+      ],
+      cognitiveFocus: 'Đếm và nhận biết chữ số trong phạm vi 10; tách gộp 10 đối tượng theo các cách khác nhau; đo độ dài bằng các thước đo; làm quen 29 chữ cái tiếng Việt; định hướng không gian; ứng dụng STEM và công nghệ đơn giản.',
+      languageAndSpeech: 'Ngôn ngữ phong phú, diễn đạt lưu loát, mạch lạc; tự tin phát biểu trước đám đông; hiểu quy ước đọc viết từ trái sang phải, từ trên xuống dưới.',
+      motorSkills: 'Ném trúng đích xa, bật sâu 30cm, chuyền bóng liên hoàn; cầm bút bằng 3 ngón tay chuẩn xác, ngồi đúng tư thế, tô nét trùng khít theo dòng kẻ ô ly.',
+      pedagogicalStrategy: 'DẠY HỌC TÍCH HỢP & DỰ ÁN NHỎ: Khuyến khích tư duy phản biện, làm việc nhóm tự quản, ứng dụng kiến thức vào thực tiễn, rèn nề nếp học đường chuẩn mực.',
+      promptGuidance: `BẮT BUỘC SOẠN GIÁO ÁN ĐẶC THÙ CHO LỚP LÁ / MẪU GIÁO LỚN 5 – 6 TUỔI (${g}):
+- Thời gian hoạt động: Chuẩn 30 – 35 phút.
+- Mục tiêu và nội dung mang tính thử thách trí tuệ: Tách gộp phân tích số lượng, nhận diện chữ cái trong từ hoàn chỉnh, đo lường so sánh logic.
+- Rèn tác phong học tập: Tư thế ngồi thẳng lưng, cách cầm bút 3 ngón, giơ tay phát biểu, lắng nghe cô và bạn trọn vẹn.
+- Hoạt động của trẻ: Trẻ chủ động bàn bạc, phân công nhiệm vụ nhóm, tự kiểm tra kết quả chéo giữa các đội.`
+    };
+  }
+
+  // 6. Custom grade fallback
+  return {
+    rawGrade: g,
+    category: 'CUSTOM',
+    standardName: `Độ tuổi ${g}`,
+    recommendedDuration: '25 – 30 phút',
+    developmentalTraits: [
+      `Đặc điểm phát triển tâm sinh lý và nhận thức tương thích với độ tuổi "${g}"`,
+      'Học tập thông qua hình thức vui chơi, trực quan hóa và trải nghiệm giác quan'
+    ],
+    cognitiveFocus: `Nội dung kiến thức và kỹ năng được căn chỉnh chính xác theo thang nhận thức của độ tuổi "${g}".`,
+    languageAndSpeech: 'Ngôn ngữ của cô mẫu mực, dịu dàng; ngôn ngữ của trẻ phù hợp với mức độ phát triển phát âm của độ tuổi.',
+    motorSkills: 'Vận động thể chất và thao tác vận động tinh thích hợp với thể trạng lứa tuổi.',
+    pedagogicalStrategy: `Áp dụng phương pháp sư phạm mầm non lấy trẻ làm trung tâm, tối ưu hóa các hoạt động trải nghiệm đúng với độ tuổi "${g}".`,
+    promptGuidance: `PHÂN TÍCH VÀ CĂN CHỈNH TOÀN BỘ GIÁO ÁN THEO ĐỘ TUỔI TỰ NHẬP: "${g}":
+- Phân tích kỹ số tuổi hoặc số tháng trong "${g}" để thiết lập mục tiêu vừa sức, câu hỏi gợi mở và hành động của trẻ chân thực nhất.
+- Bố trí thời lượng và đồ dùng học liệu phù hợp, ngôn ngữ trong sáng, chuẩn mực sư phạm mầm non.`
+  };
+}
+

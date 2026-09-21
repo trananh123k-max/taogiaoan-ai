@@ -81,6 +81,12 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
   const [isCustomSubject, setIsCustomSubject] = useState(false);
   const [customSubjectText, setCustomSubjectText] = useState('');
   const [isCustomLessonInput, setIsCustomLessonInput] = useState(false);
+  const [isCustomGradeInput, setIsCustomGradeInput] = useState(() => {
+    if (config.schoolLevel === 'Mầm non' && config.grade && !['Nhà trẻ (24-36 tháng)', 'Mẫu giáo bé (3-4 tuổi)', 'Mẫu giáo nhỡ (4-5 tuổi)', 'Mẫu giáo lớn (5-6 tuổi)'].includes(config.grade)) {
+      return true;
+    }
+    return false;
+  });
 
   // State for DOCX Sample Upload
   const [isParsingDocx, setIsParsingDocx] = useState(false);
@@ -624,6 +630,7 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                 let newSubject = config.subject;
 
                 if (newLevel === 'Mầm non') {
+                  setIsCustomGradeInput(false);
                   newGrade = 'Mẫu giáo lớn (5-6 tuổi)';
                   if (!MAM_NON_SUBJECTS_LIST.includes(newSubject || '')) {
                     newSubject = MAM_NON_SUBJECTS_LIST[0];
@@ -637,6 +644,7 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                     enableAI: true,
                   });
                 } else {
+                  setIsCustomGradeInput(false);
                   if (newLevel === 'Tiểu học') newGrade = 'Lớp 5';
                   if (newLevel === 'THCS') newGrade = 'Lớp 6';
                   if (newLevel === 'THPT') newGrade = 'Lớp 10';
@@ -766,23 +774,111 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
 
         {/* 3. ĐỘ TUỔI / KHỐI LỚP */}
         <div className="form-group flex flex-col gap-1.5">
-          <label className="text-xs font-bold text-red-600">
-            3. Độ tuổi/Khối lớp <span className="text-rose-500">*</span>
-          </label>
-          <div className="relative">
-            <select
-              value={config.grade}
-              onChange={(e) => onChangeConfig({ grade: e.target.value, lessonTitle: '' })}
-              className="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 appearance-none focus:bg-white focus:outline-none focus:border-amber-600 cursor-pointer pr-8 shadow-xs"
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold text-red-600 flex items-center gap-1.5">
+              3. Độ tuổi/Khối lớp <span className="text-rose-500">*</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => {
+                const next = !isCustomGradeInput;
+                setIsCustomGradeInput(next);
+              }}
+              className="text-[11px] text-amber-800 hover:text-amber-900 hover:underline font-semibold cursor-pointer flex items-center gap-1 bg-amber-50/70 hover:bg-amber-100/80 px-2 py-0.5 rounded border border-amber-200/80 transition-colors"
+              title={isCustomGradeInput ? 'Quay lại danh mục độ tuổi chuẩn' : 'Tự nhập tên độ tuổi/khối lớp khác'}
             >
-              {allGrades.map((gr) => (
-                <option key={gr} value={gr} className="bg-white text-slate-800">
-                  {gr}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
+              {isCustomGradeInput ? '📋 Chọn mẫu chuẩn' : '✍️ Nhập độ tuổi khác'}
+            </button>
           </div>
+
+          {isCustomGradeInput ? (
+            <div className="flex flex-col gap-1.5">
+              <div className="relative flex items-center">
+                <input
+                  type="text"
+                  value={config.grade || ''}
+                  onChange={(e) => onChangeConfig({ grade: e.target.value, lessonTitle: '' })}
+                  placeholder={config.schoolLevel === 'Mầm non' 
+                    ? "Nhập độ tuổi (ví dụ: Nhà trẻ 18-24 tháng, Lớp Mầm 3-4 tuổi, Lớp ghép...)" 
+                    : "Nhập khối lớp khác..."}
+                  className="w-full bg-white border-2 border-amber-500/80 focus:border-amber-600 rounded-lg pl-8 pr-20 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 shadow-xs transition-all"
+                  autoFocus
+                />
+                <span className="absolute left-2.5 top-2.5 text-xs pointer-events-none select-none">✍️</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCustomGradeInput(false);
+                    if (!allGrades.includes(config.grade)) {
+                      onChangeConfig({ grade: allGrades[0] || 'Mẫu giáo lớn (5-6 tuổi)', lessonTitle: '' });
+                    }
+                  }}
+                  className="absolute right-1.5 top-1.5 px-2 py-1 text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-md border border-slate-300 transition-colors cursor-pointer"
+                >
+                  Chọn mẫu
+                </button>
+              </div>
+
+              {/* Gợi ý nhanh các nhóm độ tuổi mầm non */}
+              {config.schoolLevel === 'Mầm non' && (
+                <div className="flex flex-wrap items-center gap-1 pt-0.5">
+                  <span className="text-[10px] text-slate-400 font-medium">Gợi ý nhanh:</span>
+                  {[
+                    'Nhà trẻ (12-18 tháng)',
+                    'Nhà trẻ (18-24 tháng)',
+                    'Nhà trẻ (24-36 tháng)',
+                    'Lớp Mầm (3-4 tuổi)',
+                    'Lớp Chồi (4-5 tuổi)',
+                    'Lớp Lá (5-6 tuổi)',
+                    'Lớp ghép (3-5 tuổi)',
+                    'Lớp ghép (4-5 & 5-6 tuổi)',
+                  ].map((quickAge) => (
+                    <button
+                      key={quickAge}
+                      type="button"
+                      onClick={() => onChangeConfig({ grade: quickAge, lessonTitle: '' })}
+                      className={`text-[10px] px-1.5 py-0.5 rounded border transition-colors cursor-pointer ${
+                        config.grade === quickAge
+                          ? 'bg-amber-500 text-white border-amber-600 font-bold shadow-xs'
+                          : 'bg-white text-slate-600 border-slate-200 hover:bg-amber-50 hover:text-amber-800'
+                      }`}
+                    >
+                      {quickAge}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="relative">
+              <select
+                value={config.grade}
+                onChange={(e) => {
+                  if (e.target.value === '__custom__') {
+                    setIsCustomGradeInput(true);
+                  } else {
+                    onChangeConfig({ grade: e.target.value, lessonTitle: '' });
+                  }
+                }}
+                className="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 appearance-none focus:bg-white focus:outline-none focus:border-amber-600 cursor-pointer pr-8 shadow-xs"
+              >
+                {allGrades.map((gr) => (
+                  <option key={gr} value={gr} className="bg-white text-slate-800">
+                    {gr}
+                  </option>
+                ))}
+                {config.grade && !allGrades.includes(config.grade) && (
+                  <option value={config.grade} className="bg-amber-50 text-amber-900 font-bold">
+                    ✍️ {config.grade} (Đang chọn)
+                  </option>
+                )}
+                <option value="__custom__" className="text-amber-800 font-bold bg-amber-50">
+                  ✍️ Nhập tên độ tuổi khác...
+                </option>
+              </select>
+              <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
+            </div>
+          )}
         </div>
 
         {/* 4. TÊN BÀI HỌC / CHỦ ĐỀ */}

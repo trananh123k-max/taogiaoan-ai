@@ -18,7 +18,7 @@ import {
 import fileSaver from 'file-saver';
 const saveAs = (fileSaver as any)?.saveAs || fileSaver;
 import { LessonPlanOutput, ImageSlot, StepDetail, MathFormulaFormatType } from '../types';
-import { formatPreschoolActivities, formatPreschoolMusicActivities, parseActivityPairs, detectPreschoolDomain, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes } from './preschoolUtils';
+import { formatPreschoolActivities, formatPreschoolMusicActivities, parseActivityPairs, detectPreschoolDomain, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, analyzePreschoolAgeProfile } from './preschoolUtils';
 import { latexToDocxMath, splitTextAndMath } from './latexToDocxMath';
 
 // Global state for current math formula export format (default: 'word_equation' - Phương án 2)
@@ -2731,20 +2731,8 @@ function getPreschoolDuration(plan: any): string {
     if (d.toLowerCase().startsWith('thời gian:')) d = d.substring(10).trim();
     if (d) return d;
   }
-  const gradeStr = ((plan.grade || '') + ' ' + (plan.targetPeriodDetail || '')).toLowerCase();
-  if (gradeStr.includes('nhà trẻ') || gradeStr.includes('12') || gradeStr.includes('24') || gradeStr.includes('36 tháng')) {
-    return '15 – 20 phút';
-  }
-  if (gradeStr.includes('3-4') || gradeStr.includes('3 – 4') || gradeStr.includes('bé')) {
-    return '20 – 25 phút';
-  }
-  if (gradeStr.includes('4-5') || gradeStr.includes('4 – 5') || gradeStr.includes('nhỡ')) {
-    return '25 – 30 phút';
-  }
-  if (gradeStr.includes('5-6') || gradeStr.includes('5 – 6') || gradeStr.includes('lớn')) {
-    return '30 – 35 phút';
-  }
-  return '20 – 25 phút';
+  const ageProfile = analyzePreschoolAgeProfile(plan.grade || plan.targetPeriodDetail || '');
+  return ageProfile.recommendedDuration;
 }
 
 function toTitleCase(str: string): string {
@@ -3177,11 +3165,12 @@ function buildPreschoolDocxElements(
       );
     }
 
-    // 3. Sub-lines (Tác giả, Nghe hát, Trò chơi âm nhạc, Lĩnh vực, Độ tuổi tách biệt xuống dòng rõ ràng)
+    // 3. Sub-lines (Tác giả, Nghe hát, Trò chơi âm nhạc, Lĩnh vực, Độ tuổi, Thời gian tách biệt xuống dòng rõ ràng)
     const subLines = [
       ...preschoolInfo.contentLines,
       preschoolInfo.domainLine,
       preschoolInfo.gradeLine,
+      preschoolInfo.timeLine,
     ].filter(Boolean);
 
     subLines.forEach(line => {

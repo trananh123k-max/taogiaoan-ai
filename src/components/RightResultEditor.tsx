@@ -525,6 +525,7 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                   ))}
                   <div>{preschoolInfo.domainLine}</div>
                   <div>{preschoolInfo.gradeLine}</div>
+                  {preschoolInfo.timeLine && <div>{preschoolInfo.timeLine}</div>}
                 </div>
               </div>
             ) : (
