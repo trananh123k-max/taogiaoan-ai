@@ -136,12 +136,16 @@ QUY ĐỊNH ĐẶC BIỆT VỀ MỤC TÍCH HỢP CHO 8 HOẠT ĐỘNG MỚI VÀ 
   - [Mô tả cụ thể nội dung tích hợp AI: Giáo viên ứng dụng AI tạo tranh ảnh minh họa, âm thanh sống động hoặc nhân vật trợ lý AI trò chuyện gợi mở cho trẻ tương tác dưới sự hướng dẫn của cô (KHÔNG dùng mã chỉ báo phổ thông)].
 - NẾU KHÔNG CHỌN TÍCH HỢP NLS/AI: Không hiển thị mục 5 & 6 này (hoặc chỉ ghi Quyền trẻ em / Tích hợp chung nếu cần).
 
-II. Chuẩn bị
+II. Chuẩn bị:
 1. Chuẩn bị của cô:
-- 
-- Đồ dùng, học liệu của giáo viên: ...
+- Môi trường: Lớp học sạch sẽ, an toàn, sắp xếp các góc hoạt động phù hợp chủ đề...
+- Đồ dùng của cô: Giáo án điện tử, thiết bị trình chiếu, hình ảnh, học cụ trực quan...
 2. Chuẩn bị của trẻ:
-Trang phục, đồ dùng, tâm thế ....
+- Trang phục: Gọn gàng, thoải mái, thuận tiện vận động...
+- Đồ dùng của trẻ: Mỗi trẻ/nhóm trẻ có đủ rổ học liệu, đồ dùng trải nghiệm...
+- Tâm sinh lý của trẻ: Tâm thế vui vẻ, hào hứng, tự tin, sẵn sàng tham gia hoạt động...
+3. Phối hợp với phụ huynh:
+- Phối hợp cùng phụ huynh chuẩn bị nguyên vật liệu và trò chuyện cùng con ở nhà...
 
 III. Tiến trình hoạt động 
 QUY TẮC BẮT BUỘC VỀ BẢNG TIẾN TRÌNH HOẠT ĐỘNG:
@@ -250,13 +254,14 @@ I. Mục đích - yêu cầu:
 
 II. Chuẩn bị:
 1. Chuẩn bị của cô:
-- Giáo án điện tử, bài giảng tương tác, video clip trực quan về màu sắc trong tự nhiên.
-- "Chiếc túi bí mật" / "Hộp quà kỳ diệu" chứa các đồ vật đa dạng màu sắc.
-- Học liệu trải nghiệm: Đèn pin màu, kính lọc sắc, cốc nước màu trong suốt, pipet hút màu, khay thí nghiệm pha màu, khăn lau tay.
-- Nhạc nền sôi động cho phần khởi động và nhạc nhẹ nhàng không lời cho phần khám phá.
+- Môi trường: Phòng học sạch sẽ, an toàn, không gian thoáng đãng, bài trí các góc trải nghiệm khoa học theo chủ đề sắc màu.
+- Đồ dùng của cô: Giáo án điện tử, bài giảng tương tác, video clip trực quan, "Chiếc túi bí mật", đèn pin màu, cốc nước màu, pipet, khay thí nghiệm pha màu, nhạc nền.
 2. Chuẩn bị của trẻ:
-- Trang phục gọn gàng, tâm thế vui vẻ, hào hứng sẵn sàng tham gia trải nghiệm.
-- Đồ dùng của trẻ: Khay đồ dùng phân loại, bộ thẻ màu sắc, trang phục màu sắc rực rỡ, rổ đựng sản phẩm.
+- Trang phục: Trang phục gọn gàng, thoải mái, thuận tiện cho thao tác vận động và trải nghiệm khoa học.
+- Đồ dùng của trẻ: Mỗi nhóm trẻ có khay đồ dùng phân loại, bộ thẻ màu sắc, cốc thí nghiệm, rổ đựng sản phẩm.
+- Tâm sinh lý của trẻ: Tâm thế vui vẻ, hào hứng, tự tin, sẵn sàng khám phá điều kỳ diệu của màu sắc.
+3. Phối hợp với phụ huynh:
+- Phối hợp cùng phụ huynh sưu tầm các vỏ chai nhựa, cốc trong suốt tái chế sạch sẽ; trò chuyện cùng trẻ về màu sắc các đồ vật trong gia đình.
 
 III. Tiến trình hoạt động (Kẻ 1 bảng 2 cột: Hoạt động của Cô | Hoạt động của Trẻ):
 1. Khởi động – Tạo hứng thú và giao nhiệm vụ:

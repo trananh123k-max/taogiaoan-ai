@@ -25,7 +25,7 @@ import { PreschoolSingleTable } from './PreschoolSingleTable';
 import { CompetencyMatrixView } from './CompetencyMatrixView';
 import { exportLessonPlanToDocx, getPreschoolHeaderInfo, formatHomeworkText, formatMathPeriodHeader, parseMathLessonHeader } from '../utils/docxExporter';
 import { exportLessonPlanToPptx } from '../utils/pptxExporter';
-import { formatPreschoolActivities, formatPreschoolMusicActivities, isPreschoolPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes } from '../utils/preschoolUtils';
+import { formatPreschoolActivities, formatPreschoolMusicActivities, isPreschoolPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, getPreschoolPreparation } from '../utils/preschoolUtils';
 import { MathRenderer } from './MathRenderer';
 import { WorksheetRenderer } from './WorksheetRenderer';
 import { StepProgress } from '../App';
@@ -848,90 +848,181 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
             )}
           </section>
 
-          {/* II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU */}
+          {/* II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU / CHUẨN BỊ */}
           <section className="bg-white border border-slate-300 rounded-xl p-5 sm:p-6 shadow-xs space-y-3">
             <div className="border-b border-slate-200 pb-2.5">
               <h3 className="font-bold text-base text-slate-900 uppercase tracking-wider">
-                {(plan as any)?.schoolLevel === 'Mầm non' ? 'II. Chuẩn bị' : 'II. Thiết bị dạy học và học liệu'}
+                {(isPreschoolPlan(plan) || (plan as any)?.schoolLevel === 'Mầm non') ? 'II. Chuẩn bị:' : 'II. Thiết bị dạy học và học liệu'}
               </h3>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[13pt]">
-              <div className="space-y-1 bg-white p-3.5 rounded-lg border border-slate-200">
-                <h4 className="font-bold text-slate-900">
-                  {(plan as any)?.schoolLevel === 'Mầm non' ? '1. Chuẩn bị của cô:' : '1. Giáo viên:'}
-                </h4>
-                <ul className="space-y-1 pl-1">
-                  {plan.equipment.teacher.map((e, i) => (
-                    <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                      <span className="font-bold text-slate-900 shrink-0">-</span>
-                      <span className="flex-1"><MathRenderer text={cleanItem(e)} /></span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            {(isPreschoolPlan(plan) || (plan as any)?.schoolLevel === 'Mầm non') ? (
+              (() => {
+                const prep = getPreschoolPreparation(plan.equipment);
+                return (
+                  <div className="space-y-4 text-[13pt]">
+                    {/* 1. Chuẩn bị của cô */}
+                    <div className="space-y-2 bg-white p-4 rounded-xl border border-slate-200">
+                      <h4 className="font-bold text-slate-900 text-left">
+                        1. Chuẩn bị của cô:
+                      </h4>
+                      <ul className="space-y-1.5 pl-1">
+                        {prep.teacherEnvironment.map((e, i) => (
+                          <li key={`env-${i}`} className="flex items-start gap-1.5 text-slate-800 text-justify">
+                            <span className="font-bold text-slate-900 shrink-0">-</span>
+                            <span className="flex-1">
+                              <span className="font-bold text-slate-900">Môi trường: </span>
+                              <MathRenderer text={cleanItem(e.replace(/^môi trường\s*:\s*/i, ''))} />
+                            </span>
+                          </li>
+                        ))}
+                        {prep.teacherTools.map((e, i) => (
+                          <li key={`tool-${i}`} className="flex items-start gap-1.5 text-slate-800 text-justify">
+                            <span className="font-bold text-slate-900 shrink-0">-</span>
+                            <span className="flex-1">
+                              <span className="font-bold text-slate-900">Đồ dùng của cô: </span>
+                              <MathRenderer text={cleanItem(e.replace(/^đồ dùng của cô\s*:\s*/i, ''))} />
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-              <div className="space-y-1 bg-white p-3.5 rounded-lg border border-slate-200">
-                <h4 className="font-bold text-slate-900">
-                  {(plan as any)?.schoolLevel === 'Mầm non' ? '2. Chuẩn bị của trẻ:' : '2. Học sinh:'}
-                </h4>
-                <ul className="space-y-1 pl-1">
-                  {plan.equipment.student.map((e, i) => (
-                    <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                      <span className="font-bold text-slate-900 shrink-0">-</span>
-                      <span className="flex-1"><MathRenderer text={cleanItem(e)} /></span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+                    {/* 2. Chuẩn bị của trẻ */}
+                    <div className="space-y-2 bg-white p-4 rounded-xl border border-slate-200">
+                      <h4 className="font-bold text-slate-900 text-left">
+                        2. Chuẩn bị của trẻ:
+                      </h4>
+                      <ul className="space-y-1.5 pl-1">
+                        {prep.studentCostume.map((e, i) => (
+                          <li key={`cos-${i}`} className="flex items-start gap-1.5 text-slate-800 text-justify">
+                            <span className="font-bold text-slate-900 shrink-0">-</span>
+                            <span className="flex-1">
+                              <span className="font-bold text-slate-900">Trang phục: </span>
+                              <MathRenderer text={cleanItem(e.replace(/^trang phục\s*:\s*/i, ''))} />
+                            </span>
+                          </li>
+                        ))}
+                        {prep.studentTools.map((e, i) => (
+                          <li key={`stool-${i}`} className="flex items-start gap-1.5 text-slate-800 text-justify">
+                            <span className="font-bold text-slate-900 shrink-0">-</span>
+                            <span className="flex-1">
+                              <span className="font-bold text-slate-900">Đồ dùng của trẻ: </span>
+                              <MathRenderer text={cleanItem(e.replace(/^đồ dùng của trẻ\s*:\s*/i, ''))} />
+                            </span>
+                          </li>
+                        ))}
+                        {prep.studentPsychology.map((e, i) => (
+                          <li key={`psy-${i}`} className="flex items-start gap-1.5 text-slate-800 text-justify">
+                            <span className="font-bold text-slate-900 shrink-0">-</span>
+                            <span className="flex-1">
+                              <span className="font-bold text-slate-900">Tâm sinh lý của trẻ: </span>
+                              <MathRenderer text={cleanItem(e.replace(/^(tâm sinh lý của trẻ|tâm sinh lý|tâm thế)\s*:\s*/i, ''))} />
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-            {((plan.equipment as any)?.space && (plan.equipment as any).space.length > 0) && (
-              <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">
-                <h4 className="font-bold text-slate-900 mb-1">
-                  3. Không gian:
-                </h4>
-                <ul className="space-y-1 pl-1">
-                  {(plan.equipment as any).space.map((spaceItem: string, i: number) => (
-                    <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                      <span className="font-bold text-slate-900 shrink-0">-</span>
-                      <span className="flex-1"><MathRenderer text={cleanItem(spaceItem)} /></span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+                    {/* 3. Phối hợp với phụ huynh */}
+                    <div className="space-y-2 bg-white p-4 rounded-xl border border-slate-200">
+                      <h4 className="font-bold text-slate-900 text-left">
+                        3. Phối hợp với phụ huynh:
+                      </h4>
+                      <ul className="space-y-1.5 pl-1">
+                        {prep.parentCollaboration.map((e, i) => (
+                          <li key={`parent-${i}`} className="flex items-start gap-1.5 text-slate-800 text-justify">
+                            <span className="font-bold text-slate-900 shrink-0">-</span>
+                            <span className="flex-1">
+                              <MathRenderer text={cleanItem(e.replace(/^phối hợp với phụ huynh\s*:\s*/i, ''))} />
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                );
+              })()
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[13pt]">
+                  <div className="space-y-1 bg-white p-3.5 rounded-lg border border-slate-200">
+                    <h4 className="font-bold text-slate-900">
+                      1. Giáo viên:
+                    </h4>
+                    <ul className="space-y-1 pl-1">
+                      {plan.equipment.teacher.map((e, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
+                          <span className="font-bold text-slate-900 shrink-0">-</span>
+                          <span className="flex-1"><MathRenderer text={cleanItem(e)} /></span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
-            {plan.equipment.digitalAssets && plan.equipment.digitalAssets.length > 0 && (
-              <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">
-                <h4 className="font-bold text-slate-900 mb-1">
-                  3. Học liệu và thiết bị phụ trợ:
-                </h4>
-                <ul className="space-y-1 pl-1">
-                  {plan.equipment.digitalAssets.map((asset, i) => (
-                    <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                      <span className="font-bold text-slate-900 shrink-0">-</span>
-                      <span className="flex-1"><MathRenderer text={cleanItem(asset)} /></span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+                  <div className="space-y-1 bg-white p-3.5 rounded-lg border border-slate-200">
+                    <h4 className="font-bold text-slate-900">
+                      2. Học sinh:
+                    </h4>
+                    <ul className="space-y-1 pl-1">
+                      {plan.equipment.student.map((e, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
+                          <span className="font-bold text-slate-900 shrink-0">-</span>
+                          <span className="flex-1"><MathRenderer text={cleanItem(e)} /></span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
 
-            {plan.equipment.stemMaterials && plan.equipment.stemMaterials.length > 0 && (
-              <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">
-                <h4 className="font-bold text-slate-900 mb-1">
-                  4. Thiết bị, dụng cụ và vật liệu thực hành STEM:
-                </h4>
-                <ul className="space-y-1 pl-1">
-                  {plan.equipment.stemMaterials.map((mat, i) => (
-                    <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                      <span className="font-bold text-slate-900 shrink-0">-</span>
-                      <span className="flex-1"><MathRenderer text={cleanItem(mat)} /></span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                {((plan.equipment as any)?.space && (plan.equipment as any).space.length > 0) && (
+                  <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">
+                    <h4 className="font-bold text-slate-900 mb-1">
+                      3. Không gian:
+                    </h4>
+                    <ul className="space-y-1 pl-1">
+                      {(plan.equipment as any).space.map((spaceItem: string, i: number) => (
+                        <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
+                          <span className="font-bold text-slate-900 shrink-0">-</span>
+                          <span className="flex-1"><MathRenderer text={cleanItem(spaceItem)} /></span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {plan.equipment.digitalAssets && plan.equipment.digitalAssets.length > 0 && (
+                  <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">
+                    <h4 className="font-bold text-slate-900 mb-1">
+                      3. Học liệu và thiết bị phụ trợ:
+                    </h4>
+                    <ul className="space-y-1 pl-1">
+                      {plan.equipment.digitalAssets.map((asset, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
+                          <span className="font-bold text-slate-900 shrink-0">-</span>
+                          <span className="flex-1"><MathRenderer text={cleanItem(asset)} /></span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {plan.equipment.stemMaterials && plan.equipment.stemMaterials.length > 0 && (
+                  <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">
+                    <h4 className="font-bold text-slate-900 mb-1">
+                      4. Thiết bị, dụng cụ và vật liệu thực hành STEM:
+                    </h4>
+                    <ul className="space-y-1 pl-1">
+                      {plan.equipment.stemMaterials.map((mat, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
+                          <span className="font-bold text-slate-900 shrink-0">-</span>
+                          <span className="flex-1"><MathRenderer text={cleanItem(mat)} /></span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
             )}
           </section>
 
@@ -1013,14 +1104,14 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
           <section className="space-y-4">
             <div className="flex items-center justify-between border-b border-slate-300 pb-2">
               <h3 className="font-bold text-base text-slate-900 uppercase tracking-wider">
-                {(plan as any)?.schoolLevel === 'Mầm non' ? 'III. Tiến trình hoạt động' : 'III. Tiến trình dạy học'}
+                {(isPreschoolPlan(plan) || (plan as any)?.schoolLevel === 'Mầm non') ? 'III. Tiến trình hoạt động' : 'III. Tiến trình dạy học'}
               </h3>
               <span className="text-xs text-slate-900 font-bold bg-white px-2 py-0.5 rounded border border-slate-300">
                 {(plan.activities || []).length} Hoạt động
               </span>
             </div>
 
-            {(plan as any)?.schoolLevel === 'Mầm non' ? (
+            {(isPreschoolPlan(plan) || (plan as any)?.schoolLevel === 'Mầm non') ? (
               <PreschoolSingleTable
                 activities={formatPreschoolActivities(plan.activities || [], plan.lessonTitle || '', plan.subject || '', (plan as any).oldPlanContent || '')}
                 imageSlots={imageSlots}

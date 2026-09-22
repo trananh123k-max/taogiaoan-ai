@@ -18,7 +18,7 @@ import {
 import fileSaver from 'file-saver';
 const saveAs = (fileSaver as any)?.saveAs || fileSaver;
 import { LessonPlanOutput, ImageSlot, StepDetail, MathFormulaFormatType } from '../types';
-import { formatPreschoolActivities, formatPreschoolMusicActivities, parseActivityPairs, detectPreschoolDomain, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, analyzePreschoolAgeProfile } from './preschoolUtils';
+import { formatPreschoolActivities, formatPreschoolMusicActivities, parseActivityPairs, detectPreschoolDomain, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, analyzePreschoolAgeProfile, cleanPreschoolBulletLine, getPreschoolPreparation } from './preschoolUtils';
 import { latexToDocxMath, splitTextAndMath } from './latexToDocxMath';
 
 // Global state for current math formula export format (default: 'word_equation' - Phương án 2)
@@ -3358,29 +3358,56 @@ function buildPreschoolDocxElements(
     plan.objectives.stemCompetencies.forEach(c => elements.push(createDashListItem(c, fontName)));
   }
 
-  // II. Chuẩn bị
-  elements.push(createSectionHeading('II. Chuẩn bị', fontName, primaryColor));
-  elements.push(createSubHeading('1. Chuẩn bị của cô', fontName));
-  plan.equipment.teacher.forEach(e => elements.push(createDashListItem(e, fontName)));
-  
-  elements.push(createSubHeading('2. Chuẩn bị của trẻ', fontName));
-  plan.equipment.student.forEach(e => elements.push(createDashListItem(e, fontName)));
+  // II. Chuẩn bị: (Đúng chuẩn 3 mục: 1. Chuẩn bị của cô, 2. Chuẩn bị của trẻ, 3. Phối hợp với phụ huynh)
+  elements.push(createSectionHeading('II. Chuẩn bị:', fontName, primaryColor));
 
-  const spaceItems = (plan.equipment as any)?.space;
-  if (spaceItems && Array.isArray(spaceItems) && spaceItems.length > 0) {
-    elements.push(createSubHeading('3. Không gian', fontName));
-    spaceItems.forEach((e: string) => elements.push(createDashListItem(e, fontName)));
-  }
+  const prep = getPreschoolPreparation(plan.equipment);
+
+  // 1. Chuẩn bị của cô:
+  elements.push(createSubHeading('1. Chuẩn bị của cô:', fontName));
+  prep.teacherEnvironment.forEach((item) => {
+    const clean = item.replace(/^môi trường\s*:\s*/i, '').trim();
+    elements.push(createDashListItem(`Môi trường: ${clean}`, fontName));
+  });
+  prep.teacherTools.forEach((item) => {
+    const clean = item.replace(/^đồ dùng của cô\s*:\s*/i, '').trim();
+    elements.push(createDashListItem(`Đồ dùng của cô: ${clean}`, fontName));
+  });
+
+  // 2. Chuẩn bị của trẻ:
+  elements.push(createSubHeading('2. Chuẩn bị của trẻ:', fontName));
+  prep.studentCostume.forEach((item) => {
+    const clean = item.replace(/^trang phục\s*:\s*/i, '').trim();
+    elements.push(createDashListItem(`Trang phục: ${clean}`, fontName));
+  });
+  prep.studentTools.forEach((item) => {
+    const clean = item.replace(/^đồ dùng của trẻ\s*:\s*/i, '').trim();
+    elements.push(createDashListItem(`Đồ dùng của trẻ: ${clean}`, fontName));
+  });
+  prep.studentPsychology.forEach((item) => {
+    const clean = item.replace(/^(tâm sinh lý của trẻ|tâm sinh lý|tâm thế)\s*:\s*/i, '').trim();
+    elements.push(createDashListItem(`Tâm sinh lý của trẻ: ${clean}`, fontName));
+  });
+
+  // 3. Phối hợp với phụ huynh:
+  elements.push(createSubHeading('3. Phối hợp với phụ huynh:', fontName));
+  prep.parentCollaboration.forEach((item) => {
+    const clean = item.replace(/^phối hợp với phụ huynh\s*:\s*/i, '').trim();
+    elements.push(createDashListItem(clean, fontName));
+  });
 
   // III. Tiến trình hoạt động
   elements.push(createSectionHeading('III. Tiến trình hoạt động', fontName, primaryColor));
 
-  // Create single table for preschool
+  // Create seamless single table for preschool (no horizontal divider lines between the 5 steps)
   const borderConfig = { style: BorderStyle.SINGLE, size: 6, color: '000000' };
+  const borderNone = { style: BorderStyle.NONE, size: 0, color: 'auto' };
   const rows: TableRow[] = [];
 
+  // Header row (Hoạt động của Cô | Hoạt động của Trẻ)
   rows.push(new TableRow({
     tableHeader: true,
+    cantSplit: true,
     children: [
       new TableCell({
         width: { size: 60, type: WidthType.PERCENTAGE },
@@ -3421,147 +3448,126 @@ function buildPreschoolDocxElements(
 
   const formattedActivities = formatPreschoolActivities(plan.activities, plan.lessonTitle || '', plan.subject || '', (plan as any).oldPlanContent || '');
 
-  formattedActivities.forEach((act) => {
-    const pairRows = parseActivityPairs(act);
-    pairRows.forEach((pRow) => {
-      if (pRow.type === 'title') {
-        rows.push(
-          new TableRow({
-            cantSplit: true,
+  const allTeacherParas: Paragraph[] = [];
+  const allStudentParas: Paragraph[] = [];
+
+  formattedActivities.forEach((act, actIdx) => {
+    const actTitle = (act.name || `Hoạt động ${act.index || actIdx + 1}`).replace(/\[TIẾT\s*\d+\]\s*/i, '').trim();
+
+    // Nội dung chi tiết Hoạt động của Cô và Trẻ
+    // Toàn bộ các bước nằm trong CÙNG 1 TableRow duy nhất, không tách nhiều dòng (TableRow)
+    // Giúp người dùng khi bôi đen hay sao chép trong Word hoàn toàn liền mạch, không có dòng kẻ ẩn hay khoảng ngắt ô
+    const step1 = act.step1 || {};
+    const teacherRaw = (step1.teacherAction || '').replace(/\*\*/g, '').trim();
+    const studentRaw = (step1.studentAction || '').replace(/\*\*/g, '').trim();
+
+    const tLines = teacherRaw.split('\n').map((l: string) => l.trim()).filter(Boolean);
+    const sLines = studentRaw.split('\n').map((l: string) => l.trim()).filter(Boolean);
+
+    // Tiêu đề bước (ví dụ: 1. Khởi động – Tạo hứng thú và giao nhiệm vụ)
+    // Đặt trực tiếp trong cột Cô, in đậm, cách trên thoáng để phân biệt bước
+    if (actTitle) {
+      allTeacherParas.push(
+        new Paragraph({
+          alignment: AlignmentType.LEFT,
+          spacing: { before: actIdx === 0 ? 40 : 180, after: 60, line: 260 },
+          children: [
+            new TextRun({
+              text: actTitle,
+              bold: true,
+              size: 28, // 14pt
+              font: fontName,
+              color: '000000',
+            }),
+          ],
+        })
+      );
+    }
+
+    tLines.forEach((line: string) => {
+      const isSubheader = /^([ab][\.\)]\s*.*)$/i.test(line) ||
+        /^\*?\s*(Bài tập phát triển chung|Vận động cơ bản|BTPTC|VĐCB|Trò chơi)/i.test(line);
+
+      if (isSubheader) {
+        allTeacherParas.push(
+          new Paragraph({
+            alignment: AlignmentType.BOTH,
+            spacing: { before: 80, after: 40, line: 260 },
             children: [
-              new TableCell({
-                width: { size: 60, type: WidthType.PERCENTAGE },
-                verticalAlign: VerticalAlign.TOP,
-                margins: { top: 120, bottom: 80, left: 180, right: 180 },
-                borders: {
-                  top: { style: BorderStyle.NONE, size: 0, color: 'auto' },
-                  bottom: { style: BorderStyle.NONE, size: 0, color: 'auto' },
-                  left: borderConfig,
-                  right: borderConfig,
-                },
-                children: [
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text: pRow.teacherText,
-                        bold: true,
-                        size: 28, // 14pt
-                        font: fontName,
-                        color: primaryColor || '1E293B',
-                      }),
-                    ],
-                  }),
-                ],
-              }),
-              new TableCell({
-                width: { size: 40, type: WidthType.PERCENTAGE },
-                verticalAlign: VerticalAlign.TOP,
-                margins: { top: 120, bottom: 80, left: 180, right: 180 },
-                borders: {
-                  top: { style: BorderStyle.NONE, size: 0, color: 'auto' },
-                  bottom: { style: BorderStyle.NONE, size: 0, color: 'auto' },
-                  left: borderConfig,
-                  right: borderConfig,
-                },
-                children: [
-                  new Paragraph({
-                    children: [new TextRun({ text: '', font: fontName, size: 28 })],
-                  }),
-                ],
-              }),
-            ],
-          })
-        );
-      } else if (pRow.type === 'subheader') {
-        rows.push(
-          new TableRow({
-            cantSplit: true,
-            children: [
-              new TableCell({
-                width: { size: 60, type: WidthType.PERCENTAGE },
-                verticalAlign: VerticalAlign.TOP,
-                margins: { top: 100, bottom: 60, left: 240, right: 180 },
-                borders: {
-                  top: { style: BorderStyle.NONE, size: 0, color: 'auto' },
-                  bottom: { style: BorderStyle.NONE, size: 0, color: 'auto' },
-                  left: borderConfig,
-                  right: borderConfig,
-                },
-                children: [
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text: pRow.teacherText,
-                        bold: true,
-                        size: 28,
-                        font: fontName,
-                      }),
-                    ],
-                  }),
-                ],
-              }),
-              new TableCell({
-                width: { size: 40, type: WidthType.PERCENTAGE },
-                verticalAlign: VerticalAlign.TOP,
-                margins: { top: 100, bottom: 60, left: 180, right: 180 },
-                borders: {
-                  top: { style: BorderStyle.NONE, size: 0, color: 'auto' },
-                  bottom: { style: BorderStyle.NONE, size: 0, color: 'auto' },
-                  left: borderConfig,
-                  right: borderConfig,
-                },
-                children: [
-                  new Paragraph({
-                    children: [new TextRun({ text: '', font: fontName, size: 28 })],
-                  }),
-                ],
+              new TextRun({
+                text: line,
+                bold: true,
+                size: 28,
+                font: fontName,
+                color: '000000',
               }),
             ],
           })
         );
       } else {
-        const teacherParas = pRow.teacherText
-          ? parseTextAndEmbedImages(pRow.teacherText, slotMap, fontName, 28)
-          : [new Paragraph({ children: [new TextRun({ text: '', font: fontName, size: 28 })] })];
+        const formattedLine = cleanPreschoolBulletLine(line);
+        const paras = parseTextAndEmbedImages(formattedLine, slotMap, fontName, 28, 50);
+        allTeacherParas.push(...paras);
+      }
+    });
 
-        const studentParas = pRow.studentText
-          ? parseTextAndEmbedImages(pRow.studentText, slotMap, fontName, 28)
-          : [new Paragraph({ children: [new TextRun({ text: '', font: fontName, size: 28 })] })];
-
-        rows.push(
-          new TableRow({
-            cantSplit: true,
-            children: [
-              new TableCell({
-                width: { size: 60, type: WidthType.PERCENTAGE },
-                verticalAlign: VerticalAlign.TOP,
-                margins: { top: 60, bottom: 60, left: 180, right: 180 },
-                borders: {
-                  top: { style: BorderStyle.NONE, size: 0, color: 'auto' },
-                  bottom: { style: BorderStyle.NONE, size: 0, color: 'auto' },
-                  left: borderConfig,
-                  right: borderConfig,
-                },
-                children: teacherParas,
-              }),
-              new TableCell({
-                width: { size: 40, type: WidthType.PERCENTAGE },
-                verticalAlign: VerticalAlign.TOP,
-                margins: { top: 60, bottom: 60, left: 180, right: 180 },
-                borders: {
-                  top: { style: BorderStyle.NONE, size: 0, color: 'auto' },
-                  bottom: { style: BorderStyle.NONE, size: 0, color: 'auto' },
-                  left: borderConfig,
-                  right: borderConfig,
-                },
-                children: studentParas,
-              }),
-            ],
+    sLines.forEach((line: string, lineIdx: number) => {
+      const formattedLine = cleanPreschoolBulletLine(line);
+      if (lineIdx === 0 && actIdx > 0) {
+        allStudentParas.push(
+          new Paragraph({
+            alignment: AlignmentType.JUSTIFIED,
+            spacing: { before: 180, after: 50, line: 260 },
+            children: parseMarkdownRuns(formattedLine, fontName, undefined, 28),
           })
         );
+      } else {
+        const paras = parseTextAndEmbedImages(formattedLine, slotMap, fontName, 28, 50);
+        allStudentParas.push(...paras);
       }
     });
   });
+
+  if (allTeacherParas.length === 0) {
+    allTeacherParas.push(new Paragraph({ children: [new TextRun({ text: '', font: fontName, size: 28 })] }));
+  }
+  if (allStudentParas.length === 0) {
+    allStudentParas.push(new Paragraph({ children: [new TextRun({ text: '', font: fontName, size: 28 })] }));
+  }
+
+  // ĐÚNG 1 TableRow DUY NHẤT cho toàn bộ nội dung tiến trình (2 ô: Cô và Trẻ)
+  // Tuyệt đối không tạo thêm TableRow giữa các bước -> loại bỏ 100% dòng kẻ ẩn hay đứt đoạn khi bôi đen trong Word
+  rows.push(
+    new TableRow({
+      cantSplit: false,
+      children: [
+        new TableCell({
+          width: { size: 60, type: WidthType.PERCENTAGE },
+          verticalAlign: VerticalAlign.TOP,
+          margins: { top: 100, bottom: 100, left: 180, right: 180 },
+          borders: {
+            top: borderConfig,
+            bottom: borderConfig,
+            left: borderConfig,
+            right: borderConfig,
+          },
+          children: allTeacherParas,
+        }),
+        new TableCell({
+          width: { size: 40, type: WidthType.PERCENTAGE },
+          verticalAlign: VerticalAlign.TOP,
+          margins: { top: 100, bottom: 100, left: 180, right: 180 },
+          borders: {
+            top: borderConfig,
+            bottom: borderConfig,
+            left: borderConfig,
+            right: borderConfig,
+          },
+          children: allStudentParas,
+        }),
+      ],
+    })
+  );
 
   elements.push(
     new Table({
@@ -3573,7 +3579,7 @@ function buildPreschoolDocxElements(
         left: borderConfig,
         right: borderConfig,
         insideVertical: borderConfig,
-        insideHorizontal: { style: BorderStyle.NONE, size: 0, color: 'auto' },
+        insideHorizontal: borderConfig, // Chỉ có 1 đường kẻ ngang duy nhất phân cách giữa Tiêu đề cột và Nội dung
       },
       rows,
     })

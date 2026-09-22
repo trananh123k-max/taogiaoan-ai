@@ -222,6 +222,9 @@ export async function requestGeminiGenerateKHBD(
     imageSlots: extractedData ? extractedData.imageSlots : config.imageSlots,
     additionalRequirements: config.additionalRequirements,
     ppctContent: config.ppctContent,
+    preschoolIndicatorMode: config.preschoolIndicatorMode,
+    preschoolCustomCodes: config.preschoolCustomCodes,
+    preschoolCodesBySection: config.preschoolCodesBySection,
   };
 
   const response = await fetch('/api/gemini/generate-khbd', {

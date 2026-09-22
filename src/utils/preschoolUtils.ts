@@ -1,3 +1,5 @@
+import { PreschoolPreparationData } from '../types';
+
 export type PreschoolDomainType = 
   | 'MUSIC' // Âm nhạc (Nghệ thuật / Thẩm mỹ)
   | 'SCIENCE' // Khám phá khoa học (Nhận thức)
@@ -1150,6 +1152,7 @@ export const PRESCHOOL_NEW_8_DOMAINS: PreschoolDomainType[] = [
   'PLAY_INDOOR',
   'OUTDOOR',
   'PHYSICAL_GAME',
+  'LEARNING_GAME',
   'SKILL_EDU',
   'FOLK_GAME',
   'VIETNAMESE_ENHANCE',
@@ -1196,6 +1199,7 @@ export function isPreschoolNew8Activity(
       t.includes('vui chơi trong lớp') || t.includes('hoạt động góc') ||
       t.includes('ngoài trời') ||
       t.includes('trò chơi vận động') ||
+      t.includes('trò chơi học tập') ||
       t.includes('giáo dục kỹ năng') || t.includes('kỹ năng sống') ||
       t.includes('trò chơi dân gian') ||
       t.includes('tăng cường tiếng việt') || t.includes('tctv') ||
@@ -1213,6 +1217,7 @@ export function isPreschoolNew8Activity(
     text.includes('hoạt động góc') ||
     text.includes('ngoài trời') ||
     text.includes('trò chơi vận động') ||
+    text.includes('trò chơi học tập') ||
     text.includes('giáo dục kỹ năng') ||
     text.includes('kỹ năng sống') ||
     text.includes('trò chơi dân gian') ||
@@ -1482,4 +1487,120 @@ ${is345 ? `    - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh số l
 - Bố trí thời lượng và đồ dùng học liệu phù hợp, ngôn ngữ trong sáng, chuẩn mực sư phạm mầm non.`
   };
 }
+
+/**
+ * Trích xuất và chuẩn hóa mục "II. Chuẩn bị:" mầm non thành đúng cấu trúc 3 mục chuẩn:
+ * 1. Chuẩn bị của cô:
+ * - Môi trường:
+ * - Đồ dùng của cô:
+ * 2. Chuẩn bị của trẻ:
+ * - Trang phục:
+ * - Đồ dùng của trẻ:
+ * - Tâm sinh lý của trẻ:
+ * 3. Phối hợp với phụ huynh:
+ */
+export function getPreschoolPreparation(equipment: any): PreschoolPreparationData {
+  if (equipment?.preschoolPreparation) {
+    const pp = equipment.preschoolPreparation;
+    return {
+      teacherEnvironment: (pp.teacherEnvironment && pp.teacherEnvironment.length > 0)
+        ? pp.teacherEnvironment
+        : ['Lớp học sạch sẽ, thoáng mát, an toàn, sắp xếp các góc hoạt động phù hợp chủ đề.'],
+      teacherTools: (pp.teacherTools && pp.teacherTools.length > 0)
+        ? pp.teacherTools
+        : ['Giáo án điện tử, máy tính/tivi, bài giảng tương tác, tranh ảnh và đồ dùng trực quan của cô.'],
+      studentCostume: (pp.studentCostume && pp.studentCostume.length > 0)
+        ? pp.studentCostume
+        : ['Trang phục gọn gàng, sạch sẽ, thoải mái, thuận tiện cho các hoạt động vận động và trải nghiệm.'],
+      studentTools: (pp.studentTools && pp.studentTools.length > 0)
+        ? pp.studentTools
+        : ['Mỗi trẻ hoặc nhóm trẻ có đủ rổ học cụ, đồ dùng trải nghiệm theo bài học.'],
+      studentPsychology: (pp.studentPsychology && pp.studentPsychology.length > 0)
+        ? pp.studentPsychology
+        : ['Tâm thế vui tươi, thoải mái, hào hứng, tự tin, sẵn sàng tham gia hoạt động.'],
+      parentCollaboration: (pp.parentCollaboration && pp.parentCollaboration.length > 0)
+        ? pp.parentCollaboration
+        : ['Phối hợp với phụ huynh hỗ trợ sưu tầm nguyên vật liệu mở an toàn và trò chuyện cùng con về bài học ở nhà.'],
+    };
+  }
+
+  // Phân tách từ danh sách thiết bị thông thường
+  const teacherList: string[] = Array.isArray(equipment?.teacher) ? equipment.teacher : [];
+  const studentList: string[] = Array.isArray(equipment?.student) ? equipment.student : [];
+  const spaceList: string[] = Array.isArray(equipment?.space) ? equipment.space : [];
+  const digitalList: string[] = Array.isArray(equipment?.digitalAssets) ? equipment.digitalAssets : [];
+  const parentList: string[] = Array.isArray(equipment?.parentCollaboration) ? equipment.parentCollaboration : [];
+
+  const teacherEnv: string[] = [...spaceList];
+  const teacherTools: string[] = [];
+  const studentCostume: string[] = [];
+  const studentTools: string[] = [];
+  const studentPsychology: string[] = [];
+  const parentCollab: string[] = [...parentList];
+
+  const stripPrefix = (str: string, prefixRegex: RegExp) => str.replace(prefixRegex, '').trim();
+
+  teacherList.forEach((item) => {
+    const trimmed = item.replace(/^[\*•\-–—\s]+/, '').trim();
+    if (!trimmed) return;
+    if (/^môi trường\s*:\s*/i.test(trimmed)) {
+      teacherEnv.push(stripPrefix(trimmed, /^môi trường\s*:\s*/i));
+    } else if (/^đồ dùng của cô\s*:\s*/i.test(trimmed)) {
+      teacherTools.push(stripPrefix(trimmed, /^đồ dùng của cô\s*:\s*/i));
+    } else if (/^phối hợp với phụ huynh\s*:\s*/i.test(trimmed) || /phụ huynh/i.test(trimmed)) {
+      parentCollab.push(stripPrefix(trimmed, /^phối hợp với phụ huynh\s*:\s*/i));
+    } else if (/(không gian|phòng học|lớp học|sân trường|môi trường|góc hoạt động)/i.test(trimmed)) {
+      teacherEnv.push(trimmed);
+    } else {
+      teacherTools.push(trimmed);
+    }
+  });
+
+  digitalList.forEach((d) => {
+    const trimmed = d.replace(/^[\*•\-–—\s]+/, '').trim();
+    if (trimmed) teacherTools.push(trimmed);
+  });
+
+  studentList.forEach((item) => {
+    const trimmed = item.replace(/^[\*•\-–—\s]+/, '').trim();
+    if (!trimmed) return;
+    if (/^trang phục\s*:\s*/i.test(trimmed)) {
+      studentCostume.push(stripPrefix(trimmed, /^trang phục\s*:\s*/i));
+    } else if (/^đồ dùng của trẻ\s*:\s*/i.test(trimmed)) {
+      studentTools.push(stripPrefix(trimmed, /^đồ dùng của trẻ\s*:\s*/i));
+    } else if (/^(tâm sinh lý của trẻ|tâm sinh lý|tâm thế)\s*:\s*/i.test(trimmed)) {
+      studentPsychology.push(stripPrefix(trimmed, /^(tâm sinh lý của trẻ|tâm sinh lý|tâm thế)\s*:\s*/i));
+    } else if (/^phối hợp với phụ huynh\s*:\s*/i.test(trimmed) || /phụ huynh/i.test(trimmed)) {
+      parentCollab.push(stripPrefix(trimmed, /^phối hợp với phụ huynh\s*:\s*/i));
+    } else if (/(trang phục|quần áo|giày dép|mũ nón)/i.test(trimmed)) {
+      studentCostume.push(trimmed);
+    } else if (/(tâm thế|tâm sinh lý|vui tươi|hào hứng|sức khỏe|tinh thần|sẵn sàng)/i.test(trimmed)) {
+      studentPsychology.push(trimmed);
+    } else {
+      studentTools.push(trimmed);
+    }
+  });
+
+  return {
+    teacherEnvironment: teacherEnv.length > 0
+      ? teacherEnv
+      : ['Lớp học sạch sẽ, thoáng mát, an toàn, sắp xếp các góc hoạt động phù hợp chủ đề.'],
+    teacherTools: teacherTools.length > 0
+      ? teacherTools
+      : ['Giáo án điện tử, bài giảng tương tác, tranh ảnh và đồ dùng dạy học theo bài.'],
+    studentCostume: studentCostume.length > 0
+      ? studentCostume
+      : ['Trang phục gọn gàng, sạch sẽ, thoải mái, thuận tiện cho các hoạt động vận động và trải nghiệm.'],
+    studentTools: studentTools.length > 0
+      ? studentTools
+      : ['Mỗi trẻ hoặc nhóm trẻ có đủ rổ học cụ, đồ dùng trải nghiệm theo bài học.'],
+    studentPsychology: studentPsychology.length > 0
+      ? studentPsychology
+      : ['Tâm thế vui tươi, thoải mái, hào hứng, sẵn sàng tham gia hoạt động cùng cô và bạn.'],
+    parentCollaboration: parentCollab.length > 0
+      ? parentCollab
+      : ['Phối hợp cùng phụ huynh trò chuyện, củng cố kiến thức và chuẩn bị một số nguyên vật liệu tự nhiên/tái chế an toàn cho trẻ.'],
+  };
+}
+
 

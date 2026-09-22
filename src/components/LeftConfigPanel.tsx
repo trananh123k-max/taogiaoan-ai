@@ -46,8 +46,9 @@ import {
   SAMPLE_TRO_CHOI_CHU_CAI_LESSON_PLAN_DOC,
   SAMPLE_TOAN_LOP_GHEP_LESSON_PLAN_DOC
 } from '../data/preschoolCurriculum';
+import { PreschoolQD388CodesConfig } from './PreschoolQD388CodesConfig';
 import { isPreschoolNew8Activity } from '../utils/preschoolUtils';
-import { Preschool388CriteriaSection } from './Preschool388CriteriaSection';
+import { getDefaultQD388ForSubject } from '../data/qd388Data';
 
 interface LeftConfigPanelProps {
   config: LessonPlanConfig;
@@ -746,12 +747,23 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                     onChange={(e) => {
                       const newSubj = e.target.value;
                       const isNewHDTN = newSubj.toLowerCase().includes('hoạt động trải nghiệm') || newSubj.toLowerCase().includes('hđtn');
-                      const isNewPreschool8 = config.schoolLevel === 'Mầm non' && MAM_NON_NEW_ACTIVITIES.includes(newSubj);
+                      let preschoolCodeUpdate: Partial<LessonPlanConfig> = {};
+                      if (config.schoolLevel === 'Mầm non') {
+                        const defaultCodes = getDefaultQD388ForSubject(newSubj);
+                        if (defaultCodes) {
+                          if (config.preschoolIndicatorMode !== 'custom') {
+                            preschoolCodeUpdate = {
+                              preschoolIndicatorMode: 'default_388',
+                              preschoolCustomCodes: defaultCodes.summary,
+                            };
+                          }
+                        }
+                      }
                       onChangeConfig({
                         subject: newSubj,
                         lessonTitle: '',
-                        ...(isNewPreschool8 ? { enablePreschool388Criteria: true } : {}),
                         ...(isNewHDTN ? { enableAI: false, enableNLS: false, enableSTEM: false } : {}),
+                        ...preschoolCodeUpdate,
                       });
                     }}
                     style={{
@@ -784,15 +796,6 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                 );
               })()}
               <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
-            </div>
-          )}
-
-          {/* THÔNG BÁO HOẠT ĐỘNG MỚI THEO QĐ 388/QĐ-BGDĐT */}
-          {config.schoolLevel === 'Mầm non' && MAM_NON_NEW_ACTIVITIES.includes(config.subject) && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-50/80 border border-blue-200 text-blue-900 text-[11px]">
-              <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 animate-pulse"></span>
-              <span className="font-bold">Hoạt động theo QĐ 388/QĐ-BGDĐT:</span>
-              <span className="text-blue-800 font-medium">Bắt buộc gắn mã chỉ báo tiêu chí (xem khối bên dưới).</span>
             </div>
           )}
         </div>
@@ -962,6 +965,7 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
             </label>
             <button
               type="button"
+              id="custom-age-grade-btn"
               onClick={() => {
                 if (!isCustomGrade) {
                   setIsCustomGrade(true);
@@ -975,7 +979,7 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                   onChangeConfig({ grade: defaultGrade, lessonTitle: '' });
                 }
               }}
-              className="text-[11px] text-amber-800 hover:underline font-semibold cursor-pointer"
+              className="text-[11px] px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100 font-medium cursor-pointer transition-colors shadow-2xs"
             >
               {isCustomGrade
                 ? (config.schoolLevel === 'Mầm non' ? '← Chọn độ tuổi có sẵn' : '← Chọn khối lớp có sẵn')
@@ -1083,35 +1087,18 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
           )}
         </div>
 
-        {/* VỊ TRÍ THÊM TIÊU CHÍ CHO 8 LĨNH VỰC MỚI THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT */}
-        {config.schoolLevel === 'Mầm non' && (
-          isPreschoolNew8Activity(config.subject, config.lessonTitle) ||
-          MAM_NON_NEW_ACTIVITIES.includes(config.subject) ||
-          config.enablePreschool388Criteria
-        ) && (
-          <div className="form-group flex flex-col gap-1.5 pt-1">
-            <Preschool388CriteriaSection
-              config={config}
-              onChangeConfig={onChangeConfig}
+        {/* MÃ CÁC LĨNH VỰC PHÁT TRIỂN THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT CHO MẦM NON */}
+        {config.schoolLevel === 'Mầm non' && (MAM_NON_NEW_ACTIVITIES.includes(config.subject) || isPreschoolNew8Activity(config.subject, config.lessonTitle)) && (
+          <div className="form-group flex flex-col gap-1.5">
+            <PreschoolQD388CodesConfig
+              subject={config.subject}
+              mode={config.preschoolIndicatorMode || 'default_388'}
+              customCodes={config.preschoolCustomCodes !== undefined ? config.preschoolCustomCodes : (getDefaultQD388ForSubject(config.subject)?.summary || '')}
+              onChangeMode={(newMode) => onChangeConfig({ preschoolIndicatorMode: newMode })}
+              onChangeCodes={(newCodes) => onChangeConfig({ preschoolCustomCodes: newCodes })}
             />
           </div>
         )}
-
-        {/* NÚT TÙY CHỌN MỞ BỘ TIÊU CHÍ QĐ 388 CHO CÁC MÔN MẦM NON KHÁC NẾU MUỐN */}
-        {config.schoolLevel === 'Mầm non' &&
-          !isPreschoolNew8Activity(config.subject, config.lessonTitle) &&
-          !MAM_NON_NEW_ACTIVITIES.includes(config.subject) &&
-          !config.enablePreschool388Criteria && (
-            <div className="flex items-center justify-between px-1">
-              <button
-                type="button"
-                onClick={() => onChangeConfig({ enablePreschool388Criteria: true })}
-                className="text-[11px] text-blue-700 hover:text-blue-900 font-semibold flex items-center gap-1 hover:underline cursor-pointer"
-              >
-                <span>🎯 + Thêm vị trí tiêu chí theo QĐ 388/QĐ-BGDĐT (Tùy chọn)</span>
-              </button>
-            </div>
-          )}
 
         {/* 5 & 6. SỐ TIẾT & TIẾT PPCT (ẨN KHI LÀ MẦM NON) */}
         {config.schoolLevel !== 'Mầm non' && (

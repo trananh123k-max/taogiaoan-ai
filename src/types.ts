@@ -54,11 +54,6 @@ export interface LessonPlanConfig {
   enableAI: boolean;
   aiMode?: AIIntegrationMode; // 'ppct' | 'custom' | 'ai_generated'
   customAI?: string; // Nội dung năng lực AI tự dán/nhập từ bên ngoài
-  // Tiêu chí yêu cầu cần đạt theo Quyết định 388/QĐ-BGDĐT (Dành riêng cho 8 Lĩnh vực mới Mầm non)
-  enablePreschool388Criteria?: boolean;
-  preschool388CriteriaMode?: 'preset' | 'bank' | 'custom';
-  selected388CriteriaCodes?: string[];
-  custom388CriteriaText?: string;
   enableSTEM?: boolean;
   stemTopic?: string;
   hasStemFromPPCT?: boolean;
@@ -72,6 +67,14 @@ export interface LessonPlanConfig {
   integratedAIFromPPCT?: string[];
   ppctContent?: string;
   aiModel?: string; // e.g. 'gemini-flash-latest', 'gemini-3.1-flash-lite', 'gemini-3.6-flash', 'gemini-3.8-flash'
+  preschoolIndicatorMode?: 'default_388' | 'custom'; // 'default_388' | 'custom'
+  preschoolCustomCodes?: string; // Ví dụ: "NT 3.1, TX 4.4, TC 1.2"
+  preschoolCodesBySection?: {
+    knowledge?: string;
+    skills?: string;
+    qualities?: string;
+    competencies?: string;
+  };
 }
 
 export interface StepDetail {
@@ -112,6 +115,15 @@ export interface CompetencyMatrixItem {
   digitalToolUsed?: string; // Công cụ số / AI hỗ trợ (ví dụ: GeoGebra, Padlet, Canva, ChatGPT)
 }
 
+export interface PreschoolPreparationData {
+  teacherEnvironment: string[];
+  teacherTools: string[];
+  studentCostume: string[];
+  studentTools: string[];
+  studentPsychology: string[];
+  parentCollaboration: string[];
+}
+
 export interface LessonPlanOutput {
   schoolName: string;
   teacherName: string;
@@ -133,12 +145,14 @@ export interface LessonPlanOutput {
     qualities: string[]; // 3. Về phẩm chất (Yêu nước, Chăm chỉ, Trung thực, Trách nhiệm...)
   };
 
-  // II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU
+  // II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU / CHUẨN BỊ
   equipment: {
     teacher: string[];
     student: string[];
     digitalAssets: string[]; // Học liệu số, phần mềm, công cụ AI
     stemMaterials?: string[]; // Vật liệu, dụng cụ thực hành STEM
+    parentCollaboration?: string[]; // 3. Phối hợp với phụ huynh
+    preschoolPreparation?: PreschoolPreparationData; // Chuẩn hóa 3 mục chuẩn mầm non
   };
 
   // CHỦ ĐỀ & NỘI DUNG GIÁO DỤC STEM TÍCH HỢP (Nếu có)

@@ -1,5 +1,4 @@
 import { PRESCHOOL_CURRICULUM_MATRIX, PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE } from './src/data/preschoolCurriculum.js';
-import { getCriteria388ByCode } from './src/data/preschool388Criteria.js';
 import { formatPreschoolMusicActivities, formatPreschoolActivities, isPreschoolMusicPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, sanitizePreschoolObjectives, analyzePreschoolAgeProfile } from './src/utils/preschoolUtils.js';
 import { NLS_DICTIONARY } from './src/data/nlsDictionary';
 import { getVerifiedLessons } from './src/data/verifiedCurriculumList';
@@ -2319,24 +2318,12 @@ MỤC ĐÍCH DUY NHẤT: BẢO TỒN NGUYÊN VẸN NỘI DUNG, HÌNH ẢNH, BÀI
   const preschoolAgeProfile = isPreschool ? analyzePreschoolAgeProfile(grade || 'Mẫu giáo lớn (5-6 tuổi)') : null;
   const isMixedAgeClass = preschoolAgeProfile?.category === 'MIXED_AGE';
 
-  const selected388Codes = config.selected388CriteriaCodes || [];
-  const custom388Text = config.custom388CriteriaText || '';
-  const hasCustom388Criteria = selected388Codes.length > 0 || !!custom388Text;
-
-  let preschool388CustomInstruction = '';
-  if (isPreschool && (isNew8Activity || config.enablePreschool388Criteria) && hasCustom388Criteria) {
-    preschool388CustomInstruction = `\n- BỘ TIÊU CHÍ YÊU CẦU CẦN ĐẠT THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT DO GIÁO VIÊN CHỌN CHO BÀI DẠY NÀY:
-${selected388Codes.map((code: string) => {
-  const crit = getCriteria388ByCode(code);
-  return crit ? `  + [Mã: ${crit.code}] (${crit.domainName}): ${crit.content}` : `  + [Mã: ${code}]`;
-}).join('\n')}
-${custom388Text ? `  + Tiêu chí riêng/bổ sung từ giáo viên: ${custom388Text}` : ''}
-BẮT BUỘC: Đưa đúng các tiêu chí và mã chỉ báo trên vào các gạch đầu dòng của "1. Kiến thức" và "2. Kỹ năng" trong Mục I (Mục đích - yêu cầu). Ví dụ: "- Trẻ nhận biết... (Mã: NT 1.1)", "- Rèn kỹ năng... (Mã: TC 1.1)".`;
-  }
-
-  const preschoolObjectivesInstruction = (isNew8Activity || config.enablePreschool388Criteria)
-    ? `- ĐỐI VỚI 8 NỘI DUNG MỚI TÍCH HỢP (ÁP DỤNG CHUẨN YÊU CẦU THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT):
-  + BẮT BUỘC ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng mã chỉ báo của Quyết định số 388/QĐ-BGDĐT (giống như ví dụ NT 1.1, NT 1.2, TC 1.1, TC 1.2, TC 3.1, TX 3.2, TX 4.3, TX 4.4, NN 1.2, NN 2.2...).
+  const customCodesFromUser = (config.preschoolCustomCodes || '').trim();
+  const preschoolObjectivesInstruction = isNew8Activity
+    ? `- ĐỐI VỚI NỘI DUNG MỚI TÍCH HỢP (ÁP DỤNG CHUẨN YÊU CẦU THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT):
+  + CÁC MÃ TIÊU CHÍ CHỈ BÁO THEO QUYẾT ĐỊNH 388 ĐƯỢC CHỈ ĐỊNH CHO BÀI DẠY NÀY (DO NGƯỜI DÙNG THIẾT LẬP HOẶC MẶC ĐỊNH):
+    ${customCodesFromUser ? `"${customCodesFromUser}"` : 'Các mã chuẩn theo QĐ 388 (ví dụ: NT 3.1, TX 4.4, TC 1.2, NN 2.2...)'}
+  + BẮT BUỘC ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng các mã chỉ báo trên.
   + 1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ biết/nhận biết... (Mã: NT 1.1)")
   + 2. Kỹ năng: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)")`
     : `- ĐỐI VỚI GIÁO ÁN MẦM NON CŨ/TRUYỀN THỐNG (Văn học thơ/truyện, Làm quen chữ cái, Khám phá khoa học, Xã hội, Toán, Tạo hình, Âm nhạc, Thể chất, Tình cảm - KNXH...):
@@ -2377,7 +2364,6 @@ ${yccdInstruction}${nlsInstruction}${aiInstruction}
 
 - BẮT BUỘC soạn theo Kế hoạch tổ chức hoạt động giáo dục Mầm non, TUYỆT ĐỐI KHÔNG dùng Công văn 5512.
 ${preschoolObjectivesInstruction}
-${preschool388CustomInstruction}
 - Ngôn ngữ, hoạt động phải phù hợp với tâm lý lứa tuổi mầm non (cô và trẻ).
 - Tích hợp phát triển 4 phẩm chất cốt lõi: Yêu thương, Tôn trọng, Trung thực, Trách nhiệm.
 - Tích hợp phát triển 5 năng lực nền tảng: Giao tiếp, Hợp tác, Giải quyết vấn đề, Tự lực, Thích ứng.
@@ -2398,9 +2384,16 @@ ${isNew8Activity ? `1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đ�
 4. Năng lực (Gắn với Tự lực, Thích ứng...):
 5. Tích hợp Năng lực số (NLS): (Đưa vào trường digitalCompetencies nếu người dùng chọn tích hợp NLS, nếu không chọn để [])
 6. Tích hợp Trí tuệ nhân tạo (AI): (Đưa vào trường aiCompetencies nếu người dùng chọn tích hợp AI, nếu không chọn để [])
-II. Chuẩn bị
-1. Chuẩn bị của cô
-2. Chuẩn bị của trẻ
+II. Chuẩn bị: (BẮT BUỘC ĐÚNG 100% CẤU TRÚC 3 MỤC SAU)
+1. Chuẩn bị của cô:
+- Môi trường: [Mô tả chi tiết môi trường lớp học, không gian bài trí theo chủ đề, an toàn, sạch sẽ, thoáng mát]
+- Đồ dùng của cô: [Mô tả cụ thể giáo án điện tử, máy tính/tivi, bài giảng tương tác, đồ dùng trực quan, học cụ, tranh ảnh, nhạc nền]
+2. Chuẩn bị của trẻ:
+- Trang phục: [Trang phục gọn gàng, phù hợp thời tiết, thoải mái, thuận tiện cho vận động và trải nghiệm]
+- Đồ dùng của trẻ: [Mỗi trẻ hoặc nhóm trẻ có đủ rổ đồ dùng, học cụ trải nghiệm phù hợp với bài học]
+- Tâm sinh lý của trẻ: [Tâm thế vui tươi, hào hứng, tự tin, sẵn sàng tham gia hoạt động cùng cô và các bạn]
+3. Phối hợp với phụ huynh:
+- [Nội dung cụ thể phối hợp phụ huynh: hỗ trợ nguyên vật liệu mở/tái chế an toàn, trao đổi thông tin, củng cố rèn luyện cho trẻ tại nhà]
 III. Tiến trình hoạt động
 Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động của trẻ" (Tiến trình 5 bước theo đúng chuẩn của Hoạt động / Lĩnh vực bài dạy).
 - KHỔNG ĐƯỢC BỎ BẤT KỲ NỘI DUNG NÀO TỪ FILE GIÁO ÁN CŨ TẢI LÊN (oldPlanContent). Tái cấu trúc chuẩn hóa nội dung giáo án cũ khớp đúng 5 bước của Lĩnh vực bài dạy.
@@ -2602,26 +2595,22 @@ QUY ĐỊNH BẮT BUỘC VỀ VỊ TRÍ ĐỀ MỤC SGK THEO CHUẨN CÔNG VĂN 
         ? `- NẾU NGƯỜI DÙNG CHỌN TÍCH HỢP AI (config.enableAI = true): BẮT BUỘC đưa nội dung tích hợp AI vào trường "aiCompetencies" (để hiển thị mục 6. Tích hợp Trí tuệ nhân tạo (AI)). Mô tả rõ giáo viên ứng dụng AI tạo tranh ảnh, âm thanh, câu chuyện sinh động hoặc nhân vật ảo Robot trò chuyện tương tác với trẻ dưới sự hướng dẫn của cô (tuyệt đối KHÔNG dùng mã chỉ báo phổ thông).`
         : `- KHÔNG chọn tích hợp AI: Để "aiCompetencies": [].`;
 
-      if (isNew8 || config.enablePreschool388Criteria) {
-        const selectedCodes = config.selected388CriteriaCodes || [];
-        const customCriteriaText = config.custom388CriteriaText || '';
-        const criteriaCustomBlock = (selectedCodes.length > 0 || !!customCriteriaText) ? `
-ĐẶC BIỆT - TIÊU CHÍ YÊU CẦU CẦN ĐẠT THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT DO GIÁO VIÊN LỰA CHỌN:
-${selectedCodes.map((code: string) => {
-  const crit = getCriteria388ByCode(code);
-  return crit ? `- [Mã: ${crit.code}] (${crit.domainName}): ${crit.content}` : `- [Mã: ${code}]`;
-}).join('\n')}
-${customCriteriaText ? `- Tiêu chí riêng bổ sung: ${customCriteriaText}` : ''}
-BẮT BUỘC: Đưa đúng các tiêu chí trên vào các gạch đầu dòng của "knowledge" (Kiến thức) và "subjectCompetencies" (Kỹ năng) kèm đúng mã chỉ báo!
-` : '';
-
+      if (isNew8) {
+        const customCodesFromUser = (config.preschoolCustomCodes || '').trim();
         prompt = `${baseContext}
-Hãy soạn Mục I (MỤC ĐÍCH - YÊU CẦU) và Mục II (CHUẨN BỊ) cho 8 NỘI DUNG MỚI TÍCH HỢP MẦM NON (ÁP DỤNG CHUẨN YÊU CẦU THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT).
+Hãy soạn Mục I (MỤC ĐÍCH - YÊU CẦU) và Mục II (CHUẨN BỊ) cho NỘI DUNG MỚI TÍCH HỢP MẦM NON (ÁP DỤNG CHUẨN YÊU CẦU THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT).
+${customCodesFromUser ? `
+CÁC MÃ TIÊU CHÍ CHỈ BÁO THEO QUYẾT ĐỊNH 388 ĐƯỢC CHỈ ĐỊNH CHO BÀI DẠY NÀY (DO NGƯỜI DÙNG THIẾT LẬP HOẶC MẶC ĐỊNH):
+"${customCodesFromUser}"
+BẮT BUỘC ĐƯA CHÍNH XÁC CÁC MÃ TRÊN VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU:
+- Kiến thức (knowledge): Trẻ nhận biết, hiểu được gì... gắn với mã tiêu chí tương ứng (ví dụ: "- Trẻ nhận biết và gọi tên được... (Mã: NT 3.1)").
+- Kỹ năng (subjectCompetencies): Các kỹ năng vận động, kỹ năng tư duy, thao tác... gắn với mã tiêu chí tương ứng (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.2, TX 4.4)").
+` : `
 YÊU CẦU BẮT BUỘC:
 1. ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng mã chỉ báo của Quyết định số 388/QĐ-BGDĐT (ví dụ: NT 1.1, NT 1.2, TC 1.1, TC 1.2, TC 3.1, TX 3.2, TX 4.3, TX 4.4, NN 1.2, NN 2.2...).
-${criteriaCustomBlock}
 - Kiến thức (knowledge): Trẻ nhận biết, hiểu được gì... gắn với mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ nhận biết và gọi tên được... (Mã: NT 1.1)", "- Trẻ hiểu được nội dung... (Mã: NT 1.2)").
 - Kỹ năng (subjectCompetencies): Các kỹ năng vận động, kỹ năng tư duy, thao tác... gắn với mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)", "- Trẻ phối hợp khéo léo... (Mã: TC 1.2, TX 4.4)").
+`}
 - Phẩm chất (qualities): BẮT BUỘC gắn với 4 phẩm chất cốt lõi (Yêu thương, Tôn trọng, Trung thực, Trách nhiệm). Ví dụ: "Yêu thương: ...", "Tôn trọng: ...".
 - Năng lực (generalCompetencies): BẮT BUỘC gắn với 5 năng lực nền tảng (Giao tiếp, Hợp tác, Giải quyết vấn đề, Tự lực, Thích ứng). Ví dụ: "Tự lực: ...", "Thích ứng: ...".
 2. TÍCH HỢP NĂNG LỰC SỐ VÀ TRÍ TUỆ NHÂN TẠO:
@@ -3548,6 +3537,8 @@ Trả về JSON dạng:
       student: res1.equipment?.student || ['SGK, vở ghi, thiết bị học tập'],
       digitalAssets: res1.equipment?.digitalAssets || ['Học liệu số tương tác'],
       stemMaterials: hasStem ? (res1.equipment?.stemMaterials || ['Vật liệu chế tạo và thực hành mô hình STEM']) : [],
+      parentCollaboration: res1.equipment?.parentCollaboration || [],
+      preschoolPreparation: res1.equipment?.preschoolPreparation,
     },
     stemIntegration: hasStem ? (res1.stemIntegration || {
       topicTitle: stemTopic,
@@ -3662,24 +3653,12 @@ const handleGenerateKHBD = async (req: express.Request, res: express.Response) =
     const preschoolAgeProfile = isPreschool ? analyzePreschoolAgeProfile(config.grade || 'Mẫu giáo lớn (5-6 tuổi)') : null;
     const isMixedAgeClass = preschoolAgeProfile?.category === 'MIXED_AGE';
 
-    const selected388Codes = config.selected388CriteriaCodes || [];
-    const custom388Text = config.custom388CriteriaText || '';
-    const hasCustom388Criteria = selected388Codes.length > 0 || !!custom388Text;
-
-    let preschool388CustomInstruction = '';
-    if (isPreschool && (isNew8Activity || config.enablePreschool388Criteria) && hasCustom388Criteria) {
-      preschool388CustomInstruction = `\n- BỘ TIÊU CHÍ YÊU CẦU CẦN ĐẠT THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT DO GIÁO VIÊN CHỌN CHO BÀI DẠY NÀY:
-${selected388Codes.map((code: string) => {
-  const crit = getCriteria388ByCode(code);
-  return crit ? `  + [Mã: ${crit.code}] (${crit.domainName}): ${crit.content}` : `  + [Mã: ${code}]`;
-}).join('\n')}
-${custom388Text ? `  + Tiêu chí riêng/bổ sung từ giáo viên: ${custom388Text}` : ''}
-BẮT BUỘC: Đưa đúng các tiêu chí và mã chỉ báo trên vào các gạch đầu dòng của "1. Kiến thức" và "2. Kỹ năng" trong Mục I (Mục đích - yêu cầu). Ví dụ: "- Trẻ nhận biết... (Mã: NT 1.1)", "- Rèn kỹ năng... (Mã: TC 1.1)".`;
-    }
-
-    const preschoolObjectivesInstruction = (isNew8Activity || config.enablePreschool388Criteria)
-      ? `- ĐỐI VỚI 8 NỘI DUNG MỚI TÍCH HỢP (ÁP DỤNG CHUẨN YÊU CẦU THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT):
-  + BẮT BUỘC ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng mã chỉ báo của Quyết định số 388/QĐ-BGDĐT (giống như ví dụ NT 1.1, NT 1.2, TC 1.1, TC 1.2, TC 3.1, TX 3.2, TX 4.3, TX 4.4, NN 1.2, NN 2.2...).
+    const customCodesFromUser = (config.preschoolCustomCodes || '').trim();
+    const preschoolObjectivesInstruction = isNew8Activity
+      ? `- ĐỐI VỚI NỘI DUNG MỚI TÍCH HỢP (ÁP DỤNG CHUẨN YÊU CẦU THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT):
+  + CÁC MÃ TIÊU CHÍ CHỈ BÁO THEO QUYẾT ĐỊNH 388 ĐƯỢC CHỈ ĐỊNH CHO BÀI DẠY NÀY (DO NGƯỜI DÙNG THIẾT LẬP HOẶC MẶC ĐỊNH):
+    ${customCodesFromUser ? `"${customCodesFromUser}"` : 'Các mã chuẩn theo QĐ 388 (ví dụ: NT 3.1, TX 4.4, TC 1.2, NN 2.2...)'}
+  + BẮT BUỘC ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng các mã chỉ báo trên.
   + 1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ biết/nhận biết... (Mã: NT 1.1)")
   + 2. Kỹ năng: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)")`
       : `- ĐỐI VỚI GIÁO ÁN MẦM NON CŨ/TRUYỀN THỐNG (Văn học thơ/truyện, Làm quen chữ cái, Khám phá khoa học, Xã hội, Toán, Tạo hình, Âm nhạc, Thể chất, Tình cảm - KNXH...):
@@ -3719,7 +3698,6 @@ ${ageSpecificInstruction}
 
 - BẮT BUỘC soạn theo Kế hoạch tổ chức hoạt động giáo dục Mầm non, TUYỆT ĐỐI KHÔNG dùng Công văn 5512.
 ${preschoolObjectivesInstruction}
-${preschool388CustomInstruction}
 - Ngôn ngữ, hoạt động phải phù hợp với tâm lý lứa tuổi mầm non (cô và trẻ).
 - Tích hợp phát triển 4 phẩm chất cốt lõi: Yêu thương, Tôn trọng, Trung thực, Trách nhiệm.
 - Tích hợp phát triển 5 năng lực nền tảng: Giao tiếp, Hợp tác, Giải quyết vấn đề, Tự lực, Thích ứng.
@@ -3740,9 +3718,16 @@ ${isNew8Activity ? `1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đ�
 4. Năng lực (Gắn với Tự lực, Thích ứng...):
 5. Tích hợp Năng lực số (NLS): (Đưa vào trường digitalCompetencies nếu người dùng chọn tích hợp NLS, nếu không chọn để [])
 6. Tích hợp Trí tuệ nhân tạo (AI): (Đưa vào trường aiCompetencies nếu người dùng chọn tích hợp AI, nếu không chọn để [])
-II. Chuẩn bị
-1. Chuẩn bị của cô
-2. Chuẩn bị của trẻ
+II. Chuẩn bị: (BẮT BUỘC ĐÚNG 100% CẤU TRÚC 3 MỤC SAU)
+1. Chuẩn bị của cô:
+- Môi trường: [Mô tả chi tiết môi trường lớp học, không gian bài trí theo chủ đề, an toàn, sạch sẽ, thoáng mát]
+- Đồ dùng của cô: [Mô tả cụ thể giáo án điện tử, máy tính/tivi, bài giảng tương tác, đồ dùng trực quan, học cụ, tranh ảnh, nhạc nền]
+2. Chuẩn bị của trẻ:
+- Trang phục: [Trang phục gọn gàng, phù hợp thời tiết, thoải mái, thuận tiện cho vận động và trải nghiệm]
+- Đồ dùng của trẻ: [Mỗi trẻ hoặc nhóm trẻ có đủ rổ đồ dùng, học cụ trải nghiệm phù hợp với bài học]
+- Tâm sinh lý của trẻ: [Tâm thế vui tươi, hào hứng, tự tin, sẵn sàng tham gia hoạt động cùng cô và các bạn]
+3. Phối hợp với phụ huynh:
+- [Nội dung cụ thể phối hợp phụ huynh: hỗ trợ nguyên vật liệu mở/tái chế an toàn, trao đổi thông tin, củng cố rèn luyện cho trẻ tại nhà]
 III. Tiến trình hoạt động
 Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động của trẻ" (Tiến trình 5 bước theo đúng chuẩn của Hoạt động / Lĩnh vực bài dạy).
 - KHỔNG ĐƯỢC BỎ BẤT KỲ NỘI DUNG NÀO TỪ FILE GIÁO ÁN CŨ TẢI LÊN (oldPlanContent). Tái cấu trúc chuẩn hóa nội dung giáo án cũ khớp đúng 5 bước của Lĩnh vực bài dạy.
@@ -3935,6 +3920,18 @@ ${isPreschool
                   student: { type: Type.ARRAY, items: { type: Type.STRING } },
                   digitalAssets: { type: Type.ARRAY, items: { type: Type.STRING } },
                   stemMaterials: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  parentCollaboration: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  preschoolPreparation: {
+                    type: Type.OBJECT,
+                    properties: {
+                      teacherEnvironment: { type: Type.ARRAY, items: { type: Type.STRING } },
+                      teacherTools: { type: Type.ARRAY, items: { type: Type.STRING } },
+                      studentCostume: { type: Type.ARRAY, items: { type: Type.STRING } },
+                      studentTools: { type: Type.ARRAY, items: { type: Type.STRING } },
+                      studentPsychology: { type: Type.ARRAY, items: { type: Type.STRING } },
+                      parentCollaboration: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    }
+                  }
                 },
                 required: ['teacher', 'student', 'digitalAssets'],
               },
