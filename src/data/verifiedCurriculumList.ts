@@ -164,6 +164,54 @@ export const VERIFIED_KNTT_CURRICULUM: Record<string, CurriculumItem> = {
     ]
   },
 
+  // === HOẠT ĐỘNG TẬP TÔ CHỮ CÁI (VÀ TẬP TÔ, ĐỒ, SAO CHÉP NÉT CƠ BẢN/CHỮ CÁI) ===
+  'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI_Mẫu giáo lớn (5-6 tuổi)': {
+    themes: ['Chương trình Mầm non - Tập tô chữ cái và nét cơ bản'],
+    lessons: [
+      'Bé tô, đồ, sao chép nét thẳng, nét xiên trái, nét xiên phải',
+      'Bé tô, đồ, sao chép nét cong hở phải, nét cong hở trái, nét cong tròn khép kín',
+      'Bé tô, đồ, sao chép nét móc xuôi, nét móc ngược, nét móc hai đầu',
+      'Bé tô, đồ, sao chép nét khuyết trên, nét khuyết dưới, nét thắt',
+      'Tập tô chữ cái o, ô, ơ',
+      'Tập tô chữ cái a, ă, â',
+      'Tập tô chữ cái e, ê',
+      'Tập tô chữ cái u, ư',
+      'Tập tô chữ cái i, t, c',
+      'Tập tô chữ cái b, d, đ',
+      'Tập tô chữ cái l, m, n',
+      'Tập tô chữ cái h, k',
+      'Tập tô chữ cái p, q',
+      'Tập tô chữ cái g, y',
+      'Tập tô chữ cái s, x',
+      'Tập tô, đồ và sao chép tên của bé'
+    ]
+  },
+  'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI_Mẫu giáo nhỡ (4-5 tuổi)': {
+    themes: ['Chương trình Mầm non - Làm quen nét và chữ cái'],
+    lessons: [
+      'Bé tô, đồ, sao chép nét thẳng, nét xiên trái, nét xiên phải',
+      'Bé tô, đồ nét ngang, nét thẳng đứng',
+      'Bé tô, đồ nét cong tròn, nét lượn sóng đơn giản',
+      'Làm quen và tô đồ chữ cái o, ô, ơ',
+      'Làm quen và tô đồ chữ cái a, ă, â'
+    ]
+  },
+  'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI_Mẫu giáo bé (3-4 tuổi)': {
+    themes: ['Chương trình Mầm non - Làm quen nét cơ bản'],
+    lessons: [
+      'Bé tô, đồ, sao chép nét thẳng, nét xiên trái, nét xiên phải',
+      'Bé tập cầm bút và tô theo đường kẻ thẳng',
+      'Bé di màu và tô đồ nét đơn giản'
+    ]
+  },
+  'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI_Nhà trẻ (24-36 tháng)': {
+    themes: ['Chương trình Mầm non - Vận động tinh và làm quen bút vẽ'],
+    lessons: [
+      'Bé tập cầm bút màu di nét tự do, di nét thẳng',
+      'Bé tô màu vệt dài, chấm màu tạo hình'
+    ]
+  },
+
 
 
 
@@ -3119,6 +3167,12 @@ export const standardSubjectMap: Record<string, string> = {
   'GIÁO ÁN ÂM NHẠC (Nghe hát)': 'Lĩnh vực Phát triển nghệ thuật',
   'GIÁO ÁN ÂM NHẠC (Hát vận động)': 'Lĩnh vực Phát triển nghệ thuật',
   'GIÁO ÁN TÌNH CẢM - XÃ HỘI': 'Lĩnh vực Phát triển tình cảm - xã hội',
+  'TẬP TÔ CHỮ CÁI': 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
+  'Tập tô chữ cái': 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
+  'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI': 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
+  'Hoạt động tập tô chữ cái': 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
+  'TẬP TÔ, ĐỒ CHỮ CÁI': 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
+  'TẬP TÔ NÉT CƠ BẢN': 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
 };
 
 /**
@@ -3132,7 +3186,12 @@ export function getAvailableVolumesForSubjectGrade(
   const cleanGrade = (grade || '').trim();
   const mappedSubj = standardSubjectMap[cleanSubject] || cleanSubject;
 
-  // Special handling for Mầm non: Return ALL 10 lessons for the grade
+  // Dedicated handling for HOẠT ĐỘNG TẬP TÔ CHỮ CÁI
+  if (mappedSubj === 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI') {
+    return ['Chương trình Mầm non - Tập tô chữ cái và nét cơ bản'];
+  }
+
+  // Special handling for general Mầm non: Return ALL 10 lessons for the grade
   if (['Nhà trẻ (24-36 tháng)', 'Mẫu giáo bé (3-4 tuổi)', 'Mẫu giáo nhỡ (4-5 tuổi)', 'Mẫu giáo lớn (5-6 tuổi)'].includes(cleanGrade)) {
     const allPreschoolSubjects = [
       'Lĩnh vực Phát triển thể chất',

@@ -39,6 +39,15 @@ import { extractTextFromPDF } from '../utils/pdfExtractor';
 import { getApiHeaders } from '../utils/apiKeyManager';
 import { saveTextbookToFirestore, ManagedUserAccount } from '../utils/firebase';
 import { getUserAccessStatus } from '../utils/userAccess';
+import { 
+  SAMPLE_LETTER_TRACING_LESSON_PLAN_DOC,
+  SAMPLE_KHAM_PHA_XA_HOI_LESSON_PLAN_DOC,
+  SAMPLE_TRO_CHOI_HOC_TAP_LESSON_PLAN_DOC,
+  SAMPLE_TRO_CHOI_CHU_CAI_LESSON_PLAN_DOC,
+  SAMPLE_TOAN_LOP_GHEP_LESSON_PLAN_DOC
+} from '../data/preschoolCurriculum';
+import { isPreschoolNew8Activity } from '../utils/preschoolUtils';
+import { Preschool388CriteriaSection } from './Preschool388CriteriaSection';
 
 interface LeftConfigPanelProps {
   config: LessonPlanConfig;
@@ -80,13 +89,9 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
   // State for Lesson Title & Custom Input
   const [isCustomSubject, setIsCustomSubject] = useState(false);
   const [customSubjectText, setCustomSubjectText] = useState('');
+  const [isCustomGrade, setIsCustomGrade] = useState(false);
+  const [customGradeText, setCustomGradeText] = useState('');
   const [isCustomLessonInput, setIsCustomLessonInput] = useState(false);
-  const [isCustomGradeInput, setIsCustomGradeInput] = useState(() => {
-    if (config.schoolLevel === 'Mầm non' && config.grade && !['Nhà trẻ (24-36 tháng)', 'Mẫu giáo bé (3-4 tuổi)', 'Mẫu giáo nhỡ (4-5 tuổi)', 'Mẫu giáo lớn (5-6 tuổi)'].includes(config.grade)) {
-      return true;
-    }
-    return false;
-  });
 
   // State for DOCX Sample Upload
   const [isParsingDocx, setIsParsingDocx] = useState(false);
@@ -166,7 +171,14 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
 
   const allGrades = useMemo(() => {
     if (config.schoolLevel === 'Mầm non') {
-      return ['Nhà trẻ (24-36 tháng)', 'Mẫu giáo bé (3-4 tuổi)', 'Mẫu giáo nhỡ (4-5 tuổi)', 'Mẫu giáo lớn (5-6 tuổi)'];
+      return [
+        'Nhà trẻ (24-36 tháng)',
+        'Mẫu giáo bé (3-4 tuổi)',
+        'Mẫu giáo nhỡ (4-5 tuổi)',
+        'Mẫu giáo lớn (5-6 tuổi)',
+        'Lớp ghép (3 - 4 - 5 tuổi)',
+        'Lớp ghép (4 - 5 tuổi)',
+      ];
     }
     if (config.schoolLevel === 'Tiểu học') {
       return ['Lớp 1', 'Lớp 2', 'Lớp 3', 'Lớp 4', 'Lớp 5'];
@@ -630,7 +642,8 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                 let newSubject = config.subject;
 
                 if (newLevel === 'Mầm non') {
-                  setIsCustomGradeInput(false);
+                  setIsCustomGrade(false);
+                  setCustomGradeText('');
                   newGrade = 'Mẫu giáo lớn (5-6 tuổi)';
                   if (!MAM_NON_SUBJECTS_LIST.includes(newSubject || '')) {
                     newSubject = MAM_NON_SUBJECTS_LIST[0];
@@ -644,7 +657,8 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                     enableAI: true,
                   });
                 } else {
-                  setIsCustomGradeInput(false);
+                  setIsCustomGrade(false);
+                  setCustomGradeText('');
                   if (newLevel === 'Tiểu học') newGrade = 'Lớp 5';
                   if (newLevel === 'THCS') newGrade = 'Lớp 6';
                   if (newLevel === 'THPT') newGrade = 'Lớp 10';
@@ -732,9 +746,11 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                     onChange={(e) => {
                       const newSubj = e.target.value;
                       const isNewHDTN = newSubj.toLowerCase().includes('hoạt động trải nghiệm') || newSubj.toLowerCase().includes('hđtn');
+                      const isNewPreschool8 = config.schoolLevel === 'Mầm non' && MAM_NON_NEW_ACTIVITIES.includes(newSubj);
                       onChangeConfig({
                         subject: newSubj,
                         lessonTitle: '',
+                        ...(isNewPreschool8 ? { enablePreschool388Criteria: true } : {}),
                         ...(isNewHDTN ? { enableAI: false, enableNLS: false, enableSTEM: false } : {}),
                       });
                     }}
@@ -770,92 +786,223 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
               <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
             </div>
           )}
+
+          {/* THÔNG BÁO HOẠT ĐỘNG MỚI THEO QĐ 388/QĐ-BGDĐT */}
+          {config.schoolLevel === 'Mầm non' && MAM_NON_NEW_ACTIVITIES.includes(config.subject) && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-50/80 border border-blue-200 text-blue-900 text-[11px]">
+              <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 animate-pulse"></span>
+              <span className="font-bold">Hoạt động theo QĐ 388/QĐ-BGDĐT:</span>
+              <span className="text-blue-800 font-medium">Bắt buộc gắn mã chỉ báo tiêu chí (xem khối bên dưới).</span>
+            </div>
+          )}
         </div>
+
+        {/* MẪU GIÁO ÁN CHUẨN CHO HOẠT ĐỘNG TẬP TÔ CHỮ CÁI */}
+        {config.schoolLevel === 'Mầm non' && (config.subject === 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI' || config.subject?.toLowerCase().includes('tập tô')) && (
+          <div className="p-3 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50/80 border border-blue-200 text-blue-950 text-xs flex flex-col gap-2 shadow-2xs">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 font-bold text-blue-900">
+                <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
+                <span>Mẫu chuẩn: Bé tô, đồ, sao chép nét thẳng, nét xiên</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setDocxFileName('Mẫu_Tập_Tô_Nét_Thẳng_Xiên.docx');
+                  setDocxStatusMsg('Đã nạp giáo án mẫu chuẩn (5 bước)');
+                  onChangeConfig({
+                    lessonTitle: 'Bé tô, đồ, sao chép nét thẳng, nét xiên trái, nét xiên phải',
+                    oldPlanContent: SAMPLE_LETTER_TRACING_LESSON_PLAN_DOC,
+                    imageSlots: [],
+                  });
+                }}
+                className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-[11px] shadow-xs cursor-pointer transition-colors whitespace-nowrap active:scale-95"
+              >
+                Nạp mẫu này
+              </button>
+            </div>
+            <p className="text-[11px] text-blue-800/85 leading-relaxed">
+              Kế hoạch bài dạy chuẩn chương trình mới: 4 phần mục tiêu (Kiến thức, Kỹ năng, Phẩm chất, Năng lực), chuẩn bị 3 phần, tiến trình 5 bước bảng 2 cột (Cô | Trẻ), quy tắc "Nhìn mẫu – Đặt bút – Đúng hướng – Dừng đúng điểm" và trò chơi củng cố.
+            </p>
+          </div>
+        )}
+
+        {/* MẪU GIÁO ÁN CHUẨN CHO HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI */}
+        {config.schoolLevel === 'Mầm non' && (config.subject === 'HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI' || config.subject?.toLowerCase().includes('trò chơi chữ cái')) && (
+          <div className="p-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50/80 border border-emerald-200 text-emerald-950 text-xs flex flex-col gap-2 shadow-2xs">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 font-bold text-emerald-900">
+                <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>Mẫu chuẩn: Chơi với chữ cái o, ô, ơ</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setDocxFileName('Mẫu_Trò_Chơi_Chữ_Cái_O_Ô_Ơ.docx');
+                  setDocxStatusMsg('Đã nạp giáo án mẫu chuẩn (5 bước)');
+                  onChangeConfig({
+                    lessonTitle: 'Chơi với chữ cái o, ô, ơ',
+                    oldPlanContent: SAMPLE_TRO_CHOI_CHU_CAI_LESSON_PLAN_DOC,
+                    imageSlots: [],
+                  });
+                }}
+                className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[11px] shadow-xs cursor-pointer transition-colors whitespace-nowrap active:scale-95"
+              >
+                Nạp mẫu này
+              </button>
+            </div>
+            <p className="text-[11px] text-emerald-800/85 leading-relaxed">
+              Chuẩn 5 bước bảng 2 cột: 4 phần mục tiêu, chuẩn bị chi tiết, tiến trình 5 trò chơi sinh động (Ai tìm chữ nhanh, Về đúng nhà, Chuyền chữ tiếp sức, Ghép chữ tạo từ, Săn tìm chữ cái).
+            </p>
+          </div>
+        )}
+
+        {/* MẪU GIÁO ÁN CHUẨN CHO TRÒ CHƠI HỌC TẬP */}
+        {config.schoolLevel === 'Mầm non' && (config.subject === 'TRÒ CHƠI HỌC TẬP' || config.subject?.toLowerCase().includes('trò chơi học tập')) && (
+          <div className="p-3 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50/80 border border-amber-200 text-amber-950 text-xs flex flex-col gap-2 shadow-2xs">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 font-bold text-amber-900">
+                <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>Mẫu chuẩn: Trò chơi học tập: Tìm bạn thân</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setDocxFileName('Mẫu_Trò_Chơi_Học_Tập_Tìm_Bạn_Thân.docx');
+                  setDocxStatusMsg('Đã nạp giáo án mẫu chuẩn (5 bước)');
+                  onChangeConfig({
+                    lessonTitle: 'Trò chơi học tập: Tìm bạn thân',
+                    oldPlanContent: SAMPLE_TRO_CHOI_HOC_TAP_LESSON_PLAN_DOC,
+                    imageSlots: [],
+                  });
+                }}
+                className="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-semibold text-[11px] shadow-xs cursor-pointer transition-colors whitespace-nowrap active:scale-95"
+              >
+                Nạp mẫu này
+              </button>
+            </div>
+            <p className="text-[11px] text-amber-800/85 leading-relaxed">
+              Chuẩn 5 bước bảng 2 cột: Thỏa thuận luật chơi, Lần 1 tìm bạn theo biểu tượng, Lần 2 tìm bạn theo đặc điểm/sở thích, Tình huống xử lý chia sẻ cảm xúc và gắn kết tình bạn.
+            </p>
+          </div>
+        )}
+
+        {/* MẪU GIÁO ÁN CHUẨN CHO KHÁM PHÁ XÃ HỘI */}
+        {config.schoolLevel === 'Mầm non' && (config.subject === 'KHÁM PHÁ XÃ HỘI' || config.subject?.toLowerCase().includes('khám phá xã hội')) && (
+          <div className="p-3 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50/80 border border-purple-200 text-purple-950 text-xs flex flex-col gap-2 shadow-2xs">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 font-bold text-purple-900">
+                <Sparkles className="w-4 h-4 text-purple-600 shrink-0" />
+                <span>Mẫu chuẩn: Khám phá đồ dùng, đồ chơi và các hoạt động trong lớp học</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setDocxFileName('Mẫu_Khám_Phá_Xã_Hội_Đồ_Dùng_Đồ_Chơi.docx');
+                  setDocxStatusMsg('Đã nạp giáo án mẫu chuẩn (5 bước)');
+                  onChangeConfig({
+                    lessonTitle: 'Khám phá đồ dùng, đồ chơi và các hoạt động trong lớp học của bé',
+                    oldPlanContent: SAMPLE_KHAM_PHA_XA_HOI_LESSON_PLAN_DOC,
+                    imageSlots: [],
+                  });
+                }}
+                className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-[11px] shadow-xs cursor-pointer transition-colors whitespace-nowrap active:scale-95"
+              >
+                Nạp mẫu này
+              </button>
+            </div>
+            <p className="text-[11px] text-purple-800/85 leading-relaxed">
+              Chuẩn Lĩnh vực Phát triển nhận thức (Khám phá xã hội): Chiếc túi bí mật, khám phá các góc trong lớp, so sánh công dụng, trò chơi "Đưa đồ chơi về đúng nhà" và kỹ năng dọn dẹp ngăn nắp.
+            </p>
+          </div>
+        )}
+
+        {/* MẪU GIÁO ÁN CHUẨN CHO LÀM QUEN VỚI TOÁN / LỚP GHÉP */}
+        {config.schoolLevel === 'Mầm non' && (
+          config.subject === 'Làm quen với toán' || 
+          config.subject?.toLowerCase().includes('toán') ||
+          config.subject?.toLowerCase().includes('nhận thức') ||
+          config.grade?.toLowerCase().includes('ghép')
+        ) && (
+          <div className="p-3 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50/80 border border-blue-200 text-blue-950 text-xs flex flex-col gap-2 shadow-2xs">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 font-bold text-blue-900">
+                <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
+                <span>Mẫu chuẩn: Toán lớp ghép 3-4-5 tuổi (Đếm đến 7, nhận biết số 7)</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setDocxFileName('Mau_Giao_An_Toan_Lop_Ghep_Dem_Den_7.docx');
+                  setDocxStatusMsg('Đã nạp giáo án mẫu chuẩn (5 bước phân hóa 3-4-5 tuổi)');
+                  onChangeConfig({
+                    subject: 'Làm quen với toán',
+                    grade: 'Lớp ghép (3 - 4 - 5 tuổi)',
+                    lessonTitle: 'Đếm đến 7. Nhận biết các nhóm có 7 đối tượng. Nhận biết số 7',
+                    oldPlanContent: SAMPLE_TOAN_LOP_GHEP_LESSON_PLAN_DOC,
+                    imageSlots: [],
+                  });
+                }}
+                className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-[11px] shadow-xs cursor-pointer transition-colors whitespace-nowrap active:scale-95"
+              >
+                Nạp mẫu này
+              </button>
+            </div>
+            <p className="text-[11px] text-blue-800/85 leading-relaxed">
+              Chuẩn phân hóa 3 độ tuổi (5 tuổi, 4 tuổi, 3 tuổi): Kiến thức & Kỹ năng theo từng độ tuổi, tiến trình 5 bước bảng 2 cột chi tiết cả hoạt động cô và trẻ.
+            </p>
+          </div>
+        )}
 
         {/* 3. ĐỘ TUỔI / KHỐI LỚP */}
         <div className="form-group flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
             <label className="text-xs font-bold text-red-600 flex items-center gap-1.5">
-              3. Độ tuổi/Khối lớp <span className="text-rose-500">*</span>
+              3. {config.schoolLevel === 'Mầm non' ? 'Độ tuổi' : 'Độ tuổi/Khối lớp'} <span className="text-rose-500">*</span>
             </label>
             <button
               type="button"
               onClick={() => {
-                const next = !isCustomGradeInput;
-                setIsCustomGradeInput(next);
+                if (!isCustomGrade) {
+                  setIsCustomGrade(true);
+                  const initialText = config.grade && !allGrades.includes(config.grade) ? config.grade : '';
+                  setCustomGradeText(initialText);
+                  onChangeConfig({ grade: initialText, lessonTitle: '' });
+                } else {
+                  setIsCustomGrade(false);
+                  const defaultGrade = allGrades[0] || (config.schoolLevel === 'Mầm non' ? 'Mẫu giáo lớn (5-6 tuổi)' : 'Lớp 1');
+                  setCustomGradeText('');
+                  onChangeConfig({ grade: defaultGrade, lessonTitle: '' });
+                }
               }}
-              className="text-[11px] text-amber-800 hover:text-amber-900 hover:underline font-semibold cursor-pointer flex items-center gap-1 bg-amber-50/70 hover:bg-amber-100/80 px-2 py-0.5 rounded border border-amber-200/80 transition-colors"
-              title={isCustomGradeInput ? 'Quay lại danh mục độ tuổi chuẩn' : 'Tự nhập tên độ tuổi/khối lớp khác'}
+              className="text-[11px] text-amber-800 hover:underline font-semibold cursor-pointer"
             >
-              {isCustomGradeInput ? '📋 Chọn mẫu chuẩn' : '✍️ Nhập độ tuổi khác'}
+              {isCustomGrade
+                ? (config.schoolLevel === 'Mầm non' ? '← Chọn độ tuổi có sẵn' : '← Chọn khối lớp có sẵn')
+                : (config.schoolLevel === 'Mầm non' ? '✍️ Độ tuổi khác' : '✍️ Khối lớp khác')}
             </button>
           </div>
 
-          {isCustomGradeInput ? (
-            <div className="flex flex-col gap-1.5">
-              <div className="relative flex items-center">
-                <input
-                  type="text"
-                  value={config.grade || ''}
-                  onChange={(e) => onChangeConfig({ grade: e.target.value, lessonTitle: '' })}
-                  placeholder={config.schoolLevel === 'Mầm non' 
-                    ? "Nhập độ tuổi (ví dụ: Nhà trẻ 18-24 tháng, Lớp Mầm 3-4 tuổi, Lớp ghép...)" 
-                    : "Nhập khối lớp khác..."}
-                  className="w-full bg-white border-2 border-amber-500/80 focus:border-amber-600 rounded-lg pl-8 pr-20 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 shadow-xs transition-all"
-                  autoFocus
-                />
-                <span className="absolute left-2.5 top-2.5 text-xs pointer-events-none select-none">✍️</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsCustomGradeInput(false);
-                    if (!allGrades.includes(config.grade)) {
-                      onChangeConfig({ grade: allGrades[0] || 'Mẫu giáo lớn (5-6 tuổi)', lessonTitle: '' });
-                    }
-                  }}
-                  className="absolute right-1.5 top-1.5 px-2 py-1 text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-md border border-slate-300 transition-colors cursor-pointer"
-                >
-                  Chọn mẫu
-                </button>
-              </div>
-
-              {/* Gợi ý nhanh các nhóm độ tuổi mầm non */}
-              {config.schoolLevel === 'Mầm non' && (
-                <div className="flex flex-wrap items-center gap-1 pt-0.5">
-                  <span className="text-[10px] text-slate-400 font-medium">Gợi ý nhanh:</span>
-                  {[
-                    'Nhà trẻ (12-18 tháng)',
-                    'Nhà trẻ (18-24 tháng)',
-                    'Nhà trẻ (24-36 tháng)',
-                    'Lớp Mầm (3-4 tuổi)',
-                    'Lớp Chồi (4-5 tuổi)',
-                    'Lớp Lá (5-6 tuổi)',
-                    'Lớp ghép (3-5 tuổi)',
-                    'Lớp ghép (4-5 & 5-6 tuổi)',
-                  ].map((quickAge) => (
-                    <button
-                      key={quickAge}
-                      type="button"
-                      onClick={() => onChangeConfig({ grade: quickAge, lessonTitle: '' })}
-                      className={`text-[10px] px-1.5 py-0.5 rounded border transition-colors cursor-pointer ${
-                        config.grade === quickAge
-                          ? 'bg-amber-500 text-white border-amber-600 font-bold shadow-xs'
-                          : 'bg-white text-slate-600 border-slate-200 hover:bg-amber-50 hover:text-amber-800'
-                      }`}
-                    >
-                      {quickAge}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+          {isCustomGrade ? (
+            <input
+              type="text"
+              value={customGradeText}
+              onChange={(e) => {
+                setCustomGradeText(e.target.value);
+                onChangeConfig({ grade: e.target.value, lessonTitle: '' });
+              }}
+              placeholder={config.schoolLevel === 'Mầm non' ? "Nhập độ tuổi (ví dụ: Mẫu giáo 3-4 tuổi, 18-24 tháng, Lớp ghép...)" : "Nhập khối lớp..."}
+              className="w-full bg-[#f8fafc] border border-amber-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
+            />
           ) : (
             <div className="relative">
               <select
                 value={config.grade}
                 onChange={(e) => {
-                  if (e.target.value === '__custom__') {
-                    setIsCustomGradeInput(true);
+                  if (e.target.value === '__custom_grade__') {
+                    setIsCustomGrade(true);
+                    setCustomGradeText('');
+                    onChangeConfig({ grade: '', lessonTitle: '' });
                   } else {
                     onChangeConfig({ grade: e.target.value, lessonTitle: '' });
                   }
@@ -867,13 +1014,8 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                     {gr}
                   </option>
                 ))}
-                {config.grade && !allGrades.includes(config.grade) && (
-                  <option value={config.grade} className="bg-amber-50 text-amber-900 font-bold">
-                    ✍️ {config.grade} (Đang chọn)
-                  </option>
-                )}
-                <option value="__custom__" className="text-amber-800 font-bold bg-amber-50">
-                  ✍️ Nhập tên độ tuổi khác...
+                <option value="__custom_grade__" className="bg-amber-50 text-amber-900 font-semibold">
+                  ✍️ {config.schoolLevel === 'Mầm non' ? 'Độ tuổi khác...' : 'Khối lớp khác...'}
                 </option>
               </select>
               <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
@@ -940,6 +1082,36 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
             />
           )}
         </div>
+
+        {/* VỊ TRÍ THÊM TIÊU CHÍ CHO 8 LĨNH VỰC MỚI THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT */}
+        {config.schoolLevel === 'Mầm non' && (
+          isPreschoolNew8Activity(config.subject, config.lessonTitle) ||
+          MAM_NON_NEW_ACTIVITIES.includes(config.subject) ||
+          config.enablePreschool388Criteria
+        ) && (
+          <div className="form-group flex flex-col gap-1.5 pt-1">
+            <Preschool388CriteriaSection
+              config={config}
+              onChangeConfig={onChangeConfig}
+            />
+          </div>
+        )}
+
+        {/* NÚT TÙY CHỌN MỞ BỘ TIÊU CHÍ QĐ 388 CHO CÁC MÔN MẦM NON KHÁC NẾU MUỐN */}
+        {config.schoolLevel === 'Mầm non' &&
+          !isPreschoolNew8Activity(config.subject, config.lessonTitle) &&
+          !MAM_NON_NEW_ACTIVITIES.includes(config.subject) &&
+          !config.enablePreschool388Criteria && (
+            <div className="flex items-center justify-between px-1">
+              <button
+                type="button"
+                onClick={() => onChangeConfig({ enablePreschool388Criteria: true })}
+                className="text-[11px] text-blue-700 hover:text-blue-900 font-semibold flex items-center gap-1 hover:underline cursor-pointer"
+              >
+                <span>🎯 + Thêm vị trí tiêu chí theo QĐ 388/QĐ-BGDĐT (Tùy chọn)</span>
+              </button>
+            </div>
+          )}
 
         {/* 5 & 6. SỐ TIẾT & TIẾT PPCT (ẨN KHI LÀ MẦM NON) */}
         {config.schoolLevel !== 'Mầm non' && (

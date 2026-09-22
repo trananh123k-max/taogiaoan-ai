@@ -12,6 +12,7 @@ export type PreschoolDomainType =
   | 'PLAY_INDOOR' // Hoạt động vui chơi trong lớp
   | 'OUTDOOR' // Hoạt động ngoài trời
   | 'PHYSICAL_GAME' // Trò chơi vận động
+  | 'LEARNING_GAME' // Trò chơi học tập
   | 'SKILL_EDU' // Hoạt động giáo dục kỹ năng
   | 'FOLK_GAME' // Trò chơi dân gian
   | 'VIETNAMESE_ENHANCE' // Hoạt động tăng cường tiếng Việt
@@ -103,7 +104,19 @@ export function detectPreschoolDomain(
   }
 
   // 1.5 HOẠT ĐỘNG TẬP TÔ CHỮ CÁI
-  if (s.includes('tập tô') || t.includes('tập tô') || t.includes('tô chữ cái') || t.includes('tô nét')) {
+  if (
+    s.includes('tập tô') ||
+    s.includes('to chu cai') ||
+    t.includes('tập tô') ||
+    t.includes('tô chữ cái') ||
+    t.includes('tô nét') ||
+    t.includes('sao chép nét') ||
+    s.includes('sao chép nét') ||
+    t.includes('tô, đồ') ||
+    t.includes('tô đồ') ||
+    t.includes('nét thẳng') ||
+    t.includes('nét xiên')
+  ) {
     return {
       domainType: 'LETTER_TRACING',
       mainHeader: 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
@@ -113,11 +126,21 @@ export function detectPreschoolDomain(
   }
 
   // 1.6 HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI
-  if (s.includes('trò chơi chữ cái') || t.includes('trò chơi chữ cái') || t.includes('trò chơi với chữ cái') || t.includes('tc chữ cái')) {
+  if (s.includes('trò chơi chữ cái') || t.includes('trò chơi chữ cái') || t.includes('trò chơi với chữ cái') || t.includes('chơi với chữ cái') || t.includes('tc chữ cái')) {
     return {
       domainType: 'LETTER_GAME',
       mainHeader: 'HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI',
       defaultDomainName: 'Hoạt động trò chơi chữ cái',
+      isMusic: false,
+    };
+  }
+
+  // 1.6.1 TRÒ CHƠI HỌC TẬP
+  if (s.includes('trò chơi học tập') || t.includes('trò chơi học tập') || t.includes('tìm bạn thân')) {
+    return {
+      domainType: 'LEARNING_GAME',
+      mainHeader: 'TRÒ CHƠI HỌC TẬP',
+      defaultDomainName: 'Trò chơi học tập',
       isMusic: false,
     };
   }
@@ -199,7 +222,19 @@ export function detectPreschoolDomain(
     };
   }
 
-  // 5. SKILLS & SOCIAL (Tình cảm - Xã hội / Kỹ năng sống / Khám phá xã hội)
+  // 4.1 SOCIAL (Khám phá xã hội / Lĩnh vực nhận thức)
+  const isSocialSubject = s.includes('khám phá xã hội') || s.includes('kpxh') || (s.includes('nhận thức') && s.includes('xã hội'));
+  const isSocialTitle = t.includes('khám phá xã hội') || t.includes('đồ dùng, đồ chơi') || t.includes('lớp học của bé') || t.includes('đồ dùng đồ chơi');
+  if (isSocialSubject || isSocialTitle) {
+    return {
+      domainType: 'SOCIAL',
+      mainHeader: 'LĨNH VỰC: PHÁT TRIỂN NHẬN THỨC\nHOẠT ĐỘNG: KHÁM PHÁ XÃ HỘI',
+      defaultDomainName: 'Lĩnh vực Phát triển nhận thức (Khám phá xã hội)',
+      isMusic: false,
+    };
+  }
+
+  // 5. SKILLS & SOCIAL (Tình cảm - Xã hội / Kỹ năng sống)
   const isSkillsSubject = s.includes('tình cảm') || s.includes('kỹ năng') || (s.includes('xã hội') && !s.includes('khoa học'));
   const isSkillsTitle = t.includes('tết') || t.includes('cảm xúc') || t.includes('lễ phép') ||
     t.includes('xin phép') || t.includes('chào hỏi') || t.includes('cất đồ chơi') ||
@@ -541,8 +576,26 @@ export function formatPreschoolActivities(activities: any[], lessonTitle: string
 
   if (domain.domainType === 'ART') {
     step1Name = "1. Khởi động – Tạo tình huống có ý nghĩa";
-  } else if (domain.domainType === 'SKILLS' || domain.domainType === 'SOCIAL') {
+  } else if (domain.domainType === 'SOCIAL') {
+    step1Name = "1. Khởi động - Tạo tình huống";
+    step2Name = "2. Khám phá và trải nghiệm";
+    step3Name = "3. Chia sẻ - Thảo luận";
+    step4Name = "4. Vận dụng và mở rộng";
+    step5Name = "5. Đánh giá và điều chỉnh";
+  } else if (domain.domainType === 'LETTER_GAME' || domain.domainType === 'LEARNING_GAME') {
+    step1Name = "1. Gợi hứng thú – hình thành và lựa chọn ý tưởng chơi";
+    step2Name = "2. Thỏa thuận – Lập kế hoạch chơi";
+    step3Name = "3. Thực hiện hoạt động chơi";
+    step4Name = "4. Mở rộng và phát triển";
+    step5Name = "5. Chia sẻ – Đánh giá – Kết thúc chơi";
+  } else if (domain.domainType === 'SKILLS') {
     step5Name = "5. Đánh giá – Điều chỉnh";
+  } else if (domain.domainType === 'LETTER_TRACING') {
+    step1Name = "1. Gợi hứng thú – Hình thành và lựa chọn ý tưởng";
+    step2Name = "2. Thỏa thuận - Lập kế hoạch thực hiện";
+    step3Name = "3. Thực hiện hoạt động";
+    step4Name = "4. Mở rộng và phát triển kỹ năng";
+    step5Name = "5. Chia sẻ – Đánh giá – Kết thúc";
   }
 
   const defaultNames = [
@@ -576,15 +629,15 @@ export function formatPreschoolActivities(activities: any[], lessonTitle: string
       determinedIndex = act.index;
     } else if (act.name) {
       const lower = act.name.toLowerCase();
-      if (/^1[\.\s\-–—]/.test(lower) || lower.includes('khởi động') || lower.includes('tạo tình huống') || lower.includes('tạo hứng thú')) {
+      if (/^1[\.\s\-–—]/.test(lower) || lower.includes('khởi động') || lower.includes('gợi hứng thú') || lower.includes('tạo tình huống') || lower.includes('tạo hứng thú')) {
         determinedIndex = 1;
-      } else if (/^2[\.\s\-–—]/.test(lower) || lower.includes('khám phá') || lower.includes('trải nghiệm')) {
+      } else if (/^2[\.\s\-–—]/.test(lower) || lower.includes('thỏa thuận') || lower.includes('lập kế hoạch') || lower.includes('khám phá') || lower.includes('trải nghiệm')) {
         determinedIndex = 2;
-      } else if (/^5[\.\s\-–—]/.test(lower) || lower.includes('đánh giá') || lower.includes('điều chỉnh') || lower.includes('hồi tĩnh') || (lower.includes('chia sẻ') && lower.includes('đánh giá'))) {
+      } else if (/^5[\.\s\-–—]/.test(lower) || lower.includes('kết thúc') || lower.includes('đánh giá') || lower.includes('điều chỉnh') || lower.includes('hồi tĩnh') || (lower.includes('chia sẻ') && lower.includes('đánh giá'))) {
         determinedIndex = 5;
-      } else if (/^4[\.\s\-–—]/.test(lower) || lower.includes('vận dụng') || lower.includes('mở rộng') || lower.includes('thực hành')) {
+      } else if (/^4[\.\s\-–—]/.test(lower) || lower.includes('phát triển kỹ năng') || lower.includes('vận dụng') || lower.includes('mở rộng') || lower.includes('thực hành')) {
         determinedIndex = 4;
-      } else if (/^3[\.\s\-–—]/.test(lower) || lower.includes('thảo luận') || lower.includes('chia sẻ')) {
+      } else if (/^3[\.\s\-–—]/.test(lower) || lower.includes('thực hiện hoạt động') || lower.includes('thảo luận') || lower.includes('chia sẻ')) {
         determinedIndex = 3;
       }
     }
@@ -1085,6 +1138,7 @@ export const MAM_NON_8_NEW_ACTIVITIES_LIST = [
   'HOẠT ĐỘNG VUI CHƠI TRONG LỚP',
   'HOẠT ĐỘNG NGOÀI TRỜI',
   'TRÒ CHƠI VẬN ĐỘNG',
+  'TRÒ CHƠI HỌC TẬP',
   'HOẠT ĐỘNG GIÁO DỤC KỸ NĂNG',
   'TRÒ CHƠI DÂN GIAN',
   'HOẠT ĐỘNG TĂNG CƯỜNG TIẾNG VIỆT',
@@ -1235,32 +1289,51 @@ export function analyzePreschoolAgeProfile(grade: string = ''): PreschoolAgeProf
   const g = (grade || '').trim();
   const lower = g.toLowerCase();
 
-  // 1. Kiểm tra lớp ghép / nhiều độ tuổi (ví dụ: Lớp ghép 3-5 tuổi, Ghép 4-5 và 5-6 tuổi...)
+  // 1. Kiểm tra lớp ghép / nhiều độ tuổi (ví dụ: Lớp ghép 3-5 tuổi, Ghép 4-5 và 5-6 tuổi, Lớp ghép 3-4-5 tuổi...)
   const isMixed = lower.includes('ghép') || 
+                  lower.includes('3-4-5') || lower.includes('3 - 4 - 5') || lower.includes('3, 4, 5') || lower.includes('3,4,5') ||
+                  lower.includes('đa độ tuổi') || lower.includes('nhiều độ tuổi') || lower.includes('hỗn hợp') ||
+                  /\b(3|4|5)\s*[-–,\+và\&]+\s*(3|4|5)\s*[-–,\+và\&]+\s*(3|4|5)/.test(lower) ||
                   (lower.includes('tuổi') && (lower.includes('&') || lower.includes('và') || lower.includes('+') || /\d\s*-\s*\d.*(?:\&|\bvà\b|\+).*\d\s*-\s*\d/.test(lower)));
   
   if (isMixed) {
+    const is345 = lower.includes('3') && lower.includes('4') && lower.includes('5');
     return {
       rawGrade: g,
       category: 'MIXED_AGE',
-      standardName: 'Lớp mầm non ghép độ tuổi',
-      recommendedDuration: '25 – 30 phút',
+      standardName: is345 ? 'Lớp mẫu giáo ghép (3 – 4 – 5 tuổi)' : 'Lớp mầm non ghép độ tuổi',
+      recommendedDuration: '30 – 35 phút',
       developmentalTraits: [
-        'Lớp học bao gồm các trẻ có nhiều lứa tuổi khác nhau (thường chênh nhau 1-2 tuổi)',
-        'Mức độ nhận thức, ngôn ngữ và khả năng vận động không đồng đều giữa các nhóm trẻ',
-        'Trẻ lớn có xu hướng thể hiện và che chở cho trẻ nhỏ; trẻ nhỏ học hỏi rất nhanh từ việc quan sát bạn lớn'
+        'Lớp học bao gồm các trẻ có nhiều lứa tuổi khác nhau (thường là 3 tuổi, 4 tuổi và 5 tuổi)',
+        'Mức độ nhận thức, tư duy toán học, ngôn ngữ và khả năng vận động có sự chênh lệch rõ rệt giữa các độ tuổi',
+        'Trẻ 5 tuổi có tính tự lập cao, tư duy biểu tượng tốt; trẻ 4 tuổi bắt đầu biết so sánh, phối hợp; trẻ 3 tuổi học qua bắt chước và cần sự trợ giúp trực tiếp từ cô và các anh chị lớn'
       ],
-      cognitiveFocus: 'Thiết kế mục tiêu phân hóa 2 mức: Mức cơ bản cho nhóm trẻ nhỏ tuổi hơn và Mức mở rộng/nâng cao cho nhóm trẻ lớn tuổi hơn.',
-      languageAndSpeech: 'Cô dùng ngôn ngữ gần gũi, giao tiếp đa tầng; khuyến khích trẻ lớn giải thích hoặc trò chuyện cùng trẻ nhỏ.',
-      motorSkills: 'Đa dạng hóa bài tập và dụng cụ: đồ dùng to dễ thao tác cho trẻ nhỏ, đồ dùng tinh xảo hơn cho trẻ lớn.',
-      pedagogicalStrategy: 'DẠY HỌC PHÂN HÓA: Tổ chức hoạt động chung ở phần mở đầu và kết thúc. Ở phần Khám phá/Trải nghiệm và Thực hành, giao 2 mức độ nhiệm vụ rõ rệt (Nhóm 1: trẻ nhỏ; Nhóm 2: trẻ lớn). Cô luân phiên hướng dẫn trực tiếp nhóm nhỏ và gợi ý nhóm lớn làm việc độc lập.',
+      cognitiveFocus: is345 
+        ? 'Thiết kế mục tiêu phân hóa 3 mức rõ ràng theo từng lứa tuổi (5 tuổi: nhận biết số lượng, đếm, so sánh, thêm bớt, nhận biết chữ số; 4 tuổi: đếm, tạo nhóm, xếp tương ứng 1-1, so sánh; 3 tuổi: đếm theo cô, đếm cùng các bạn).'
+        : 'Thiết kế mục tiêu phân hóa theo từng nhóm tuổi tương ứng trong lớp ghép.',
+      languageAndSpeech: 'Cô dùng ngôn ngữ linh hoạt: với trẻ 3 tuổi dùng câu ngắn trực quan, với trẻ 4-5 tuổi dùng câu hỏi gợi mở, so sánh và giải thích lý do.',
+      motorSkills: 'Đa dạng hóa học liệu: đồ dùng trực quan to, dễ cầm cho trẻ 3 tuổi; thẻ số, que tính, bộ ghép tương ứng cho trẻ 4 và 5 tuổi.',
+      pedagogicalStrategy: 'DẠY HỌC PHÂN HÓA ĐỘ TUỔI: Chung chủ đề/đề tài nhưng phân hóa mức độ yêu cầu và nhiệm vụ theo từng độ tuổi. Cô luân phiên hướng dẫn trực tiếp nhóm nhỏ (3 tuổi) và bao quát, kích thích nhóm lớn (4-5 tuổi) tự lập, hợp tác.',
       promptGuidance: `BẮT BUỘC THIẾT KẾ GIÁO ÁN PHÂN HÓA ĐỘ TUỔI CHO LỚP GHÉP (${g}):
-- Trong phần Mục đích - yêu cầu (Kiến thức, Kỹ năng): Ghi rõ yêu cầu phân hóa cho từng nhóm tuổi (ví dụ: Với trẻ nhỏ tuổi hơn...; Với trẻ lớn tuổi hơn...).
-- Trong Bảng Tiến trình hoạt động (Đặc biệt ở Bước 2 Khám phá - Trải nghiệm và Bước 4 Thực hành - Vận dụng):
-  + Tách rõ hành động của cô và trẻ theo từng nhóm:
-    * Nhóm trẻ nhỏ hơn: Làm quen thao tác cơ bản, nhận biết trực quan, cô trực tiếp hỗ trợ, động viên âu yếm.
-    * Nhóm trẻ lớn hơn: Tự thực hiện nhiệm vụ nâng cao hơn, sáng tạo hơn, hoặc hỗ trợ bạn nhỏ.
-- Đồ dùng chuẩn bị phải có phân loại phù hợp cho cả 2 nhóm độ tuổi.`
+- Trong phần I. MỤC ĐÍCH - YÊU CẦU:
+  + 1. Kiến thức: BẮT BUỘC PHÂN HÓA RÕ TỪNG ĐỘ TUỔI THEO ĐÚNG MẪU CHUẨN:
+${is345 ? `    - 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X, nhận biết chữ số X biểu thị cho các nhóm có số lượng X. Trẻ đếm từ 1 đến X, đọc được số X và các số nhỏ hơn X. So sánh 2 nhóm đối tượng, biết thêm bớt để có số lượng bằng nhau...
+    - 4 tuổi: Trẻ biết đếm đến X, nhận biết các nhóm có X đối tượng. Trẻ biết tạo nhóm, xếp tương ứng 1- 1, biết so sánh 2 nhóm đồ vật, biết đếm đúng số lượng và sử dụng đúng chữ số tương ứng theo cô và các bạn...
+    - 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô, đếm cùng các bạn.` : `    - Phân hóa rõ theo từng độ tuổi có trong lớp (ví dụ: - [Độ tuổi lớn]: ...; - [Độ tuổi nhỏ]: ...).`}
+  + 2. Kỹ năng: BẮT BUỘC PHÂN HÓA RÕ TỪNG ĐỘ TUỔI THEO ĐÚNG MẪU CHUẨN:
+${is345 ? `    - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh số lượng giữa 2 nhóm, thêm bớt tạo sự bằng nhau trong phạm vi X, chọn và gắn thẻ số X chính xác, nhanh nhẹn.
+    - 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1 thẳng hàng từ trái sang phải, đếm theo thứ tự, tìm đúng thẻ số X theo cô và bạn.
+    - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay và đếm theo cô, phát âm rõ từ chỉ số lượng.` : `    - Phân hóa rõ kỹ năng cho từng độ tuổi tương ứng trong lớp.`}
+  + 3. Phẩm chất: Yêu thương, Tôn trọng, Trung thực, Trách nhiệm (Nêu rõ tinh thần trẻ lớn biết yêu thương, chia sẻ, giúp đỡ các em nhỏ; trẻ nhỏ tôn trọng, học tập các anh chị lớn).
+  + 4. Năng lực: Tự lực, Thích ứng, Giao tiếp, Hợp tác (Trẻ lớn biết phối hợp và hỗ trợ em nhỏ).
+- Trong phần II. CHUẨN BỊ:
+  + Đồ dùng của cô và trẻ phải ghi rõ học liệu chuẩn bị phân hóa cho từng nhóm tuổi (trẻ 5 tuổi, 4 tuổi, 3 tuổi).
+- Trong phần III. TIẾN TRÌNH HOẠT ĐỘNG (Bảng 2 cột: Hoạt động của giáo viên & Hoạt động của trẻ):
+  + Ở các bước (Đặc biệt Bước 2 Khám phá - Trải nghiệm, Bước 3 Chia sẻ - Thảo luận, Bước 4 Vận dụng - Mở rộng):
+  + BẮT BUỘC PHÂN CHIA RÕ RÀNG HOẠT ĐỘNG CỦA CÔ VÀ TRẺ THEO TỪNG ĐỘ TUỔI:
+    * Hoạt động cho trẻ 5 tuổi: Thao tác nhiệm vụ nâng cao (xếp nhóm, so sánh, thêm bớt, gắn số, giải thích...).
+    * Hoạt động cho trẻ 4 tuổi: Thao tác nhiệm vụ cơ bản (xếp tương ứng 1-1, đếm, chọn số theo bạn...).
+    * Hoạt động cho trẻ 3 tuổi: Thao tác đếm cùng cô, quan sát và bắt chước các anh chị lớn.`
     };
   }
 

@@ -1,4 +1,5 @@
 import { PRESCHOOL_CURRICULUM_MATRIX, PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE } from './src/data/preschoolCurriculum.js';
+import { getCriteria388ByCode } from './src/data/preschool388Criteria.js';
 import { formatPreschoolMusicActivities, formatPreschoolActivities, isPreschoolMusicPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, sanitizePreschoolObjectives, analyzePreschoolAgeProfile } from './src/utils/preschoolUtils.js';
 import { NLS_DICTIONARY } from './src/data/nlsDictionary';
 import { getVerifiedLessons } from './src/data/verifiedCurriculumList';
@@ -2315,7 +2316,25 @@ MỤC ĐÍCH DUY NHẤT: BẢO TỒN NGUYÊN VẸN NỘI DUNG, HÌNH ẢNH, BÀI
   const nlsInstruction = config.enableNLS ? `\n- TÍCH HỢP NĂNG LỰC SỐ (NLS): Nếu người dùng chọn tích hợp NLS, BẮT BUỘC xuất vào mảng digitalCompetencies để hiển thị ở Mục "5. Tích hợp Năng lực số (NLS)". Mô tả rõ: Các hoạt động ứng dụng công nghệ, thiết bị số, màn hình tương tác hoặc hình ảnh/video mô phỏng phù hợp lứa tuổi mầm non (tuyệt đối KHÔNG dùng mã chỉ báo phổ thông).` : '';
   const aiInstruction = config.enableAI ? `\n- TÍCH HỢP TRÍ TUỆ NHÂN TẠO (AI): Nếu người dùng chọn tích hợp AI, BẮT BUỘC xuất vào mảng aiCompetencies để hiển thị ở Mục "6. Tích hợp Trí tuệ nhân tạo (AI)". Mô tả rõ: Giáo viên ứng dụng trợ lý AI tạo ra hình ảnh, âm thanh, câu chuyện, tranh ảnh minh họa sống động hoặc nhân vật ảo Robot trò chuyện với trẻ. Trẻ tương tác với AI thông qua sự hướng dẫn của giáo viên (tuyệt đối KHÔNG dùng mã chỉ báo phổ thông).` : '';
 
-  const preschoolObjectivesInstruction = isNew8Activity
+  const preschoolAgeProfile = isPreschool ? analyzePreschoolAgeProfile(grade || 'Mẫu giáo lớn (5-6 tuổi)') : null;
+  const isMixedAgeClass = preschoolAgeProfile?.category === 'MIXED_AGE';
+
+  const selected388Codes = config.selected388CriteriaCodes || [];
+  const custom388Text = config.custom388CriteriaText || '';
+  const hasCustom388Criteria = selected388Codes.length > 0 || !!custom388Text;
+
+  let preschool388CustomInstruction = '';
+  if (isPreschool && (isNew8Activity || config.enablePreschool388Criteria) && hasCustom388Criteria) {
+    preschool388CustomInstruction = `\n- BỘ TIÊU CHÍ YÊU CẦU CẦN ĐẠT THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT DO GIÁO VIÊN CHỌN CHO BÀI DẠY NÀY:
+${selected388Codes.map((code: string) => {
+  const crit = getCriteria388ByCode(code);
+  return crit ? `  + [Mã: ${crit.code}] (${crit.domainName}): ${crit.content}` : `  + [Mã: ${code}]`;
+}).join('\n')}
+${custom388Text ? `  + Tiêu chí riêng/bổ sung từ giáo viên: ${custom388Text}` : ''}
+BẮT BUỘC: Đưa đúng các tiêu chí và mã chỉ báo trên vào các gạch đầu dòng của "1. Kiến thức" và "2. Kỹ năng" trong Mục I (Mục đích - yêu cầu). Ví dụ: "- Trẻ nhận biết... (Mã: NT 1.1)", "- Rèn kỹ năng... (Mã: TC 1.1)".`;
+  }
+
+  const preschoolObjectivesInstruction = (isNew8Activity || config.enablePreschool388Criteria)
     ? `- ĐỐI VỚI 8 NỘI DUNG MỚI TÍCH HỢP (ÁP DỤNG CHUẨN YÊU CẦU THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT):
   + BẮT BUỘC ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng mã chỉ báo của Quyết định số 388/QĐ-BGDĐT (giống như ví dụ NT 1.1, NT 1.2, TC 1.1, TC 1.2, TC 3.1, TX 3.2, TX 4.3, TX 4.4, NN 1.2, NN 2.2...).
   + 1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ biết/nhận biết... (Mã: NT 1.1)")
@@ -2323,10 +2342,16 @@ MỤC ĐÍCH DUY NHẤT: BẢO TỒN NGUYÊN VẸN NỘI DUNG, HÌNH ẢNH, BÀI
     : `- ĐỐI VỚI GIÁO ÁN MẦM NON CŨ/TRUYỀN THỐNG (Văn học thơ/truyện, Làm quen chữ cái, Khám phá khoa học, Xã hội, Toán, Tạo hình, Âm nhạc, Thể chất, Tình cảm - KNXH...):
   + BẮT BUỘC LẤY LẠI ĐÚNG MẪU GIÁO ÁN BAN ĐẦU TRƯỚC KHI CẬP NHẬT 8 LĨNH VỰC MỚI, GIỮ NGUYÊN ĐỊNH DẠNG BAN ĐẦU.
   + TUYỆT ĐỐI KHÔNG ĐIỀN MÃ TIÊU CHÍ NÀO: KHÔNG ghi "(Mã: NN 5.1)", KHÔNG ghi "(Mã: NT 1.1)", KHÔNG ghi bất kỳ mã chỉ báo nào trong phần Kiến thức và Kỹ năng.
-  + 1. Kiến thức: Các gạch đầu dòng mô tả những gì trẻ biết, hiểu (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Trẻ biết tên bài thơ/bài hát...", "- Trẻ hiểu nội dung bài...".
-  + 2. Kỹ năng: Các gạch đầu dòng rèn luyện kỹ năng (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Rèn kỹ năng phát âm...", "- Phát triển kỹ năng vận động...".`;
-
-  const preschoolAgeProfile = isPreschool ? analyzePreschoolAgeProfile(grade || 'Mẫu giáo lớn (5-6 tuổi)') : null;
+  + 1. Kiến thức: Các gạch đầu dòng mô tả những gì trẻ biết, hiểu (TUYỆT ĐỐI KHÔNG GẮN MÃ).
+${isMixedAgeClass ? `    * ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): BẮT BUỘC PHÂN HÓA RÕ RÀNG KIẾN THỨC THEO TỪNG ĐỘ TUỔI (Ví dụ nếu lớp ghép 3-4-5 tuổi:
+      - 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X, nhận biết chữ số X biểu thị cho các nhóm có số lượng X. Trẻ đếm từ 1 đến X, đọc được số X và các số nhỏ hơn X. So sánh 2 nhóm đối tượng, biết thêm bớt để có số lượng bằng nhau.
+      - 4 tuổi: Trẻ biết đếm đến X, nhận biết các nhóm có X đối tượng. Trẻ biết tạo nhóm, xếp tương ứng 1- 1, biết so sánh 2 nhóm đồ vật, biết đếm đúng số lượng và sử dụng đúng chữ số tương ứng theo cô và các bạn.
+      - 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô, đếm cùng các bạn.)` : '    Ví dụ: "- Trẻ biết tên bài thơ/bài hát...", "- Trẻ hiểu nội dung bài...".'}
+  + 2. Kỹ năng: Các gạch đầu dòng rèn luyện kỹ năng (TUYỆT ĐỐI KHÔNG GẮN MÃ).
+${isMixedAgeClass ? `    * ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): BẮT BUỘC PHÂN HÓA RÕ RÀNG KỸ NĂNG THEO TỪNG ĐỘ TUỔI (Ví dụ nếu lớp ghép 3-4-5 tuổi:
+      - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh số lượng giữa 2 nhóm, thêm bớt tạo sự bằng nhau trong phạm vi X, chọn và gắn thẻ số X chính xác, nhanh nhẹn.
+      - 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1 thẳng hàng từ trái sang phải, đếm theo thứ tự không bỏ sót đối tượng, tìm đúng thẻ số X theo cô và bạn.
+      - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay và đếm theo cô, phát âm rõ từ chỉ số lượng.)` : '    Ví dụ: "- Rèn kỹ năng phát âm...", "- Phát triển kỹ năng vận động...".'}`;
   const ageSpecificInstruction = preschoolAgeProfile ? `
 =============================================================================
 ĐẶC BIỆT CHÚ Ý - PHÂN TÍCH VÀ CĂN CHỈNH TOÀN BỘ GIÁO ÁN THEO ĐỘ TUỔI: "${preschoolAgeProfile.rawGrade}" (${preschoolAgeProfile.standardName})
@@ -2352,6 +2377,7 @@ ${yccdInstruction}${nlsInstruction}${aiInstruction}
 
 - BẮT BUỘC soạn theo Kế hoạch tổ chức hoạt động giáo dục Mầm non, TUYỆT ĐỐI KHÔNG dùng Công văn 5512.
 ${preschoolObjectivesInstruction}
+${preschool388CustomInstruction}
 - Ngôn ngữ, hoạt động phải phù hợp với tâm lý lứa tuổi mầm non (cô và trẻ).
 - Tích hợp phát triển 4 phẩm chất cốt lõi: Yêu thương, Tôn trọng, Trung thực, Trách nhiệm.
 - Tích hợp phát triển 5 năng lực nền tảng: Giao tiếp, Hợp tác, Giải quyết vấn đề, Tự lực, Thích ứng.
@@ -2397,6 +2423,13 @@ Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động củ
   + Bước 4 BẮT BUỘC là "4. Thực hành – Vận dụng": Trẻ lần lượt thực hành theo hàng/nhóm từ dễ đến khó (cá nhân -> nhóm -> thi đua giữa các tổ); Cô bao quát sửa sai; Tổ chức trò chơi vận động củng cố hào hứng.
   + Bước 5 BẮT BUỘC là "5. Chia sẻ – Đánh giá và Hồi tĩnh": Trao đổi cảm nhận của trẻ sau buổi tập, cô nhận xét tuyên dương; Hồi tĩnh: Cho trẻ đi nhẹ nhàng 1 - 2 vòng quanh sân/phòng tập theo nhạc êm dịu, làm động tác chim bay thả lỏng cơ thể, hít thở sâu.
 - RIÊNG ĐỐI VỚI MÔN ÂM NHẠC (LĨNH VỰC NGHỆ THUẬT): Soạn RẤT CHI TIẾT VÀ KỸ LƯỠNG. Dùng VĂN PHONG SƯ PHẠM MẦM NON NGỌT NGÀO, DỊU DÀNG, TRÌU MẾN, GIÀU TÍNH NGHỆ THUẬT VÀ CẢM XÚC. QUY ĐỊNH BẮT BUỘC: Ở Mục "3. Chia sẻ – Thảo luận" BẮT BUỘC PHẢI CÓ ĐẦY ĐỦ 2 NỘI DUNG VỚI ĐÚNG ĐỀ MỤC: "a. Dạy hát: [Tên bài hát trọng tâm] (TT)" và "b. Nghe hát: [Tên bài nghe hát]" (KHÔNG CÓ LÀ SAI YÊU CẦU NGHIÊM TRỌNG). Trong cột Hoạt động của trẻ tuyệt đối KHÔNG chứa nhãn "a." hay "b." đứng riêng lẻ, chỉ ghi các gạch đầu dòng mô tả phản ứng, hành động của trẻ tương ứng cho từng phần dạy hát và nghe hát.
+- RIÊNG ĐỐI VỚI HOẠT ĐỘNG TẬP TÔ CHỮ CÁI (VÀ TẬP TÔ, ĐỒ, SAO CHÉP NÉT CƠ BẢN/CHỮ CÁI):
+  BẮT BUỘC tuân thủ đúng 5 bước chuẩn mực:
+  + Bước 1: "1. Gợi hứng thú – Hình thành và lựa chọn ý tưởng": Trò chơi ngón tay "Ngón tay nhảy múa", tạo tình huống nhân vật Bạn Bút Chì, quan sát hình ảnh thực tế chứa nét/chữ (ngôi nhà, hàng rào, tia nắng...), đàm thoại gợi mở tư thế ngồi và đặc điểm nét/chữ, dẫn dắt vào bài.
+  + Bước 2: "2. Thỏa thuận - Lập kế hoạch thực hiện": BẮT BUỘC có 3 nội dung trọng tâm rõ ràng: "* Hướng dẫn tư thế và cách cầm bút:" (ngồi thẳng lưng, mắt cách vở 25-30cm, cầm bút 3 ngón tay cái-trỏ-giữa, tay kia giữ vở), "* Hướng dẫn tô, đồ nét / chữ cái:" (cô làm mẫu đặt bút tại điểm bắt đầu, kéo theo đường chấm mờ đến điểm kết thúc, không đưa bút lung tung), "* Hướng dẫn sao chép nét / chữ cái:" (nhìn mẫu -> xác định điểm bắt đầu -> đưa bút đúng hướng -> dừng đúng điểm; quy tắc 4 bước: "Nhìn mẫu – Đặt bút – Đúng hướng – Dừng đúng điểm").
+  + Bước 3: "3. Thực hiện hoạt động": Trẻ thực hành từng bước (tư thế ngồi, đặt vở, cầm bút, tay giữ vở, tô/đồ/sao chép); Cô quan sát đến từng bàn nhẹ nhàng sửa tư thế ngồi, cách cầm bút và nét vẽ; khuyến khích trẻ tự kiểm tra.
+  + Bước 4: "4. Mở rộng và phát triển kỹ năng": Trò chơi 1 "Nét nào biến mất?" (hoặc "Chữ cái nào biến mất?"), Trò chơi 2 "Bé làm họa sĩ nhí" (vận dụng nét vẽ tranh đơn giản) hoặc "Tìm chữ trong từ/tranh".
+  + Bước 5: "5. Chia sẻ – Đánh giá – Kết thúc": BẮT BUỘC gồm 3 nội dung: "* Chia sẻ:" (trẻ đặt bút, thả lỏng ngón tay, giới thiệu và nhận xét sản phẩm), "* Đánh giá:" (khen ngợi tư thế ngồi, cách cầm bút, nét tô đồ đúng hướng; khắc sâu bí quyết "Ngồi đúng – Cầm bút đúng – Nhìn mẫu kỹ – Đưa bút đúng hướng"), "* Kết thúc:" (thu dọn đồ dùng, vận động nhẹ ngón tay/cổ tay).
 - ĐỐI VỚI LĨNH VỰC NHẬN THỨC (KHÁM PHÁ KHOA HỌC / KHÁM PHÁ XÃ HỘI / TOÁN) VÀ CÁC LĨNH VỰC KHÁC: Áp dụng đúng 5 bước tiến trình: 1. Khởi động – Tạo tình huống, 2. Khám phá – Trải nghiệm, 3. Chia sẻ – Thảo luận, 4. Vận dụng – Mở rộng, 5. Đánh giá – Điều chỉnh. Trẻ được trực tiếp thao tác, làm thí nghiệm, trải nghiệm thực tế trước; giáo viên quan sát, gợi mở và tổng kết sau. Toàn bộ nằm trong 1 bảng 2 cột duy nhất (Hoạt động của Cô | Hoạt động của Trẻ). Tuyệt đối KHÔNG chèn các đề mục âm nhạc (a. Dạy hát, b. Nghe hát) vào các môn khoa học/xã hội/toán/thơ/truyện.
 - Mỗi mục, mỗi ý BẮT BUỘC phải xuống dòng. Sử dụng gạch đầu dòng (-) rõ ràng ở mỗi ý con.`;
 
@@ -2569,11 +2602,24 @@ QUY ĐỊNH BẮT BUỘC VỀ VỊ TRÍ ĐỀ MỤC SGK THEO CHUẨN CÔNG VĂN 
         ? `- NẾU NGƯỜI DÙNG CHỌN TÍCH HỢP AI (config.enableAI = true): BẮT BUỘC đưa nội dung tích hợp AI vào trường "aiCompetencies" (để hiển thị mục 6. Tích hợp Trí tuệ nhân tạo (AI)). Mô tả rõ giáo viên ứng dụng AI tạo tranh ảnh, âm thanh, câu chuyện sinh động hoặc nhân vật ảo Robot trò chuyện tương tác với trẻ dưới sự hướng dẫn của cô (tuyệt đối KHÔNG dùng mã chỉ báo phổ thông).`
         : `- KHÔNG chọn tích hợp AI: Để "aiCompetencies": [].`;
 
-      if (isNew8) {
+      if (isNew8 || config.enablePreschool388Criteria) {
+        const selectedCodes = config.selected388CriteriaCodes || [];
+        const customCriteriaText = config.custom388CriteriaText || '';
+        const criteriaCustomBlock = (selectedCodes.length > 0 || !!customCriteriaText) ? `
+ĐẶC BIỆT - TIÊU CHÍ YÊU CẦU CẦN ĐẠT THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT DO GIÁO VIÊN LỰA CHỌN:
+${selectedCodes.map((code: string) => {
+  const crit = getCriteria388ByCode(code);
+  return crit ? `- [Mã: ${crit.code}] (${crit.domainName}): ${crit.content}` : `- [Mã: ${code}]`;
+}).join('\n')}
+${customCriteriaText ? `- Tiêu chí riêng bổ sung: ${customCriteriaText}` : ''}
+BẮT BUỘC: Đưa đúng các tiêu chí trên vào các gạch đầu dòng của "knowledge" (Kiến thức) và "subjectCompetencies" (Kỹ năng) kèm đúng mã chỉ báo!
+` : '';
+
         prompt = `${baseContext}
 Hãy soạn Mục I (MỤC ĐÍCH - YÊU CẦU) và Mục II (CHUẨN BỊ) cho 8 NỘI DUNG MỚI TÍCH HỢP MẦM NON (ÁP DỤNG CHUẨN YÊU CẦU THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT).
 YÊU CẦU BẮT BUỘC:
 1. ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng mã chỉ báo của Quyết định số 388/QĐ-BGDĐT (ví dụ: NT 1.1, NT 1.2, TC 1.1, TC 1.2, TC 3.1, TX 3.2, TX 4.3, TX 4.4, NN 1.2, NN 2.2...).
+${criteriaCustomBlock}
 - Kiến thức (knowledge): Trẻ nhận biết, hiểu được gì... gắn với mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ nhận biết và gọi tên được... (Mã: NT 1.1)", "- Trẻ hiểu được nội dung... (Mã: NT 1.2)").
 - Kỹ năng (subjectCompetencies): Các kỹ năng vận động, kỹ năng tư duy, thao tác... gắn với mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)", "- Trẻ phối hợp khéo léo... (Mã: TC 1.2, TX 4.4)").
 - Phẩm chất (qualities): BẮT BUỘC gắn với 4 phẩm chất cốt lõi (Yêu thương, Tôn trọng, Trung thực, Trách nhiệm). Ví dụ: "Yêu thương: ...", "Tôn trọng: ...".
@@ -2604,13 +2650,28 @@ Yêu cầu: Trả về JSON với cấu trúc:
   }
 }`;
       } else {
+        const isMixed345 = isMixedAgeClass && grade.includes('3') && grade.includes('4') && grade.includes('5');
         prompt = `${baseContext}
 Hãy soạn Mục I (MỤC ĐÍCH - YÊU CẦU) và Mục II (CHUẨN BỊ) theo ĐÚNG MẪU GIÁO ÁN MẦM NON TRUYỀN THỐNG/BAN ĐẦU TRƯỚC KHI CẬP NHẬT 8 LĨNH VỰC MỚI.
 YÊU CẦU BẮT BUỘC:
 1. MỤC ĐÍCH - YÊU CẦU:
 - TUYỆT ĐỐI KHÔNG ĐIỀN MÃ TIÊU CHÍ NÀO: KHÔNG ghi "(Mã: NN 5.1)", KHÔNG ghi "(Mã: NT 1.1)", KHÔNG ghi bất kỳ mã chỉ báo nào trong phần Kiến thức và Kỹ năng. Giữ nguyên định dạng giáo án mầm non ban đầu.
-- Kiến thức (knowledge): Trẻ nhận biết, biết tên, hiểu nội dung... (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Trẻ biết tên bài thơ/bài hát/câu chuyện...", "- Trẻ hiểu nội dung bài học...".
-- Kỹ năng (subjectCompetencies): Rèn luyện và phát triển các kỹ năng (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Rèn kỹ năng phát âm rõ ràng, trả lời trọn câu...", "- Rèn kỹ năng vận động nhịp nhàng...", "- Phát triển khả năng chú ý và ghi nhớ có chủ định...".
+- Kiến thức (knowledge): Trẻ nhận biết, biết tên, hiểu nội dung... (TUYỆT ĐỐI KHÔNG GẮN MÃ).
+${isMixedAgeClass ? `- ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): BẮT BUỘC PHÂN HÓA RÕ RÀNG KIẾN THỨC THEO TỪNG ĐỘ TUỔI:
+${isMixed345 ? `  Ví dụ chuẩn phân hóa 3 độ tuổi:
+  [
+    "- 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X, nhận biết chữ số X biểu thị cho các nhóm có số lượng X. Trẻ đếm từ 1 đến X, đọc được số X và các số nhỏ hơn X. So sánh 2 nhóm đối tượng, biết thêm bớt để có số lượng bằng nhau",
+    "- 4 tuổi: Trẻ biết đếm đến X, nhận biết các nhóm có X đối tượng. Trẻ biết tạo nhóm, xếp tương ứng 1- 1, biết so sánh 2 nhóm đồ vật, biết đếm đúng số lượng và sử dụng đúng chữ số tương ứng theo cô và các bạn",
+    "- 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô, đếm cùng các bạn."
+  ]` : `  Tách rõ từng gạch đầu dòng tương ứng với các độ tuổi có trong lớp.`}` : `Ví dụ: "- Trẻ biết tên bài thơ/bài hát/câu chuyện...", "- Trẻ hiểu nội dung bài học...".`}
+- Kỹ năng (subjectCompetencies): Rèn luyện và phát triển các kỹ năng (TUYỆT ĐỐI KHÔNG GẮN MÃ).
+${isMixedAgeClass ? `- ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): BẮT BUỘC PHÂN HÓA RÕ RÀNG KỸ NĂNG THEO TỪNG ĐỘ TUỔI:
+${isMixed345 ? `  Ví dụ chuẩn phân hóa 3 độ tuổi:
+  [
+    "- 5 tuổi: Rèn kỹ năng đếm thành thạo từ 1 đến X từ trái sang phải, so sánh số lượng giữa 2 nhóm, thêm bớt tạo sự bằng nhau trong phạm vi X, chọn và gắn thẻ số X chính xác, nhanh nhẹn.",
+    "- 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1 thẳng hàng từ trái sang phải, đếm theo thứ tự không bỏ sót đối tượng, tìm đúng thẻ số X theo cô và bạn.",
+    "- 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay và đếm theo cô, phát âm rõ từ chỉ số lượng."
+  ]` : `  Tách rõ từng gạch đầu dòng rèn luyện kỹ năng cho từng độ tuổi tương ứng trong lớp.`}` : `Ví dụ: "- Rèn kỹ năng phát âm rõ ràng, trả lời trọn câu...", "- Rèn kỹ năng vận động nhịp nhàng...", "- Phát triển khả năng chú ý và ghi nhớ có chủ định...".`}
 - Phẩm chất (qualities): BẮT BUỘC gắn với 4 phẩm chất cốt lõi (Yêu thương, Tôn trọng, Trung thực, Trách nhiệm). Ví dụ: "Yêu thương: ...", "Tôn trọng: ...".
 - Năng lực (generalCompetencies): BẮT BUỘC gắn với 5 năng lực nền tảng (Giao tiếp, Hợp tác, Giải quyết vấn đề, Tự lực, Thích ứng). Ví dụ: "Tự lực: ...", "Thích ứng: ...".
 2. TÍCH HỢP NĂNG LỰC SỐ VÀ TRÍ TUỆ NHÂN TẠO:
@@ -2618,13 +2679,21 @@ ${nlsReq}
 ${aiReq}
 3. CHUẨN BỊ:
 - Chuẩn bị của cô (equipment.teacher): Bắt buộc có "- Môi trường và không gian: ...", "- Đồ dùng, học liệu của giáo viên: ...".
-- Chuẩn bị của trẻ (equipment.student): Trang phục, đồ dùng, tâm thế...
+- Chuẩn bị của trẻ (equipment.student): Trang phục, đồ dùng, tâm thế...${isMixedAgeClass ? ' (Bắt buộc phân loại học liệu cụ thể cho từng nhóm tuổi).' : ''}
 
 Yêu cầu: Trả về JSON với cấu trúc:
 {
   "objectives": {
-    "knowledge": ["- Trẻ biết...", "- Trẻ hiểu..."],
-    "subjectCompetencies": ["- Rèn kỹ năng...", "- Phát triển khả năng..."],
+    "knowledge": ${isMixedAgeClass ? `[
+      "- 5 tuổi: Trẻ nhận biết...",
+      "- 4 tuổi: Trẻ biết...",
+      "- 3 tuổi: Trẻ đếm..."
+    ]` : `["- Trẻ biết...", "- Trẻ hiểu..."]`},
+    "subjectCompetencies": ${isMixedAgeClass ? `[
+      "- 5 tuổi: Rèn kỹ năng...",
+      "- 4 tuổi: Rèn kỹ năng...",
+      "- 3 tuổi: Rèn kỹ năng..."
+    ]` : `["- Rèn kỹ năng...", "- Phát triển khả năng..."]`},
     "generalCompetencies": ["Tự lực: ...", "Thích ứng: ...", "Giao tiếp: ..."],
     "qualities": ["Yêu thương: ...", "Tôn trọng: ...", "Trung thực: ...", "Trách nhiệm: ..."],
     "digitalCompetencies": ${config.enableNLS ? '["Mô tả hoạt động tích hợp Năng lực số (NLS) cho trẻ..."]' : '[]'},
@@ -2741,13 +2810,86 @@ Yêu cầu: Trả về JSON với cấu trúc:
         t.includes('thể dục') || t.includes('thể chất') || t.includes('vận động cơ bản') || t.includes('bài tập phát triển chung') ||
         extra.includes('thể chất') || extra.includes('btptc') || extra.includes('vđcb') || extra.includes('bài tập phát triển chung');
 
+      const isLetterTracing = s.includes('tập tô') || s.includes('to chu cai') || t.includes('tập tô') || t.includes('tô chữ cái') || t.includes('tô nét') || t.includes('sao chép nét') || s.includes('sao chép nét') || t.includes('tô, đồ') || t.includes('tô đồ') || extra.includes('tập tô chữ cái') || extra.includes('tô, đồ, sao chép');
+      const isLetterGame = s.includes('trò chơi chữ cái') || t.includes('trò chơi chữ cái') || t.includes('chơi với chữ cái') || t.includes('tc chữ cái') || extra.includes('trò chơi chữ cái');
+      const isLearningGame = s.includes('trò chơi học tập') || t.includes('trò chơi học tập') || t.includes('tìm bạn thân') || extra.includes('trò chơi học tập');
+      const isSocialExploration = s.includes('khám phá xã hội') || s.includes('kpxh') || t.includes('khám phá xã hội') || t.includes('đồ dùng, đồ chơi') || t.includes('lớp học của bé') || (s.includes('nhận thức') && (s.includes('xã hội') || t.includes('đồ dùng')));
+
       let act1Name = isCognitive ? "1. Khởi động – Tạo hứng thú và giao nhiệm vụ" : "1. Khởi động – Tạo tình huống";
       let act2Name = "2. Khám phá – Trải nghiệm";
 
       if (isPhysical) {
         act1Name = "1. Khởi động – Tạo hứng thú";
         act2Name = "2. Khám phá – Trải nghiệm nhiệm vụ vận động.";
+      } else if (isLetterTracing) {
+        act1Name = "1. Gợi hứng thú – Hình thành và lựa chọn ý tưởng";
+        act2Name = "2. Thỏa thuận - Lập kế hoạch thực hiện";
+      } else if (isLetterGame || isLearningGame) {
+        act1Name = "1. Gợi hứng thú – hình thành và lựa chọn ý tưởng chơi";
+        act2Name = "2. Thỏa thuận – Lập kế hoạch chơi";
+      } else if (isSocialExploration) {
+        act1Name = "1. Khởi động - Tạo tình huống";
+        act2Name = "2. Khám phá và trải nghiệm";
       }
+
+      const letterTracingGuidancePart1 = isLetterTracing ? `
+BẮT BUỘC ĐẶC BIỆT CHO HOẠT ĐỘNG TẬP TÔ CHỮ CÁI (VÀ TẬP TÔ, ĐỒ, SAO CHÉP NÉT/CHỮ):
+- Tên Hoạt động 1: "1. Gợi hứng thú – Hình thành và lựa chọn ý tưởng":
+  + Trò chơi khởi động vận động ngón tay: "Ngón tay nhảy múa" (hoặc "Các ngón tay ngoan").
+  + Tạo tình huống gợi mở (nhân vật Bạn Bút Chì muốn vẽ tranh/viết chữ đẹp...).
+  + Cho trẻ quan sát hình ảnh thực tế (ngôi nhà, hàng rào, mái nhà, tia nắng... hoặc tranh chữ cái) có chứa các nét/chữ.
+  + Đàm thoại gợi mở về đặc điểm các nét/chữ cái, đồ dùng và tư thế ngồi học đúng.
+  + Dẫn dắt vào bài học tập tô, đồ và sao chép.
+- Tên Hoạt động 2: "2. Thỏa thuận - Lập kế hoạch thực hiện":
+  + BẮT BUỘC trong teacherAction của mục 2 phải có đầy đủ 3 nội dung trọng tâm với đúng các đề mục:
+    * Hướng dẫn tư thế và cách cầm bút:
+      - Tư thế ngồi: Lưng thẳng, không tì ngực vào bàn, đầu hơi cúi, mắt cách vở khoảng 25-30cm.
+      - Cách cầm bút: Cầm bằng ba ngón tay (ngón cái, ngón trỏ và ngón giữa), cầm vừa phải không quá chặt cũng không quá lỏng. Tay còn lại giữ mép giấy/vở.
+    * Hướng dẫn tô, đồ nét / chữ cái:
+      - Giới thiệu phiếu/vở có các nét hoặc chữ cái in chấm mờ.
+      - Cô làm mẫu từng nét/chữ: Đặt bút tại điểm bắt đầu, đưa/kéo bút chậm rãi theo đường chấm mờ đến điểm kết thúc.
+      - Nhấn mạnh quy tắc: Đưa bút theo đường chấm mờ từ điểm bắt đầu đến điểm kết thúc, không đưa bút chệch ra ngoài hoặc lung tung.
+    * Hướng dẫn sao chép nét / chữ cái:
+      - Cho trẻ quan sát mẫu trên bảng.
+      - Cô làm mẫu các thao tác: Nhìn mẫu -> Xác định điểm bắt đầu -> Đưa bút đúng hướng -> Dừng ở điểm kết thúc.
+      - Thống nhất quy tắc 4 bước: "Nhìn mẫu – Đặt bút – Đúng hướng – Dừng đúng điểm."
+` : '';
+
+      const letterGameGuidancePart1 = isLetterGame ? `
+BẮT BUỘC ĐẶC BIỆT CHO HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI:
+- Tên Hoạt động 1: "1. Gợi hứng thú – hình thành và lựa chọn ý tưởng chơi":
+  + Cho trẻ hát/vận động bài hát ngắn có từ chứa chữ cái trọng tâm (ví dụ o, ô, ơ).
+  + Đưa chữ cái ra gợi ý và hỏi trẻ muốn chơi những trò chơi gì với chữ cái đó.
+  + Gợi ý các trò chơi hấp dẫn (Ai tìm chữ nhanh, Về đúng nhà, Chuyền chữ tiếp sức, Ghép chữ tạo từ, Săn tìm chữ cái...) và cho trẻ lựa chọn.
+- Tên Hoạt động 2: "2. Thỏa thuận – Lập kế hoạch chơi":
+  + Chia trẻ thành các nhóm/đội chơi.
+  + Cùng trẻ thống nhất: Chơi trò gì? Chơi ở đâu? Chơi như thế nào? Luật chơi ra sao?
+  + Nhắc nhở trẻ chơi vui vẻ, không tranh giành, biết chờ lượt và giúp đỡ bạn.
+` : '';
+
+      const learningGameGuidancePart1 = isLearningGame ? `
+BẮT BUỘC ĐẶC BIỆT CHO TRÒ CHƠI HỌC TẬP (VÍ DỤ TÌM BẠN THÂN):
+- Tên Hoạt động 1: "1. Gợi hứng thú – hình thành và lựa chọn ý tưởng chơi":
+  + Vận động theo điệu nhạc vui tươi về tình bạn / chủ đề bài học.
+  + Đàm thoại khơi gợi cảm xúc và câu hỏi gợi mở về cách tìm bạn, chơi với bạn.
+- Tên Hoạt động 2: "2. Thỏa thuận – Lập kế hoạch chơi":
+  + Thống nhất Cách chơi và Luật chơi rõ ràng.
+  + Cách chơi: Mỗi trẻ nhận một thẻ hình/dấu hiệu bí mật; khi nhạc bật đi nhẹ nhàng; khi nhạc dừng trao đổi hỏi đáp tìm bạn có thẻ tương ứng.
+  + Luật chơi văn minh: Không giành bạn, không kéo đẩy, không nhìn trộm thẻ, chờ đến lượt, tôn trọng bạn.
+` : '';
+
+      const socialExplorationGuidancePart1 = isSocialExploration ? `
+BẮT BUỘC ĐẶC BIỆT CHO HOẠT ĐỘNG KHÁM PHÁ XÃ HỘI (LĨNH VỰC NHẬN THỨC):
+- Tên Hoạt động 1: "1. Khởi động - Tạo tình huống":
+  + Hát và vận động theo bài hát chủ đề (ví dụ "Lớp chúng mình đoàn kết").
+  + Tạo tình huống bất ngờ với "Chiếc túi bí mật" chứa các đồ dùng, đồ chơi quen thuộc để trẻ sờ đoán và tạo hứng thú.
+  + Dẫn dắt vào bài học khám phá một cách tự nhiên.
+- Tên Hoạt động 2: "2. Khám phá và trải nghiệm":
+  + Chia trẻ thành các nhóm nhỏ khám phá các góc trong lớp (học tập, xây dựng, phân vai, nghệ thuật, sách truyện...).
+  + Đặt câu hỏi gợi mở về tên gọi, đặc điểm, công dụng của từng đồ dùng, đồ chơi.
+  + Cho trẻ trực tiếp trải nghiệm sử dụng an toàn, nhẹ nhàng (cầm bút, mở sách, xếp hình, nặn đất...).
+  + Đặt các tình huống giả định lựa chọn đồ dùng phù hợp với hoạt động.
+` : '';
 
       const physicalGuidancePart1 = isPhysical ? `
 BẮT BUỘC ĐẶC BIỆT CHO LĨNH VỰC PHÁT TRIỂN THỂ CHẤT (TIẾT THỂ DỤC / VẬN ĐỘNG):
@@ -2782,6 +2924,10 @@ YÊU CẦU SÁNG TẠO ĐỔI MỚI VÀ ĐA DẠNG HÓA PHƯƠNG PHÁP (MẦM NO
   + Tích hợp Công nghệ/AI & Phương pháp giáo dục sớm (Reggio Emilia, Montessori, STEM mầm non) một cách tự nhiên, trực quan, không gượng ép.
   + Lời dẫn của cô ngọt ngào, giàu cảm xúc, sử dụng ngôn ngữ kích thích tư duy ("Nếu là con, con sẽ...", "Chúng mình cùng thử xem điều kỳ diệu gì sẽ xảy ra nhé!"). Phản ứng của trẻ sinh động, hồn nhiên, tích cực.
 ${physicalGuidancePart1}
+${letterTracingGuidancePart1}
+${letterGameGuidancePart1}
+${learningGameGuidancePart1}
+${socialExplorationGuidancePart1}
 `;
 
       prompt = `${baseContext}
@@ -2956,6 +3102,11 @@ Trả về JSON dạng:
 
       const isCognitive = isScience || isMath;
       const isSocialSkills = isSocial;
+      const isLetterTracing = s.includes('tập tô') || s.includes('to chu cai') || t.includes('tập tô') || t.includes('tô chữ cái') || t.includes('tô nét') || t.includes('sao chép nét') || s.includes('sao chép nét') || t.includes('tô, đồ') || t.includes('tô đồ') || extra.includes('tập tô chữ cái') || extra.includes('tô, đồ, sao chép');
+      const isLetterGame = s.includes('trò chơi chữ cái') || t.includes('trò chơi chữ cái') || t.includes('chơi với chữ cái') || t.includes('tc chữ cái') || extra.includes('trò chơi chữ cái');
+      const isLearningGame = s.includes('trò chơi học tập') || t.includes('trò chơi học tập') || t.includes('tìm bạn thân') || extra.includes('trò chơi học tập');
+      const isSocialExploration = s.includes('khám phá xã hội') || s.includes('kpxh') || t.includes('khám phá xã hội') || t.includes('đồ dùng, đồ chơi') || t.includes('lớp học của bé') || (s.includes('nhận thức') && (s.includes('xã hội') || t.includes('đồ dùng')));
+
       let act3Name = isCognitive || isSocialSkills ? "3. Chia sẻ - Thảo luận" : "3. Chia sẻ – Thảo luận";
       let act4Name = "4. Vận dụng – Mở rộng";
       let act5Name = isCognitive ? "5. Chia sẻ - Đánh giá" : "5. Đánh giá – Điều chỉnh";
@@ -2964,6 +3115,18 @@ Trả về JSON dạng:
         act3Name = "3. Chia sẻ – Hình thành cách thực hiện";
         act4Name = "4. Thực hành – Vận dụng";
         act5Name = "5. Chia sẻ – Đánh giá và Hồi tĩnh";
+      } else if (isLetterTracing) {
+        act3Name = "3. Thực hiện hoạt động";
+        act4Name = "4. Mở rộng và phát triển kỹ năng";
+        act5Name = "5. Chia sẻ – Đánh giá – Kết thúc";
+      } else if (isLetterGame || isLearningGame) {
+        act3Name = "3. Thực hiện hoạt động chơi";
+        act4Name = "4. Mở rộng và phát triển";
+        act5Name = "5. Chia sẻ – Đánh giá – Kết thúc chơi";
+      } else if (isSocialExploration) {
+        act3Name = "3. Chia sẻ - Thảo luận";
+        act4Name = "4. Vận dụng và mở rộng";
+        act5Name = "5. Đánh giá và điều chỉnh";
       }
 
       let domainSpecificGuidance = '';
@@ -3042,6 +3205,68 @@ Trả về JSON dạng:
 - Hoạt động 3 "3. Chia sẻ – Thảo luận": Trẻ quây quần đàm thoại thấu hiểu tính cách nhân vật, bối cảnh và bài học câu chuyện; Luyện nói câu trọn vẹn và thể hiện ngữ điệu giọng nhân vật. Trích dẫn câu nói của nhân vật.
 - Hoạt động 4 "4. Vận dụng – Mở rộng": Thử thách nhóm (Ví dụ: Sắp xếp Vòng tuần hoàn của Tí Xíu, Sơ đồ câu chuyện, Tình huống bảo vệ môi trường, Sáng tạo sản phẩm), Phân vai đóng kịch ngắn mô phỏng câu chuyện với mũ nhân vật.
 - Hoạt động 5 "5. Chia sẻ - Đánh giá": Trẻ chia sẻ cảm xúc sau hoạt động, cô nhận xét biểu dương tinh thần tự tin và diễn xuất của trẻ.`;
+      } else if (isLetterTracing) {
+        domainSpecificGuidance = `ĐẶC BIỆT LƯU Ý CHO HOẠT ĐỘNG TẬP TÔ CHỮ CÁI:
+- TUYỆT ĐỐI KHÔNG DÙNG CÁC ĐỀ MỤC ÂM NHẠC.
+- Hoạt động 3 "3. Thực hiện hoạt động":
+  + Trẻ ngồi vào bàn chuẩn bị bút, giấy/vở.
+  + Trẻ thực hành từng bước: Ngồi đúng tư thế -> Đặt vở ngay ngắn -> Cầm bút 3 ngón tay -> Tay kia giữ vở -> Thực hiện tô, đồ, sao chép theo yêu cầu.
+  + Cô đến từng bàn quan sát, nhẹ nhàng sửa tư thế ngồi, cách cầm bút và nét cho trẻ còn lúng túng; Khuyến khích trẻ tự kiểm tra.
+- Hoạt động 4 "4. Mở rộng và phát triển kỹ năng":
+  + Trò chơi 1: "Nét nào biến mất?" (hoặc "Chữ cái nào biến mất?"): Cô giơ thẻ, trẻ gọi tên và dùng ngón tay vẽ nét/chữ trong không khí.
+  + Trò chơi 2: "Bé làm họa sĩ nhí" (hoặc "Tìm chữ trong từ/tranh"): Trẻ vận dụng các nét đã học tạo hình đơn giản (mái nhà, hàng rào, tia nắng, thân cây...) hoặc tìm và khoanh chữ cái.
+  + Khuyến khích trẻ vừa thực hiện vừa gọi tên nét/chữ.
+- Hoạt động 5 "5. Chia sẻ – Đánh giá – Kết thúc":
+  + BẮT BUỘC gồm 3 nội dung với đề mục rõ ràng:
+    * Chia sẻ: Trẻ đặt bút xuống, thả lỏng ngón tay; Giới thiệu sản phẩm, đàm thoại nhận xét sản phẩm của mình và bạn.
+    * Đánh giá: Nhận xét chung, khen ngợi trẻ ngồi đúng tư thế, cầm bút đúng, tô đồ đúng hướng; Động viên trẻ còn gặp khó khăn; Khắc sâu: "Ngồi đúng – Cầm bút đúng – Nhìn mẫu kỹ – Đưa bút đúng hướng."
+    * Kết thúc: Cất bút, vở đúng nơi quy định; Vận động nhẹ các ngón tay, cổ tay thư giãn; Chuyển sang hoạt động tiếp theo.`;
+      } else if (isLetterGame) {
+        domainSpecificGuidance = `ĐẶC BIỆT LƯU Ý CHO HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI:
+- TUYỆT ĐỐI KHÔNG DÙNG CÁC ĐỀ MỤC ÂM NHẠC.
+- Hoạt động 3 "3. Thực hiện hoạt động chơi":
+  + Tổ chức chuỗi các trò chơi chữ cái hấp dẫn (từ 3 đến 5 trò chơi, ví dụ: Trò chơi 1 "Ai tìm chữ nhanh", Trò chơi 2 "Về đúng nhà", Trò chơi 3 "Chuyền chữ tiếp sức", Trò chơi 4 "Ghép chữ tạo từ", Trò chơi 5 "Săn tìm chữ cái").
+  + Với mỗi trò chơi BẮT BUỘC ghi rõ các mục: Cách chơi, Luật chơi, Mục tiêu và diễn biến chơi của trẻ.
+  + Trẻ chủ động tương tác, phát âm chuẩn chữ cái, phối hợp đồng đội nhịp nhàng.
+- Hoạt động 4 "4. Mở rộng và phát triển":
+  + Tăng độ khó: Tìm chữ cái trong từ xung quanh lớp, phân tích nét (nét cong, thêm mũ, thêm râu...).
+  + Cho trẻ tự nghĩ thêm từ có chứa chữ cái trong thực tế.
+  + Khuyến khích trẻ sáng tạo trò chơi mới với các thẻ chữ cái.
+- Hoạt động 5 "5. Chia sẻ – Đánh giá – Kết thúc chơi":
+  + Đàm thoại củng cố: Hỏi cảm nhận, tên các trò chơi, những chữ cái đã học và so sánh đặc điểm cấu tạo nét.
+  + Cả lớp phát âm lại đồng thanh rõ ràng các chữ cái.
+  + Đánh giá tuyên dương tinh thần đoàn kết, chơi trung thực, trách nhiệm; cùng cô thu dọn đồ dùng thẻ chữ vào rổ gọn gàng.`;
+      } else if (isLearningGame) {
+        domainSpecificGuidance = `ĐẶC BIỆT LƯU Ý CHO TRÒ CHƠI HỌC TẬP (VÍ DỤ TÌM BẠN THÂN):
+- TUYỆT ĐỐI KHÔNG DÙNG CÁC ĐỀ MỤC ÂM NHẠC.
+- Hoạt động 3 "3. Thực hiện hoạt động chơi":
+  + Trò chơi "TÌM BẠN THÂN" (hoặc trò chơi học tập tương ứng):
+    * Lần 1 – Tìm bạn theo biểu tượng/hình ảnh: Trẻ nhận thẻ bí mật, di chuyển theo nhạc, khi nhạc dừng chủ động hỏi đáp chào hỏi tìm bạn có hình tương ứng. Hai bạn kiểm tra thẻ reo vui "Chúng mình là bạn thân!".
+    * Lần 2 – Tìm bạn theo đặc điểm/sở thích: Đổi sang dấu hiệu sở thích (cùng thích màu đỏ, thích vẽ, thích xây dựng...). Trẻ chủ động trao đổi tìm kiếm. Cô hỗ trợ trẻ nhút nhát.
+- Hoạt động 4 "4. Mở rộng và phát triển trò chơi":
+  + Tình huống giải quyết vấn đề: Bạn thân đang buồn / bạn chưa tìm được bạn, trẻ thảo luận và đưa ra cách xử lý (hỏi thăm, chia sẻ đồ chơi, mời chơi cùng).
+  + Mở rộng: Tạo nhóm 3-4 bạn cùng sở thích thực hiện nhiệm vụ chung (xếp hình, vẽ tranh tình bạn...).
+- Hoạt động 5 "5. Chia sẻ – Đánh giá – Kết thúc chơi":
+  + Chia sẻ: Hỏi cảm xúc khi tìm được bạn, cách hỏi bạn, cách giúp đỡ bạn.
+  + Đánh giá: Nhận xét kỹ năng quan sát, giao tiếp, hợp tác, tự lực, trung thực khi chơi.
+  + Kết thúc: Giáo dục tình bạn đẹp, cả lớp nắm tay nhau thành vòng tròn hát vang bài ca tình bạn và chuyển hoạt động.`;
+      } else if (isSocialExploration) {
+        domainSpecificGuidance = `ĐẶC BIỆT LƯU Ý CHO HOẠT ĐỘNG KHÁM PHÁ XÃ HỘI (LĨNH VỰC PHÁT TRIỂN NHẬN THỨC):
+- TUYỆT ĐỐI KHÔNG DÙNG CÁC ĐỀ MỤC ÂM NHẠC.
+- Hoạt động 3 "3. Chia sẻ - Thảo luận":
+  + Tập trung trẻ theo nhóm, mời đại diện nhóm chia sẻ đồ dùng đồ chơi đã tìm thấy ở các góc.
+  + Đàm thoại về công dụng, cách sử dụng an toàn, so sánh sự giống và khác nhau giữa đồ dùng học tập và đồ chơi.
+  + Trò chuyện về các hoạt động diễn ra trong lớp học (học tập, vui chơi, tạo hình, âm nhạc, vệ sinh...).
+  + Đặt tình huống chia sẻ đồ dùng đồ chơi khi chơi cùng bạn.
+  + Cô khái quát chuẩn hóa kiến thức.
+- Hoạt động 4 "4. Vận dụng và mở rộng":
+  + Trò chơi "Đưa đồ chơi về đúng nhà" (theo ký hiệu của từng góc chơi).
+  + Tình huống giải quyết vấn đề: Dọn dẹp đồ chơi sau giờ chơi, phân loại và sắp xếp đồ dùng theo nhóm ngăn nắp.
+  + Mở rộng liên hệ đồ dùng ở nhà và giáo dục ý thức giữ gìn tài sản chung.
+- Hoạt động 5 "5. Đánh giá và điều chỉnh":
+  + Cô nhận xét quá trình tham gia, hỏi cảm nhận của trẻ và câu hỏi củng cố kiến thức.
+  + Đánh giá phân hóa: khích lệ trẻ nhút nhát, nâng cao cho trẻ khá giỏi.
+  + Tuyên dương tinh thần hợp tác, biết giữ gìn đồ dùng; cùng trẻ kiểm tra lại các góc và thu dọn gọn gàng.`;
       } else if (isLetter) {
         domainSpecificGuidance = `ĐẶC BIỆT LƯU Ý CHO NGÔN NGỮ (CHỮ CÁI):
 - TUYỆT ĐỐI KHÔNG DÙNG CÁC ĐỀ MỤC ÂM NHẠC.
@@ -3434,7 +3659,25 @@ const handleGenerateKHBD = async (req: express.Request, res: express.Response) =
 
     const isNew8Activity = isPreschoolNew8Activity(config.subject, config.lessonTitle);
 
-    const preschoolObjectivesInstruction = isNew8Activity
+    const preschoolAgeProfile = isPreschool ? analyzePreschoolAgeProfile(config.grade || 'Mẫu giáo lớn (5-6 tuổi)') : null;
+    const isMixedAgeClass = preschoolAgeProfile?.category === 'MIXED_AGE';
+
+    const selected388Codes = config.selected388CriteriaCodes || [];
+    const custom388Text = config.custom388CriteriaText || '';
+    const hasCustom388Criteria = selected388Codes.length > 0 || !!custom388Text;
+
+    let preschool388CustomInstruction = '';
+    if (isPreschool && (isNew8Activity || config.enablePreschool388Criteria) && hasCustom388Criteria) {
+      preschool388CustomInstruction = `\n- BỘ TIÊU CHÍ YÊU CẦU CẦN ĐẠT THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT DO GIÁO VIÊN CHỌN CHO BÀI DẠY NÀY:
+${selected388Codes.map((code: string) => {
+  const crit = getCriteria388ByCode(code);
+  return crit ? `  + [Mã: ${crit.code}] (${crit.domainName}): ${crit.content}` : `  + [Mã: ${code}]`;
+}).join('\n')}
+${custom388Text ? `  + Tiêu chí riêng/bổ sung từ giáo viên: ${custom388Text}` : ''}
+BẮT BUỘC: Đưa đúng các tiêu chí và mã chỉ báo trên vào các gạch đầu dòng của "1. Kiến thức" và "2. Kỹ năng" trong Mục I (Mục đích - yêu cầu). Ví dụ: "- Trẻ nhận biết... (Mã: NT 1.1)", "- Rèn kỹ năng... (Mã: TC 1.1)".`;
+    }
+
+    const preschoolObjectivesInstruction = (isNew8Activity || config.enablePreschool388Criteria)
       ? `- ĐỐI VỚI 8 NỘI DUNG MỚI TÍCH HỢP (ÁP DỤNG CHUẨN YÊU CẦU THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT):
   + BẮT BUỘC ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng mã chỉ báo của Quyết định số 388/QĐ-BGDĐT (giống như ví dụ NT 1.1, NT 1.2, TC 1.1, TC 1.2, TC 3.1, TX 3.2, TX 4.3, TX 4.4, NN 1.2, NN 2.2...).
   + 1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ biết/nhận biết... (Mã: NT 1.1)")
@@ -3442,10 +3685,16 @@ const handleGenerateKHBD = async (req: express.Request, res: express.Response) =
       : `- ĐỐI VỚI GIÁO ÁN MẦM NON CŨ/TRUYỀN THỐNG (Văn học thơ/truyện, Làm quen chữ cái, Khám phá khoa học, Xã hội, Toán, Tạo hình, Âm nhạc, Thể chất, Tình cảm - KNXH...):
   + BẮT BUỘC LẤY LẠI ĐÚNG MẪU GIÁO ÁN BAN ĐẦU TRƯỚC KHI CẬP NHẬT 8 LĨNH VỰC MỚI, GIỮ NGUYÊN ĐỊNH DẠNG BAN ĐẦU.
   + TUYỆT ĐỐI KHÔNG ĐIỀN MÃ TIÊU CHÍ NÀO: KHÔNG ghi "(Mã: NN 5.1)", KHÔNG ghi "(Mã: NT 1.1)", KHÔNG ghi bất kỳ mã chỉ báo nào trong phần Kiến thức và Kỹ năng.
-  + 1. Kiến thức: Các gạch đầu dòng mô tả những gì trẻ biết, hiểu (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Trẻ biết tên bài thơ/bài hát...", "- Trẻ hiểu nội dung bài...".
-  + 2. Kỹ năng: Các gạch đầu dòng rèn luyện kỹ năng (TUYỆT ĐỐI KHÔNG GẮN MÃ). Ví dụ: "- Rèn kỹ năng phát âm...", "- Phát triển kỹ năng vận động...".`;
-
-    const preschoolAgeProfile = isPreschool ? analyzePreschoolAgeProfile(config.grade || 'Mẫu giáo lớn (5-6 tuổi)') : null;
+  + 1. Kiến thức: Các gạch đầu dòng mô tả những gì trẻ biết, hiểu (TUYỆT ĐỐI KHÔNG GẮN MÃ).
+${isMixedAgeClass ? `    * ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${config.grade}): BẮT BUỘC PHÂN HÓA RÕ RÀNG KIẾN THỨC THEO TỪNG ĐỘ TUỔI (Ví dụ nếu lớp ghép 3-4-5 tuổi:
+      - 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X, nhận biết chữ số X biểu thị cho các nhóm có số lượng X. Trẻ đếm từ 1 đến X, đọc được số X và các số nhỏ hơn X. So sánh 2 nhóm đối tượng, biết thêm bớt để có số lượng bằng nhau.
+      - 4 tuổi: Trẻ biết đếm đến X, nhận biết các nhóm có X đối tượng. Trẻ biết tạo nhóm, xếp tương ứng 1- 1, biết so sánh 2 nhóm đồ vật, biết đếm đúng số lượng và sử dụng đúng chữ số tương ứng theo cô và các bạn.
+      - 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô, đếm cùng các bạn.)` : '    Ví dụ: "- Trẻ biết tên bài thơ/bài hát...", "- Trẻ hiểu nội dung bài...".'}
+  + 2. Kỹ năng: Các gạch đầu dòng rèn luyện kỹ năng (TUYỆT ĐỐI KHÔNG GẮN MÃ).
+${isMixedAgeClass ? `    * ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${config.grade}): BẮT BUỘC PHÂN HÓA RÕ RÀNG KỸ NĂNG THEO TỪNG ĐỘ TUỔI (Ví dụ nếu lớp ghép 3-4-5 tuổi:
+      - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh số lượng giữa 2 nhóm, thêm bớt tạo sự bằng nhau trong phạm vi X, chọn và gắn thẻ số X chính xác, nhanh nhẹn.
+      - 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1 thẳng hàng từ trái sang phải, đếm theo thứ tự không bỏ sót đối tượng, tìm đúng thẻ số X theo cô và bạn.
+      - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay và đếm theo cô, phát âm rõ từ chỉ số lượng.)` : '    Ví dụ: "- Rèn kỹ năng phát âm...", "- Phát triển kỹ năng vận động...".'}`;
     const ageSpecificInstruction = preschoolAgeProfile ? `
 =============================================================================
 ĐẶC BIỆT CHÚ Ý - PHÂN TÍCH VÀ CĂN CHỈNH TOÀN BỘ GIÁO ÁN THEO ĐỘ TUỔI: "${preschoolAgeProfile.rawGrade}" (${preschoolAgeProfile.standardName})
@@ -3470,6 +3719,7 @@ ${ageSpecificInstruction}
 
 - BẮT BUỘC soạn theo Kế hoạch tổ chức hoạt động giáo dục Mầm non, TUYỆT ĐỐI KHÔNG dùng Công văn 5512.
 ${preschoolObjectivesInstruction}
+${preschool388CustomInstruction}
 - Ngôn ngữ, hoạt động phải phù hợp với tâm lý lứa tuổi mầm non (cô và trẻ).
 - Tích hợp phát triển 4 phẩm chất cốt lõi: Yêu thương, Tôn trọng, Trung thực, Trách nhiệm.
 - Tích hợp phát triển 5 năng lực nền tảng: Giao tiếp, Hợp tác, Giải quyết vấn đề, Tự lực, Thích ứng.

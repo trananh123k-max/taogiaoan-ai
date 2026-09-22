@@ -3013,6 +3013,7 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
     else if (domainInfo.domainType === 'POETRY') prefix = 'Thơ: ';
     else if (domainInfo.domainType === 'ART') prefix = 'Tên hoạt động: ';
     else if (domainInfo.domainType === 'PHYSICAL') prefix = 'Hoạt động học thể chất: ';
+    else if (domainInfo.domainType === 'LETTER_TRACING') prefix = 'Đề tài: ';
 
     if (cleanT) {
       lessonTitle = `${prefix}${cleanT}`;
@@ -3364,6 +3365,12 @@ function buildPreschoolDocxElements(
   
   elements.push(createSubHeading('2. Chuẩn bị của trẻ', fontName));
   plan.equipment.student.forEach(e => elements.push(createDashListItem(e, fontName)));
+
+  const spaceItems = (plan.equipment as any)?.space;
+  if (spaceItems && Array.isArray(spaceItems) && spaceItems.length > 0) {
+    elements.push(createSubHeading('3. Không gian', fontName));
+    spaceItems.forEach((e: string) => elements.push(createDashListItem(e, fontName)));
+  }
 
   // III. Tiến trình hoạt động
   elements.push(createSectionHeading('III. Tiến trình hoạt động', fontName, primaryColor));

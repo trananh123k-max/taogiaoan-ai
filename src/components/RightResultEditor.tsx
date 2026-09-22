@@ -858,7 +858,9 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[13pt]">
               <div className="space-y-1 bg-white p-3.5 rounded-lg border border-slate-200">
-                <h4 className="font-bold text-slate-900">1. Giáo viên:</h4>
+                <h4 className="font-bold text-slate-900">
+                  {(plan as any)?.schoolLevel === 'Mầm non' ? '1. Chuẩn bị của cô:' : '1. Giáo viên:'}
+                </h4>
                 <ul className="space-y-1 pl-1">
                   {plan.equipment.teacher.map((e, i) => (
                     <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
@@ -870,7 +872,9 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
               </div>
 
               <div className="space-y-1 bg-white p-3.5 rounded-lg border border-slate-200">
-                <h4 className="font-bold text-slate-900">2. Học sinh:</h4>
+                <h4 className="font-bold text-slate-900">
+                  {(plan as any)?.schoolLevel === 'Mầm non' ? '2. Chuẩn bị của trẻ:' : '2. Học sinh:'}
+                </h4>
                 <ul className="space-y-1 pl-1">
                   {plan.equipment.student.map((e, i) => (
                     <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
@@ -881,6 +885,22 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                 </ul>
               </div>
             </div>
+
+            {((plan.equipment as any)?.space && (plan.equipment as any).space.length > 0) && (
+              <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">
+                <h4 className="font-bold text-slate-900 mb-1">
+                  3. Không gian:
+                </h4>
+                <ul className="space-y-1 pl-1">
+                  {(plan.equipment as any).space.map((spaceItem: string, i: number) => (
+                    <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
+                      <span className="font-bold text-slate-900 shrink-0">-</span>
+                      <span className="flex-1"><MathRenderer text={cleanItem(spaceItem)} /></span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {plan.equipment.digitalAssets && plan.equipment.digitalAssets.length > 0 && (
               <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">

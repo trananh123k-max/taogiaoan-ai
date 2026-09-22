@@ -54,6 +54,11 @@ export interface LessonPlanConfig {
   enableAI: boolean;
   aiMode?: AIIntegrationMode; // 'ppct' | 'custom' | 'ai_generated'
   customAI?: string; // Nội dung năng lực AI tự dán/nhập từ bên ngoài
+  // Tiêu chí yêu cầu cần đạt theo Quyết định 388/QĐ-BGDĐT (Dành riêng cho 8 Lĩnh vực mới Mầm non)
+  enablePreschool388Criteria?: boolean;
+  preschool388CriteriaMode?: 'preset' | 'bank' | 'custom';
+  selected388CriteriaCodes?: string[];
+  custom388CriteriaText?: string;
   enableSTEM?: boolean;
   stemTopic?: string;
   hasStemFromPPCT?: boolean;
