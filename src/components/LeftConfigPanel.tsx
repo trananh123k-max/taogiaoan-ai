@@ -40,6 +40,7 @@ import { getApiHeaders } from '../utils/apiKeyManager';
 import { saveTextbookToFirestore, ManagedUserAccount } from '../utils/firebase';
 import { getUserAccessStatus } from '../utils/userAccess';
 import { PreschoolQD388CodesConfig } from './PreschoolQD388CodesConfig';
+import { CustomSubjectSelect } from './CustomSubjectSelect';
 import { isPreschoolNew8Activity } from '../utils/preschoolUtils';
 import { getDefaultQD388ForSubject } from '../data/qd388Data';
 
@@ -725,7 +726,6 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
           ) : (
             <div className="relative">
               {(() => {
-                const isSelectedNewActivity = config.schoolLevel === 'Mầm non' && MAM_NON_NEW_ACTIVITIES.includes(config.subject);
                 const currentSubjects = config.schoolLevel === 'Mầm non'
                   ? MAM_NON_SUBJECTS_LIST
                   : config.schoolLevel === 'Tiểu học'
@@ -734,61 +734,37 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                   ? THCS_SUBJECTS_LIST
                   : THPT_SUBJECTS_LIST;
 
-                return (
-                  <select
-                    value={config.subject}
-                    onChange={(e) => {
-                      const newSubj = e.target.value;
-                      const isNewHDTN = newSubj.toLowerCase().includes('hoạt động trải nghiệm') || newSubj.toLowerCase().includes('hđtn');
-                      let preschoolCodeUpdate: Partial<LessonPlanConfig> = {};
-                      if (config.schoolLevel === 'Mầm non') {
-                        const defaultCodes = getDefaultQD388ForSubject(newSubj);
-                        if (defaultCodes) {
-                          if (config.preschoolIndicatorMode !== 'custom') {
-                            preschoolCodeUpdate = {
-                              preschoolIndicatorMode: 'default_388',
-                              preschoolCustomCodes: defaultCodes.summary,
-                            };
-                          }
-                        }
+                const handleSubjectChange = (newSubj: string) => {
+                  const isNewHDTN = newSubj.toLowerCase().includes('hoạt động trải nghiệm') || newSubj.toLowerCase().includes('hđtn');
+                  let preschoolCodeUpdate: Partial<LessonPlanConfig> = {};
+                  if (config.schoolLevel === 'Mầm non') {
+                    const defaultCodes = getDefaultQD388ForSubject(newSubj);
+                    if (defaultCodes) {
+                      if (config.preschoolIndicatorMode !== 'custom') {
+                        preschoolCodeUpdate = {
+                          preschoolIndicatorMode: 'default_388',
+                          preschoolCustomCodes: defaultCodes.summary,
+                        };
                       }
-                      onChangeConfig({
-                        subject: newSubj,
-                        lessonTitle: '',
-                        ...(isNewHDTN ? { enableAI: false, enableNLS: false, enableSTEM: false } : {}),
-                        ...preschoolCodeUpdate,
-                      });
-                    }}
-                    style={{
-                      color: isSelectedNewActivity ? '#1d4ed8' : '#0f172a',
-                    }}
-                    className={`w-full border rounded-lg px-3 py-2 text-xs font-semibold appearance-none focus:bg-white focus:outline-none focus:border-amber-600 cursor-pointer pr-8 shadow-xs ${
-                      isSelectedNewActivity
-                        ? 'bg-blue-50/50 border-blue-300 text-blue-700 font-bold'
-                        : 'bg-[#f8fafc] border-slate-200 text-slate-900'
-                    }`}
-                  >
-                    {currentSubjects.map((subj) => {
-                      const isNew = config.schoolLevel === 'Mầm non' && MAM_NON_NEW_ACTIVITIES.includes(subj);
-                      return (
-                        <option
-                          key={subj}
-                          value={subj}
-                          style={{
-                            color: isNew ? '#1d4ed8' : '#1e293b',
-                            fontWeight: isNew ? 'bold' : 'normal',
-                            backgroundColor: isNew ? '#eff6ff' : '#ffffff',
-                          }}
-                          className={isNew ? 'bg-blue-50 text-blue-700 font-bold' : 'bg-white text-slate-800'}
-                        >
-                          {subj}
-                        </option>
-                      );
-                    })}
-                  </select>
+                    }
+                  }
+                  onChangeConfig({
+                    subject: newSubj,
+                    lessonTitle: '',
+                    ...(isNewHDTN ? { enableAI: false, enableNLS: false, enableSTEM: false } : {}),
+                    ...preschoolCodeUpdate,
+                  });
+                };
+
+                return (
+                  <CustomSubjectSelect
+                    value={config.subject}
+                    onChange={handleSubjectChange}
+                    subjects={currentSubjects}
+                    schoolLevel={config.schoolLevel}
+                  />
                 );
               })()}
-              <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
             </div>
           )}
         </div>
