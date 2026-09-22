@@ -797,6 +797,8 @@ export default function App() {
           <div className={`${isExpandedPreview ? 'lg:col-span-12' : 'lg:col-span-8 xl:col-span-9'} w-full flex flex-col flex-1 animate-in fade-in slide-in-from-right-4 duration-500`}>
             <RightResultEditor
               plan={currentPlan}
+              config={config}
+              onChangeConfig={(patch) => setConfig((prev) => ({ ...prev, ...patch }))}
               imageSlots={config.imageSlots}
               onOpenAiSuggestions={() => setActiveModal('ai_suggestions')}
               onRefineActivity={handleRefineActivity}

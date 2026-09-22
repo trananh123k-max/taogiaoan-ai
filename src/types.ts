@@ -67,8 +67,12 @@ export interface LessonPlanConfig {
   integratedAIFromPPCT?: string[];
   ppctContent?: string;
   aiModel?: string; // e.g. 'gemini-flash-latest', 'gemini-3.1-flash-lite', 'gemini-3.6-flash', 'gemini-3.8-flash'
+  enablePreschool388Criteria?: boolean;
   preschoolIndicatorMode?: 'default_388' | 'custom'; // 'default_388' | 'custom'
   preschoolCustomCodes?: string; // Ví dụ: "NT 3.1, TX 4.4, TC 1.2"
+  showPreschoolQD388InPreview?: boolean; // Tích chọn hiển thị bảng tra cứu mã QĐ 388 ở khung xem trước
+  selected388CriteriaCodes?: string[];
+  custom388CriteriaText?: string;
   preschoolCodesBySection?: {
     knowledge?: string;
     skills?: string;

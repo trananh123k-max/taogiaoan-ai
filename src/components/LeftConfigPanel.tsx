@@ -1094,8 +1094,10 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
               subject={config.subject}
               mode={config.preschoolIndicatorMode || 'default_388'}
               customCodes={config.preschoolCustomCodes !== undefined ? config.preschoolCustomCodes : (getDefaultQD388ForSubject(config.subject)?.summary || '')}
+              showInPreview={config.showPreschoolQD388InPreview ?? false}
               onChangeMode={(newMode) => onChangeConfig({ preschoolIndicatorMode: newMode })}
               onChangeCodes={(newCodes) => onChangeConfig({ preschoolCustomCodes: newCodes })}
+              onChangeShowInPreview={(show) => onChangeConfig({ showPreschoolQD388InPreview: show })}
             />
           </div>
         )}

@@ -4,10 +4,12 @@ import {
   ImageSlot,
   ActivityDetail,
   MathFormulaFormatType,
+  LessonPlanConfig,
 } from '../types';
 import {
   Download,
   BookOpen,
+  BookMarked,
   FileText,
   Award,
   Clock,
@@ -26,12 +28,16 @@ import { CompetencyMatrixView } from './CompetencyMatrixView';
 import { exportLessonPlanToDocx, getPreschoolHeaderInfo, formatHomeworkText, formatMathPeriodHeader, parseMathLessonHeader } from '../utils/docxExporter';
 import { exportLessonPlanToPptx } from '../utils/pptxExporter';
 import { formatPreschoolActivities, formatPreschoolMusicActivities, isPreschoolPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, getPreschoolPreparation } from '../utils/preschoolUtils';
+import { MAM_NON_NEW_ACTIVITIES } from '../data/curriculumData';
+import { PreschoolQD388FullViewer } from './PreschoolQD388FullViewer';
 import { MathRenderer } from './MathRenderer';
 import { WorksheetRenderer } from './WorksheetRenderer';
 import { StepProgress } from '../App';
 
 interface RightResultEditorProps {
   plan: LessonPlanOutput | null;
+  config?: LessonPlanConfig;
+  onChangeConfig?: (newConfig: Partial<LessonPlanConfig>) => void;
   imageSlots: ImageSlot[];
   onOpenAiSuggestions: () => void;
   onRefineActivity: (activity: ActivityDetail, instruction: string) => void;
@@ -144,6 +150,8 @@ const renderSubjectCompetencyItem = (text: string) => {
 
 export const RightResultEditor: React.FC<RightResultEditorProps> = ({
   plan,
+  config,
+  onChangeConfig,
   imageSlots,
   onOpenAiSuggestions,
   onRefineActivity,
@@ -162,6 +170,13 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
 }) => {
   const [isExportingDocx, setIsExportingDocx] = useState(false);
   const [isExportingPptx, setIsExportingPptx] = useState(false);
+
+  const currentSubject = config?.subject || plan?.subject || '';
+  const currentTitle = config?.lessonTitle || plan?.lessonTitle || '';
+  const isPreschoolActivity = (config?.schoolLevel === 'Mầm non' || (plan as any)?.schoolLevel === 'Mầm non') && (
+    MAM_NON_NEW_ACTIVITIES.includes(currentSubject) ||
+    isPreschoolNew8Activity(currentSubject, currentTitle)
+  );
 
   // Calculate dynamic progress
   const completedStepsCount = Object.values(progress || {}).filter((s) => s === 'done').length;
@@ -342,7 +357,19 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
 
   if (!plan) {
     return (
-      <div className="bg-white border border-slate-300 rounded-xl p-12 text-center shadow-xs text-slate-500 flex flex-col items-center justify-center min-h-[calc(100vh-200px)] w-full">
+      <div className="bg-white border border-slate-300 rounded-xl p-6 sm:p-10 text-center shadow-xs text-slate-500 flex flex-col items-center justify-center min-h-[calc(100vh-200px)] w-full">
+        {isPreschoolActivity && config?.showPreschoolQD388InPreview && (
+          <div className="w-full text-left mb-6 font-sans">
+            <PreschoolQD388FullViewer
+              subject={currentSubject}
+              customCodes={config.preschoolCustomCodes || ''}
+              mode={config.preschoolIndicatorMode || 'default_388'}
+              onChangeCodes={(codes) => onChangeConfig?.({ preschoolCustomCodes: codes })}
+              onChangeMode={(mode) => onChangeConfig?.({ preschoolIndicatorMode: mode })}
+              onClose={() => onChangeConfig?.({ showPreschoolQD388InPreview: false })}
+            />
+          </div>
+        )}
         <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 mb-4 shadow-sm">
           <BookOpen className="w-8 h-8" />
         </div>
@@ -421,6 +448,23 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
               <option value="mathtype_latex">Phương án 1: Mã LaTeX (Dành cho MathType)</option>
             </select>
           </div>
+
+          {/* Nút bật/tắt Bảng tra cứu mã QĐ 388 cho Mầm non */}
+          {isPreschoolActivity && (
+            <button
+              type="button"
+              onClick={() => onChangeConfig?.({ showPreschoolQD388InPreview: !config?.showPreschoolQD388InPreview })}
+              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border transition-all cursor-pointer shadow-2xs ${
+                config?.showPreschoolQD388InPreview
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                  : 'bg-blue-50 text-blue-800 border-blue-200 hover:bg-blue-100'
+              }`}
+              title="Xem và tra cứu danh mục mã các lĩnh vực phát triển theo Quyết định 388/QĐ-BGDĐT"
+            >
+              <BookMarked className="w-3.5 h-3.5" />
+              <span>{config?.showPreschoolQD388InPreview ? 'Đóng tra cứu QĐ 388' : 'Tra cứu mã QĐ 388'}</span>
+            </button>
+          )}
 
           {onReset && (
             <button
@@ -504,6 +548,20 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
         style={{ fontFamily: '"Times New Roman", Times, serif' }}
       >
         <div className={`mx-auto space-y-8 text-justify leading-relaxed text-[13pt] w-full ${isExpanded ? 'max-w-6xl' : 'max-w-5xl'}`}>
+          {/* Bảng tra cứu & chọn mã QĐ 388 cho Mầm non khi được tích chọn */}
+          {isPreschoolActivity && config?.showPreschoolQD388InPreview && (
+            <div className="font-sans mb-4">
+              <PreschoolQD388FullViewer
+                subject={currentSubject}
+                customCodes={config.preschoolCustomCodes || ''}
+                mode={config.preschoolIndicatorMode || 'default_388'}
+                onChangeCodes={(codes) => onChangeConfig?.({ preschoolCustomCodes: codes })}
+                onChangeMode={(mode) => onChangeConfig?.({ preschoolIndicatorMode: mode })}
+                onClose={() => onChangeConfig?.({ showPreschoolQD388InPreview: false })}
+              />
+            </div>
+          )}
+
           {/* Document Standard Header */}
           {(plan as any)?.schoolLevel === 'Mầm non' ? (() => {
             const preschoolInfo = getPreschoolHeaderInfo(plan);
