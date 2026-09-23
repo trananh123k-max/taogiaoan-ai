@@ -71,7 +71,7 @@ export const MAM_NON_NEW_ACTIVITIES = [
   'HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI'
 ];
 
-export const MAM_NON_SUBJECTS_LIST = [
+export const MAM_NON_TRADITIONAL_DOMAINS = [
   'GIÁO ÁN VĂN HỌC (THƠ)',
   'GIÁO ÁN VĂN HỌC (TRUYỆN)',
   'NGÔN NGỮ (CHỮ CÁI)',
@@ -84,6 +84,22 @@ export const MAM_NON_SUBJECTS_LIST = [
   'GIÁO ÁN ÂM NHẠC (Hát vận động)',
   'GIÁO ÁN TÌNH CẢM - XÃ HỘI',
   'Lĩnh vực Phát triển thể chất',
+];
+
+export const MAM_NON_MAIN_THEMES = [
+  'Trường mầm non',
+  'Bản thân',
+  'Gia đình',
+  'Nghề nghiệp',
+  'Động vật',
+  'Thực vật',
+  'Giao thông',
+  'Nước và các hiện tượng tự nhiên',
+  'Quê hương - Đất nước - Bác Hồ'
+];
+
+export const MAM_NON_SUBJECTS_LIST = [
+  ...MAM_NON_TRADITIONAL_DOMAINS,
   ...MAM_NON_NEW_ACTIVITIES
 ];
 

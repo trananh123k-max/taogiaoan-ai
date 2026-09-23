@@ -47,11 +47,22 @@ import {
   User,
   Phone,
   MessageCircle,
+  Sliders,
+  FileText,
+  Download,
+  Presentation,
+  Plus,
+  Loader2,
 } from 'lucide-react';
+import { exportLessonPlanToDocx } from './utils/docxExporter';
+import { exportLessonPlanToPptx } from './utils/pptxExporter';
 
 export type StepProgress = 'pending' | 'start' | 'done';
 
 export default function App() {
+  // Active Tab state ('config' for Tab 1, 'result' for Tab 2)
+  const [activeTab, setActiveTab] = useState<'config' | 'result'>('config');
+
   // Config state
   const [config, setConfig] = useState<LessonPlanConfig>({
     lessonTitle: '',
@@ -378,12 +389,14 @@ export default function App() {
     setCurrentPlan(null);
     setProgressSteps({ 1: 'pending', 2: 'pending', 3: 'pending', 4: 'pending' });
     setIsGenerating(false);
+    setActiveTab('config');
     setConfig((prev) => ({
       ...prev,
       lessonTitle: '',
       oldPlanContent: '',
       oldPlanFileName: '',
     }));
+    showToast('Đã khởi tạo bài mới, chuyển về Tab 1 để thiết lập!', 'info');
   };
 
   // Generate Lesson Plan via Gemini Server Endpoint
@@ -499,6 +512,7 @@ export default function App() {
     setElapsedSeconds(0);
     setIsGenerating(true);
     setCurrentPlan(null); // Clear previous plan to show empty/generating state
+    setActiveTab('result'); // Switch to Tab 2 to watch progress and result
     showToast('Đang tiến hành soạn giáo án bài dạy, vui lòng chờ trong giây lát...', 'info');
 
     if (timerIntervalRef.current) {
@@ -696,6 +710,37 @@ export default function App() {
     showToast(`Đã lưu thay đổi Hoạt động ${updatedActivity.index}!`, 'success');
   };
 
+  const [isExportingDocx, setIsExportingDocx] = useState(false);
+  const [isExportingPptx, setIsExportingPptx] = useState(false);
+
+  const handleExportDocx = async () => {
+    if (!currentPlan) return;
+    setIsExportingDocx(true);
+    try {
+      await exportLessonPlanToDocx(currentPlan, config.imageSlots, config.tableLayout, config.mathFormulaFormat || 'word_equation');
+      showToast('Đã tải tệp Giáo án (.docx) thành công!', 'success');
+    } catch (err) {
+      console.error('Error exporting DOCX:', err);
+      showToast('Không thể xuất file Word: ' + (err instanceof Error ? err.message : String(err)), 'error');
+    } finally {
+      setIsExportingDocx(false);
+    }
+  };
+
+  const handleExportPptx = async () => {
+    if (!currentPlan) return;
+    setIsExportingPptx(true);
+    try {
+      await exportLessonPlanToPptx(currentPlan, config.imageSlots);
+      showToast('Đã tải bài giảng PowerPoint (.pptx) thành công!', 'success');
+    } catch (err) {
+      console.error('Error exporting PPTX:', err);
+      showToast('Không thể xuất bài giảng PowerPoint: ' + (err instanceof Error ? err.message : String(err)), 'error');
+    } finally {
+      setIsExportingPptx(false);
+    }
+  };
+
   // Select textbook from cloud storage modal
   const handleSelectTextbook = (sample: TextbookSample) => {
     setConfig((prev) => ({
@@ -766,35 +811,173 @@ export default function App() {
         </div>
       )}
 
-      {/* Main Responsive Dashboard Layout */}
-      <main className="flex-1 w-full max-w-[1850px] mx-auto px-2 sm:px-4 lg:px-6 py-3 sm:py-5 flex flex-col">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start flex-1">
-          {/* Left Column: Configurator & DOCX/Image extraction */}
-          {!isExpandedPreview ? (
-            <div className="lg:col-span-4 xl:col-span-3 space-y-4 lg:sticky lg:top-18 lg:max-h-[calc(100vh-5.5rem)] lg:overflow-y-auto lg:pr-1 animate-in fade-in slide-in-from-left-4 duration-500">
-              <LeftConfigPanel
-                config={config}
-                onChangeConfig={handleUpdateConfig}
-                onGenerate={handleGeneratePlan}
-                onCancelGenerate={handleCancelGenerate}
-                isGenerating={isGenerating}
-                elapsedSeconds={elapsedSeconds}
-                onOpenCloudStorage={() => setActiveModal('cloud_storage')}
-                uploadedBooks={uploadedBooks}
-                uploadedPPCTs={uploadedPPCTs}
-                userRole={userRole}
-                currentUser={currentUser}
-                onRequestContactAdmin={() => setIsContactAdminOpen(true)}
-                onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
-                onBooksUpdated={(books) => {
-                  setUploadedBooks(books);
-                }}
-              />
-            </div>
-          ) : null}
+      {/* Unified Sticky Tab Navigation & Action Toolbar (Cùng 1 hàng ngang duy nhất) */}
+      {(() => {
+        const isMathSubject = /toán|math/i.test(config.subject || '') || /toán|math/i.test(currentPlan?.subject || '') || /toán|math/i.test(config.lessonTitle || '');
+        return (
+          <div className="sticky top-16 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs py-1.5 px-2 sm:px-4 lg:px-6">
+            <div className="max-w-[1850px] mx-auto flex items-center justify-between gap-2 flex-nowrap overflow-x-auto">
+              {/* Main Tab Switcher Buttons */}
+              <div className="flex items-center gap-1 p-0.5 bg-slate-100/90 border border-slate-200 rounded-xl shadow-2xs shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('config')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold tracking-wide transition-all cursor-pointer whitespace-nowrap ${
+                    activeTab === 'config'
+                      ? 'bg-gradient-to-r from-amber-700 via-amber-800 to-amber-900 text-white shadow-xs'
+                      : 'text-slate-700 hover:text-amber-900 hover:bg-white/80'
+                  }`}
+                >
+                  <Sliders className="w-3.5 h-3.5" />
+                  <span>TAB 1: CẤU HÌNH SOẠN BÀI DẠY</span>
+                </button>
 
-          {/* Right Column: Visual 2-Column Table Editor & Matrices */}
-          <div className={`${isExpandedPreview ? 'lg:col-span-12' : 'lg:col-span-8 xl:col-span-9'} w-full flex flex-col flex-1 animate-in fade-in slide-in-from-right-4 duration-500`}>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('result')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold tracking-wide transition-all cursor-pointer whitespace-nowrap ${
+                    activeTab === 'result'
+                      ? 'bg-gradient-to-r from-amber-700 via-amber-800 to-amber-900 text-white shadow-xs'
+                      : 'text-slate-700 hover:text-amber-900 hover:bg-white/80'
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>TAB 2: KẾT QUẢ BÀI SOẠN</span>
+                  {isGenerating ? (
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9.5px] bg-rose-500 text-white font-bold animate-pulse">
+                      Đang soạn...
+                    </span>
+                  ) : currentPlan ? (
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9.5px] bg-emerald-600 text-white font-bold">
+                      Đã có bài ✓
+                    </span>
+                  ) : null}
+                </button>
+              </div>
+
+              {/* Quick Action Cluster (Soạn bài mới -> Công thức Word nếu Toán -> Tải pptx -> Tải docx) */}
+              <div className="flex items-center gap-1.5 shrink-0 flex-nowrap">
+                {/* Context indicator tag */}
+                <div className="hidden 2xl:flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg shrink-0">
+                  <span className="text-amber-900 font-bold">{config.schoolLevel || 'Mầm non'}</span>
+                  <span className="text-slate-300">•</span>
+                  <span className="text-slate-800 truncate max-w-[130px]">{config.subject || 'Chưa chọn môn'}</span>
+                </div>
+
+                {/* Nút + Soạn bài mới */}
+                <button
+                  type="button"
+                  onClick={handleResetPlan}
+                  className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
+                  title="Khởi tạo một giáo án mới từ đầu"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Soạn bài mới</span>
+                </button>
+
+                {/* Ô lựa chọn Công thức Word (Chỉ hiển thị khi là môn Toán) */}
+                {isMathSubject && (
+                  <div className="flex items-center gap-1 bg-amber-50/90 border border-amber-300/80 rounded-lg px-2 py-1 shadow-2xs shrink-0 animate-in fade-in duration-200">
+                    <span className="text-[10.5px] font-bold text-amber-900 flex items-center gap-1 shrink-0">
+                      <Sparkles className="w-3 h-3 text-amber-600" />
+                      <span className="hidden sm:inline">Công thức Word:</span>
+                    </span>
+                    <select
+                      value={config.mathFormulaFormat || 'word_equation'}
+                      onChange={(e) => setConfig((prev) => ({ ...prev, mathFormulaFormat: e.target.value as any }))}
+                      className="text-[10.5px] font-bold text-amber-950 bg-white border border-amber-300 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer shadow-2xs max-w-[180px] sm:max-w-none truncate"
+                      title="Phương án 2: Tự động tạo công thức chuẩn Word Equation. Phương án 1: Giữ mã LaTeX cho MathType."
+                    >
+                      <option value="word_equation">Phương án 2: Word Equation (Tự động)</option>
+                      <option value="mathtype_latex">Phương án 1: Mã LaTeX (MathType)</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Nút Tải bài giảng (.pptx) */}
+                <button
+                  type="button"
+                  onClick={handleExportPptx}
+                  disabled={isExportingPptx || !currentPlan}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all shadow-2xs shrink-0 whitespace-nowrap ${
+                    !currentPlan
+                      ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-60'
+                      : 'bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 hover:from-amber-700 hover:via-orange-700 hover:to-rose-700 text-white border border-orange-400/30 hover:scale-[1.01] active:scale-[0.99] cursor-pointer'
+                  }`}
+                  title="Tải bài giảng trình chiếu PowerPoint (.pptx)"
+                >
+                  {isExportingPptx ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin shrink-0" />
+                      <span>Đang tạo...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Presentation className="w-3 h-3 text-amber-100 shrink-0" />
+                      <span>Tải bài giảng (.pptx)</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Nút Tải giáo án về máy */}
+                <button
+                  type="button"
+                  onClick={handleExportDocx}
+                  disabled={isExportingDocx || !currentPlan}
+                  className={`flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold rounded-lg transition-all shadow-2xs shrink-0 whitespace-nowrap ${
+                    !currentPlan
+                      ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-60'
+                      : 'bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800 text-white border border-blue-400/30 hover:scale-[1.01] active:scale-[0.99] cursor-pointer'
+                  }`}
+                  title="Tải giáo án Word (.docx) về máy"
+                >
+                  {isExportingDocx ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin shrink-0" />
+                      <span>Đang tải...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-3 h-3 text-blue-100 shrink-0" />
+                      <span>Tải giáo án về máy</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Main Full-Screen Layout per Tab */}
+      <main className="flex-1 w-full max-w-[1850px] mx-auto px-2 sm:px-4 lg:px-6 py-3 sm:py-5 flex flex-col min-h-[calc(100vh-140px)] pb-16 sm:pb-24">
+        {activeTab === 'config' ? (
+          /* TAB 1: Cấu hình soạn bài dạy độc lập (Full screen / Mở to hết màn hình) */
+          <div className="w-full animate-in fade-in duration-300">
+            <LeftConfigPanel
+              config={config}
+              onChangeConfig={handleUpdateConfig}
+              onGenerate={handleGeneratePlan}
+              onCancelGenerate={handleCancelGenerate}
+              isGenerating={isGenerating}
+              elapsedSeconds={elapsedSeconds}
+              onOpenCloudStorage={() => setActiveModal('cloud_storage')}
+              uploadedBooks={uploadedBooks}
+              uploadedPPCTs={uploadedPPCTs}
+              userRole={userRole}
+              currentUser={currentUser}
+              onRequestContactAdmin={() => setIsContactAdminOpen(true)}
+              onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
+              onBooksUpdated={(books) => {
+                setUploadedBooks(books);
+              }}
+              onViewResult={() => setActiveTab('result')}
+              hasPlan={Boolean(currentPlan)}
+            />
+          </div>
+        ) : (
+          /* TAB 2: Kết quả bài soạn độc lập (Full screen / Mở to hết màn hình) */
+          <div className="w-full flex flex-col flex-1 animate-in fade-in duration-300">
             <RightResultEditor
               plan={currentPlan}
               config={config}
@@ -804,8 +987,8 @@ export default function App() {
               onRefineActivity={handleRefineActivity}
               onManualEditActivity={handleManualEditActivity}
               isRefiningActivity={isRefiningActivity}
-              isExpanded={isExpandedPreview}
-              onToggleExpand={() => setIsExpandedPreview(!isExpandedPreview)}
+              isExpanded={true}
+              onToggleExpand={() => {}}
               isGenerating={isGenerating}
               elapsedSeconds={elapsedSeconds}
               progress={progressSteps}
@@ -814,13 +997,14 @@ export default function App() {
               tableLayout={config.tableLayout}
               mathFormulaFormat={config.mathFormulaFormat || 'word_equation'}
               onMathFormulaFormatChange={(fmt) => setConfig((prev) => ({ ...prev, mathFormulaFormat: fmt }))}
+              onBackToConfig={() => setActiveTab('config')}
             />
           </div>
-        </div>
+        )}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-amber-900/60 bg-gradient-to-r from-[#7c2d12] via-[#9a3412] to-[#78350f] py-3 mt-auto shadow-sm">
+      <footer className="border-t border-amber-900/60 bg-gradient-to-r from-[#7c2d12] via-[#9a3412] to-[#78350f] py-3 mt-auto shadow-sm relative z-10 shrink-0">
         <div className="max-w-[1700px] mx-auto px-4 flex flex-col items-center justify-center gap-2">
           <div className="font-medium text-[11px] sm:text-xs text-amber-400 flex items-center justify-center gap-3 sm:gap-4 flex-wrap tracking-wide">
             <span className="flex items-center gap-1.5 hover:text-amber-300 transition-colors cursor-default"><User className="w-3.5 h-3.5 text-emerald-400" /> Tác giả: Hoàng Văn Đình Khoa</span>

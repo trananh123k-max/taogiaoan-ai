@@ -142,27 +142,73 @@ export const PreschoolQD388FullViewer: React.FC<PreschoolQD388FullViewerProps> =
         </div>
       </div>
 
-      {/* 2. Hàng nút thao tác: Nạp mã mặc định theo QĐ 388, Xóa mã, Đã chọn X mã */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5 pt-3 pb-2">
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            type="button"
-            onClick={handleResetDefault}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-colors shadow-2xs cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Nạp mã mặc định theo QĐ 388</span>
-          </button>
+      {/* 2. Chế độ và Ô nhập / xem danh sách mã */}
+      <div className="pt-3 pb-2 flex flex-col gap-2.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-800">
+              Mã lĩnh vực phát triển đưa vào giáo án:
+            </span>
+            <div className="inline-flex p-0.5 rounded-lg bg-slate-100 border border-slate-300 text-[11px]">
+              <button
+                type="button"
+                onClick={handleResetDefault}
+                className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
+                  mode === 'default_388'
+                    ? 'bg-white text-blue-700 shadow-xs font-bold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Mặc định theo QĐ 388
+              </button>
+              <button
+                type="button"
+                onClick={() => onChangeMode('custom')}
+                className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
+                  mode === 'custom'
+                    ? 'bg-white text-amber-700 shadow-xs font-bold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Tự do tùy chỉnh mã
+              </button>
+            </div>
+          </div>
 
-          <button
-            type="button"
-            onClick={handleClearCodes}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200 hover:border-rose-200 transition-colors shadow-2xs cursor-pointer"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            <span>Xóa mã</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleResetDefault}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-colors shadow-2xs cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Nạp mã mặc định</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleClearCodes}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200 hover:border-rose-200 transition-colors shadow-2xs cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Xóa mã</span>
+            </button>
+          </div>
         </div>
+
+        {/* Ô hiển thị và sửa mã trực tiếp */}
+        <textarea
+          value={customCodes}
+          onChange={(e) => {
+            onChangeCodes(e.target.value);
+            if (mode === 'default_388') {
+              onChangeMode('custom');
+            }
+          }}
+          rows={2}
+          placeholder="Mã lĩnh vực phát triển (ví dụ: NT 3.1, TX 3.2, TX 4.3, TX 4.4, NN 2.2)... Có thể nhập trực tiếp hoặc nhấp chọn trong bảng chỉ báo bên dưới."
+          className="w-full bg-slate-50/50 hover:bg-white focus:bg-white border border-slate-300 focus:border-blue-500 rounded-lg px-3 py-2 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-xs transition-colors"
+        />
 
         <div className="text-xs text-slate-600 italic flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-amber-500" />

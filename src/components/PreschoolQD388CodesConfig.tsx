@@ -94,7 +94,7 @@ export const PreschoolQD388CodesConfig: React.FC<PreschoolQD388CodesConfigProps>
           />
           <span className="text-xs font-semibold text-blue-700 group-hover:text-blue-900 flex items-center gap-1.5">
             <BookOpen className="w-3.5 h-3.5" />
-            <span>Hiển thị bảng tra cứu & chọn mã QĐ 388 ở khung xem trước</span>
+            <span>Hiển thị bảng tra cứu & chọn mã QĐ 388 ở phía dưới</span>
           </span>
         </label>
       )}

@@ -199,36 +199,37 @@ function resolveCandidateKeys(req: express.Request): {
 
 // Task-Specific Model Hierarchies
 // 1. Phục vụ Soạn bài dạy (KHBD), Tinh chỉnh hoạt động CV 5512, Gợi ý sư phạm:
-// Ưu tiên tốc độ siêu tốc 1.2s - 3s và độ ổn định cao nhất, kèm dự phòng đa tầng:
+// Ưu tiên model có Quota rộng, tốc độ siêu tốc và khả năng chống nghẽn Rate Limit cao nhất:
 const PEDAGOGICAL_MODELS = [
-  'gemini-3.1-flash-lite',  // Tốc độ cao nhất (1.2s - 2s), Quota rộng rãi, không bị 503
+  'gemini-3.1-flash-lite',  // Quota RPM/TPM cao nhất, độ trễ thấp nhất (1.2s - 2s), chống Rate Exceeded tốt nhất
+  'gemini-3.8-flash',       // Chuẩn chính xác, năng lực sư phạm cao cấp
   'gemini-flash-latest',    // Chuẩn tốc độ cao & ổn định
-  'gemini-2.5-flash',       // Chuẩn 2.5 flash cực kỳ ổn định, quota dồi dào
   'gemini-3.7-flash',       // Trí tuệ sư phạm cao cấp
 ];
 
 // 2. Phục vụ Trợ lý Trò chuyện Sư phạm (Chatbot):
 const CHAT_MODELS = [
-  'gemini-3.1-flash-lite',  // Phản hồi đối thoại tức thì 1s
+  'gemini-3.1-flash-lite',
+  'gemini-3.8-flash',
   'gemini-flash-latest',
-  'gemini-2.5-flash',
   'gemini-3.7-flash',
 ];
 
 // 3. Phục vụ Tác vụ Tiện ích phụ, Kiểm tra thông tin, Ping, Quét mục lục SGK:
 const UTILITY_MODELS = [
-  'gemini-3.1-flash-lite',  // Phản hồi tức thì 1s, tiết kiệm Quota tối đa
+  'gemini-3.1-flash-lite',
+  'gemini-3.8-flash',
   'gemini-flash-latest',
-  'gemini-2.5-flash',
   'gemini-3.7-flash',
 ];
 
 /**
  * Resilient Multi-Key & Multi-Model Execution Engine:
  * 1. Executes with highest/best candidate model for the specific task and iterates candidate keys.
- * 2. If a Key fails (429 Quota Exceeded, 503 Overloaded, Invalid, etc.), immediately switches to next Key.
- * 3. If ALL keys fail on this model, automatically downgrades to next fallback Model in hierarchy.
- * 4. Repeats through all keys on the downgraded model until a working combination succeeds.
+ * 2. If encountering transient 503 (high demand) or 429 (rate spike), retries with exponential backoff & jitter.
+ * 3. If a Key fails permanently or quota exceeded, automatically switches to next Key.
+ * 4. If ALL keys fail on this model, automatically downgrades to next fallback Model in hierarchy.
+ * 5. Repeats through all keys on the downgraded model until a working combination succeeds.
  */
 async function generateContentWithRetryAndFallback(options: {
   systemInstruction?: string;
@@ -282,37 +283,54 @@ async function generateContentWithRetryAndFallback(options: {
     for (let kIdx = 0; kIdx < keysToTry.length; kIdx++) {
       const currentKey = keysToTry[kIdx];
 
-      try {
-        const client = getGeminiClient(currentKey);
-        const response = await client.models.generateContent({
-          model: currentModel,
-          contents: options.contents,
-          config: {
-            ...(options.systemInstruction ? { systemInstruction: options.systemInstruction } : {}),
-            ...options.config,
-          },
-        });
+      // Retry up to 3 attempts for transient spike (503 / 429) before switching key/model
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const client = getGeminiClient(currentKey);
+          const response = await client.models.generateContent({
+            model: currentModel,
+            contents: options.contents,
+            config: {
+              ...(options.systemInstruction ? { systemInstruction: options.systemInstruction } : {}),
+              ...options.config,
+            },
+          });
 
-        if (response && response.text) {
-          // Success! Return immediately with optimal result
-          return response;
-        }
-      } catch (err: any) {
-        lastError = err;
-        const errMsg = err?.message || String(err);
-        const keyPreview =
-          currentKey.length > 8
-            ? `${currentKey.substring(0, 5)}...${currentKey.substring(currentKey.length - 4)}`
-            : 'Key';
+          if (response && response.text) {
+            // Success! Return immediately with optimal result
+            return response;
+          }
+        } catch (err: any) {
+          lastError = err;
+          const rawErrMsg = err?.message || String(err);
+          const errMsgLower = rawErrMsg.toLowerCase();
+          const isRateLimit = errMsgLower.includes('rate') || errMsgLower.includes('429') || errMsgLower.includes('quota') || errMsgLower.includes('resource_exhausted') || errMsgLower.includes('too many requests');
+          const isTransient = isRateLimit || errMsgLower.includes('503') || errMsgLower.includes('unavailable') || errMsgLower.includes('high demand') || errMsgLower.includes('overloaded');
 
-        console.warn(
-          `[Auto-Failover] Key [${kIdx + 1}/${keysToTry.length} - ${keyPreview}] gặp lỗi/hết quota trên model "${currentModel}": ${errMsg.substring(0, 100)}`
-        );
+          if (isTransient && attempt < 2) {
+            // Exponential backoff + jitter for rate limit recovery
+            const delayMs = isRateLimit
+              ? 1200 * (attempt + 1) + Math.random() * 800
+              : 600 * (attempt + 1) + Math.random() * 400;
+            await new Promise((resolve) => setTimeout(resolve, delayMs));
+            continue;
+          }
 
-        if (kIdx < keysToTry.length - 1) {
-          console.log(
-            `[Auto-Failover] -> Tự động chuyển sang Key dự phòng [${kIdx + 2}/${keysToTry.length}] trên model "${currentModel}"...`
+          const keyPreview =
+            currentKey.length > 8
+              ? `${currentKey.substring(0, 5)}...${currentKey.substring(currentKey.length - 4)}`
+              : 'Key';
+
+          console.warn(
+            `[Auto-Failover] Key [${kIdx + 1}/${keysToTry.length} - ${keyPreview}] gặp lỗi/hết quota trên model "${currentModel}": ${rawErrMsg.substring(0, 100)}`
           );
+
+          if (kIdx < keysToTry.length - 1) {
+            console.log(
+              `[Auto-Failover] -> Tự động chuyển sang Key dự phòng [${kIdx + 2}/${keysToTry.length}] trên model "${currentModel}"...`
+            );
+          }
+          break; // break retry loop to move to next key
         }
       }
     }
@@ -1235,7 +1253,7 @@ app.post('/api/check-api-key', async (req, res) => {
           let success = false;
           let lastErr: any = null;
           // Fast and resilient models to test in priority order
-          const testModels = ['gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-3.7-flash'];
+          const testModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite', 'gemini-3.7-flash'];
           
           for (const m of testModels) {
             try {
@@ -2356,10 +2374,21 @@ ${preschoolAgeProfile.promptGuidance}
 =============================================================================
 ` : '';
 
+  const hasPreschoolTheme = isPreschool && (config.preschoolCategoryMode === 'theme' || Boolean(config.preschoolMainTheme));
+  const preschoolThemeInstruction = hasPreschoolTheme ? `
+=============================================================================
+CHỦ ĐỀ GIÁO DỤC MẦM NON (BẮT BUỘC BÁM SÁT 100%):
+- CHỦ ĐỀ LỚN: "${config.preschoolMainTheme || 'Trường mầm non'}"
+${config.preschoolSubTheme ? `- CHỦ ĐỀ NHỎ (CHỦ ĐỀ NHÁNH / SỰ KIỆN): "${config.preschoolSubTheme}"` : ''}
+- YÊU CẦU NỘI DUNG VÀ HỌC LIỆU: Mọi câu chuyện, hình ảnh, bài hát, câu hỏi gợi mở, học cụ, trò chơi và tình huống khởi động BẮT BUỘC phải lồng ghép khéo léo và bám sát Chủ đề lớn "${config.preschoolMainTheme || 'Trường mầm non'}" ${config.preschoolSubTheme ? `và Chủ đề nhỏ "${config.preschoolSubTheme}"` : ''}.
+=============================================================================
+` : '';
+
   const preschoolPrompt = `\nĐẶC BIỆT QUAN TRỌNG ĐỐI VỚI CẤP MẦM NON:
 ${PRESCHOOL_CURRICULUM_MATRIX}
 ${PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE}
 ${ageSpecificInstruction}
+${preschoolThemeInstruction}
 ${yccdInstruction}${nlsInstruction}${aiInstruction}
 
 - BẮT BUỘC soạn theo Kế hoạch tổ chức hoạt động giáo dục Mầm non, TUYỆT ĐỐI KHÔNG dùng Công văn 5512.
@@ -3464,31 +3493,39 @@ Trả về JSON dạng:
   };
 
   // Execute tasks in parallel with error resilience and automatic retry
-  const wrap = async (taskFn: any, step: number) => {
+  const wrap = async (taskFn: any, step: number, initialDelayMs = 0) => {
+    if (initialDelayMs > 0) {
+      await new Promise((r) => setTimeout(r, initialDelayMs));
+    }
     onProgress?.(step, 'start');
-    for (let attempt = 1; attempt <= 2; attempt++) {
+    for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         const res = await taskFn();
         if (res && Object.keys(res).length > 0) {
           onProgress?.(step, 'done');
           return res;
         }
-      } catch (err) {
-        console.warn(`Task ${step} attempt ${attempt} warning:`, err);
+      } catch (err: any) {
+        const msg = err?.message || String(err);
+        console.warn(`Task ${step} attempt ${attempt} warning:`, msg);
+        if (attempt < 3) {
+          const isRateLimit = msg.toLowerCase().includes('rate') || msg.toLowerCase().includes('429') || msg.toLowerCase().includes('quota');
+          const delay = isRateLimit ? 1500 * attempt + Math.random() * 800 : 800 * attempt;
+          await new Promise((r) => setTimeout(r, delay));
+        }
       }
     }
-    // If still empty after 2 attempts, mark done with fallback to prevent UI hanging
+    // If still empty after attempts, mark done with fallback to prevent UI hanging
     onProgress?.(step, 'done');
     return {};
   };
 
-  
-  // Execute all 4 sections in parallel for lightning-fast generation speed
-  const [res1, res2, res3, res4] = await Promise.all([
-    wrap(taskObjectivesEquipment, 1),
-    wrap(taskActivities1And2, 2),
-    wrap(taskActivities3And4, 3),
-    wrap(async () => { if (isPreschool) return {}; return taskMatrixAndAppendix(); }, 4),
+  // Execute sections with safe staggered batches to prevent burst 429 Rate Limit
+  const res1 = await wrap(taskObjectivesEquipment, 1, 0);
+  const [res2, res3, res4] = await Promise.all([
+    wrap(taskActivities1And2, 2, 200),
+    wrap(taskActivities3And4, 3, 600),
+    wrap(async () => { if (isPreschool) return {}; return taskMatrixAndAppendix(); }, 4, 1000),
   ]);
 
 
@@ -3514,7 +3551,11 @@ Trả về JSON dạng:
     subject: subject,
     grade: grade,
     schoolLevel: config.schoolLevel || '',
-    duration: isPreschool ? (preschoolAgeProfile?.recommendedDuration || '30 – 35 phút') : undefined,
+    duration: isPreschool ? (config.preschoolDuration || preschoolAgeProfile?.recommendedDuration || '30 – 35 phút') : undefined,
+    mainTheme: isPreschool ? (config.preschoolMainTheme || undefined) : undefined,
+    subTheme: isPreschool ? (config.preschoolSubTheme || undefined) : undefined,
+    classSize: isPreschool ? (config.preschoolClassSize || undefined) : undefined,
+    preschoolCategoryMode: config.preschoolCategoryMode,
     bookSeries: bookSeries,
     periods: periods,
     lessonTotalPeriods: totalPeriods,
@@ -4306,6 +4347,42 @@ Trả lời lịch thiệp, sư phạm, chuyên nghiệp, cấu trúc rõ ràng 
   } catch (error: any) {
     console.error('Error in AI Assistant chat:', error);
     res.status(500).json({ success: false, error: 'Hệ thống đang quá tải, vui lòng thử lại sau.' });
+  }
+});
+
+/**
+ * Dynamic on-the-fly Project Source Code Zip Exporter
+ */
+app.get('/api/export-project-zip', async (_req, res) => {
+  try {
+    const JSZip = (await import('jszip')).default;
+    const fs = await import('fs');
+    const path = await import('path');
+    const zip = new JSZip();
+
+    function addDirToZip(currentDir: string, zipFolder: any) {
+      const items = fs.readdirSync(currentDir);
+      for (const item of items) {
+        if (['node_modules', '.git', 'dist', 'build', '.aistudio', '.cache'].includes(item)) continue;
+        const fullPath = path.join(currentDir, item);
+        const stat = fs.statSync(fullPath);
+        if (stat.isDirectory()) {
+          addDirToZip(fullPath, zipFolder.folder(item));
+        } else {
+          if (item.endsWith('.map') || item.endsWith('.log')) continue;
+          zipFolder.file(item, fs.readFileSync(fullPath));
+        }
+      }
+    }
+
+    addDirToZip(process.cwd(), zip);
+    const content = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', 'attachment; filename="taogiaoan-ai-pro.zip"');
+    res.send(content);
+  } catch (err: any) {
+    console.error('Error creating source zip:', err);
+    res.status(500).json({ error: 'Không thể tạo file nén' });
   }
 });
 

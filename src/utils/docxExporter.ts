@@ -2723,6 +2723,8 @@ export interface PreschoolHeaderInfo {
   domainLine: string;
   gradeLine: string;
   timeLine: string;
+  themeLine?: string;
+  classSizeLine?: string;
 }
 
 function getPreschoolDuration(plan: any): string {
@@ -3106,6 +3108,16 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
   const gradeLine = `Độ tuổi: ${grade}`;
   const timeLine = `Thời gian: ${getPreschoolDuration(plan)}`;
 
+  const mainT = (plan.mainTheme || (plan as any).preschoolMainTheme || '').trim();
+  const subT = (plan.subTheme || (plan as any).preschoolSubTheme || '').trim();
+  let themeLine = '';
+  if (mainT) {
+    themeLine = subT ? `Chủ đề: ${mainT} - ${subT}` : `Chủ đề: ${mainT}`;
+  }
+
+  const rawClassSize = (plan.classSize || (plan as any).preschoolClassSize || '').trim();
+  const classSizeLine = rawClassSize ? (rawClassSize.toLowerCase().startsWith('số lượng:') ? rawClassSize : `Số lượng: ${rawClassSize}`) : '';
+
   return {
     isMusic,
     mainHeader,
@@ -3113,7 +3125,9 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
     contentLines: finalContentLines,
     domainLine,
     gradeLine,
-    timeLine
+    timeLine,
+    themeLine,
+    classSizeLine
   };
 }
 
@@ -3166,11 +3180,13 @@ function buildPreschoolDocxElements(
       );
     }
 
-    // 3. Sub-lines (Tác giả, Nghe hát, Trò chơi âm nhạc, Lĩnh vực, Độ tuổi, Thời gian tách biệt xuống dòng rõ ràng)
+    // 3. Sub-lines (Tác giả, Nghe hát, Trò chơi âm nhạc, Lĩnh vực, Chủ đề, Độ tuổi, Thời gian tách biệt xuống dòng rõ ràng)
     const subLines = [
       ...preschoolInfo.contentLines,
       preschoolInfo.domainLine,
+      preschoolInfo.themeLine,
       preschoolInfo.gradeLine,
+      preschoolInfo.classSizeLine,
       preschoolInfo.timeLine,
     ].filter(Boolean);
 
@@ -3250,6 +3266,25 @@ function buildPreschoolDocxElements(
       );
     }
 
+    // 3.1. Chủ đề (CĂN GIỮA, IN ĐẬM) nếu có
+    if (preschoolInfo.themeLine) {
+      elements.push(
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 20, after: 20 },
+          children: [
+            new TextRun({
+              text: preschoolInfo.themeLine,
+              bold: true,
+              size: 28, // 14pt
+              font: fontName,
+              color: '000000',
+            }),
+          ],
+        })
+      );
+    }
+
     // 4. Độ tuổi (CĂN GIỮA, IN ĐẬM)
     if (preschoolInfo.gradeLine) {
       elements.push(
@@ -3259,6 +3294,25 @@ function buildPreschoolDocxElements(
           children: [
             new TextRun({
               text: preschoolInfo.gradeLine,
+              bold: true,
+              size: 28, // 14pt
+              font: fontName,
+              color: '000000',
+            }),
+          ],
+        })
+      );
+    }
+
+    // 4.1. Số lượng trẻ (nếu có)
+    if (preschoolInfo.classSizeLine) {
+      elements.push(
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 20, after: 20 },
+          children: [
+            new TextRun({
+              text: preschoolInfo.classSizeLine,
               bold: true,
               size: 28, // 14pt
               font: fontName,

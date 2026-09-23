@@ -628,11 +628,20 @@ export const SourceCodeModal: React.FC<SourceCodeModalProps> = ({ isOpen, onClos
             <button
               type="button"
               onClick={handleDownloadHtml}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 text-white font-bold shadow-xs transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold shadow-2xs transition-all cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Tải file index.html</span>
             </button>
+
+            <a
+              href="/api/export-project-zip"
+              download="taogiaoan-ai-pro.zip"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 text-white font-bold shadow-xs transition-all cursor-pointer no-underline"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Tải toàn bộ Dự án (.ZIP)</span>
+            </a>
           </div>
         </div>
 

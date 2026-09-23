@@ -67,6 +67,11 @@ export interface LessonPlanConfig {
   integratedAIFromPPCT?: string[];
   ppctContent?: string;
   aiModel?: string; // e.g. 'gemini-flash-latest', 'gemini-3.1-flash-lite', 'gemini-3.6-flash', 'gemini-3.8-flash'
+  preschoolCategoryMode?: 'traditional' | 'new_8' | 'theme';
+  preschoolMainTheme?: string; // Chủ đề lớn: Trường mầm non, Bản thân, Gia đình...
+  preschoolSubTheme?: string; // Chủ đề nhỏ / nhánh do giáo viên tự nhập
+  preschoolClassSize?: string; // Số lượng trẻ (ví dụ: "30 – 35 trẻ")
+  preschoolDuration?: string; // Thời gian (ví dụ: "30 – 35 phút")
   enablePreschool388Criteria?: boolean;
   preschoolIndicatorMode?: 'default_388' | 'custom'; // 'default_388' | 'custom'
   preschoolCustomCodes?: string; // Ví dụ: "NT 3.1, TX 4.4, TC 1.2"
@@ -137,6 +142,10 @@ export interface LessonPlanOutput {
   bookSeries: string;
   volume?: string;
   periods: number;
+  mainTheme?: string; // Chủ đề lớn
+  subTheme?: string; // Chủ đề nhánh / nhỏ
+  classSize?: string; // Số lượng trẻ
+  duration?: string; // Thời gian thực hiện (ví dụ: 30 - 35 phút)
   
   // I. MỤC TIÊU
   objectives: {

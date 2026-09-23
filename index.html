@@ -2,6 +2,30 @@
 <html lang="vi" class="notranslate" translate="no">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (function() {
+        try {
+          var originalFetch = window.fetch;
+          if (typeof originalFetch === 'function') {
+            var currentFetch = originalFetch.bind(window);
+            try {
+              Object.defineProperty(window, 'fetch', {
+                get: function() {
+                  return currentFetch;
+                },
+                set: function(fn) {
+                  if (typeof fn === 'function') {
+                    currentFetch = fn;
+                  }
+                },
+                configurable: true,
+                enumerable: true
+              });
+            } catch (e) {}
+          }
+        } catch (err) {}
+      })();
+    </script>
     <meta name="google" content="notranslate" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>KHBD AI PRO</title>
@@ -15,79 +39,6 @@
     <meta property="og:image" content="/logo.svg" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="/logo.svg" />
-    <script>
-      // Defensive patch: Prevent React crashes caused by Google Translate & browser extension DOM mutations
-      (function() {
-        if (typeof Node === 'function' && Node.prototype) {
-          var origRemoveChild = Node.prototype.removeChild;
-          Node.prototype.removeChild = function(child) {
-            if (child && child.parentNode !== this) {
-              if (typeof console !== 'undefined' && console.warn) {
-                console.warn('[DOM Patch] Prevented removeChild on foreign node:', child);
-              }
-              if (child.parentNode) {
-                return child.parentNode.removeChild(child);
-              }
-              return child;
-            }
-            return origRemoveChild.apply(this, arguments);
-          };
-
-          var origInsertBefore = Node.prototype.insertBefore;
-          Node.prototype.insertBefore = function(newNode, referenceNode) {
-            if (referenceNode && referenceNode.parentNode !== this) {
-              if (typeof console !== 'undefined' && console.warn) {
-                console.warn('[DOM Patch] Prevented insertBefore with foreign reference node:', referenceNode);
-              }
-              if (referenceNode.parentNode) {
-                return referenceNode.parentNode.insertBefore(newNode, referenceNode);
-              }
-              return newNode;
-            }
-            return origInsertBefore.apply(this, arguments);
-          };
-        }
-      })();
-
-      // Defensive patch: Ensure window.fetch and Window.prototype.fetch have both getter and setter
-      (function() {
-        try {
-          var _currentFetch = (typeof window !== 'undefined' && window.fetch) ? window.fetch.bind(window) : null;
-          
-          // 1. Patch Window.prototype.fetch so prototype inheritance allows setter
-          if (typeof Window !== 'undefined' && Window.prototype) {
-            try {
-              Object.defineProperty(Window.prototype, 'fetch', {
-                get: function() {
-                  return _currentFetch;
-                },
-                set: function(newFetch) {
-                  _currentFetch = newFetch;
-                },
-                configurable: true,
-                enumerable: true
-              });
-            } catch (eProto) {}
-          }
-
-          // 2. Patch window object itself
-          if (typeof window !== 'undefined') {
-            try {
-              Object.defineProperty(window, 'fetch', {
-                get: function() {
-                  return _currentFetch;
-                },
-                set: function(newFetch) {
-                  _currentFetch = newFetch;
-                },
-                configurable: true,
-                enumerable: true
-              });
-            } catch (eWin) {}
-          }
-        } catch (e) {}
-      })();
-    </script>
   </head>
   <body>
     <div id="root"></div>
