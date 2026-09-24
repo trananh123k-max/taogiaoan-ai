@@ -673,7 +673,7 @@ export default function App() {
           subject: config.subject,
           grade: config.grade,
           tableLayout: config.tableLayout,
-          aiModel: (config.aiModel && config.aiModel !== 'gemini-flash-latest' && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.1-flash-lite',
+          aiModel: (config.aiModel === 'gemini-3.1-flash-lite') ? 'gemini-3.1-flash-lite' : 'gemini-3.5-flash-lite',
           customApiKey: getStoredApiKey(),
           userRole: currentUser?.role,
           userEmail: currentUser?.email,

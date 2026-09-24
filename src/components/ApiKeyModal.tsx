@@ -392,11 +392,11 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                   <ExternalLink className="w-2.5 h-2.5" />
                 </a>
               </li>
-              <li>Đăng nhập bằng tài khoản Google (Gmail) bất kỳ.</li>
-              <li>Bấm nút xanh <strong className="text-slate-800">"Create API Key"</strong>.</li>
+              <li>Đăng nhập bằng <strong>tài khoản Gmail cá nhân (@gmail.com)</strong>. <em className="text-amber-800 font-medium">(Lưu ý: Không dùng tài khoản giáo dục đuôi @...edu.vn vì quản trị viên trường/sở mặc định khóa quyền truy cập API).</em></li>
+              <li>Bấm nút xanh <strong className="text-slate-800">"Create API Key"</strong> (hoặc "Tạo khóa API").</li>
               <li>Sao chép mã khóa (bắt đầu bằng <code className="bg-slate-200 px-1 rounded font-mono">AIzaSy...</code>) và dán vào ô trên.</li>
               <li>
-                <em>Mẹo hay: Thầy cô có thể tạo 2-3 khóa API từ các tài khoản Google khác nhau và dán vào đây để hệ thống tự động chuyển đổi khi hết hạn ngạch!</em>
+                <em>Mẹo hay: Thầy cô có thể dán nhiều khóa API từ các tài khoản Gmail cá nhân khác nhau (mỗi key 1 dòng) để hệ thống tự động xoay vòng không giới hạn!</em>
               </li>
             </ol>
           </div>

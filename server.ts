@@ -260,25 +260,22 @@ function resolveCandidateKeys(req: express.Request): {
   };
 }
 
-// Task-Specific Model Hierarchies
+// Task-Specific Model Hierarchies - CHỈ DÙNG DUY NHẤT 2 MODEL FLASH-LITE THEO YÊU CẦU:
 // 1. Phục vụ Soạn bài dạy (KHBD), Tinh chỉnh hoạt động CV 5512, Gợi ý sư phạm:
 const PEDAGOGICAL_MODELS = [
-  'gemini-3.8-flash',       // Chuẩn chính xác, năng lực sư phạm cao cấp
-  'gemini-flash-latest',    // Chuẩn tốc độ cao & ổn định
-  'gemini-3.1-flash-lite',  // Quota RPM/TPM cao
+  'gemini-3.5-flash-lite',  // Ưu tiên 1: Tốc độ cao, hạn ngạch rộng, chống 429
+  'gemini-3.1-flash-lite',  // Ưu tiên 2: Siêu nhẹ, xoay vòng mượt mà
 ];
 
 // 2. Phục vụ Trợ lý Trò chuyện Sư phạm (Chatbot):
 const CHAT_MODELS = [
-  'gemini-3.8-flash',
-  'gemini-flash-latest',
+  'gemini-3.5-flash-lite',
   'gemini-3.1-flash-lite',
 ];
 
 // 3. Phục vụ Tác vụ Tiện ích phụ, Kiểm tra thông tin, Ping, Quét mục lục SGK:
 const UTILITY_MODELS = [
-  'gemini-3.8-flash',
-  'gemini-flash-latest',
+  'gemini-3.5-flash-lite',
   'gemini-3.1-flash-lite',
 ];
 
@@ -328,7 +325,7 @@ async function generateContentWithRetryAndFallback(options: {
     defaultModelList = PEDAGOGICAL_MODELS;
   }
 
-  const models = (options.primaryModel && options.primaryModel !== 'auto' && (options.taskType !== 'pedagogical' || options.primaryModel !== 'gemini-flash-latest'))
+  const models = (options.primaryModel && options.primaryModel !== 'auto' && defaultModelList.includes(options.primaryModel))
     ? [options.primaryModel, ...defaultModelList.filter((m) => m !== options.primaryModel)]
     : defaultModelList;
 
@@ -367,12 +364,17 @@ async function generateContentWithRetryAndFallback(options: {
           const isRateLimit = !isDailyQuota && (errMsgLower.includes('rate') || errMsgLower.includes('429') || errMsgLower.includes('resource_exhausted') || errMsgLower.includes('too many requests'));
           const isTransient = !isDailyQuota && (isRateLimit || errMsgLower.includes('503') || errMsgLower.includes('unavailable') || errMsgLower.includes('high demand') || errMsgLower.includes('overloaded'));
 
+          // If multiple keys are available and we hit rate-limit or quota, immediately failover to next key with 0ms delay!
+          if (keysToTry.length > 1 && (isDailyQuota || isRateLimit)) {
+            break;
+          }
+
           if (isTransient && attempt < 2) {
-            let delayMs = 1500 * (attempt + 1) + Math.random() * 500;
+            let delayMs = 600 * (attempt + 1) + Math.random() * 200;
             const retryMatch = rawErrMsg.match(/retry in ([0-9.]+)s/i);
             if (retryMatch && parseFloat(retryMatch[1])) {
-              const seconds = Math.min(parseFloat(retryMatch[1]), 8);
-              delayMs = seconds * 1000 + 500;
+              const seconds = Math.min(parseFloat(retryMatch[1]), 4);
+              delayMs = seconds * 1000 + 200;
             }
             await new Promise((resolve) => setTimeout(resolve, delayMs));
             continue;
@@ -1322,35 +1324,34 @@ app.post('/api/check-api-key', async (req, res) => {
           const client = new GoogleGenAI({ apiKey: k });
           let success = false;
           let lastErr: any = null;
-          // Fast and resilient models to test in priority order
-          const testModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
+          // Strictly test with gemini-3.5-flash-lite and gemini-3.1-flash-lite only
+          const testModels = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
           
           for (const m of testModels) {
             try {
-              await client.models.generateContent({
+              const pingRes = await client.models.generateContent({
                 model: m,
                 contents: 'Ping',
               });
-              success = true;
-              break;
+              if (pingRes && pingRes.text) {
+                success = true;
+                break;
+              }
             } catch (err: any) {
               lastErr = err;
               const errMsg = err?.message || String(err);
               const status = err?.status;
-              // If project denied (403), invalid key (400), or quota (429), stop testing other models
+              console.warn(`[Validate Key] Key ${preview} model ${m} failed (Status: ${status}): ${errMsg.substring(0, 150)}`);
+              // Only abort immediately if key itself is syntactically invalid or expired (400)
               if (
-                status === 403 ||
-                errMsg.includes('403') ||
-                errMsg.includes('denied access') ||
-                status === 400 ||
-                errMsg.includes('API_KEY_INVALID') ||
-                errMsg.includes('API key not valid') ||
-                status === 429 ||
-                errMsg.includes('429') ||
-                errMsg.includes('RESOURCE_EXHAUSTED')
+                status === 400 &&
+                (errMsg.includes('API_KEY_INVALID') ||
+                 errMsg.includes('API key not valid') ||
+                 errMsg.includes('INVALID_ARGUMENT'))
               ) {
                 break;
               }
+              // For 403 (model restriction) or 429 (quota on this model), DO NOT BREAK: proceed to next candidate model!
             }
           }
 
@@ -1370,7 +1371,7 @@ app.post('/api/check-api-key', async (req, res) => {
           if (isQuota) {
             cleanError = 'Key đã hết hạn mức Quota (429 Resource Exhausted)';
           } else if (isDenied) {
-            cleanError = 'Dự án Google của Key này đã bị khóa quyền truy cập (403 Project Denied)';
+            cleanError = 'Dự án Google của Key này bị khóa quyền truy cập (403 Project Denied)';
           } else if (isInvalid) {
             cleanError = 'Sai mã khóa hoặc key đã bị vô hiệu hóa (400 Invalid Key)';
           } else {
@@ -1473,10 +1474,21 @@ app.post('/api/check-api-key', async (req, res) => {
     const preview = serverKeys[0].length > 8 ? `${serverKeys[0].substring(0, 6)}...${serverKeys[0].substring(serverKeys[0].length - 4)}` : '***';
     try {
       const client = new GoogleGenAI({ apiKey: serverKeys[0] });
-      await client.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: 'Ping test. Trả lời: OK',
-      });
+      let success = false;
+      let lastErr: any = null;
+      for (const m of ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite']) {
+        try {
+          await client.models.generateContent({
+            model: m,
+            contents: 'Ping test. Trả lời: OK',
+          });
+          success = true;
+          break;
+        } catch (err) {
+          lastErr = err;
+        }
+      }
+      if (!success) throw lastErr;
       return res.json({
         success: true,
         status: 'valid',
@@ -2160,11 +2172,11 @@ async function generateKHBDSectional(
   } else if (typeof candidateKeysOrApiKey === 'string' && candidateKeysOrApiKey.trim()) {
     keysList = extractKeysFromInput(candidateKeysOrApiKey);
   }
-  const modelToUse = (primaryModel && primaryModel !== 'gemini-flash-latest' && primaryModel !== 'auto')
-    ? primaryModel
-    : (config.aiModel && config.aiModel !== 'gemini-flash-latest' && config.aiModel !== 'auto')
-      ? config.aiModel
-      : 'gemini-3.8-flash';
+  const modelToUse = (primaryModel === 'gemini-3.1-flash-lite')
+    ? 'gemini-3.1-flash-lite'
+    : (config.aiModel === 'gemini-3.1-flash-lite')
+      ? 'gemini-3.1-flash-lite'
+      : 'gemini-3.5-flash-lite';
 
   const subject = config.subject || 'Tin học';
   const grade = config.grade || 'Lớp 6';
@@ -2683,7 +2695,7 @@ QUY ĐỊNH BẮT BUỘC VỀ VỊ TRÍ ĐỀ MỤC SGK THEO CHUẨN CÔNG VĂN 
    - Giáo viên kết luận nhận định chốt kiến thức và yêu cầu học sinh ghi nhớ nội dung của từng mục vào vở.`;
 
   // Task 1: Objectives & Equipment
-  const taskObjectivesEquipment = async () => {
+  const taskObjectivesEquipment = async (taskCandidateKeys?: string[]) => {
     let prompt = '';
     const isNew8 = isPreschoolNew8Activity(subject, lessonTitle);
     if (isPreschool) {
@@ -2866,7 +2878,7 @@ Yêu cầu: Trả về JSON với cấu trúc:
     }
     const res = await generateContentWithRetryAndFallback({
       contents: prompt,
-      candidateKeys: keysList,
+      candidateKeys: taskCandidateKeys || keysList,
       primaryModel: modelToUse,
       taskType: 'pedagogical',
       config: { responseMimeType: 'application/json' },
@@ -2879,7 +2891,7 @@ Yêu cầu: Trả về JSON với cấu trúc:
   };
 
   // Task 2: Activity 1 (Khởi động) & Activity 2 (Hình thành kiến thức mới)
-  const taskActivities1And2 = async () => {
+  const taskActivities1And2 = async (taskCandidateKeys?: string[]) => {
     const periodNote = config.periods >= 2 ? 'LƯU Ý PHÂN PHỐI TIẾT: Hoạt động 1 và Hoạt động 2 thuộc TIẾT 1. Đặt tên hoạt động có tiền tố "[TIẾT 1]" (ví dụ "[TIẾT 1] Hoạt động 1: Mở đầu / Khởi động", "[TIẾT 1] Hoạt động 2: Hình thành kiến thức mới").' : '';
     let prompt = '';
     
@@ -3143,7 +3155,7 @@ Trả về JSON dạng:
     }
     const res = await generateContentWithRetryAndFallback({
       contents: prompt,
-      candidateKeys: keysList,
+      candidateKeys: taskCandidateKeys || keysList,
       primaryModel: modelToUse,
       taskType: 'pedagogical',
       config: { responseMimeType: 'application/json' },
@@ -3151,7 +3163,7 @@ Trả về JSON dạng:
     return parseJSONRobust(res.text);
   };
   // Task 3: Activity 3 (Luyện tập) & Activity 4 (Vận dụng & Hướng dẫn về nhà / Bài tiếp theo)
-  const taskActivities3And4 = async () => {
+  const taskActivities3And4 = async (taskCandidateKeys?: string[]) => {
     const periodNote = config.periods >= 2 ? 'LƯU Ý PHÂN PHỐI TIẾT: Hoạt động 3 và Hoạt động 4 thuộc TIẾT 2. Đặt tên hoạt động có tiền tố "[TIẾT 2]" (ví dụ "[TIẾT 2] Hoạt động 3: Luyện tập", "[TIẾT 2] Hoạt động 4: Vận dụng & Hướng dẫn tự học").' : '';
     let prompt = '';
     
@@ -3493,7 +3505,7 @@ Trả về JSON dạng:
     }
     const res = await generateContentWithRetryAndFallback({
       contents: prompt,
-      candidateKeys: keysList,
+      candidateKeys: taskCandidateKeys || keysList,
       primaryModel: modelToUse,
       taskType: 'pedagogical',
       config: { responseMimeType: 'application/json' },
@@ -3501,7 +3513,7 @@ Trả về JSON dạng:
     return parseJSONRobust(res.text);
   };
   // Task 4: Competency Matrix & Appendix (Worksheet, Next Lesson Homework)
-  const taskMatrixAndAppendix = async () => {
+  const taskMatrixAndAppendix = async (taskCandidateKeys?: string[]) => {
     const prompt = `${baseContext}
 Hãy soạn:
 1. BẢNG PHÂN TÍCH MA TRẬN NĂNG LỰC SỐ (NLS) & GIÁO DỤC AI:
@@ -3553,7 +3565,7 @@ Trả về JSON dạng:
 }   `;
     const res = await generateContentWithRetryAndFallback({
       contents: prompt,
-      candidateKeys: keysList,
+      candidateKeys: taskCandidateKeys || keysList,
       primaryModel: modelToUse,
       taskType: 'pedagogical',
       config: { responseMimeType: 'application/json' },
@@ -3561,7 +3573,14 @@ Trả về JSON dạng:
     return parseJSONRobust(res.text);
   };
 
-  // Execute tasks in sequence with error resilience and clear fail-fast on quota limits
+  // Helper to rotate candidate keys for concurrent tasks so they don't fight over the same primary key
+  const rotateKeys = (keys: string[], offset: number): string[] => {
+    if (!keys || keys.length <= 1) return keys;
+    const shift = offset % keys.length;
+    return [...keys.slice(shift), ...keys.slice(0, shift)];
+  };
+
+  // Execute tasks with error resilience and clear fail-fast on quota limits
   const wrap = async (taskFn: any, step: number, delayMs = 0) => {
     if (delayMs > 0) {
       await new Promise((r) => setTimeout(r, delayMs));
@@ -3577,22 +3596,25 @@ Trả về JSON dạng:
       } catch (err: any) {
         const msg = err?.message || String(err);
         const isQuota = msg.toLowerCase().includes('quota') || msg.toLowerCase().includes('hạn ngạch') || msg.toLowerCase().includes('resource_exhausted');
-        console.warn(`Task ${step} attempt ${attempt} warning:`, msg);
+        console.warn(`[Sectional Generator] Task ${step} attempt ${attempt} warning:`, msg);
         if (isQuota || attempt >= 2) {
           throw err;
         }
-        await new Promise((r) => setTimeout(r, 2000));
+        await new Promise((r) => setTimeout(r, 1000));
       }
     }
     onProgress?.(step, 'done');
     return {};
   };
 
-  // Execute sections smoothly to prevent 429 burst rate limits while maintaining high responsiveness
-  const res1 = await wrap(taskObjectivesEquipment, 1, 0);
-  const res2 = await wrap(taskActivities1And2, 2, 300);
-  const res3 = await wrap(taskActivities3And4, 3, 300);
-  const res4 = isPreschool ? {} : await wrap(taskMatrixAndAppendix, 4, 300);
+  // Run all sections concurrently in parallel for 3-4x blazing-fast generation speed!
+  // Slight stagger (120ms) and rotated key priority per task ensures ultra-fast and resilient processing
+  const [res1, res2, res3, res4] = await Promise.all([
+    wrap(() => taskObjectivesEquipment(rotateKeys(keysList, 0)), 1, 0),
+    wrap(() => taskActivities1And2(rotateKeys(keysList, 1)), 2, 120),
+    wrap(() => taskActivities3And4(rotateKeys(keysList, 2)), 3, 240),
+    isPreschool ? Promise.resolve({}) : wrap(() => taskMatrixAndAppendix(rotateKeys(keysList, 3)), 4, 360),
+  ]);
 
   const extractActivitiesList = (res: any): any[] => {
     if (!res) return [];
@@ -4352,7 +4374,7 @@ app.post('/api/gemini/generate-lesson-plan-sectional', async (req, res) => {
       config,
       undefined,
       auth.keys,
-      (config.aiModel && config.aiModel !== 'gemini-flash-latest' && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.8-flash'
+      (config.aiModel === 'gemini-3.1-flash-lite') ? 'gemini-3.1-flash-lite' : 'gemini-3.5-flash-lite'
     );
     res.json({ success: true, data: sectionalResult, lessonPlan: sectionalResult });
   } catch (error: any) {
@@ -4395,7 +4417,7 @@ app.post('/api/gemini/generate-lesson-plan-stream', async (req, res) => {
       config,
       onProgress,
       auth.keys,
-      (config.aiModel && config.aiModel !== 'gemini-flash-latest' && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.8-flash'
+      (config.aiModel === 'gemini-3.1-flash-lite') ? 'gemini-3.1-flash-lite' : 'gemini-3.5-flash-lite'
     );
     sendEvent('complete', { success: true, lessonPlan: result });
   } catch (error: any) {
@@ -4537,7 +4559,7 @@ Trả lời lịch thiệp, sư phạm, chuyên nghiệp, cấu trúc rõ ràng 
     const response = await generateContentWithRetryAndFallback({
       systemInstruction,
       candidateKeys: auth.keys,
-      primaryModel: aiModel && aiModel !== 'auto' && aiModel !== 'gemini-flash-latest' ? aiModel : 'gemini-3.8-flash',
+      primaryModel: (aiModel === 'gemini-3.1-flash-lite') ? 'gemini-3.1-flash-lite' : 'gemini-3.5-flash-lite',
       taskType: 'chat',
       contents,
     });
