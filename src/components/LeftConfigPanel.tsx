@@ -1200,7 +1200,7 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
         )}
 
         {/* 5 & 6. SỐ TIẾT & TIẾT PPCT (ẨN KHI LÀ MẦM NON) - CÙNG HÀNG SONG SONG */}
-        {config.schoolLevel !== 'Mầm non' && (
+        {!(config.schoolLevel || '').toLowerCase().includes('mầm non') && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
               {/* 5. SỐ TIẾT CẦN SOẠN */}
@@ -1213,7 +1213,7 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                 <input
                   type="number"
                   min={1}
-                  max={100}
+                  max={20}
                   value={config.periods || ''}
                   onChange={(e) => {
                     const rawVal = e.target.value;
@@ -1270,29 +1270,31 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
               </div>
             </div>
 
-            {/* 8. ĐỊNH DẠNG CÔNG THỨC TOÁN TRONG WORD */}
-            <div className="form-group flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-red-600 flex items-center justify-between">
-                <span>8. Công thức Toán trong Word</span>
-                <span className="text-[10px] font-normal text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">Mới</span>
-              </label>
-              <div className="relative">
-                <select
-                  value={config.mathFormulaFormat || 'word_equation'}
-                  onChange={(e) => onChangeConfig({ mathFormulaFormat: e.target.value as any })}
-                  className="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 appearance-none focus:bg-white focus:outline-none focus:border-amber-600 cursor-pointer pr-8 shadow-xs"
-                >
-                  <option value="word_equation">Phương án 2: Chuẩn Word Equation (Tự động - Khuyên dùng)</option>
-                  <option value="mathtype_latex">Phương án 1: Giữ mã LaTeX (Dành cho MathType Alt+\)</option>
-                </select>
-                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
+            {/* 8. ĐỊNH DẠNG CÔNG THỨC TOÁN TRONG WORD (Chỉ hiển thị khi là môn Toán) */}
+            {/toán|math/i.test(config.subject || '') && (
+              <div className="form-group flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-red-600 flex items-center justify-between">
+                  <span>8. Công thức Toán trong Word</span>
+                  <span className="text-[10px] font-normal text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">Mới</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={config.mathFormulaFormat || 'word_equation'}
+                    onChange={(e) => onChangeConfig({ mathFormulaFormat: e.target.value as any })}
+                    className="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 appearance-none focus:bg-white focus:outline-none focus:border-amber-600 cursor-pointer pr-8 shadow-xs"
+                  >
+                    <option value="word_equation">Phương án 2: Chuẩn Word Equation (Tự động - Khuyên dùng)</option>
+                    <option value="mathtype_latex">Phương án 1: Giữ mã LaTeX (Dành cho MathType Alt+\)</option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
+                </div>
+                <p className="text-[11px] text-slate-500 italic leading-snug">
+                  {config.mathFormulaFormat === 'mathtype_latex' 
+                    ? '• Phương án 1: Giữ nguyên mã $công_thức$ để thầy/cô quét chọn và bấm Alt + \\ trong MathType.'
+                    : '• Phương án 2: Tự động chuyển đổi thành công thức chuẩn Word Equation (OMML). Mở Word xem được ngay, không cần cài MathType.'}
+                </p>
               </div>
-              <p className="text-[11px] text-slate-500 italic leading-snug">
-                {config.mathFormulaFormat === 'mathtype_latex' 
-                  ? '• Phương án 1: Giữ nguyên mã $công_thức$ để thầy/cô quét chọn và bấm Alt + \\ trong MathType.'
-                  : '• Phương án 2: Tự động chuyển đổi thành công thức chuẩn Word Equation (OMML). Mở Word xem được ngay, không cần cài MathType.'}
-              </p>
-            </div>
+            )}
           </>
         )}
             </div>

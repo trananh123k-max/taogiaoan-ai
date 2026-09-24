@@ -1050,7 +1050,9 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                 {(isPreschoolPlan(plan) || (plan as any)?.schoolLevel === 'Mầm non') ? 'III. Tiến trình hoạt động' : 'III. Tiến trình dạy học'}
               </h3>
               <span className="text-xs text-slate-900 font-bold bg-white px-2 py-0.5 rounded border border-slate-300">
-                {(plan.activities || []).length} Hoạt động
+                {((isPreschoolPlan(plan) || (plan as any)?.schoolLevel === 'Mầm non')
+                  ? formatPreschoolActivities(plan.activities || [], plan.lessonTitle || '', plan.subject || '', (plan as any).oldPlanContent || '').length
+                  : (plan.activities || []).length)} Hoạt động
               </span>
             </div>
 

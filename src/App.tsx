@@ -53,6 +53,7 @@ import {
   Presentation,
   Plus,
   Loader2,
+  Key,
 } from 'lucide-react';
 import { exportLessonPlanToDocx } from './utils/docxExporter';
 import { exportLessonPlanToPptx } from './utils/pptxExporter';
@@ -793,7 +794,7 @@ export default function App() {
 
       {/* Toast notification - positioned bottom-right so it never blocks top action buttons */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 transition-all duration-300 animate-in slide-in-from-bottom-4">
+        <div className="fixed bottom-6 right-6 z-50 transition-all duration-300 animate-in slide-in-from-bottom-4 max-w-xl">
           <div
             className={`flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-xl border text-xs font-semibold backdrop-blur-md ${
               toastMessage.type === 'success'
@@ -806,14 +807,25 @@ export default function App() {
             {toastMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />}
             {toastMessage.type === 'error' && <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />}
             {toastMessage.type === 'info' && <Info className="w-4 h-4 text-blue-600 shrink-0" />}
-            <span className="leading-snug">{toastMessage.text}</span>
+            <span className="leading-snug flex-1">{toastMessage.text}</span>
+            {toastMessage.type === 'error' && /api key|quota|hạn ngạch/i.test(toastMessage.text) && (
+              <button
+                type="button"
+                onClick={() => setIsApiKeyModalOpen(true)}
+                className="ml-2 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white rounded-lg text-[11px] font-bold shrink-0 transition-all shadow-xs cursor-pointer whitespace-nowrap flex items-center gap-1"
+              >
+                <Key className="w-3.5 h-3.5" />
+                <span>Dán API Key ngay</span>
+              </button>
+            )}
           </div>
         </div>
       )}
 
       {/* Unified Sticky Tab Navigation & Action Toolbar (Cùng 1 hàng ngang duy nhất) */}
       {(() => {
-        const isMathSubject = /toán|math/i.test(config.subject || '') || /toán|math/i.test(currentPlan?.subject || '') || /toán|math/i.test(config.lessonTitle || '');
+        const isPreschool = (config.schoolLevel || (currentPlan as any)?.schoolLevel || '').toLowerCase().includes('mầm non');
+        const isMathSubject = !isPreschool && (/toán|math/i.test(config.subject || '') || /toán|math/i.test(currentPlan?.subject || '') || /toán|math/i.test(config.lessonTitle || ''));
         return (
           <div className="sticky top-16 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs py-1.5 px-2 sm:px-4 lg:px-6">
             <div className="max-w-[1850px] mx-auto flex items-center justify-between gap-2 flex-nowrap overflow-x-auto">
@@ -875,8 +887,8 @@ export default function App() {
                   <span>Soạn bài mới</span>
                 </button>
 
-                {/* Ô lựa chọn Công thức Word (Chỉ hiển thị khi là môn Toán) */}
-                {isMathSubject && (
+                {/* Ô lựa chọn Công thức Word (Chỉ hiển thị khi là môn Toán ở các cấp Tiểu học, THCS, THPT; TUYỆT ĐỐI KHÔNG hiển thị ở cấp Mầm non) */}
+                {!isPreschool && isMathSubject && (
                   <div className="flex items-center gap-1 bg-amber-50/90 border border-amber-300/80 rounded-lg px-2 py-1 shadow-2xs shrink-0 animate-in fade-in duration-200">
                     <span className="text-[10.5px] font-bold text-amber-900 flex items-center gap-1 shrink-0">
                       <Sparkles className="w-3 h-3 text-amber-600" />
@@ -1078,6 +1090,7 @@ export default function App() {
           showToast('Đã cập nhật danh sách tài khoản người dùng!', 'success');
         }}
         currentUser={currentUser}
+        onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
       />
 
       <UserProfileModal

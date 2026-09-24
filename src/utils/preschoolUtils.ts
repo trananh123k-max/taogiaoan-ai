@@ -167,15 +167,36 @@ export function detectPreschoolDomain(
     };
   }
 
-  // 2. PHYSICAL (Thể chất / Thể dục) with HIGH PRIORITY
-  const isPhysicalSubject = s.includes('thể chất') || s.includes('vận động') || s.includes('thể dục') || s.includes('gdtc');
-  const isPhysicalTitle = t.includes('vđcb') || t.includes('btptc') || t.includes('đi thăng bằng') ||
-    t.includes('bật') || t.includes('ném') || t.includes('bò chui') || t.includes('tung bóng') ||
-    t.includes('chuyền bóng') || t.includes('bắt bóng') || t.includes('trèo thang') || t.includes('rửa tay') ||
-    t.includes('chạy') || t.includes('bò') || t.includes('trườn') || t.includes('nhảy') ||
-    t.includes('thể dục') || t.includes('thể chất') || t.includes('vận động cơ bản') ||
-    t.includes('bài tập phát triển chung') || t.includes('kéo co');
-  const isPhysicalExtra = extra.includes('thể chất') || extra.includes('btptc') || extra.includes('vđcb') || extra.includes('bài tập phát triển chung');
+  // 1.9 SKILLS & SOCIAL (Tình cảm - Xã hội / Kỹ năng sống) - HIGH PRIORITY when subject is explicitly Tình cảm / Xã hội
+  const isSkillsSubject = s.includes('tình cảm') || s.includes('kỹ năng') || (s.includes('xã hội') && !s.includes('khoa học'));
+  const isSkillsTitle = t.includes('tết') || t.includes('cảm xúc') || t.includes('lễ phép') ||
+    t.includes('xin phép') || t.includes('chào hỏi') || t.includes('cất đồ chơi') ||
+    t.includes('tự phục vụ') || t.includes('tâm thế vào lớp') || t.includes('quy tắc lớp học') ||
+    t.includes('chia sẻ đồ chơi') || t.includes('bác nông dân') || t.includes('chú bộ đội') ||
+    t.includes('chú công an') || t.includes('bác cấp dưỡng') || t.includes('cô giáo') ||
+    t.includes('trường mầm non') || t.includes('nghề nghiệp') || t.includes('gia đình') ||
+    t.includes('lễ hội') || t.includes('quê hương') || t.includes('làng nghề') ||
+    t.includes('trò chuyện về');
+
+  if (isSkillsSubject || (isSkillsTitle && !s.includes('thể chất') && !s.includes('thể dục') && !s.includes('khoa học') && !s.includes('toán') && !s.includes('âm nhạc') && !s.includes('hát'))) {
+    return {
+      domainType: 'SKILLS',
+      mainHeader: 'GIÁO ÁN TÌNH CẢM - XÃ HỘI',
+      defaultDomainName: 'Lĩnh vực Phát triển tình cảm - kỹ năng xã hội',
+      isMusic: false,
+    };
+  }
+
+  // 2. PHYSICAL (Thể chất / Thể dục) with strict word boundaries (prevents false matches like 'trường' matching 'trườn')
+  const isPhysicalSubject = !isSkillsSubject && (s.includes('thể chất') || s.includes('thể dục') || s.includes('gdtc') || (s.includes('vận động') && !s.includes('xã hội')));
+  const isPhysicalTitle = !isSkillsSubject && (
+    t.includes('vđcb') || t.includes('btptc') || t.includes('đi thăng bằng') ||
+    t.includes('ném trúng đích') || t.includes('ném xa') || t.includes('bật sâu') || t.includes('bật xa') ||
+    t.includes('tung bóng') || t.includes('chuyền bóng') || t.includes('bắt bóng') || t.includes('trèo thang') ||
+    /(?:^|[^\p{L}\p{N}])(?:trườn\s+sấp|trườn\s+theo|trườn\s+qua|bò\s+chui|bò\s+theo|bò\s+bằng|bò\s+zic|nhảy\s+xa|nhảy\s+bật)(?:[^\p{L}\p{N}]|$)/ui.test(t) ||
+    t.includes('vận động cơ bản') || t.includes('bài tập phát triển chung') || t.includes('kéo co')
+  );
+  const isPhysicalExtra = !isSkillsSubject && (extra.includes('thể chất') || extra.includes('btptc') || extra.includes('vđcb') || extra.includes('bài tập phát triển chung'));
 
   if (isPhysicalSubject || isPhysicalTitle || isPhysicalExtra) {
     return {
@@ -232,25 +253,6 @@ export function detectPreschoolDomain(
       domainType: 'SOCIAL',
       mainHeader: 'LĨNH VỰC: PHÁT TRIỂN NHẬN THỨC\nHOẠT ĐỘNG: KHÁM PHÁ XÃ HỘI',
       defaultDomainName: 'Lĩnh vực Phát triển nhận thức (Khám phá xã hội)',
-      isMusic: false,
-    };
-  }
-
-  // 5. SKILLS & SOCIAL (Tình cảm - Xã hội / Kỹ năng sống)
-  const isSkillsSubject = s.includes('tình cảm') || s.includes('kỹ năng') || (s.includes('xã hội') && !s.includes('khoa học'));
-  const isSkillsTitle = t.includes('tết') || t.includes('cảm xúc') || t.includes('lễ phép') ||
-    t.includes('xin phép') || t.includes('chào hỏi') || t.includes('cất đồ chơi') ||
-    t.includes('tự phục vụ') || t.includes('tâm thế vào lớp') || t.includes('quy tắc lớp học') ||
-    t.includes('chia sẻ đồ chơi') || t.includes('bác nông dân') || t.includes('chú bộ đội') ||
-    t.includes('chú công an') || t.includes('bác cấp dưỡng') || t.includes('cô giáo') ||
-    t.includes('trường mầm non') || t.includes('nghề nghiệp') || t.includes('gia đình') ||
-    t.includes('lễ hội') || t.includes('quê hương') || t.includes('làng nghề');
-
-  if (isSkillsSubject || (isSkillsTitle && !isScienceSubject && !isScienceTitle && !isMathSubject && !isMathTitle)) {
-    return {
-      domainType: 'SKILLS',
-      mainHeader: 'GIÁO ÁN TÌNH CẢM - XÃ HỘI',
-      defaultDomainName: 'Lĩnh vực Phát triển tình cảm - kỹ năng xã hội',
       isMusic: false,
     };
   }
@@ -444,7 +446,9 @@ export function formatPreschoolPhysicalActivities(
   lessonTitle: string = '',
   subject: string = ''
 ): any[] {
-  if (!activities || !Array.isArray(activities)) return [];
+  if (!activities || !Array.isArray(activities) || activities.length === 0) {
+    return generateDefaultPreschoolActivities(lessonTitle, subject, { domainType: 'PHYSICAL' });
+  }
 
   const defaultThemeSong = '“Trường chúng cháu là trường mầm non”';
 
@@ -558,8 +562,397 @@ export function formatPreschoolPhysicalActivities(
   });
 }
 
+/**
+ * Generate rich default 5-step preschool activities based on domain, topic, and age.
+ * Ensures the lesson plan NEVER has 0 activities even if AI tasks encounter rate limits or return an empty array.
+ */
+export function generateDefaultPreschoolActivities(
+  lessonTitle: string = 'Trò chuyện về bài học',
+  subject: string = '',
+  domainInfo?: any
+): any[] {
+  const domain = domainInfo || detectPreschoolDomain(subject, lessonTitle);
+  const title = lessonTitle || 'chủ đề bài học';
+
+  if (domain.domainType === 'PHYSICAL') {
+    return [
+      {
+        id: 'act-1',
+        index: 1,
+        name: '1. Khởi động – Tạo hứng thú',
+        duration: '3 - 5 phút',
+        objective: 'Trẻ hào hứng, khởi động các nhóm cơ chuẩn bị vận động',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cho trẻ đi vòng tròn kết hợp các kiểu đi/chạy theo hiệu lệnh và nhạc: đi thường -> đi bằng mũi bàn chân -> đi thường -> đi bằng gót bàn chân -> đi thường -> chạy chậm -> chạy nhanh -> chạy chậm -> đi thường.\n- Cho trẻ xoay các khớp cổ tay, khớp bả vai, hông và khớp gối.\n- Cho trẻ chuyển đội hình về 3 hàng ngang dãn cách đều chuẩn bị tập BTPTC.`,
+          studentAction: `- Trẻ chú ý lắng nghe hiệu lệnh của cô và đi/chạy theo vòng tròn nhịp nhàng theo nhạc.\n- Trẻ tích cực xoay đều các khớp cổ tay, bả vai, hông, khớp gối.\n- Trẻ nhanh nhẹn chuyển về 3 hàng ngang dãn cách đều theo hiệu lệnh.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-2',
+        index: 2,
+        name: '2. Khám phá – Trải nghiệm nhiệm vụ vận động.',
+        duration: '5 - 7 phút',
+        objective: 'Trẻ tập bài tập phát triển chung và làm quen sơ đồ vận động',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `* Bài tập phát triển chung:\n- Tập theo nhạc bài hát chủ đề:\n+ Tay: Hai tay đưa ra trước, lên cao (2 lần x 8 nhịp).\n+ Bụng: Hai tay giơ cao, cúi gập người chạm mũi bàn chân (2 lần x 8 nhịp).\n+ Chân: Hai tay chống hông, khuỵu gối bật nhẹ (2 lần x 8 nhịp).\n+ Bật: Bật tách khép chân tại chỗ (2 lần x 8 nhịp).\n- Cho trẻ chuyển về đội hình 2 hàng đối diện nhau dãn cách cách nhau 3 - 4m.\n* Vận động cơ bản:\n- Cô giới thiệu sơ đồ sân tập và dụng cụ vận động gắn với "${title}".\n- Mời 1 - 2 trẻ lên thử trải nghiệm thực hiện vận động theo cách của mình.`,
+          studentAction: `- Trẻ đứng theo hàng dãn cách, lắng nghe nhạc và tập đều các động tác Tay, Bụng, Chân, Bật cùng cô.\n- Trẻ chú ý chuyển đội hình về 2 hàng đối diện nhau theo hiệu lệnh của cô.\n- Trẻ quan sát sơ đồ/dụng cụ và bạn lên thử trải nghiệm thực hiện vận động theo cách của mình.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-3',
+        index: 3,
+        name: '3. Chia sẻ – Hình thành cách thực hiện',
+        duration: '10 - 12 phút',
+        objective: 'Trẻ nắm vững kỹ thuật vận động cơ bản đúng tư thế',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô mời trẻ chia sẻ cách thực hiện, cảm nhận sau khi quan sát bạn thử vận động.\n- Cô chuẩn hóa và làm mẫu vận động cơ bản:\n  + Lần 1: Làm mẫu toàn phần không giải thích để trẻ hình dung trọn vẹn.\n  + Lần 2: Làm mẫu kết hợp phân tích kỹ thuật vận động chi tiết, nhấn mạnh tư thế chuẩn bị và phối hợp tay chân nhịp nhàng.\n  + Lần 3: Nhấn mạnh điểm mấu chốt kỹ thuật và chú ý an toàn.\n- Mời 2 trẻ khá lên thực hiện lại để cô và cả lớp cùng quan sát, chuẩn hóa.`,
+          studentAction: `- Trẻ chú ý lắng nghe bạn chia sẻ cảm nhận.\n- Trẻ chăm chú quan sát cô làm mẫu từng động tác và lắng nghe cô phân tích kỹ thuật.\n- Trẻ nhận xét bạn lên làm mẫu và ghi nhớ các bước thực hiện đúng.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-4',
+        index: 4,
+        name: '4. Thực hành – Vận dụng',
+        duration: '8 - 10 phút',
+        objective: 'Trẻ luyện tập vận động thuần thục và hào hứng chơi trò chơi vận động',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Tổ chức cho trẻ thực hành vận động:\n  + Lần 1: Cho lần lượt từng trẻ ở 2 hàng lên thực hiện (cô quan sát, sửa sai kịp thời).\n  + Lần 2: Cho 2 trẻ cùng thực hiện nối tiếp nhau theo hiệu lệnh.\n  + Lần 3: Thi đua giữa 2 tổ với hình thức tiếp sức vui nhộn.\n- Trò chơi vận động củng cố: Cô giới thiệu trò chơi vận động sôi nổi, phổ biến cách chơi và luật chơi, bao quát động viên trẻ tham gia hết mình.`,
+          studentAction: `- Từng nhóm trẻ lần lượt lên thực hiện vận động đúng kỹ thuật theo sự hướng dẫn của cô.\n- Trẻ hào hứng thi đua giữa các tổ, biết phối hợp và cổ vũ bạn cùng đội.\n- Trẻ tham gia trò chơi vận động sôi nổi, tuân thủ đúng luật chơi và reo vui khi đội mình chiến thắng.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-5',
+        index: 5,
+        name: '5. Chia sẻ – Đánh giá và Hồi tĩnh',
+        duration: '3 - 5 phút',
+        objective: 'Trẻ thả lỏng cơ thể, chia sẻ cảm xúc sau giờ tập',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô trò chuyện thân mật, hỏi cảm nhận của trẻ sau giờ học thể chất: "Con cảm thấy cơ thể mình thế nào? Con thích bài tập nào nhất?".\n- Cô nhận xét, tuyên dương tinh thần cố gắng và sự khéo léo của các bé.\n- Hồi tĩnh: Cho trẻ đi nhẹ nhàng 1 - 2 vòng quanh sân theo nền nhạc êm dịu, làm động tác chim bay thả lỏng các cơ và hít thở sâu.`,
+          studentAction: `- Trẻ hào hứng chia sẻ cảm nhận cơ thể khỏe khoắn, vui tươi sau giờ học.\n- Trẻ vỗ tay tự khen ngợi sự nỗ lực của bản thân và các bạn.\n- Trẻ nhẹ nhàng thả lỏng chân tay, hít thở sâu theo giai điệu nhạc êm dịu.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+    ];
+  }
+
+  if (domain.domainType === 'SKILLS') {
+    // GIÁO ÁN TÌNH CẢM - XÃ HỘI / KỸ NĂNG SỐNG
+    return [
+      {
+        id: 'act-1',
+        index: 1,
+        name: '1. Khởi động – Tạo hứng thú và giao nhiệm vụ',
+        duration: '3 - 5 phút',
+        objective: 'Trẻ hứng thú, tập trung và chuẩn bị tâm thế bước vào hoạt động',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô cùng cả lớp hát và vận động theo giai điệu vui tươi của bài hát chủ đề (ví dụ "Trường chúng cháu là trường mầm non", "Lời chào của bé"...).\n- Cô tạo tình huống gây bất ngờ với "Chiếc hộp bí mật" hoặc video giới thiệu sinh động gắn liền với nội dung "${title}".\n- Cô trò chuyện gợi mở cảm xúc: "Các con có cảm thấy vui và tò mò về điều kỳ diệu hôm nay không?".\n- Cô dẫn dắt nhẹ nhàng, giới thiệu đề tài và giao nhiệm vụ trải nghiệm cho trẻ.`,
+          studentAction: `- Trẻ cùng cô hát và nhún nhảy theo giai điệu bài hát vui nhộn.\n- Trẻ ngắm nhìn chiếc hộp bí mật, hào hứng đoán xem bên trong có gì.\n- Trẻ sẵn sàng tinh thần cùng cô bước vào hoạt động khám phá.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-2',
+        index: 2,
+        name: '2. Khám phá – Trải nghiệm',
+        duration: '8 - 10 phút',
+        objective: 'Trẻ được trực tiếp quan sát, trải nghiệm qua các trạm hoạt động',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô tạo điều kiện cho trẻ tự do chia thành các nhóm nhỏ (4 - 5 trẻ/nhóm) về các trạm trải nghiệm theo sở thích liên quan đến "${title}":\n  + Trạm 1 (Góc Quan sát & Tranh ảnh / Video thực tế): Trẻ quan sát các hình ảnh thực tế, mô hình và góc quen thuộc liên quan đến "${title}".\n  + Trạm 2 (Góc Trò chuyện & Tương tác xã hội): Trẻ cùng bạn trao đổi về các hành vi, tình cảm, sự chăm sóc và những kỷ niệm đáng nhớ.\n  + Trạm 3 (Góc Thực hành trải nghiệm): Trẻ thực hành các hành động cụ thể, cùng bạn sắp xếp, trang trí hoặc nhập vai tình huống đẹp.\n- Cô đến từng trạm quan sát, gợi mở câu hỏi kích thích tư duy và cảm xúc của trẻ: "Con thấy điều gì ở đây?", "Hành động này mang lại niềm vui gì cho mọi người?".`,
+          studentAction: `- Trẻ hào hứng chia về các trạm theo ý thích:\n  + Tại Trạm 1: Trẻ sờ, ngắm nhìn tranh ảnh, chia sẻ với bạn những gì mình thấy.\n  + Tại Trạm 2: Trẻ trao đổi, kể cho bạn nghe những điều mình biết về "${title}".\n  + Tại Trạm 3: Trẻ cùng bạn phối hợp thực hiện các thao tác, sắp xếp đồ dùng gọn gàng.\n- Trẻ bộc lộ cảm xúc vui tươi, gắn kết cùng bạn bè.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-3',
+        index: 3,
+        name: '3. Chia sẻ - Thảo luận',
+        duration: '10 - 12 phút',
+        objective: 'Trẻ tự tin bộc lộ cảm xúc, chuẩn hóa kiến thức và hành vi xã hội tích cực',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô gõ xắc xô nhẹ nhàng, mời trẻ quây quần ngồi thành vòng tròn đầm ấm bên cô.\n- Cô đặt câu hỏi khơi gợi để trẻ tự tin nói ra suy nghĩ và cảm xúc của mình về "${title}":\n  + "Qua trải nghiệm vừa rồi, con đã phát hiện ra điều gì thú vị?"\n  + "Để thể hiện tình cảm yêu thương, chúng mình cần làm những việc gì?"\n  + "Những hành động nào giúp lớp mình, mọi người xung quanh luôn vui vẻ, hạnh phúc?"\n- Cô trình chiếu hình ảnh/video chuẩn hóa kiến thức, đàm thoại làm rõ ý nghĩa.\n- Cô khái quát, giáo dục bài học tình cảm: Biết yêu quý, kính trọng người lớn, đoàn kết và sẻ chia cùng bạn bè trong cuộc sống.`,
+          studentAction: `- Trẻ nhanh nhẹn về ngồi quây quần xung quanh cô với nét mặt rạng rỡ.\n- Trẻ mạnh dạn giơ tay chia sẻ trải nghiệm ở các trạm và cảm xúc của mình.\n- Trẻ chú ý xem tranh/video và lắng nghe cô đàm thoại, giảng giải.\n- Trẻ tiếp thu lời cô dạy, biết nói lời cảm ơn, xin lỗi và thể hiện tình yêu thương.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-4',
+        index: 4,
+        name: '4. Vận dụng và mở rộng',
+        duration: '6 - 8 phút',
+        objective: 'Trẻ áp dụng kỹ năng ứng xử và tham gia trò chơi gắn kết tập thể',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô tổ chức hoạt động vận dụng thực hành kỹ năng xã hội gắn liền với "${title}":\n  + Trò chơi củng cố: Tổ chức trò chơi tập thể sôi động (ví dụ: "Tiếp sức yêu thương", "Tìm hành vi đúng - sai", "Bé gắn hoa việc tốt").\n  + Tình huống ứng xử thực tế: Đưa ra tình huống đóng vai thực tế để trẻ thực hành cách chào hỏi lễ phép, biết chia sẻ đồ chơi hoặc an ủi bạn khi bạn buồn.\n- Cô đồng hành, khích lệ trẻ tham gia nhiệt tình và xử lý tình huống khéo léo.`,
+          studentAction: `- Trẻ chăm chú lắng nghe cô phổ biến luật chơi và cách chơi.\n- Trẻ tích cực tham gia trò chơi, phối hợp nhịp nhàng và cổ vũ các bạn trong đội.\n- Trẻ hào hứng nhập vai xử lý tình huống: khoanh tay chào hỏi, mỉm cười nói lời cảm ơn, chia sẻ đồ chơi cùng bạn.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-5',
+        index: 5,
+        name: '5. Đánh giá – Điều chỉnh',
+        duration: '3 - 5 phút',
+        objective: 'Trẻ chia sẻ cảm xúc sau buổi học, hình thành thói quen ngăn nắp tự giác',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô trò chuyện hỏi cảm nhận của trẻ: "Hôm nay con thích hoạt động nào nhất?", "Con cảm thấy như thế nào sau bài học?".\n- Quan sát, biểu dương tinh thần tham gia tự tin, sự đoàn kết và những lời nói, hành vi đẹp của trẻ trong giờ học.\n- Động viên, khích lệ trẻ tiếp tục phát huy những hành vi lễ phép, yêu thương mọi người trong sinh hoạt hằng ngày.\n- Nhắc nhở trẻ tự giác cùng cô thu dọn đồ dùng, học liệu cất gọn gàng vào các góc quy định.`,
+          studentAction: `- Trẻ vui vẻ chia sẻ cảm xúc hào hứng và những điều mình yêu thích nhất.\n- Trẻ tự tin đón nhận lời khen ngợi của cô và vỗ tay chúc mừng cả lớp.\n- Trẻ tự giác cùng bạn thu dọn đồ dùng, học liệu ngăn nắp vào đúng nơi quy định.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+    ];
+  }
+
+  if (domain.domainType === 'SCIENCE') {
+    // KHÁM PHÁ KHOA HỌC
+    return [
+      {
+        id: 'act-1',
+        index: 1,
+        name: '1. Khởi động – Tạo hứng thú và giao nhiệm vụ',
+        duration: '3 - 5 phút',
+        objective: 'Khơi gợi trí tò mò, khám phá khoa học của trẻ',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô tạo tình huống bất ngờ với "Chiếc túi kỳ diệu" / một thí nghiệm nhỏ hoặc video ngắn khơi gợi sự tò mò gắn với "${title}".\n- Cô đặt câu hỏi kích thích óc quan sát: "Các con có nhìn thấy điều gì kỳ lạ vừa xảy ra không?".\n- Dẫn dắt trẻ vào hành trình khám phá khoa học hôm nay.`,
+          studentAction: `- Trẻ tập trung chú ý, quan sát hiện tượng và hào hứng phán đoán.\n- Trẻ sôi nổi đưa ra ý kiến của mình và háo hức muốn tự tay làm thử.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-2',
+        index: 2,
+        name: '2. Khám phá – Trải nghiệm',
+        duration: '8 - 10 phút',
+        objective: 'Trẻ trực tiếp trải nghiệm, thực hành thí nghiệm bằng đa giác quan',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Chia trẻ về các nhóm khám phá, cung cấp đồ dùng học liệu thí nghiệm/vật thật liên quan đến "${title}".\n- Hướng dẫn trẻ sử dụng các giác quan (mắt nhìn, tai nghe, tay sờ, mũi ngửi...) để quan sát và khám phá đặc điểm, sự biến đổi.\n- Cô đi lại gợi mở câu hỏi khám phá: "Con thấy vật này thế nào?", "Khi làm như vậy thì điều gì xuất hiện?".`,
+          studentAction: `- Trẻ về nhóm, chủ động sờ, ngửi, quan sát và thao tác với học liệu.\n- Trẻ trao đổi râm ran với bạn trong nhóm về những điều mình nhìn thấy và cảm nhận được.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-3',
+        index: 3,
+        name: '3. Chia sẻ - Thảo luận',
+        duration: '10 - 12 phút',
+        objective: 'Trẻ báo cáo kết quả quan sát, cô chuẩn hóa kiến thức khoa học',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Tập trung trẻ, mời đại diện các nhóm chia sẻ kết quả khám phá / thí nghiệm.\n- Cô đàm thoại phân tích, giải thích bản chất hiện tượng khoa học bằng slide/hình ảnh trực quan dễ hiểu.\n- Chuẩn hóa kiến thức khoa học cốt lõi phù hợp với lứa tuổi.`,
+          studentAction: `- Trẻ tự tin chia sẻ những gì nhóm mình phát hiện được.\n- Trẻ chú ý quan sát hình ảnh chuẩn hóa của cô và đối chiếu với kết quả thực hành.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-4',
+        index: 4,
+        name: '4. Vận dụng – Mở rộng',
+        duration: '6 - 8 phút',
+        objective: 'Trẻ áp dụng kiến thức vào trò chơi khoa học sáng tạo',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Tổ chức trò chơi khoa học củng cố hoặc thử thách sáng tạo (ví dụ: "Thử tài nhà bác học nhí", "Phân loại thông minh").\n- Gợi mở liên hệ hiện tượng thực tế trong cuộc sống xung quanh trẻ.`,
+          studentAction: `- Trẻ tham gia trò chơi nhiệt tình, vận dụng kiến thức vừa học để vượt qua thử thách.\n- Trẻ hào hứng kể về những điều tương tự mình từng thấy ở nhà hoặc ngoài thiên nhiên.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-5',
+        index: 5,
+        name: '5. Chia sẻ - Đánh giá',
+        duration: '3 - 5 phút',
+        objective: 'Trẻ chia sẻ cảm nhận và rèn luyện nề nếp thu dọn đồ dùng',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Trò chuyện hỏi trẻ cảm nhận về buổi khám phá khoa học.\n- Nhận xét tuyên dương tinh thần chủ động tìm tòi của cả lớp.\n- Hướng dẫn trẻ cùng cô rửa sạch dụng cụ thí nghiệm, cất dọn ngăn nắp.`,
+          studentAction: `- Trẻ chia sẻ niềm vui khám phá điều mới lạ.\n- Trẻ tự giác cùng bạn thu dọn đồ dùng, lau bàn và cất học liệu đúng nơi quy định.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+    ];
+  }
+
+  if (domain.domainType === 'MATH') {
+    // LÀM QUEN VỚI TOÁN
+    return [
+      {
+        id: 'act-1',
+        index: 1,
+        name: '1. Khởi động – Tạo hứng thú và giao nhiệm vụ',
+        duration: '3 - 5 phút',
+        objective: 'Trẻ hứng thú, ôn lại kiến thức toán đã học',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô cho trẻ hát và vận động bài hát toán học vui nhộn.\n- Tổ chức trò chơi ôn luyện số lượng/hình khối đã biết qua câu đố hoặc trò chơi vận động nhẹ nhàng.\n- Dẫn dắt vào bài học toán mới: "${title}".`,
+          studentAction: `- Trẻ hào hứng hát và vận động theo bài hát.\n- Trẻ nhanh nhẹn đoán đúng số lượng, gọi tên hình khối theo hiệu lệnh của cô.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-2',
+        index: 2,
+        name: '2. Khám phá – Trải nghiệm',
+        duration: '8 - 10 phút',
+        objective: 'Trẻ làm quen với biểu tượng toán mới qua đồ dùng trực quan',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Phát rổ đồ dùng cho từng trẻ.\n- Cho trẻ lấy đồ dùng trong rổ ra xếp thành hàng ngang từ trái sang phải theo hướng dẫn.\n- Hướng dẫn trẻ đếm, so sánh số lượng, phát hiện sự thay đổi hoặc nhận biết đặc điểm hình khối.`,
+          studentAction: `- Trẻ nhận rổ đồ dùng và xếp ngay ngắn từ trái qua phải.\n- Trẻ đếm to, rõ ràng từ 1 đến hết và đặt thẻ số tương ứng.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-3',
+        index: 3,
+        name: '3. Chia sẻ - Thảo luận',
+        duration: '10 - 12 phút',
+        objective: 'Trẻ chuẩn hóa khái niệm toán học và quy tắc nhận biết',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô mời trẻ phát biểu quy tắc xếp, cách đếm và kết quả so sánh.\n- Cô thao tác mẫu trên bảng từ chuẩn hóa kiến thức, giới thiệu chữ số / hình khối mới.\n- Cho cả lớp, từng tổ, cá nhân trẻ phát âm và chỉ vào chữ số/hình khối mới.`,
+          studentAction: `- Trẻ tự tin trả lời câu hỏi và chia sẻ thao tác xếp của mình.\n- Trẻ đồng thanh và cá nhân phát âm chính xác tên số lượng / hình khối.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-4',
+        index: 4,
+        name: '4. Vận dụng – Mở rộng',
+        duration: '6 - 8 phút',
+        objective: 'Trẻ vận dụng kiến thức toán vào các trò chơi củng cố',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Tổ chức trò chơi củng cố sôi nổi (ví dụ: "Ai nhanh hơn", "Về đúng nhà", "Tìm bạn cho số").\n- Quan sát, động viên trẻ tham gia chơi đúng luật, đếm chuẩn xác.`,
+          studentAction: `- Trẻ hào hứng tham gia trò chơi, nhanh nhẹn tìm đúng nhà, gắn đúng số lượng.\n- Cả lớp vỗ tay chúc mừng các bạn thắng cuộc.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-5',
+        index: 5,
+        name: '5. Chia sẻ - Đánh giá',
+        duration: '3 - 5 phút',
+        objective: 'Trẻ củng cố bài học và cất dọn đồ dùng toán',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô đàm thoại hỏi lại tên bài học toán hôm nay.\n- Khen ngợi trẻ học chăm chỉ, đếm giỏi, nhận biết nhanh.\n- Hướng dẫn trẻ xếp đồ dùng gọn gàng vào rổ và mang về góc cất.`,
+          studentAction: `- Trẻ nhắc lại tên bài học và số lượng/hình khối vừa học.\n- Trẻ tự giác xếp từng món đồ chơi vào rổ và cất gọn gàng.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+    ];
+  }
+
+  // DEFAULT / GENERAL PRESCHOOL DOMAINS (Thơ, Truyện, Tạo hình, Xã hội, etc.)
+  return [
+    {
+      id: 'act-1',
+      index: 1,
+      name: '1. Khởi động – Tạo hứng thú và giao nhiệm vụ',
+      duration: '3 - 5 phút',
+      objective: 'Trẻ hứng thú, chuẩn bị tâm thế sẵn sàng tham gia hoạt động',
+      step1: {
+        title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+        teacherAction: `- Cô tạo tình huống bất ngờ với bài hát, trò chơi nhỏ hoặc câu đố vui nhộn gắn với nội dung "${title}".\n- Cô trò chuyện gợi mở tạo cảm xúc vui vẻ và kết nối trẻ vào bài học.\n- Cô dẫn dắt tự nhiên, giới thiệu đề tài bài học hôm nay.`,
+        studentAction: `- Trẻ chăm chú lắng nghe, cùng cô hát và vận động nhịp nhàng.\n- Trẻ sôi nổi trả lời câu hỏi và hào hứng đón chờ hoạt động tiếp theo.`,
+        productExpected: '',
+        digitalOrAiTool: '',
+      },
+    },
+    {
+      id: 'act-2',
+      index: 2,
+      name: '2. Khám phá – Trải nghiệm',
+      duration: '8 - 10 phút',
+      objective: 'Trẻ được quan sát, tiếp cận trực quan với nội dung bài học',
+      step1: {
+        title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+        teacherAction: `- Cô tổ chức cho trẻ tiếp cận đối tượng học tập gắn với "${title}" (qua tranh ảnh, vật thật, video, bài thơ, câu chuyện hoặc các trạm trải nghiệm).\n- Cô hướng dẫn, đặt câu hỏi gợi mở để trẻ tự quan sát, cảm nhận và tìm hiểu đặc điểm chính.`,
+        studentAction: `- Trẻ tập trung quan sát, lắng nghe và tự tay trải nghiệm học liệu.\n- Trẻ hào hứng chia sẻ cảm nhận ban đầu với bạn và cô.`,
+        productExpected: '',
+        digitalOrAiTool: '',
+      },
+    },
+    {
+      id: 'act-3',
+      index: 3,
+      name: '3. Chia sẻ - Thảo luận',
+      duration: '10 - 12 phút',
+      objective: 'Trẻ đàm thoại làm rõ nội dung, cô chuẩn hóa kiến thức và kỹ năng',
+      step1: {
+        title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+        teacherAction: `- Cô đàm thoại qua hệ thống câu hỏi khơi gợi tư duy từ dễ đến khó về "${title}".\n- Cô giải thích, làm mẫu hoặc phân tích kỹ năng/kiến thức trọng tâm.\n- Cho trẻ luyện tập, phát biểu, thể hiện sự hiểu biết theo nhóm và cá nhân.`,
+        studentAction: `- Trẻ mạnh dạn giơ tay trả lời câu hỏi của cô bằng câu trọn vẹn.\n- Trẻ chú ý lắng nghe cô chuẩn hóa và tích cực luyện tập theo hướng dẫn.`,
+        productExpected: '',
+        digitalOrAiTool: '',
+      },
+    },
+    {
+      id: 'act-4',
+      index: 4,
+      name: '4. Vận dụng – Mở rộng',
+      duration: '6 - 8 phút',
+      objective: 'Trẻ củng cố kiến thức qua trò chơi hoặc thực hành sáng tạo',
+      step1: {
+        title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+        teacherAction: `- Cô tổ chức trò chơi củng cố hoặc bài tập thực hành ứng dụng gắn với "${title}".\n- Cô phổ biến cách chơi, luật chơi rõ ràng và khích lệ trẻ tham gia tự tin.`,
+        studentAction: `- Trẻ tích cực tham gia trò chơi, phối hợp cùng bạn và tuân thủ luật chơi.\n- Trẻ hào hứng thể hiện kỹ năng đã học để hoàn thành nhiệm vụ.`,
+        productExpected: '',
+        digitalOrAiTool: '',
+      },
+    },
+    {
+      id: 'act-5',
+      index: 5,
+      name: '5. Chia sẻ - Đánh giá',
+      duration: '3 - 5 phút',
+      objective: 'Trẻ chia sẻ cảm xúc, cô nhận xét động viên và thu dọn đồ dùng',
+      step1: {
+        title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+        teacherAction: `- Cô cùng trẻ trò chuyện hỏi cảm xúc sau buổi học hôm nay.\n- Cô nhận xét, tuyên dương tinh thần học tập tích cực của cả lớp.\n- Hướng dẫn trẻ tự giác thu dọn đồ dùng, học liệu cất gọn gàng vào các góc quy định.`,
+        studentAction: `- Trẻ hào hứng chia sẻ niềm vui và những điều mình thích nhất.\n- Trẻ đón nhận lời khen và cùng bạn thu dọn đồ dùng ngăn nắp.`,
+        productExpected: '',
+        digitalOrAiTool: '',
+      },
+    },
+  ];
+}
+
 export function formatPreschoolActivities(activities: any[], lessonTitle: string = '', subject: string = '', oldPlanContent: string = ''): any[] {
-  if (!activities || !Array.isArray(activities)) return [];
   const domain = detectPreschoolDomain(subject, lessonTitle, oldPlanContent);
 
   if (domain.domainType === 'MUSIC') {
@@ -568,6 +961,11 @@ export function formatPreschoolActivities(activities: any[], lessonTitle: string
 
   if (domain.domainType === 'PHYSICAL') {
     return formatPreschoolPhysicalActivities(activities, lessonTitle, subject);
+  }
+
+  // Safety fallback: If activities array is missing or empty, generate default 5-step curriculum activities!
+  if (!activities || !Array.isArray(activities) || activities.length === 0) {
+    return generateDefaultPreschoolActivities(lessonTitle, subject, domain);
   }
 
   let step1Name = "1. Khởi động – Tạo hứng thú và giao nhiệm vụ";
@@ -658,6 +1056,18 @@ export function formatPreschoolActivities(activities: any[], lessonTitle: string
       newAct.name = defaultNames[idx];
     }
 
+    // Fallback if teacherAction or studentAction is empty
+    if (!teacherAction.trim() || !studentAction.trim()) {
+      const defaultActs = generateDefaultPreschoolActivities(lessonTitle, subject, domain);
+      const matched = defaultActs[determinedIndex - 1] || defaultActs[idx] || defaultActs[0];
+      if (!teacherAction.trim() && matched?.step1?.teacherAction) {
+        teacherAction = matched.step1.teacherAction;
+      }
+      if (!studentAction.trim() && matched?.step1?.studentAction) {
+        studentAction = matched.step1.studentAction;
+      }
+    }
+
     step1.teacherAction = teacherAction
       .split('\n')
       .map((l) => cleanPreschoolBulletLine(l))
@@ -674,7 +1084,9 @@ export function formatPreschoolActivities(activities: any[], lessonTitle: string
 }
 
 export function formatPreschoolMusicActivities(activities: any[], lessonTitle: string = '', oldPlanContent: string = ''): any[] {
-  if (!activities || !Array.isArray(activities)) return [];
+  if (!activities || !Array.isArray(activities) || activities.length === 0) {
+    return generateDefaultPreschoolActivities(lessonTitle, 'Âm nhạc', { domainType: 'MUSIC' });
+  }
 
   const { mainSong, listeningSong } = extractSongTitles(lessonTitle, oldPlanContent);
 

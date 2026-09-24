@@ -8,6 +8,7 @@ import {
   Plus,
   Search,
   KeyRound,
+  Key,
   Laptop,
   RefreshCw,
   Edit3,
@@ -74,6 +75,7 @@ interface UserManagementModalProps {
   userAccounts: ManagedUserAccount[];
   onAccountsUpdated: (accounts: ManagedUserAccount[]) => void;
   currentUser?: ManagedUserAccount | null;
+  onOpenApiKeyModal?: () => void;
 }
 
 export const UserManagementModal: React.FC<UserManagementModalProps> = ({
@@ -82,6 +84,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
   userAccounts,
   onAccountsUpdated,
   currentUser,
+  onOpenApiKeyModal,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'teacher'>('all');
@@ -932,6 +935,18 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
               <RefreshCw className={`w-3.5 h-3.5 ${isDeduplicating ? 'animate-spin' : ''}`} />
               <span>{isDeduplicating ? 'Đang hợp nhất...' : 'Hợp Nhất Máy Trùng'}</span>
             </button>
+
+            {onOpenApiKeyModal && (
+              <button
+                type="button"
+                onClick={onOpenApiKeyModal}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
+                title="Quản lý và dán danh sách các API Key Gemini dự phòng"
+              >
+                <Key className="w-4 h-4" />
+                <span>Quản Lý API Key</span>
+              </button>
+            )}
 
             <button
               type="button"

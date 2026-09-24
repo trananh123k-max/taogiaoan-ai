@@ -1,5 +1,5 @@
 import { PRESCHOOL_CURRICULUM_MATRIX, PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE } from './src/data/preschoolCurriculum.js';
-import { formatPreschoolMusicActivities, formatPreschoolActivities, isPreschoolMusicPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, sanitizePreschoolObjectives, analyzePreschoolAgeProfile } from './src/utils/preschoolUtils.js';
+import { formatPreschoolMusicActivities, formatPreschoolActivities, isPreschoolMusicPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, sanitizePreschoolObjectives, analyzePreschoolAgeProfile, detectPreschoolDomain, generateDefaultPreschoolActivities } from './src/utils/preschoolUtils.js';
 import { NLS_DICTIONARY } from './src/data/nlsDictionary';
 import { getVerifiedLessons } from './src/data/verifiedCurriculumList';
 import { getTextbookLessonStructure } from './src/data/textbookStructureDictionary';
@@ -49,21 +49,70 @@ function extractKeysFromInput(inputStr?: string): string[] {
 function getServerApiKeys(): string[] {
   const keys: string[] = [];
 
-  if (process.env.GEMINI_API_KEY) {
-    keys.push(...extractKeysFromInput(process.env.GEMINI_API_KEY));
+  // Direct common variable names
+  const directEnvVars = [
+    process.env.GEMINI_API_KEY,
+    process.env.GEMINI_API_KEYS,
+    process.env.GOOGLE_API_KEY,
+    process.env.GOOGLE_API_KEYS,
+    process.env.GEMINI_KEY,
+    process.env.GEMINI_KEYS,
+    process.env.API_KEY,
+    process.env.API_KEYS,
+  ];
+
+  for (const v of directEnvVars) {
+    if (v && typeof v === 'string' && v.trim()) {
+      keys.push(...extractKeysFromInput(v));
+    }
   }
-  if (process.env.GEMINI_API_KEYS) {
-    keys.push(...extractKeysFromInput(process.env.GEMINI_API_KEYS));
+
+  // Numbered variants up to 50 (e.g. GEMINI_API_KEY_1, GEMINI_KEY_2, etc.)
+  for (let i = 1; i <= 50; i++) {
+    const numberedKeys = [
+      process.env[`GEMINI_API_KEY_${i}`],
+      process.env[`GEMINI_API_KEY-${i}`],
+      process.env[`GEMINI_API_KEY${i}`],
+      process.env[`GEMINI_KEY_${i}`],
+      process.env[`GEMINI_KEY${i}`],
+      process.env[`GOOGLE_API_KEY_${i}`],
+      process.env[`GOOGLE_API_KEY${i}`],
+      process.env[`API_KEY_${i}`],
+      process.env[`API_KEY${i}`],
+    ];
+    for (const k of numberedKeys) {
+      if (k && typeof k === 'string' && k.trim()) {
+        keys.push(...extractKeysFromInput(k));
+      }
+    }
   }
-  for (let i = 1; i <= 10; i++) {
-    const k = process.env[`GEMINI_API_KEY_${i}`] || process.env[`GEMINI_API_KEY-${i}`] || process.env[`GEMINI_API_KEY${i}`];
-    if (k && k.trim()) {
-      keys.push(...extractKeysFromInput(k));
+
+  // Dynamic search across all environment variables for any other key patterns
+  for (const [keyName, val] of Object.entries(process.env)) {
+    if (!val || typeof val !== 'string') continue;
+    const lowerKey = keyName.toLowerCase();
+    if (
+      lowerKey.includes('gemini') ||
+      lowerKey.includes('google_api') ||
+      lowerKey.includes('apikey') ||
+      lowerKey.startsWith('api_key')
+    ) {
+      if (
+        lowerKey.includes('firebase') ||
+        lowerKey.includes('project_id') ||
+        lowerKey.includes('database') ||
+        lowerKey.includes('token') ||
+        lowerKey.includes('secret')
+      ) {
+        continue;
+      }
+      keys.push(...extractKeysFromInput(val));
     }
   }
 
   // Deduplicate and filter non-empty
-  return Array.from(new Set(keys)).filter(Boolean);
+  const uniqueKeys = Array.from(new Set(keys)).filter(Boolean);
+  return uniqueKeys;
 }
 
 // Cache of GoogleGenAI instances by API Key to avoid re-allocating
@@ -118,10 +167,14 @@ function resolveGeminiAuth(req: express.Request): {
   try { userEmail = decodeURIComponent(userEmail); } catch {}
 
   const isAdmin = userRole === 'admin' || userEmail === 'admin@123' || userEmail.toLowerCase() === 'admin@123';
+  const serverKeys = getServerApiKeys();
+
+  console.log(
+    `[Gemini Auth] User: "${userEmail || 'anonymous'}" | Role: "${userRole || 'none'}" | Admin: ${isAdmin} | Client Keys: ${customKeys.length} | Server Keys (Render/.env): ${serverKeys.length}`
+  );
 
   // 1. User provided personal custom API key(s)
   if (customKeys.length > 0) {
-    const serverKeys = getServerApiKeys();
     // Prioritize user's personal keys first; append server keys as emergency backup if personal keys hit quota limits
     const allCandidateKeys = Array.from(new Set([...customKeys, ...serverKeys]));
     return {
@@ -136,7 +189,17 @@ function resolveGeminiAuth(req: express.Request): {
 
   // 2. Admin account can use server environment keys
   if (isAdmin) {
-    const serverKeys = getServerApiKeys();
+    if (serverKeys.length === 0) {
+      return {
+        allowed: false,
+        error: 'Tài khoản Quản trị viên chưa có mã API Key nào trong máy chủ. Thầy/Cô vui lòng nhấn vào biểu tượng "API Key" ở thanh tiêu đề để dán danh sách các API Key của mình (hoặc kiểm tra Environment Variables trên Render.com và bấm Manual Deploy).',
+        keys: [],
+        isAdmin: true,
+        isTrial: false,
+        isSubscription: false,
+        isCustom: false,
+      };
+    }
     return {
       allowed: true,
       keys: serverKeys,
@@ -199,28 +262,24 @@ function resolveCandidateKeys(req: express.Request): {
 
 // Task-Specific Model Hierarchies
 // 1. Phục vụ Soạn bài dạy (KHBD), Tinh chỉnh hoạt động CV 5512, Gợi ý sư phạm:
-// Ưu tiên model có Quota rộng, tốc độ siêu tốc và khả năng chống nghẽn Rate Limit cao nhất:
 const PEDAGOGICAL_MODELS = [
-  'gemini-3.1-flash-lite',  // Quota RPM/TPM cao nhất, độ trễ thấp nhất (1.2s - 2s), chống Rate Exceeded tốt nhất
   'gemini-3.8-flash',       // Chuẩn chính xác, năng lực sư phạm cao cấp
   'gemini-flash-latest',    // Chuẩn tốc độ cao & ổn định
-  'gemini-3.7-flash',       // Trí tuệ sư phạm cao cấp
+  'gemini-3.1-flash-lite',  // Quota RPM/TPM cao
 ];
 
 // 2. Phục vụ Trợ lý Trò chuyện Sư phạm (Chatbot):
 const CHAT_MODELS = [
-  'gemini-3.1-flash-lite',
   'gemini-3.8-flash',
   'gemini-flash-latest',
-  'gemini-3.7-flash',
+  'gemini-3.1-flash-lite',
 ];
 
 // 3. Phục vụ Tác vụ Tiện ích phụ, Kiểm tra thông tin, Ping, Quét mục lục SGK:
 const UTILITY_MODELS = [
-  'gemini-3.1-flash-lite',
   'gemini-3.8-flash',
   'gemini-flash-latest',
-  'gemini-3.7-flash',
+  'gemini-3.1-flash-lite',
 ];
 
 /**
@@ -304,14 +363,17 @@ async function generateContentWithRetryAndFallback(options: {
           lastError = err;
           const rawErrMsg = err?.message || String(err);
           const errMsgLower = rawErrMsg.toLowerCase();
-          const isRateLimit = errMsgLower.includes('rate') || errMsgLower.includes('429') || errMsgLower.includes('quota') || errMsgLower.includes('resource_exhausted') || errMsgLower.includes('too many requests');
-          const isTransient = isRateLimit || errMsgLower.includes('503') || errMsgLower.includes('unavailable') || errMsgLower.includes('high demand') || errMsgLower.includes('overloaded');
+          const isDailyQuota = errMsgLower.includes('generaterequestsperday') || errMsgLower.includes('free_tier_requests') || errMsgLower.includes('exceeded your current quota');
+          const isRateLimit = !isDailyQuota && (errMsgLower.includes('rate') || errMsgLower.includes('429') || errMsgLower.includes('resource_exhausted') || errMsgLower.includes('too many requests'));
+          const isTransient = !isDailyQuota && (isRateLimit || errMsgLower.includes('503') || errMsgLower.includes('unavailable') || errMsgLower.includes('high demand') || errMsgLower.includes('overloaded'));
 
           if (isTransient && attempt < 2) {
-            // Exponential backoff + jitter for rate limit recovery
-            const delayMs = isRateLimit
-              ? 1200 * (attempt + 1) + Math.random() * 800
-              : 600 * (attempt + 1) + Math.random() * 400;
+            let delayMs = 1500 * (attempt + 1) + Math.random() * 500;
+            const retryMatch = rawErrMsg.match(/retry in ([0-9.]+)s/i);
+            if (retryMatch && parseFloat(retryMatch[1])) {
+              const seconds = Math.min(parseFloat(retryMatch[1]), 8);
+              delayMs = seconds * 1000 + 500;
+            }
             await new Promise((resolve) => setTimeout(resolve, delayMs));
             continue;
           }
@@ -342,6 +404,14 @@ async function generateContentWithRetryAndFallback(options: {
         `[Auto-Failover] -> Toàn bộ Key gặp lỗi/hết quota trên model "${currentModel}". Tự động hạ cấp sang Model dự phòng tiếp theo: "${nextModel}"...`
       );
     }
+  }
+
+  const lastMsg = (lastError?.message || String(lastError || '')).toLowerCase();
+  const isQuotaIssue = lastMsg.includes('quota') || lastMsg.includes('resource_exhausted') || lastMsg.includes('429') || lastMsg.includes('exceeded');
+  if (isQuotaIssue) {
+    throw new Error(
+      'Mã API Key đã đạt giới hạn hạn ngạch (Quota) của Google. Thầy/Cô vui lòng nhấn vào biểu tượng "API Key" ở thanh tiêu đề để đổi hoặc dán thêm API Key dự phòng (hoặc kiểm tra gói trả phí trên Google AI Studio).'
+    );
   }
 
   throw lastError || new Error('Tất cả các API Key và Model dự phòng đều gặp sự cố hoặc hết hạn ngạch. Vui lòng kiểm tra lại mã khóa.');
@@ -1253,7 +1323,7 @@ app.post('/api/check-api-key', async (req, res) => {
           let success = false;
           let lastErr: any = null;
           // Fast and resilient models to test in priority order
-          const testModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite', 'gemini-3.7-flash'];
+          const testModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
           
           for (const m of testModels) {
             try {
@@ -1404,7 +1474,7 @@ app.post('/api/check-api-key', async (req, res) => {
     try {
       const client = new GoogleGenAI({ apiKey: serverKeys[0] });
       await client.models.generateContent({
-        model: 'gemini-3.7-flash',
+        model: 'gemini-3.8-flash',
         contents: 'Ping test. Trả lời: OK',
       });
       return res.json({
@@ -2094,7 +2164,7 @@ async function generateKHBDSectional(
     ? primaryModel
     : (config.aiModel && config.aiModel !== 'gemini-flash-latest' && config.aiModel !== 'auto')
       ? config.aiModel
-      : 'gemini-3.1-flash-lite';
+      : 'gemini-3.8-flash';
 
   const subject = config.subject || 'Tin học';
   const grade = config.grade || 'Lớp 6';
@@ -2814,26 +2884,18 @@ Yêu cầu: Trả về JSON với cấu trúc:
     let prompt = '';
     
     if (isPreschool) {
-      const s = (subject || '').toLowerCase();
-      const t = (lessonTitle || '').toLowerCase();
-      const extra = ((config.oldPlanContent || '') + ' ' + (config.topic || '')).toLowerCase();
-      const isScience = s.includes('khoa học') || s.includes('kham pha khoa hoc') || s.includes('khám phá khoa học') || t.includes('thí nghiệm') || t.includes('khoa học');
-      const isSocial = s.includes('xã hội') || s.includes('khám phá xã hội') || s.includes('kỹ năng sống') || s.includes('tình cảm');
-      const isMath = s.includes('toán') || s.includes('số học') || s.includes('hình học') || s.includes('đo lường');
-      const isCognitive = isScience || isSocial || isMath;
-      const isPhysical = s.includes('thể chất') || s.includes('vận động') || s.includes('thể dục') || s.includes('gdtc') ||
-        t.includes('vđcb') || t.includes('btptc') || t.includes('đi thăng bằng') || t.includes('bật') || t.includes('ném') ||
-        t.includes('bò chui') || t.includes('tung bóng') || t.includes('chuyền bóng') || t.includes('bắt bóng') ||
-        t.includes('trèo thang') || t.includes('rửa tay') || t.includes('chạy') || t.includes('bò') || t.includes('trườn') ||
-        t.includes('thể dục') || t.includes('thể chất') || t.includes('vận động cơ bản') || t.includes('bài tập phát triển chung') ||
-        extra.includes('thể chất') || extra.includes('btptc') || extra.includes('vđcb') || extra.includes('bài tập phát triển chung');
+      const domainInfo = detectPreschoolDomain(subject, lessonTitle, config.oldPlanContent || '');
+      const isPhysical = domainInfo.domainType === 'PHYSICAL';
+      const isSkills = domainInfo.domainType === 'SKILLS';
+      const isScience = domainInfo.domainType === 'SCIENCE';
+      const isMath = domainInfo.domainType === 'MATH';
+      const isSocialExploration = domainInfo.domainType === 'SOCIAL';
+      const isCognitive = isScience || isMath || isSocialExploration;
+      const isLetterTracing = domainInfo.domainType === 'LETTER_TRACING';
+      const isLetterGame = domainInfo.domainType === 'LETTER_GAME';
+      const isLearningGame = domainInfo.domainType === 'LEARNING_GAME';
 
-      const isLetterTracing = s.includes('tập tô') || s.includes('to chu cai') || t.includes('tập tô') || t.includes('tô chữ cái') || t.includes('tô nét') || t.includes('sao chép nét') || s.includes('sao chép nét') || t.includes('tô, đồ') || t.includes('tô đồ') || extra.includes('tập tô chữ cái') || extra.includes('tô, đồ, sao chép');
-      const isLetterGame = s.includes('trò chơi chữ cái') || t.includes('trò chơi chữ cái') || t.includes('chơi với chữ cái') || t.includes('tc chữ cái') || extra.includes('trò chơi chữ cái');
-      const isLearningGame = s.includes('trò chơi học tập') || t.includes('trò chơi học tập') || t.includes('tìm bạn thân') || extra.includes('trò chơi học tập');
-      const isSocialExploration = s.includes('khám phá xã hội') || s.includes('kpxh') || t.includes('khám phá xã hội') || t.includes('đồ dùng, đồ chơi') || t.includes('lớp học của bé') || (s.includes('nhận thức') && (s.includes('xã hội') || t.includes('đồ dùng')));
-
-      let act1Name = isCognitive ? "1. Khởi động – Tạo hứng thú và giao nhiệm vụ" : "1. Khởi động – Tạo tình huống";
+      let act1Name = isCognitive || isSkills ? "1. Khởi động – Tạo hứng thú và giao nhiệm vụ" : "1. Khởi động – Tạo tình huống";
       let act2Name = "2. Khám phá – Trải nghiệm";
 
       if (isPhysical) {
@@ -2849,6 +2911,18 @@ Yêu cầu: Trả về JSON với cấu trúc:
         act1Name = "1. Khởi động - Tạo tình huống";
         act2Name = "2. Khám phá và trải nghiệm";
       }
+
+      const skillsGuidancePart1 = isSkills ? `
+BẮT BUỘC ĐẶC BIỆT CHO LĨNH VỰC PHÁT TRIỂN TÌNH CẢM - KỸ NĂNG XÃ HỘI:
+- TUYỆT ĐỐI KHÔNG DÙNG CÁC ĐỀ MỤC THỂ CHẤT (BTPTC, VĐCB) HAY ÂM NHẠC.
+- Tên Hoạt động 1: "1. Khởi động – Tạo hứng thú và giao nhiệm vụ":
+  + Trò chuyện, hát nhẹ nhàng hoặc tạo tình huống gắn liền trực tiếp với đề tài "${lessonTitle}".
+  + Đàm thoại gợi mở cảm xúc, tạo tâm lý vui tươi và giao nhiệm vụ tìm hiểu/trải nghiệm cho trẻ.
+- Tên Hoạt động 2: "2. Khám phá – Trải nghiệm":
+  + Tổ chức không gian trải nghiệm sinh động (quan sát tranh ảnh, video clip, mô hình, nhập vai tình huống ứng xử).
+  + Cho trẻ quan sát trực tiếp, trao đổi, tương tác cảm xúc và chia sẻ suy nghĩ hồn nhiên của mình.
+  + Cô gợi mở các câu hỏi định hướng hành vi đúng đắn, tình yêu thương, sự tôn trọng và kỹ năng sống tích cực.
+` : '';
 
       const letterTracingGuidancePart1 = isLetterTracing ? `
 BẮT BUỘC ĐẶC BIỆT CHO HOẠT ĐỘNG TẬP TÔ CHỮ CÁI (VÀ TẬP TÔ, ĐỒ, SAO CHÉP NÉT/CHỮ):
@@ -2942,6 +3016,7 @@ YÊU CẦU SÁNG TẠO ĐỔI MỚI VÀ ĐA DẠNG HÓA PHƯƠNG PHÁP (MẦM NO
   + Tích hợp Công nghệ/AI & Phương pháp giáo dục sớm (Reggio Emilia, Montessori, STEM mầm non) một cách tự nhiên, trực quan, không gượng ép.
   + Lời dẫn của cô ngọt ngào, giàu cảm xúc, sử dụng ngôn ngữ kích thích tư duy ("Nếu là con, con sẽ...", "Chúng mình cùng thử xem điều kỳ diệu gì sẽ xảy ra nhé!"). Phản ứng của trẻ sinh động, hồn nhiên, tích cực.
 ${physicalGuidancePart1}
+${skillsGuidancePart1}
 ${letterTracingGuidancePart1}
 ${letterGameGuidancePart1}
 ${learningGameGuidancePart1}
@@ -3083,47 +3158,23 @@ Trả về JSON dạng:
     if (isPreschool) {
       const s = (subject || '').toLowerCase().trim();
       const t = (lessonTitle || '').toLowerCase().trim();
-
-      const isScience = s.includes('khoa học') || s.includes('kpk') || t.includes('khoa học') ||
-        t.includes('màu sắc') || t.includes('thí nghiệm') || t.includes('pha màu') ||
-        t.includes('vật chìm') || t.includes('không khí') || t.includes('ánh sáng') ||
-        t.includes('nam châm') || t.includes('giác quan') ||
-        ((s.includes('nhận thức') || s.includes('kntt') || !s) && (t.includes('khám phá') || t.includes('màu') || t.includes('cây xanh') || t.includes('thực vật') || t.includes('động vật') || t.includes('con vật')));
-
-      const isMath = s.includes('toán') || s.includes('lqvt') || t.includes('toán') ||
-        t.includes('đếm') || t.includes('chữ số') || t.includes('số lượng') ||
-        t.includes('hình tròn') || t.includes('hình vuông') || t.includes('hình tam giác') ||
-        t.includes('cao - thấp') || t.includes('to - nhỏ') || t.includes('dài - ngắn') ||
-        t.includes('tách gộp') || t.includes('xếp tương ứng') || t.includes('ghép đôi');
-
-      const isSocial = s.includes('khám phá xã hội') || s.includes('kpxh') ||
-        ((s.includes('nhận thức') || s.includes('xã hội')) && (t.includes('cô giáo') || t.includes('trường mầm non') || t.includes('bác cấp dưỡng') || t.includes('chú bộ đội') || t.includes('gia đình') || t.includes('trung thu') || t.includes('lễ hội') || t.includes('quy tắc')));
-
-      const isPoetry = s.includes('thơ') || t.startsWith('thơ:') || t.startsWith('thơ ') || t.includes('bài thơ') || t.includes('đồng dao');
-      const isStory = s.includes('truyện') || t.startsWith('truyện:') || t.startsWith('truyện ') || t.includes('câu chuyện') || t.includes('sự tích');
-      const isLetter = s.includes('chữ cái') || s.includes('lqcc') || t.includes('chữ cái') || t.includes('tập tô') || t.includes('chữ o') || t.includes('chữ a') || t.includes('chữ e');
-      const isArt = s.includes('tạo hình') || t.includes('xé dán') || t.includes('nặn') || t.includes('vẽ tranh') || t.includes('cắt dán') || t.includes('gấp giấy') || t.includes('làm khung tranh');
-      
-      const extra = ((config.oldPlanContent || '') + ' ' + (config.topic || '')).toLowerCase();
-      const isPhysical = s.includes('thể chất') || s.includes('vận động') || s.includes('thể dục') || s.includes('gdtc') ||
-        t.includes('vđcb') || t.includes('btptc') || t.includes('đi thăng bằng') || t.includes('bật') || t.includes('ném') ||
-        t.includes('bò chui') || t.includes('tung bóng') || t.includes('chuyền bóng') || t.includes('bắt bóng') ||
-        t.includes('trèo thang') || t.includes('rửa tay') || t.includes('chạy') || t.includes('bò') || t.includes('trườn') ||
-        t.includes('thể dục') || t.includes('thể chất') || t.includes('vận động cơ bản') || t.includes('bài tập phát triển chung') ||
-        extra.includes('thể chất') || extra.includes('btptc') || extra.includes('vđcb') || extra.includes('bài tập phát triển chung');
-
-      const isMusic = !isScience && !isMath && !isSocial && !isPoetry && !isStory && !isLetter && !isPhysical &&
-        (s.includes('âm nhạc') || s.includes('ấm nhạc') || s.includes('gdam') || s.includes('hát múa') || s.includes('dạy hát') || s.includes('nghe hát') ||
-         t.startsWith('dạy hát:') || t.startsWith('dạy hát ') || t.startsWith('dạy hát') || t.startsWith('nghe hát:') || t.includes('dạy hát') || t.includes('nghe hát') ||
-         t.includes('hát và nhún nhảy') || t.includes('vận động theo nhạc') ||
-         ((s.includes('nghệ thuật') || s.includes('thẩm mỹ') || s.includes('thẩm mĩ')) && (t.includes('hát') || t.includes('nhạc') || extra.includes('hát') || extra.includes('nhạc') || extra.includes('dạy hát'))));
-
-      const isCognitive = isScience || isMath;
+      const domainInfo = detectPreschoolDomain(subject, lessonTitle, config.oldPlanContent || '');
+      const isPhysical = domainInfo.domainType === 'PHYSICAL';
+      const isSkills = domainInfo.domainType === 'SKILLS';
+      const isScience = domainInfo.domainType === 'SCIENCE';
+      const isMath = domainInfo.domainType === 'MATH';
+      const isSocialExploration = domainInfo.domainType === 'SOCIAL';
+      const isCognitive = isScience || isMath || isSocialExploration;
+      const isSocial = isSkills || isSocialExploration;
       const isSocialSkills = isSocial;
-      const isLetterTracing = s.includes('tập tô') || s.includes('to chu cai') || t.includes('tập tô') || t.includes('tô chữ cái') || t.includes('tô nét') || t.includes('sao chép nét') || s.includes('sao chép nét') || t.includes('tô, đồ') || t.includes('tô đồ') || extra.includes('tập tô chữ cái') || extra.includes('tô, đồ, sao chép');
-      const isLetterGame = s.includes('trò chơi chữ cái') || t.includes('trò chơi chữ cái') || t.includes('chơi với chữ cái') || t.includes('tc chữ cái') || extra.includes('trò chơi chữ cái');
-      const isLearningGame = s.includes('trò chơi học tập') || t.includes('trò chơi học tập') || t.includes('tìm bạn thân') || extra.includes('trò chơi học tập');
-      const isSocialExploration = s.includes('khám phá xã hội') || s.includes('kpxh') || t.includes('khám phá xã hội') || t.includes('đồ dùng, đồ chơi') || t.includes('lớp học của bé') || (s.includes('nhận thức') && (s.includes('xã hội') || t.includes('đồ dùng')));
+      const isPoetry = domainInfo.domainType === 'POETRY';
+      const isStory = domainInfo.domainType === 'STORY';
+      const isLetter = domainInfo.domainType === 'LETTER';
+      const isArt = domainInfo.domainType === 'ART';
+      const isLetterTracing = domainInfo.domainType === 'LETTER_TRACING';
+      const isLetterGame = domainInfo.domainType === 'LETTER_GAME';
+      const isLearningGame = domainInfo.domainType === 'LEARNING_GAME';
+      const isMusic = domainInfo.domainType === 'MUSIC';
 
       let act3Name = isCognitive || isSocialSkills ? "3. Chia sẻ - Thảo luận" : "3. Chia sẻ – Thảo luận";
       let act4Name = "4. Vận dụng – Mở rộng";
@@ -3145,6 +3196,10 @@ Trả về JSON dạng:
         act3Name = "3. Chia sẻ - Thảo luận";
         act4Name = "4. Vận dụng và mở rộng";
         act5Name = "5. Đánh giá và điều chỉnh";
+      } else if (isSkills) {
+        act3Name = "3. Chia sẻ - Thảo luận";
+        act4Name = "4. Vận dụng và mở rộng";
+        act5Name = "5. Đánh giá – Điều chỉnh";
       }
 
       let domainSpecificGuidance = '';
@@ -3297,6 +3352,20 @@ Trả về JSON dạng:
 - Hoạt động 3 "3. Chia sẻ – Thảo luận": Trưng bày sản phẩm tạo hình lên kệ/bàn triển lãm; Trẻ tự tin giới thiệu sản phẩm của mình, nêu ý tưởng và kỹ năng đã vận dụng (vẽ, nặn, xé dán...); Cô kết nối, nhận xét động viên và tôn trọng cảm xúc sáng tạo riêng của trẻ.
 - Hoạt động 4 "4. Vận dụng – Mở rộng": Gợi mở ứng dụng sản phẩm vào thực tế (lồng ảnh, tặng người thân, trang trí không gian lớp học).
 - Hoạt động 5 "5. Đánh giá – Điều chỉnh": Trẻ chia sẻ niềm vui, tự giác thu dọn nguyên vật liệu gọn gàng.`;
+      } else if (isSkills) {
+        domainSpecificGuidance = `ĐẶC BIỆT LƯU Ý CHO LĨNH VỰC PHÁT TRIỂN TÌNH CẢM - KỸ NĂNG XÃ HỘI:
+- TUYỆT ĐỐI KHÔNG DÙNG CÁC ĐỀ MỤC THỂ CHẤT (BTPTC, VĐCB) HAY ÂM NHẠC.
+- Hoạt động 3 "3. Chia sẻ - Thảo luận":
+  + Cho trẻ quây quần bên cô, đại diện các nhóm chia sẻ cảm nhận, quan sát hoặc kết quả sau hoạt động khám phá "${lessonTitle}".
+  + Đàm thoại hệ thống câu hỏi khơi gợi cảm xúc tích cực, lòng biết ơn, sự quan tâm, kỹ năng chia sẻ, hợp tác với cô giáo, bạn bè, người thân.
+  + Cô chuẩn hóa kiến thức xã hội, hình thành thói quen và hành vi văn minh cho trẻ.
+- Hoạt động 4 "4. Vận dụng và mở rộng":
+  + Trò chơi củng cố rèn luyện kỹ năng xã hội (Tiếp sức yêu thương, Bé chọn hành vi đúng, Cây hoa việc tốt...).
+  + Đưa ra tình huống thực tế để trẻ thực hành cách ứng xử nhân văn (chào hỏi lễ phép, giúp đỡ bạn, chia sẻ đồ dùng, bảo vệ môi trường lớp học).
+- Hoạt động 5 "5. Đánh giá – Điều chỉnh":
+  + Trò chuyện thân mật, hỏi trẻ cảm xúc sau buổi học và điều con thích nhất.
+  + Đánh giá sự tiến bộ, thái độ tham gia và kỹ năng ứng xử của từng nhóm/cá nhân trẻ.
+  + Tuyên dương, khích lệ trẻ lan tỏa hành vi tốt trong sinh hoạt hằng ngày; hướng dẫn trẻ cùng cô thu dọn đồ dùng gọn gàng.`;
       } else {
         domainSpecificGuidance = `ĐẶC BIỆT LƯU Ý: TUYỆT ĐỐI KHÔNG CHÈN ĐỀ MỤC ÂM NHẠC (Dạy hát, Nghe hát, Trò chơi âm nhạc) VÀO CÁC BÀI HỌC KHÔNG PHẢI MÔN ÂM NHẠC.
 - Hoạt động 3 "${act3Name}": Trẻ quây quần chia sẻ, thảo luận và cô chuẩn hóa kiến thức/kỹ năng trọng tâm.
@@ -3492,13 +3561,13 @@ Trả về JSON dạng:
     return parseJSONRobust(res.text);
   };
 
-  // Execute tasks in parallel with error resilience and automatic retry
-  const wrap = async (taskFn: any, step: number, initialDelayMs = 0) => {
-    if (initialDelayMs > 0) {
-      await new Promise((r) => setTimeout(r, initialDelayMs));
+  // Execute tasks in sequence with error resilience and clear fail-fast on quota limits
+  const wrap = async (taskFn: any, step: number, delayMs = 0) => {
+    if (delayMs > 0) {
+      await new Promise((r) => setTimeout(r, delayMs));
     }
     onProgress?.(step, 'start');
-    for (let attempt = 1; attempt <= 3; attempt++) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
       try {
         const res = await taskFn();
         if (res && Object.keys(res).length > 0) {
@@ -3507,36 +3576,106 @@ Trả về JSON dạng:
         }
       } catch (err: any) {
         const msg = err?.message || String(err);
+        const isQuota = msg.toLowerCase().includes('quota') || msg.toLowerCase().includes('hạn ngạch') || msg.toLowerCase().includes('resource_exhausted');
         console.warn(`Task ${step} attempt ${attempt} warning:`, msg);
-        if (attempt < 3) {
-          const isRateLimit = msg.toLowerCase().includes('rate') || msg.toLowerCase().includes('429') || msg.toLowerCase().includes('quota');
-          const delay = isRateLimit ? 1500 * attempt + Math.random() * 800 : 800 * attempt;
-          await new Promise((r) => setTimeout(r, delay));
+        if (isQuota || attempt >= 2) {
+          throw err;
         }
+        await new Promise((r) => setTimeout(r, 2000));
       }
     }
-    // If still empty after attempts, mark done with fallback to prevent UI hanging
     onProgress?.(step, 'done');
     return {};
   };
 
-  // Execute sections with safe staggered batches to prevent burst 429 Rate Limit
+  // Execute sections smoothly to prevent 429 burst rate limits while maintaining high responsiveness
   const res1 = await wrap(taskObjectivesEquipment, 1, 0);
-  const [res2, res3, res4] = await Promise.all([
-    wrap(taskActivities1And2, 2, 200),
-    wrap(taskActivities3And4, 3, 600),
-    wrap(async () => { if (isPreschool) return {}; return taskMatrixAndAppendix(); }, 4, 1000),
-  ]);
+  const res2 = await wrap(taskActivities1And2, 2, 300);
+  const res3 = await wrap(taskActivities3And4, 3, 300);
+  const res4 = isPreschool ? {} : await wrap(taskMatrixAndAppendix, 4, 300);
 
+  const extractActivitiesList = (res: any): any[] => {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res.activities)) return res.activities;
+    if (Array.isArray(res.data?.activities)) return res.data.activities;
+    if (Array.isArray(res.data)) return res.data;
+    if (Array.isArray(res.items)) return res.items;
+    if (Array.isArray(res.steps)) return res.steps;
+    if (Array.isArray(res.result)) return res.result;
+    if (Array.isArray(res.hoatdong)) return res.hoatdong;
+    if (res && typeof res === 'object') {
+      const values = Object.values(res).filter((v: any) => v && typeof v === 'object' && (v.name || v.step1 || v.teacherAction || v.content));
+      if (values.length > 0) return values;
+    }
+    return [];
+  };
 
-  const rawActivities = [
-    ...(res2.activities || []),
-    ...(res3.activities || []),
+  const actsPart1 = extractActivitiesList(res2);
+  const actsPart2 = extractActivitiesList(res3);
+
+  let rawActivities = [
+    ...actsPart1,
+    ...actsPart2,
   ].map((act, idx) => ({
     ...act,
     id: `act-${idx + 1}`,
     index: idx + 1
   }));
+
+  if (rawActivities.length === 0) {
+    if (isPreschool) {
+      const domain = detectPreschoolDomain(subject, lessonTitle, config.oldPlanContent || '');
+      rawActivities = generateDefaultPreschoolActivities(lessonTitle, subject, domain);
+    } else {
+      rawActivities = [
+        {
+          id: 'act-1',
+          index: 1,
+          name: 'Hoạt động 1: Mở đầu / Khởi động',
+          objective: 'Tạo hứng thú, kết nối kiến thức cũ với bài học mới',
+          step1: {
+            title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+            teacherAction: `- Giáo viên đặt câu hỏi gợi mở hoặc tổ chức trò chơi tình huống gắn liền với bài học "${lessonTitle}".`,
+            studentAction: `- Học sinh hào hứng lắng nghe, suy nghĩ và đưa ra câu trả lời.`
+          }
+        },
+        {
+          id: 'act-2',
+          index: 2,
+          name: 'Hoạt động 2: Hình thành kiến thức mới',
+          objective: 'Học sinh nắm vững các khái niệm, kiến thức trọng tâm của bài',
+          step1: {
+            title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+            teacherAction: `- Giáo viên hướng dẫn học sinh đọc tài liệu/sách giáo khoa, thảo luận nhóm để giải quyết nhiệm vụ cốt lõi.`,
+            studentAction: `- Học sinh chủ động làm việc cá nhân và thảo luận nhóm, ghi chép kết quả.`
+          }
+        },
+        {
+          id: 'act-3',
+          index: 3,
+          name: 'Hoạt động 3: Luyện tập',
+          objective: 'Học sinh củng cố và thực hành các kỹ năng đã học',
+          step1: {
+            title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+            teacherAction: `- Giáo viên giao phiếu bài tập hoặc câu hỏi thực hành củng cố kiến thức.`,
+            studentAction: `- Học sinh thực hiện bài tập theo hướng dẫn và so sánh kết quả.`
+          }
+        },
+        {
+          id: 'act-4',
+          index: 4,
+          name: 'Hoạt động 4: Vận dụng',
+          objective: 'Học sinh vận dụng kiến thức bài học vào thực tế đời sống',
+          step1: {
+            title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+            teacherAction: `- Giáo viên giao bài tập liên hệ thực tiễn mở rộng về nhà.`,
+            studentAction: `- Học sinh tiếp nhận nhiệm vụ và lập kế hoạch thực hiện.`
+          }
+        }
+      ];
+    }
+  }
 
   const allActivities = isPreschool
     ? (isPreschoolMusicPlan({ schoolLevel: config.schoolLevel, grade, subject, lessonTitle, oldPlanContent: config.oldPlanContent })
@@ -3560,22 +3699,82 @@ Trả về JSON dạng:
     periods: periods,
     lessonTotalPeriods: totalPeriods,
     targetPeriodDetail: targetPeriodDetail,
-    objectives: {
-      knowledge: res1.objectives?.knowledge || [`Nắm vững kiến thức trọng tâm bài ${lessonTitle}`],
-      generalCompetencies: res1.objectives?.generalCompetencies || [
-        'Năng lực tự chủ và tự học: Tự giác tìm tòi, nghiên cứu nội dung bài học trong SGK và tài liệu học tập.',
-        'Năng lực giao tiếp và hợp tác: Chủ động trao đổi, thảo luận nhóm để hoàn thành nhiệm vụ học tập.',
-        'Năng lực giải quyết vấn đề và sáng tạo: Vận dụng linh hoạt kiến thức đã học vào thực tiễn giải quyết bài toán.'
-      ],
-      subjectCompetencies: res1.objectives?.subjectCompetencies || [`Phát triển năng lực đặc thù môn ${subject}`],
+    objectives: isPreschool ? {
+      knowledge: (Array.isArray(res1.objectives?.knowledge) && res1.objectives.knowledge.length > 0)
+        ? res1.objectives.knowledge
+        : [
+            `- Trẻ nhận biết, ghi nhớ và hiểu được nội dung bài học "${lessonTitle}".`,
+            `- Trẻ tích cực tham gia trải nghiệm và khắc sâu kiến thức trọng tâm của bài.`
+          ],
+      subjectCompetencies: (Array.isArray(res1.objectives?.subjectCompetencies) && res1.objectives.subjectCompetencies.length > 0)
+        ? res1.objectives.subjectCompetencies
+        : [
+            `- Rèn luyện và phát triển kỹ năng quan sát, lắng nghe, ghi nhớ có chủ đích.`,
+            `- Trẻ có kỹ năng thực hiện thành thạo các thao tác phù hợp với bài học "${lessonTitle}".`
+          ],
+      generalCompetencies: (Array.isArray(res1.objectives?.generalCompetencies) && res1.objectives.generalCompetencies.length > 0)
+        ? res1.objectives.generalCompetencies
+        : [
+            'Giao tiếp: Trẻ tự tin trả lời câu hỏi, diễn đạt suy nghĩ rõ ràng, mạch lạc.',
+            'Hợp tác: Biết phối hợp cùng bạn trong nhóm, chia sẻ đồ dùng học tập.',
+            'Tự lực: Tự giác tham gia các hoạt động và tự thu dọn đồ dùng sau khi học.'
+          ],
+      qualities: (Array.isArray(res1.objectives?.qualities) && res1.objectives.qualities.length > 0)
+        ? res1.objectives.qualities
+        : [
+            'Yêu thương: Trẻ yêu quý trường lớp, cô giáo, bạn bè và mọi người xung quanh.',
+            'Tôn trọng: Biết lắng nghe cô và bạn, tôn trọng sự khác biệt và tuân thủ quy tắc chung.',
+            'Trách nhiệm: Có ý thức giữ gìn đồ dùng, bảo vệ cảnh quan môi trường lớp học.'
+          ],
+      digitalCompetencies: config.enableNLS ? (res1.objectives?.digitalCompetencies || []) : [],
+      aiCompetencies: config.enableAI ? (res1.objectives?.aiCompetencies || []) : [],
+      stemCompetencies: hasStem ? (res1.objectives?.stemCompetencies || []) : [],
+    } : {
+      knowledge: (Array.isArray(res1.objectives?.knowledge) && res1.objectives.knowledge.length > 0)
+        ? res1.objectives.knowledge
+        : [`Nắm vững các kiến thức trọng tâm và cốt lõi của bài học "${lessonTitle}".`],
+      generalCompetencies: (Array.isArray(res1.objectives?.generalCompetencies) && res1.objectives.generalCompetencies.length > 0)
+        ? res1.objectives.generalCompetencies
+        : [
+            'Năng lực tự chủ và tự học: Tự giác tìm tòi, nghiên cứu nội dung bài học trong SGK và tài liệu học tập.',
+            'Năng lực giao tiếp và hợp tác: Chủ động trao đổi, thảo luận nhóm để hoàn thành nhiệm vụ học tập.',
+            'Năng lực giải quyết vấn đề và sáng tạo: Vận dụng linh hoạt kiến thức đã học vào thực tiễn giải quyết vấn đề.'
+          ],
+      subjectCompetencies: (Array.isArray(res1.objectives?.subjectCompetencies) && res1.objectives.subjectCompetencies.length > 0)
+        ? res1.objectives.subjectCompetencies
+        : [`Phát triển các năng lực đặc thù của môn ${subject} gắn với bài học "${lessonTitle}".`],
       digitalCompetencies: config.enableNLS ? (res1.objectives?.digitalCompetencies || []) : [],
       aiCompetencies: config.enableAI ? (res1.objectives?.aiCompetencies || []) : [],
       stemCompetencies: hasStem ? (res1.objectives?.stemCompetencies || [`Vận dụng liên môn STEM giải quyết vấn đề thực tiễn gắn với chủ đề ${stemTopic}`]) : [],
-      qualities: res1.objectives?.qualities || ['Chăm chỉ, trung thực, trách nhiệm'],
+      qualities: (Array.isArray(res1.objectives?.qualities) && res1.objectives.qualities.length > 0)
+        ? res1.objectives.qualities
+        : ['Chăm chỉ, trung thực, trách nhiệm'],
     },
-    equipment: {
-      teacher: res1.equipment?.teacher || ['Máy tính, máy chiếu, bài giảng điện tử, SGK Kết nối tri thức'],
-      student: res1.equipment?.student || ['SGK, vở ghi, thiết bị học tập'],
+    equipment: isPreschool ? {
+      teacher: (Array.isArray(res1.equipment?.teacher) && res1.equipment.teacher.length > 0)
+        ? res1.equipment.teacher
+        : [
+            `- Môi trường và không gian: Lớp học sạch sẽ, an toàn, thoáng mát, bố trí góc trải nghiệm phù hợp với bài học "${lessonTitle}".`,
+            `- Đồ dùng, học liệu của giáo viên: Giáo án, bài giảng điện tử/video clip sinh động, học liệu trực quan, tranh ảnh hoặc mô hình liên quan.`
+          ],
+      student: (Array.isArray(res1.equipment?.student) && res1.equipment.student.length > 0)
+        ? res1.equipment.student
+        : [
+            `- Trang phục gọn gàng, thuận tiện khi vận động và tham gia hoạt động.`,
+            `- Tâm thế vui tươi, sẵn sàng học tập.`,
+            `- Đồ dùng cá nhân hoặc học liệu theo nhóm phù hợp với bài học.`
+          ],
+      digitalAssets: res1.equipment?.digitalAssets || [],
+      stemMaterials: hasStem ? (res1.equipment?.stemMaterials || []) : [],
+      parentCollaboration: res1.equipment?.parentCollaboration || [],
+      preschoolPreparation: res1.equipment?.preschoolPreparation,
+    } : {
+      teacher: (Array.isArray(res1.equipment?.teacher) && res1.equipment.teacher.length > 0)
+        ? res1.equipment.teacher
+        : ['Máy tính, máy chiếu, bài giảng điện tử, SGK Kết nối tri thức'],
+      student: (Array.isArray(res1.equipment?.student) && res1.equipment.student.length > 0)
+        ? res1.equipment.student
+        : ['SGK, vở ghi, thiết bị học tập'],
       digitalAssets: res1.equipment?.digitalAssets || ['Học liệu số tương tác'],
       stemMaterials: hasStem ? (res1.equipment?.stemMaterials || ['Vật liệu chế tạo và thực hành mô hình STEM']) : [],
       parentCollaboration: res1.equipment?.parentCollaboration || [],
@@ -4153,12 +4352,12 @@ app.post('/api/gemini/generate-lesson-plan-sectional', async (req, res) => {
       config,
       undefined,
       auth.keys,
-      (config.aiModel && config.aiModel !== 'gemini-flash-latest' && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.1-flash-lite'
+      (config.aiModel && config.aiModel !== 'gemini-flash-latest' && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.8-flash'
     );
     res.json({ success: true, data: sectionalResult, lessonPlan: sectionalResult });
   } catch (error: any) {
     console.error('Error in sectional generation:', error);
-    res.status(500).json({ success: false, error: 'Hệ thống đang quá tải, vui lòng thử lại sau.' });
+    res.status(500).json({ success: false, error: error?.message || 'Hệ thống AI đang quá tải, vui lòng thử lại sau.' });
   }
 });
 
@@ -4196,12 +4395,12 @@ app.post('/api/gemini/generate-lesson-plan-stream', async (req, res) => {
       config,
       onProgress,
       auth.keys,
-      (config.aiModel && config.aiModel !== 'gemini-flash-latest' && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.1-flash-lite'
+      (config.aiModel && config.aiModel !== 'gemini-flash-latest' && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.8-flash'
     );
     sendEvent('complete', { success: true, lessonPlan: result });
   } catch (error: any) {
     console.error('Error in streaming sectional generation:', error);
-    sendEvent('error', { success: false, error: 'Hệ thống đang quá tải, vui lòng thử lại sau.' });
+    sendEvent('error', { success: false, error: error?.message || 'Hệ thống AI đang quá tải, vui lòng thử lại sau.' });
   } finally {
     res.end();
   }
@@ -4338,7 +4537,7 @@ Trả lời lịch thiệp, sư phạm, chuyên nghiệp, cấu trúc rõ ràng 
     const response = await generateContentWithRetryAndFallback({
       systemInstruction,
       candidateKeys: auth.keys,
-      primaryModel: aiModel && aiModel !== 'auto' && aiModel !== 'gemini-flash-latest' ? aiModel : 'gemini-3.7-flash',
+      primaryModel: aiModel && aiModel !== 'auto' && aiModel !== 'gemini-flash-latest' ? aiModel : 'gemini-3.8-flash',
       taskType: 'chat',
       contents,
     });
@@ -4346,7 +4545,7 @@ Trả lời lịch thiệp, sư phạm, chuyên nghiệp, cấu trúc rõ ràng 
     res.json({ success: true, reply: response.text });
   } catch (error: any) {
     console.error('Error in AI Assistant chat:', error);
-    res.status(500).json({ success: false, error: 'Hệ thống đang quá tải, vui lòng thử lại sau.' });
+    res.status(500).json({ success: false, error: error?.message || 'Hệ thống AI đang quá tải, vui lòng thử lại sau.' });
   }
 });
 
