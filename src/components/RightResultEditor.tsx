@@ -20,14 +20,13 @@ import {
   Sparkles,
   Layers,
   XCircle,
-  Presentation,
+  Zap,
   Sliders,
 } from 'lucide-react';
 import { PedagogicalTable } from './PedagogicalTable';
 import { PreschoolSingleTable } from './PreschoolSingleTable';
 import { CompetencyMatrixView } from './CompetencyMatrixView';
 import { exportLessonPlanToDocx, getPreschoolHeaderInfo, formatHomeworkText, formatMathPeriodHeader, parseMathLessonHeader } from '../utils/docxExporter';
-import { exportLessonPlanToPptx } from '../utils/pptxExporter';
 import { formatPreschoolActivities, formatPreschoolMusicActivities, isPreschoolPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, getPreschoolPreparation } from '../utils/preschoolUtils';
 import { MAM_NON_NEW_ACTIVITIES } from '../data/curriculumData';
 import { MathRenderer } from './MathRenderer';
@@ -171,7 +170,6 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
   onBackToConfig,
 }) => {
   const [isExportingDocx, setIsExportingDocx] = useState(false);
-  const [isExportingPptx, setIsExportingPptx] = useState(false);
 
   const currentSubject = config?.subject || plan?.subject || '';
   const currentTitle = config?.lessonTitle || plan?.lessonTitle || '';
@@ -183,70 +181,11 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
   // Calculate dynamic progress
   const completedStepsCount = Object.values(progress || {}).filter((s) => s === 'done').length;
   
-  // Progress percentage calculation based on actual completed parts and elapsed time
+  // Progress percentage calculation based on elapsed time for smooth animation
   const progressPercent = Math.min(
     99,
-    Math.max(
-      completedStepsCount * 24 + 5,
-      Math.min(95, Math.floor((elapsedSeconds / 30) * 90) + 10)
-    )
+    Math.max(15, Math.min(95, Math.floor((elapsedSeconds / 6) * 90) + 15))
   );
-
-  const getDynamicStatusText = () => {
-    if (completedStepsCount === 4) return 'Đang hoàn tất và đồng bộ Kế hoạch bài dạy...';
-    if (elapsedSeconds < 5) return 'Đang phân tích nội dung bài học và trích xuất chuẩn kiến thức...';
-    if (elapsedSeconds < 12) return 'Đang xây dựng chuỗi hoạt động sư phạm chuẩn 4 bước...';
-    if (elapsedSeconds < 20) return 'Đang thiết kế Phiếu học tập kẻ bảng, Ma trận NLS/AI...';
-    return 'Đang tối ưu hóa định dạng và chuẩn bị hiển thị giáo án hoàn chỉnh...';
-  };
-
-  const renderStep = (
-    stepNumber: number,
-    title: string,
-    subtitle: string,
-    pingColorClass: string
-  ) => {
-    const status = progress?.[stepNumber] || 'pending';
-    
-    let icon;
-    let badge;
-    if (status === 'done') {
-      icon = <CheckCircle2 className="w-5 h-5 text-emerald-500 animate-in zoom-in duration-300" />;
-      badge = <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Hoàn thành</span>;
-    } else if (status === 'start') {
-      icon = <Loader2 className={`w-5 h-5 animate-spin ${pingColorClass}`} />;
-      badge = <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 animate-pulse">Đang xử lý...</span>;
-    } else {
-      icon = <div className="w-4 h-4 rounded-full border-2 border-slate-300 bg-white" />;
-      badge = <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">Đang chờ</span>;
-    }
-
-    return (
-      <div className={`flex items-start justify-between gap-3 p-3.5 rounded-xl border transition-all ${
-        status === 'start'
-          ? 'bg-white shadow-md border-amber-300 scale-[1.01]'
-          : status === 'done'
-          ? 'bg-emerald-50/50 border-emerald-200'
-          : 'bg-slate-50/60 border-slate-200 opacity-80'
-      }`}>
-        <div className="flex items-start gap-3">
-          <div className="w-6 flex items-center justify-center flex-shrink-0 mt-0.5">
-            {icon}
-          </div>
-          <div>
-            <div className={`text-sm ${status === 'done' ? 'text-slate-900 font-bold' : status === 'start' ? 'text-amber-900 font-bold' : 'text-slate-700 font-medium'}`}>
-              <span className="text-xs opacity-75 mr-1 font-semibold uppercase">Phần {stepNumber}:</span>
-              {title}
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{subtitle}</p>
-          </div>
-        </div>
-        <div className="flex-shrink-0">{badge}</div>
-      </div>
-    );
-  };
-
-    
 
   if (isGenerating) {
     const formatMinSec = (sec: number) => {
@@ -258,7 +197,7 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
     return (
       <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-10 text-center text-slate-700 flex flex-col items-center justify-center min-h-[calc(100vh-180px)] w-full shadow-xs">
         {/* Animated Icon & Badge */}
-        <div className="relative mb-4">
+        <div className="relative mb-6">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
             <BookOpen className="w-8 h-8 animate-pulse" />
           </div>
@@ -267,14 +206,7 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
           </div>
         </div>
 
-        <h3 className="text-xl sm:text-2xl font-black text-slate-900 mb-1 tracking-tight">
-          Đang biên soạn Kế hoạch bài dạy
-        </h3>
-        <p className="text-xs sm:text-sm text-slate-600 max-w-xl mb-6 leading-relaxed">
-          Hệ thống đang tự động trích xuất nội dung bài học, thiết kế chuỗi hoạt động sư phạm chuẩn 4 bước và tích hợp Năng lực số / AI.
-        </p>
-
-        {/* Live Timer & Progress Cards (No remaining time estimation) */}
+        {/* Live Timer & Progress Percentage */}
         <div className="w-full max-w-xl grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
           <div className="bg-amber-50/80 border border-amber-200/80 rounded-xl p-3 text-center shadow-2xs">
             <span className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider block mb-0.5">
@@ -295,49 +227,140 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
           </div>
         </div>
 
-        {/* Dynamic Progress Bar */}
+        {/* Dynamic Progress Indicator */}
         <div className="w-full max-w-xl mb-6">
           <div className="flex items-center justify-between text-xs text-slate-500 mb-1.5 font-medium">
             <span className="flex items-center gap-1.5 text-amber-800 font-semibold">
               <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" />
-              {getDynamicStatusText()}
+              <span>Đang kết nối Gemini API & hoàn thiện toàn bộ bài dạy...</span>
             </span>
-            <span className="font-mono text-slate-700 font-bold">{completedStepsCount}/4 phần</span>
+            <span className="font-mono text-emerald-700 font-bold">{progressPercent}%</span>
           </div>
-          <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200">
+          <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200">
             <div
-              className="h-full bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-500 rounded-full transition-all duration-500 shadow-inner"
+              className="h-full bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-500 rounded-full transition-all duration-300 shadow-inner"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
         </div>
 
-        {/* 4 Multi-Threaded Step Cards */}
-        <div className="w-full max-w-xl text-left flex flex-col gap-2.5 mb-6">
-          {renderStep(
-            1,
-            'Mục tiêu bài dạy & Thiết bị dạy học',
-            'Chuẩn phẩm chất, năng lực, chỉ báo NLS/AI và học liệu',
-            'text-amber-500'
-          )}
-          {renderStep(
-            2,
-            'Hoạt động 1 (Khởi động) & Hoạt động 2 (Hình thành kiến thức)',
-            'Quy chuẩn 4 bước sư phạm (Chuyển giao, Thực hiện, Báo cáo, Kết luận) & nội dung ghi bảng',
-            'text-indigo-500'
-          )}
-          {renderStep(
-            3,
-            'Hoạt động 3 (Luyện tập) & Hoạt động 4 (Vận dụng & Dặn dò)',
-            'Hệ thống bài tập củng cố, tình huống thực tế và hướng dẫn chuẩn bị bài tiếp theo',
-            'text-blue-500'
-          )}
-          {renderStep(
-            4,
-            'Hồ sơ dạy học & Ma trận Năng lực số / AI',
-            'Phiếu học tập kẻ bảng chi tiết và bảng ma trận 4 cột',
-            'text-rose-500'
-          )}
+        {/* Dynamic Generation Progress Steps */}
+        <div className="w-full max-w-xl text-left flex flex-col gap-2 mb-6">
+          {/* Bước 1 */}
+          <div className={`p-2.5 rounded-xl border flex items-center justify-between text-xs transition-all duration-300 ${
+            progressPercent >= 30
+              ? 'bg-emerald-50/70 border-emerald-200 text-slate-800'
+              : progressPercent >= 10
+              ? 'bg-amber-50/70 border-amber-200 text-amber-900 font-medium animate-pulse'
+              : 'bg-slate-50 border-slate-200 text-slate-400'
+          }`}>
+            <div className="flex items-center gap-2.5">
+              {progressPercent >= 30 ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              ) : progressPercent >= 10 ? (
+                <Loader2 className="w-4 h-4 text-amber-600 animate-spin shrink-0" />
+              ) : (
+                <div className="w-4 h-4 rounded-full border border-slate-300 shrink-0" />
+              )}
+              <span>Mục tiêu bài dạy (phẩm chất, năng lực chung, đặc thù) & Thiết bị dạy học</span>
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider shrink-0 ml-2">
+              {progressPercent >= 30 ? (
+                <span className="text-emerald-700">Đã xong</span>
+              ) : progressPercent >= 10 ? (
+                <span className="text-amber-700">Đang soạn...</span>
+              ) : (
+                <span className="text-slate-400">Chờ</span>
+              )}
+            </span>
+          </div>
+
+          {/* Bước 2 */}
+          <div className={`p-2.5 rounded-xl border flex items-center justify-between text-xs transition-all duration-300 ${
+            progressPercent >= 65
+              ? 'bg-emerald-50/70 border-emerald-200 text-slate-800'
+              : progressPercent >= 30
+              ? 'bg-amber-50/70 border-amber-200 text-amber-900 font-medium animate-pulse'
+              : 'bg-slate-50 border-slate-200 text-slate-400'
+          }`}>
+            <div className="flex items-center gap-2.5">
+              {progressPercent >= 65 ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              ) : progressPercent >= 30 ? (
+                <Loader2 className="w-4 h-4 text-amber-600 animate-spin shrink-0" />
+              ) : (
+                <div className="w-4 h-4 rounded-full border border-slate-300 shrink-0" />
+              )}
+              <span>Tiến trình 4 hoạt động sư phạm chuẩn 4 bước (Chuyển giao, Thực hiện, Báo cáo, Kết luận)</span>
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider shrink-0 ml-2">
+              {progressPercent >= 65 ? (
+                <span className="text-emerald-700">Đã xong</span>
+              ) : progressPercent >= 30 ? (
+                <span className="text-amber-700">Đang soạn...</span>
+              ) : (
+                <span className="text-slate-400">Chờ</span>
+              )}
+            </span>
+          </div>
+
+          {/* Bước 3 */}
+          <div className={`p-2.5 rounded-xl border flex items-center justify-between text-xs transition-all duration-300 ${
+            progressPercent >= 85
+              ? 'bg-emerald-50/70 border-emerald-200 text-slate-800'
+              : progressPercent >= 65
+              ? 'bg-amber-50/70 border-amber-200 text-amber-900 font-medium animate-pulse'
+              : 'bg-slate-50 border-slate-200 text-slate-400'
+          }`}>
+            <div className="flex items-center gap-2.5">
+              {progressPercent >= 85 ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              ) : progressPercent >= 65 ? (
+                <Loader2 className="w-4 h-4 text-amber-600 animate-spin shrink-0" />
+              ) : (
+                <div className="w-4 h-4 rounded-full border border-slate-300 shrink-0" />
+              )}
+              <span>Tích hợp Năng lực số (NLS), Trí tuệ nhân tạo (AI), STEM & Bảng ma trận</span>
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider shrink-0 ml-2">
+              {progressPercent >= 85 ? (
+                <span className="text-emerald-700">Đã xong</span>
+              ) : progressPercent >= 65 ? (
+                <span className="text-amber-700">Đang soạn...</span>
+              ) : (
+                <span className="text-slate-400">Chờ</span>
+              )}
+            </span>
+          </div>
+
+          {/* Bước 4 */}
+          <div className={`p-2.5 rounded-xl border flex items-center justify-between text-xs transition-all duration-300 ${
+            progressPercent >= 98
+              ? 'bg-emerald-50/70 border-emerald-200 text-slate-800'
+              : progressPercent >= 85
+              ? 'bg-amber-50/70 border-amber-200 text-amber-900 font-medium animate-pulse'
+              : 'bg-slate-50 border-slate-200 text-slate-400'
+          }`}>
+            <div className="flex items-center gap-2.5">
+              {progressPercent >= 98 ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              ) : progressPercent >= 85 ? (
+                <Loader2 className="w-4 h-4 text-amber-600 animate-spin shrink-0" />
+              ) : (
+                <div className="w-4 h-4 rounded-full border border-slate-300 shrink-0" />
+              )}
+              <span>Kiểm tra tính toàn vẹn cấu trúc bảng, công thức toán và phụ lục</span>
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider shrink-0 ml-2">
+              {progressPercent >= 98 ? (
+                <span className="text-emerald-700">Đã xong</span>
+              ) : progressPercent >= 85 ? (
+                <span className="text-amber-700">Đang xử lý...</span>
+              ) : (
+                <span className="text-slate-400">Chờ</span>
+              )}
+            </span>
+          </div>
         </div>
 
         {/* Quick Cancel Button */}
@@ -396,19 +419,6 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
     }
   };
 
-  // Export to PowerPoint (PPTX)
-  const handleExportPptx = async () => {
-    setIsExportingPptx(true);
-    try {
-      await exportLessonPlanToPptx(plan, imageSlots);
-    } catch (err) {
-      console.error('Error exporting PPTX:', err);
-      alert('Không thể xuất bài giảng PowerPoint: ' + (err instanceof Error ? err.message : String(err)));
-    } finally {
-      setIsExportingPptx(false);
-    }
-  };
-
   const isPreschool = (plan as any)?.schoolLevel === 'Mầm non';
   const isNew8 = isPreschoolNew8Activity(plan.subject, plan.lessonTitle);
   const cleanItem = (text: string) => {
@@ -438,69 +448,45 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
           {/* Document Standard Header */}
           {(plan as any)?.schoolLevel === 'Mầm non' ? (() => {
             const preschoolInfo = getPreschoolHeaderInfo(plan);
-            return preschoolInfo.isMusic ? (
-              <div className="bg-white border border-slate-300 rounded-xl p-6 shadow-xs text-left space-y-4">
-                <div>
-                  <span className="bg-[#00FF00] text-black font-bold text-base sm:text-lg px-3.5 py-1 rounded inline-block tracking-wide">
+            const subLines = [
+              preschoolInfo.lessonTitle,
+              preschoolInfo.domainLine,
+              preschoolInfo.themeLine,
+              preschoolInfo.gradeLine,
+              preschoolInfo.classSizeLine,
+              preschoolInfo.timeLine,
+              ...preschoolInfo.contentLines,
+            ].filter(Boolean);
+
+            const renderSubLine = (line: string, idx: number) => {
+              const colonIdx = line.indexOf(':');
+              if (colonIdx > 0 && colonIdx < 35) {
+                const label = line.substring(0, colonIdx + 1);
+                const val = line.substring(colonIdx + 1);
+                return (
+                  <div key={idx} className="text-justify leading-relaxed font-bold text-slate-900" style={{ textIndent: '2em' }}>
+                    <span>{label}</span>
+                    <span>{val}</span>
+                  </div>
+                );
+              }
+              return (
+                <div key={idx} className="text-justify leading-relaxed font-bold text-slate-900" style={{ textIndent: '2em' }}>
+                  {line}
+                </div>
+              );
+            };
+
+            return (
+              <div className="bg-white border border-slate-300 rounded-xl p-6 shadow-xs space-y-4">
+                <div className="text-center">
+                  <span className="bg-[#00FF00] text-black font-bold text-base sm:text-lg px-4 py-1.5 rounded inline-block tracking-wide uppercase">
                     {preschoolInfo.mainHeader}
                   </span>
                 </div>
-                {preschoolInfo.lessonTitle && (
-                  <div className="text-center font-bold text-[15pt] sm:text-[16pt] text-slate-900 uppercase pt-1 pb-1 tracking-wide">
-                    {preschoolInfo.lessonTitle}
-                  </div>
-                )}
-                <div className="pl-4 sm:pl-8 space-y-1.5 text-[13.5pt] font-normal text-slate-900 leading-relaxed">
-                  {preschoolInfo.contentLines.map((line, idx) => (
-                    <div key={idx}>{line}</div>
-                  ))}
-                  <div>{preschoolInfo.domainLine}</div>
-                  {preschoolInfo.themeLine && <div>{preschoolInfo.themeLine}</div>}
-                  <div>{preschoolInfo.gradeLine}</div>
-                  {preschoolInfo.classSizeLine && <div>{preschoolInfo.classSizeLine}</div>}
-                  {preschoolInfo.timeLine && <div>{preschoolInfo.timeLine}</div>}
+                <div className="space-y-1.5 text-[13.5pt] text-slate-900 leading-relaxed font-normal">
+                  {subLines.map((line, idx) => renderSubLine(line, idx))}
                 </div>
-              </div>
-            ) : (
-              <div className="bg-white border border-slate-300 rounded-xl p-6 shadow-xs text-center space-y-3">
-                <div>
-                  <span className="bg-[#00FF00] text-black font-bold text-base sm:text-lg px-3.5 py-1 rounded inline-block tracking-wide">
-                    {preschoolInfo.mainHeader}
-                  </span>
-                </div>
-                {preschoolInfo.lessonTitle && (
-                  <div className="font-bold text-[14.5pt] sm:text-[15.5pt] text-slate-900 pt-1">
-                    {preschoolInfo.lessonTitle}
-                  </div>
-                )}
-                {preschoolInfo.domainLine && (
-                  <div className="font-bold text-[13.5pt] text-slate-900">
-                    {preschoolInfo.domainLine}
-                  </div>
-                )}
-                {preschoolInfo.themeLine && (
-                  <div className="font-bold text-[13.5pt] text-slate-900">
-                    {preschoolInfo.themeLine}
-                  </div>
-                )}
-                {preschoolInfo.gradeLine && (
-                  <div className="font-bold text-[13.5pt] text-slate-900">
-                    {preschoolInfo.gradeLine}
-                  </div>
-                )}
-                {preschoolInfo.classSizeLine && (
-                  <div className="font-bold text-[13.5pt] text-slate-900">
-                    {preschoolInfo.classSizeLine}
-                  </div>
-                )}
-                {preschoolInfo.timeLine && (
-                  <div className="font-bold text-[13.5pt] text-slate-900">
-                    {preschoolInfo.timeLine}
-                  </div>
-                )}
-                {preschoolInfo.contentLines.map((line, idx) => (
-                  <div key={idx} className="text-[13pt] text-slate-800">{line}</div>
-                ))}
               </div>
             );
           })() : isMath ? (
@@ -550,60 +536,60 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                 {/* 1. Kiến thức */}
                 <div className="space-y-1.5 text-[13pt]">
                   <h4 className="font-bold text-slate-900">1. Kiến thức:</h4>
-                  <ul className="space-y-1.5 pl-3 leading-relaxed">
-                    {plan.objectives.knowledge.map((k, i) => (
-                      <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                        <span className="font-bold text-slate-900 shrink-0">-</span>
-                        <span className="flex-1"><MathRenderer text={cleanItem(k)} /></span>
-                      </li>
+                  <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
+                    {(plan.objectives?.knowledge || []).map((k, i) => (
+                      <div key={i} className="text-justify leading-relaxed">
+                        <span className="font-bold text-slate-900">- </span>
+                        <MathRenderer text={cleanItem(k)} />
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
                 
                 {/* 2. Kỹ năng */}
                 <div className="space-y-1.5 text-[13pt] pt-2">
                   <h4 className="font-bold text-slate-900">2. Kỹ năng:</h4>
-                  <ul className="space-y-1.5 pl-3 leading-relaxed">
-                    {plan.objectives.subjectCompetencies.map((c, i) => (
-                      <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                        <span className="font-bold text-slate-900 shrink-0">-</span>
-                        <span className="flex-1"><MathRenderer text={cleanItem(c)} /></span>
-                      </li>
+                  <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
+                    {(plan.objectives?.subjectCompetencies || []).map((c, i) => (
+                      <div key={i} className="text-justify leading-relaxed">
+                        <span className="font-bold text-slate-900">- </span>
+                        <MathRenderer text={cleanItem(c)} />
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
 
                 {/* 3. Phẩm chất */}
                 <div className="space-y-1.5 text-[13pt] pt-2">
                   <h4 className="font-bold text-slate-900">3. Phẩm chất:</h4>
-                  <ul className="space-y-1.5 pl-3 leading-relaxed">
-                    {plan.objectives.qualities.map((q, i) => (
-                      <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                        <span className="font-bold text-slate-900 shrink-0">-</span>
-                        <span className="flex-1"><MathRenderer text={cleanItem(q)} /></span>
-                      </li>
+                  <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
+                    {(plan.objectives?.qualities || []).map((q, i) => (
+                      <div key={i} className="text-justify leading-relaxed">
+                        <span className="font-bold text-slate-900">- </span>
+                        <MathRenderer text={cleanItem(q)} />
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
 
                 {/* 4. Năng lực */}
                 <div className="space-y-1.5 text-[13pt] pt-2">
                   <h4 className="font-bold text-slate-900">4. Năng lực:</h4>
-                  <ul className="space-y-1.5 pl-3 leading-relaxed">
-                    {plan.objectives.generalCompetencies.map((c, i) => (
-                      <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                        <span className="font-bold text-slate-900 shrink-0">-</span>
-                        <span className="flex-1"><MathRenderer text={cleanItem(c)} /></span>
-                      </li>
+                  <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
+                    {(plan.objectives?.generalCompetencies || []).map((c, i) => (
+                      <div key={i} className="text-justify leading-relaxed">
+                        <span className="font-bold text-slate-900">- </span>
+                        <MathRenderer text={cleanItem(c)} />
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
 
                 {/* 5. Tích hợp Năng lực số (NLS) và 6. Tích hợp Trí tuệ nhân tạo (AI) nếu người dùng chọn tích hợp */}
                 {(() => {
-                  const hasNLS = (plan.objectives.digitalCompetencies || []).length > 0;
-                  const hasAI = (plan.objectives.aiCompetencies || []).length > 0;
-                  const hasSTEM = (plan.objectives.stemCompetencies || []).length > 0;
+                  const hasNLS = (plan.objectives?.digitalCompetencies || []).length > 0;
+                  const hasAI = (plan.objectives?.aiCompetencies || []).length > 0;
+                  const hasSTEM = (plan.objectives?.stemCompetencies || []).length > 0;
 
                   if (hasNLS || hasAI) {
                     const nlsNumber = 5;
@@ -613,40 +599,40 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                         {hasNLS && (
                           <div className="space-y-1.5 text-[13pt] pt-2">
                             <h4 className="font-bold text-slate-900">{nlsNumber}. Tích hợp Năng lực số (NLS):</h4>
-                            <ul className="space-y-1.5 pl-3 leading-relaxed">
-                              {plan.objectives.digitalCompetencies.map((c, i) => (
-                                <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                                  <span className="font-bold text-slate-900 shrink-0">-</span>
-                                  <span className="flex-1"><MathRenderer text={cleanItem(c)} /></span>
-                                </li>
+                            <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
+                              {(plan.objectives?.digitalCompetencies || []).map((c, i) => (
+                                <div key={i} className="text-justify leading-relaxed">
+                                  <span className="font-bold text-slate-900">- </span>
+                                  <MathRenderer text={cleanItem(c)} />
+                                </div>
                               ))}
-                            </ul>
+                            </div>
                           </div>
                         )}
                         {hasAI && (
                           <div className="space-y-1.5 text-[13pt] pt-2">
                             <h4 className="font-bold text-slate-900">{aiNumber}. Tích hợp Trí tuệ nhân tạo (AI):</h4>
-                            <ul className="space-y-1.5 pl-3 leading-relaxed">
-                              {plan.objectives.aiCompetencies.map((c, i) => (
-                                <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                                  <span className="font-bold text-slate-900 shrink-0">-</span>
-                                  <span className="flex-1"><MathRenderer text={cleanItem(c)} /></span>
-                                </li>
+                            <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
+                              {(plan.objectives?.aiCompetencies || []).map((c, i) => (
+                                <div key={i} className="text-justify leading-relaxed">
+                                  <span className="font-bold text-slate-900">- </span>
+                                  <MathRenderer text={cleanItem(c)} />
+                                </div>
                               ))}
-                            </ul>
+                            </div>
                           </div>
                         )}
                         {hasSTEM && (
                           <div className="space-y-1.5 text-[13pt] pt-2">
                             <h4 className="font-bold text-slate-900">{hasNLS && hasAI ? 7 : 6}. Tích hợp STEM / Khác:</h4>
-                            <ul className="space-y-1.5 pl-3 leading-relaxed">
-                              {plan.objectives.stemCompetencies.map((c, i) => (
-                                <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                                  <span className="font-bold text-slate-900 shrink-0">-</span>
-                                  <span className="flex-1"><MathRenderer text={cleanItem(c)} /></span>
-                                </li>
+                            <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
+                              {(plan.objectives?.stemCompetencies || []).map((c, i) => (
+                                <div key={i} className="text-justify leading-relaxed">
+                                  <span className="font-bold text-slate-900">- </span>
+                                  <MathRenderer text={cleanItem(c)} />
+                                </div>
                               ))}
-                            </ul>
+                            </div>
                           </div>
                         )}
                       </>
@@ -657,14 +643,14 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                     return (
                       <div className="space-y-1.5 text-[13pt] pt-2">
                         <h4 className="font-bold text-slate-900">5. Tích hợp:</h4>
-                        <ul className="space-y-1.5 pl-3 leading-relaxed">
-                          {plan.objectives.stemCompetencies.map((c, i) => (
-                            <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                              <span className="font-bold text-slate-900 shrink-0">-</span>
-                              <span className="flex-1"><MathRenderer text={cleanItem(c)} /></span>
-                            </li>
+                        <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
+                          {(plan.objectives?.stemCompetencies || []).map((c, i) => (
+                            <div key={i} className="text-justify leading-relaxed">
+                              <span className="font-bold text-slate-900">- </span>
+                              <MathRenderer text={cleanItem(c)} />
+                            </div>
                           ))}
-                        </ul>
+                        </div>
                       </div>
                     );
                   }
@@ -677,14 +663,14 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                 {/* 1. Kiến thức */}
                 <div className="space-y-1.5 text-[13pt]">
                   <h4 className="font-bold text-slate-900">1. Về kiến thức:</h4>
-                  <ul className="space-y-1.5 pl-3 leading-relaxed">
-                    {plan.objectives.knowledge.map((k, i) => (
-                      <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                        <span className="font-bold text-slate-900 shrink-0">-</span>
-                        <span className="flex-1"><MathRenderer text={cleanItem(k)} /></span>
-                      </li>
+                  <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
+                    {(plan.objectives?.knowledge || []).map((k, i) => (
+                      <div key={i} className="text-justify leading-relaxed">
+                        <span className="font-bold text-slate-900">- </span>
+                        <MathRenderer text={cleanItem(k)} />
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
 
                 {/* 2. Năng lực */}
@@ -695,65 +681,65 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                       <span className="font-bold text-slate-800 block mb-1">
                         a) Năng lực chung:
                       </span>
-                      <ul className="space-y-1.5 pl-3 leading-relaxed">
-                        {plan.objectives.generalCompetencies.map((c, i) => (
-                          <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                            <span className="font-bold text-slate-900 shrink-0">-</span>
-                            <span className="flex-1">{renderGeneralCompetencyItem(c)}</span>
-                          </li>
+                      <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
+                        {(plan.objectives?.generalCompetencies || []).map((c, i) => (
+                          <div key={i} className="text-justify leading-relaxed">
+                            <span className="font-bold text-slate-900">- </span>
+                            {renderGeneralCompetencyItem(c)}
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
 
                     <div>
                       <span className="font-bold text-slate-900 block mb-1">
                         b) Năng lực đặc thù môn học:
                       </span>
-                      <ul className="space-y-1.5 pl-3 leading-relaxed">
-                        {plan.objectives.subjectCompetencies.map((c, i) => (
-                          <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                            <span className="font-bold text-slate-900 shrink-0">-</span>
-                            <span className="flex-1">{renderSubjectCompetencyItem(c)}</span>
-                          </li>
+                      <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
+                        {(plan.objectives?.subjectCompetencies || []).map((c, i) => (
+                          <div key={i} className="text-justify leading-relaxed">
+                            <span className="font-bold text-slate-900">- </span>
+                            {renderSubjectCompetencyItem(c)}
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
 
-                    {plan.objectives.digitalCompetencies && plan.objectives.digitalCompetencies.length > 0 && (
+                    {plan.objectives?.digitalCompetencies && plan.objectives.digitalCompetencies.length > 0 && (
                       <div>
                         <span className={`font-bold ${isMath ? 'text-red-600' : 'text-[#0066CC]'} block mb-1`}>
                           c) Các Năng lực số (NLS) được phát triển:
                         </span>
-                        <ul className="space-y-1.5 pl-3 leading-relaxed">
-                          {plan.objectives.digitalCompetencies.map((c, i) => (
-                            <li key={i} className={`flex items-start gap-1.5 ${isMath ? 'text-red-600' : 'text-[#0066CC]'} font-medium text-justify`}>
-                              <span className={`font-bold ${isMath ? 'text-red-600' : 'text-[#0066CC]'} shrink-0`}>-</span>
-                              <span className="flex-1"><MathRenderer text={cleanItem(c)} nlsRed={isMath} /></span>
-                            </li>
+                        <div className="space-y-1.5 text-justify leading-relaxed">
+                          {(plan.objectives.digitalCompetencies || []).map((c, i) => (
+                            <div key={i} className={`text-justify leading-relaxed ${isMath ? 'text-red-600' : 'text-[#0066CC]'} font-medium`}>
+                              <span className={`font-bold ${isMath ? 'text-red-600' : 'text-[#0066CC]'}`}>- </span>
+                              <MathRenderer text={cleanItem(c)} nlsRed={isMath} />
+                            </div>
                           ))}
-                        </ul>
+                        </div>
                       </div>
                     )}
 
-                    {plan.objectives.aiCompetencies && plan.objectives.aiCompetencies.length > 0 && (
+                    {plan.objectives?.aiCompetencies && plan.objectives.aiCompetencies.length > 0 && (
                       <div>
                         <span className="font-bold text-[#0066CC] block mb-1">
                           {(plan.objectives.digitalCompetencies?.length || 0) > 0
                             ? 'd) Năng lực trí tuệ nhân tạo (AI):'
                             : 'c) Năng lực trí tuệ nhân tạo (AI):'}
                         </span>
-                        <ul className="space-y-1.5 pl-3 leading-relaxed">
-                          {plan.objectives.aiCompetencies.map((c, i) => (
-                            <li key={i} className="flex items-start gap-1.5 text-[#0066CC] font-medium text-justify">
-                              <span className="font-bold text-[#0066CC] shrink-0">-</span>
-                              <span className="flex-1"><MathRenderer text={cleanItem(c)} /></span>
-                            </li>
+                        <div className="space-y-1.5 text-[#0066CC] text-justify leading-relaxed font-medium">
+                          {(plan.objectives.aiCompetencies || []).map((c, i) => (
+                            <div key={i} className="text-justify leading-relaxed">
+                              <span className="font-bold text-[#0066CC]">- </span>
+                              <MathRenderer text={cleanItem(c)} />
+                            </div>
                           ))}
-                        </ul>
+                        </div>
                       </div>
                     )}
 
-                    {plan.objectives.stemCompetencies && plan.objectives.stemCompetencies.length > 0 && (
+                    {plan.objectives?.stemCompetencies && plan.objectives.stemCompetencies.length > 0 && (
                       <div>
                         <span className="font-bold text-[#0066CC] block mb-1">
                           {(plan.objectives.digitalCompetencies?.length || 0) > 0 && (plan.objectives.aiCompetencies?.length || 0) > 0
@@ -762,14 +748,14 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                             ? 'd) Năng lực giáo dục STEM:'
                             : 'c) Năng lực giáo dục STEM:'}
                         </span>
-                        <ul className="space-y-1.5 pl-3 leading-relaxed">
-                          {plan.objectives.stemCompetencies.map((c, i) => (
-                            <li key={i} className="flex items-start gap-1.5 text-[#0066CC] font-medium text-justify">
-                              <span className="font-bold text-[#0066CC] shrink-0">-</span>
-                              <span className="flex-1"><MathRenderer text={cleanItem(c)} /></span>
-                            </li>
+                        <div className="space-y-1.5 text-[#0066CC] text-justify leading-relaxed font-medium">
+                          {(plan.objectives.stemCompetencies || []).map((c, i) => (
+                            <div key={i} className="text-justify leading-relaxed">
+                              <span className="font-bold text-[#0066CC]">- </span>
+                              <MathRenderer text={cleanItem(c)} />
+                            </div>
                           ))}
-                        </ul>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -778,14 +764,14 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                 {/* 3. Phẩm chất */}
                 <div className="space-y-1.5 text-[13pt] pt-2">
                   <h4 className="font-bold text-slate-900">3. Về phẩm chất:</h4>
-                  <ul className="space-y-1.5 pl-3 leading-relaxed">
-                    {plan.objectives.qualities.map((q, i) => (
-                      <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                        <span className="font-bold text-slate-900 shrink-0">-</span>
-                        <span className="flex-1"><MathRenderer text={cleanItem(q)} /></span>
-                      </li>
+                  <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
+                    {(plan.objectives?.qualities || []).map((q, i) => (
+                      <div key={i} className="text-justify leading-relaxed">
+                        <span className="font-bold text-slate-900">- </span>
+                        <MathRenderer text={cleanItem(q)} />
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               </>
             )}
@@ -809,26 +795,22 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                       <h4 className="font-bold text-slate-900 text-left">
                         1. Chuẩn bị của cô:
                       </h4>
-                      <ul className="space-y-1.5 pl-1">
-                        {prep.teacherEnvironment.map((e, i) => (
-                          <li key={`env-${i}`} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                            <span className="font-bold text-slate-900 shrink-0">-</span>
-                            <span className="flex-1">
-                              <span className="font-bold text-slate-900">Môi trường: </span>
-                              <MathRenderer text={cleanItem(e.replace(/^môi trường\s*:\s*/i, ''))} />
-                            </span>
-                          </li>
+                      <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
+                        {(prep.teacherEnvironment || []).map((e, i) => (
+                          <div key={`env-${i}`} className="text-justify leading-relaxed">
+                            <span className="font-bold text-slate-900">- </span>
+                            <span className="font-bold text-slate-900">Môi trường: </span>
+                            <MathRenderer text={cleanItem(e.replace(/^môi trường\s*:\s*/i, ''))} />
+                          </div>
                         ))}
-                        {prep.teacherTools.map((e, i) => (
-                          <li key={`tool-${i}`} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                            <span className="font-bold text-slate-900 shrink-0">-</span>
-                            <span className="flex-1">
-                              <span className="font-bold text-slate-900">Đồ dùng của cô: </span>
-                              <MathRenderer text={cleanItem(e.replace(/^đồ dùng của cô\s*:\s*/i, ''))} />
-                            </span>
-                          </li>
+                        {(prep.teacherTools || []).map((e, i) => (
+                          <div key={`tool-${i}`} className="text-justify leading-relaxed">
+                            <span className="font-bold text-slate-900">- </span>
+                            <span className="font-bold text-slate-900">Đồ dùng của cô: </span>
+                            <MathRenderer text={cleanItem(e.replace(/^đồ dùng của cô\s*:\s*/i, ''))} />
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
 
                     {/* 2. Chuẩn bị của trẻ */}
@@ -836,35 +818,29 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                       <h4 className="font-bold text-slate-900 text-left">
                         2. Chuẩn bị của trẻ:
                       </h4>
-                      <ul className="space-y-1.5 pl-1">
-                        {prep.studentCostume.map((e, i) => (
-                          <li key={`cos-${i}`} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                            <span className="font-bold text-slate-900 shrink-0">-</span>
-                            <span className="flex-1">
-                              <span className="font-bold text-slate-900">Trang phục: </span>
-                              <MathRenderer text={cleanItem(e.replace(/^trang phục\s*:\s*/i, ''))} />
-                            </span>
-                          </li>
+                      <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
+                        {(prep.studentCostume || []).map((e, i) => (
+                          <div key={`cos-${i}`} className="text-justify leading-relaxed">
+                            <span className="font-bold text-slate-900">- </span>
+                            <span className="font-bold text-slate-900">Trang phục: </span>
+                            <MathRenderer text={cleanItem(e.replace(/^trang phục\s*:\s*/i, ''))} />
+                          </div>
                         ))}
-                        {prep.studentTools.map((e, i) => (
-                          <li key={`stool-${i}`} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                            <span className="font-bold text-slate-900 shrink-0">-</span>
-                            <span className="flex-1">
-                              <span className="font-bold text-slate-900">Đồ dùng của trẻ: </span>
-                              <MathRenderer text={cleanItem(e.replace(/^đồ dùng của trẻ\s*:\s*/i, ''))} />
-                            </span>
-                          </li>
+                        {(prep.studentTools || []).map((e, i) => (
+                          <div key={`stool-${i}`} className="text-justify leading-relaxed">
+                            <span className="font-bold text-slate-900">- </span>
+                            <span className="font-bold text-slate-900">Đồ dùng của trẻ: </span>
+                            <MathRenderer text={cleanItem(e.replace(/^đồ dùng của trẻ\s*:\s*/i, ''))} />
+                          </div>
                         ))}
-                        {prep.studentPsychology.map((e, i) => (
-                          <li key={`psy-${i}`} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                            <span className="font-bold text-slate-900 shrink-0">-</span>
-                            <span className="flex-1">
-                              <span className="font-bold text-slate-900">Tâm sinh lý của trẻ: </span>
-                              <MathRenderer text={cleanItem(e.replace(/^(tâm sinh lý của trẻ|tâm sinh lý|tâm thế)\s*:\s*/i, ''))} />
-                            </span>
-                          </li>
+                        {(prep.studentPsychology || []).map((e, i) => (
+                          <div key={`psy-${i}`} className="text-justify leading-relaxed">
+                            <span className="font-bold text-slate-900">- </span>
+                            <span className="font-bold text-slate-900">Tâm sinh lý của trẻ: </span>
+                            <MathRenderer text={cleanItem(e.replace(/^(tâm sinh lý của trẻ|tâm sinh lý|tâm thế)\s*:\s*/i, ''))} />
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
 
                     {/* 3. Phối hợp với phụ huynh */}
@@ -872,16 +848,14 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                       <h4 className="font-bold text-slate-900 text-left">
                         3. Phối hợp với phụ huynh:
                       </h4>
-                      <ul className="space-y-1.5 pl-1">
-                        {prep.parentCollaboration.map((e, i) => (
-                          <li key={`parent-${i}`} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                            <span className="font-bold text-slate-900 shrink-0">-</span>
-                            <span className="flex-1">
-                              <MathRenderer text={cleanItem(e.replace(/^phối hợp với phụ huynh\s*:\s*/i, ''))} />
-                            </span>
-                          </li>
+                      <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
+                        {(prep.parentCollaboration || []).map((e, i) => (
+                          <div key={`parent-${i}`} className="text-justify leading-relaxed">
+                            <span className="font-bold text-slate-900">- </span>
+                            <MathRenderer text={cleanItem(e.replace(/^phối hợp với phụ huynh\s*:\s*/i, ''))} />
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
                   </div>
                 );
@@ -893,28 +867,28 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                     <h4 className="font-bold text-slate-900">
                       1. Giáo viên:
                     </h4>
-                    <ul className="space-y-1 pl-1">
-                      {plan.equipment.teacher.map((e, i) => (
-                        <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                          <span className="font-bold text-slate-900 shrink-0">-</span>
-                          <span className="flex-1"><MathRenderer text={cleanItem(e)} /></span>
-                        </li>
+                    <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
+                      {(plan.equipment?.teacher || []).map((e, i) => (
+                        <div key={i} className="text-justify leading-relaxed">
+                          <span className="font-bold text-slate-900">- </span>
+                          <MathRenderer text={cleanItem(e)} />
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
 
                   <div className="space-y-1 bg-white p-3.5 rounded-lg border border-slate-200">
                     <h4 className="font-bold text-slate-900">
                       2. Học sinh:
                     </h4>
-                    <ul className="space-y-1 pl-1">
-                      {plan.equipment.student.map((e, i) => (
-                        <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                          <span className="font-bold text-slate-900 shrink-0">-</span>
-                          <span className="flex-1"><MathRenderer text={cleanItem(e)} /></span>
-                        </li>
+                    <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
+                      {(plan.equipment?.student || []).map((e, i) => (
+                        <div key={i} className="text-justify leading-relaxed">
+                          <span className="font-bold text-slate-900">- </span>
+                          <MathRenderer text={cleanItem(e)} />
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 </div>
 
@@ -923,46 +897,46 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                     <h4 className="font-bold text-slate-900 mb-1">
                       3. Không gian:
                     </h4>
-                    <ul className="space-y-1 pl-1">
-                      {(plan.equipment as any).space.map((spaceItem: string, i: number) => (
-                        <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                          <span className="font-bold text-slate-900 shrink-0">-</span>
-                          <span className="flex-1"><MathRenderer text={cleanItem(spaceItem)} /></span>
-                        </li>
+                    <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
+                      {((plan.equipment as any).space || []).map((spaceItem: string, i: number) => (
+                        <div key={i} className="text-justify leading-relaxed">
+                          <span className="font-bold text-slate-900">- </span>
+                          <MathRenderer text={cleanItem(spaceItem)} />
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
 
-                {plan.equipment.digitalAssets && plan.equipment.digitalAssets.length > 0 && (
+                {plan.equipment?.digitalAssets && plan.equipment.digitalAssets.length > 0 && (
                   <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">
                     <h4 className="font-bold text-slate-900 mb-1">
                       3. Học liệu và thiết bị phụ trợ:
                     </h4>
-                    <ul className="space-y-1 pl-1">
-                      {plan.equipment.digitalAssets.map((asset, i) => (
-                        <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                          <span className="font-bold text-slate-900 shrink-0">-</span>
-                          <span className="flex-1"><MathRenderer text={cleanItem(asset)} /></span>
-                        </li>
+                    <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
+                      {(plan.equipment.digitalAssets || []).map((asset, i) => (
+                        <div key={i} className="text-justify leading-relaxed">
+                          <span className="font-bold text-slate-900">- </span>
+                          <MathRenderer text={cleanItem(asset)} />
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
 
-                {plan.equipment.stemMaterials && plan.equipment.stemMaterials.length > 0 && (
+                {plan.equipment?.stemMaterials && plan.equipment.stemMaterials.length > 0 && (
                   <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">
                     <h4 className="font-bold text-slate-900 mb-1">
                       4. Thiết bị, dụng cụ và vật liệu thực hành STEM:
                     </h4>
-                    <ul className="space-y-1 pl-1">
-                      {plan.equipment.stemMaterials.map((mat, i) => (
-                        <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                          <span className="font-bold text-slate-900 shrink-0">-</span>
-                          <span className="flex-1"><MathRenderer text={cleanItem(mat)} /></span>
-                        </li>
+                    <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
+                      {(plan.equipment.stemMaterials || []).map((mat, i) => (
+                        <div key={i} className="text-justify leading-relaxed">
+                          <span className="font-bold text-slate-900">- </span>
+                          <MathRenderer text={cleanItem(mat)} />
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
               </>
@@ -981,62 +955,62 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
               <div className="space-y-3 text-[13pt]">
                 <div>
                   <h4 className="font-bold text-slate-900">1. Tên chủ đề STEM:</h4>
-                  <p className="pl-2 text-slate-800 font-semibold">{plan.stemIntegration.topicTitle}</p>
+                  <p className="text-slate-800 font-semibold">{plan.stemIntegration.topicTitle}</p>
                 </div>
 
                 {plan.stemIntegration.stemGoals && plan.stemIntegration.stemGoals.length > 0 && (
                   <div>
                     <h4 className="font-bold text-slate-900">2. Mục tiêu giáo dục STEM (S-T-E-M):</h4>
-                    <ul className="space-y-1 pl-2">
-                      {plan.stemIntegration.stemGoals.map((g, i) => (
-                        <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                          <span className="font-bold text-slate-900 shrink-0">-</span>
-                          <span className="flex-1"><MathRenderer text={cleanItem(g)} /></span>
-                        </li>
+                    <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
+                      {(plan.stemIntegration.stemGoals || []).map((g, i) => (
+                        <div key={i} className="text-justify leading-relaxed">
+                          <span className="font-bold text-slate-900">- </span>
+                          <MathRenderer text={cleanItem(g)} />
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
 
                 {plan.stemIntegration.stemMaterials && plan.stemIntegration.stemMaterials.length > 0 && (
                   <div>
                     <h4 className="font-bold text-slate-900">3. Dụng cụ và vật liệu chuẩn bị:</h4>
-                    <ul className="space-y-1 pl-2">
-                      {plan.stemIntegration.stemMaterials.map((m, i) => (
-                        <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                          <span className="font-bold text-slate-900 shrink-0">-</span>
-                          <span className="flex-1"><MathRenderer text={cleanItem(m)} /></span>
-                        </li>
+                    <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
+                      {(plan.stemIntegration.stemMaterials || []).map((m, i) => (
+                        <div key={i} className="text-justify leading-relaxed">
+                          <span className="font-bold text-slate-900">- </span>
+                          <MathRenderer text={cleanItem(m)} />
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
 
                 {plan.stemIntegration.stemProcess && plan.stemIntegration.stemProcess.length > 0 && (
                   <div>
                     <h4 className="font-bold text-slate-900">4. Tiến trình hoạt động trải nghiệm / thiết kế kỹ thuật STEM:</h4>
-                    <ul className="space-y-1 pl-2">
-                      {plan.stemIntegration.stemProcess.map((p, i) => (
-                        <li key={i} className="flex items-start gap-1.5 text-slate-800 text-justify">
-                          <span className="font-bold text-slate-900 shrink-0">-</span>
-                          <span className="flex-1"><MathRenderer text={cleanItem(p)} /></span>
-                        </li>
+                    <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
+                      {(plan.stemIntegration.stemProcess || []).map((p, i) => (
+                        <div key={i} className="text-justify leading-relaxed">
+                          <span className="font-bold text-slate-900">- </span>
+                          <MathRenderer text={cleanItem(p)} />
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
 
                 {plan.stemIntegration.expectedProduct && (
                   <div>
                     <h4 className="font-bold text-slate-900">5. Sản phẩm học tập STEM dự kiến:</h4>
-                    <p className="pl-2 text-slate-800 text-justify"><MathRenderer text={cleanItem(plan.stemIntegration.expectedProduct)} /></p>
+                    <p className="text-slate-800 text-justify"><MathRenderer text={cleanItem(plan.stemIntegration.expectedProduct)} /></p>
                   </div>
                 )}
 
                 {plan.stemIntegration.evaluationCriteria && (
                   <div>
                     <h4 className="font-bold text-slate-900">6. Tiêu chí đánh giá & nghiệm thu sản phẩm STEM:</h4>
-                    <p className="pl-2 text-slate-800 text-justify"><MathRenderer text={cleanItem(plan.stemIntegration.evaluationCriteria)} /></p>
+                    <p className="text-slate-800 text-justify"><MathRenderer text={cleanItem(plan.stemIntegration.evaluationCriteria)} /></p>
                   </div>
                 )}
               </div>

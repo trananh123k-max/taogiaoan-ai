@@ -329,13 +329,13 @@ export const PedagogicalTable: React.FC<PedagogicalTableProps> = ({
                       </div>
                     )}
                     {detail.teacherAction && detail.teacherAction.trim() && (
-                      <div className="space-y-1 pl-1">
+                      <div className="space-y-1">
                         {(!isPreschool && !(/^(-|\*)?\s*(GV|Giáo viên)\b/i.test(detail.teacherAction.trim())) && !(/^\*\s*(GV|HS)/i.test(detail.title || ''))) && (
                           <div className="font-bold text-slate-900 text-[14pt]">
                             - Giáo viên:
                           </div>
                         )}
-                        <div className="text-slate-800 leading-relaxed pl-2 whitespace-pre-line text-justify text-[14pt]">
+                        <div className="text-slate-800 leading-relaxed whitespace-pre-line text-justify text-[14pt]">
                         {isEditing ? (
                           <textarea
                             value={detail.teacherAction}
@@ -357,13 +357,13 @@ export const PedagogicalTable: React.FC<PedagogicalTableProps> = ({
                       </div>
                     )}
                     {!isPreschool && detail.studentAction && detail.studentAction.trim() && (
-                      <div className="space-y-1 pl-1">
+                      <div className="space-y-1">
                         {!(/^(-|\*)?\s*(HS|Học sinh)\b/i.test(detail.studentAction.trim())) && !(/^\*\s*(GV|HS)/i.test(detail.title || '')) && (
                           <div className="font-bold text-slate-900 text-[14pt]">
                             - Học sinh:
                           </div>
                         )}
-                        <div className="text-slate-800 leading-relaxed pl-2 whitespace-pre-line text-justify text-[14pt]">
+                        <div className="text-slate-800 leading-relaxed whitespace-pre-line text-justify text-[14pt]">
                           {isEditing ? (
                             <textarea
                               value={detail.studentAction}

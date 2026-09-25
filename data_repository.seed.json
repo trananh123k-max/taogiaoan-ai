@@ -2,12 +2,13 @@
   "books": [
     {
       "bookSeries": "Kết nối tri thức với cuộc sống",
-      "title": "SGK Toán học Lớp 9 - SGK TOÁN 9 TẬP 1.pdf",
-      "fileSize": "19.32 MB",
-      "id": "sgk_1788252052359_wz4nr",
-      "volume": "Cả năm / Không phân tập",
       "grade": "Lớp 9",
       "fileName": "SGK TOÁN 9 TẬP 1.pdf",
+      "fileSize": "19.32 MB",
+      "id": "sgk_1788252052359_wz4nr",
+      "updatedAt": "2026-09-01T08:40:52.360Z",
+      "volume": "Cả năm / Không phân tập",
+      "uploadedAt": "1/9/2026",
       "summary": "Sách giáo khoa Toán học Lớp 9 gồm 31 bài học.",
       "lessons": [
         "Bài 1: Phương trình quy về phương trình bậc nhất một ẩn",
@@ -42,21 +43,10 @@
         "Bài 30: Xác suất của biến cố trong một số mô hình đơn giản",
         "Bài 31: Mối liên hệ giữa thống kê và xác suất"
       ],
-      "uploadedAt": "1/9/2026",
-      "updatedAt": "2026-09-01T08:40:52.360Z",
-      "subject": "Toán học"
+      "subject": "Toán học",
+      "title": "SGK Toán học Lớp 9 - SGK TOÁN 9 TẬP 1.pdf"
     },
     {
-      "bookSeries": "Kết nối tri thức với cuộc sống",
-      "grade": "Lớp 9",
-      "fileName": "SGK TOÁN 9 TẬP 1.pdf",
-      "updatedAt": "2026-09-01T08:42:18.013Z",
-      "id": "sgk_1788252138011_k0h2i",
-      "title": "SGK Toán học Lớp 9 - SGK TOÁN 9 TẬP 1.pdf",
-      "fileSize": "19.32 MB",
-      "subject": "Toán học",
-      "volume": "Cả năm / Không phân tập",
-      "uploadedAt": "1/9/2026",
       "lessons": [
         "Bài 1: Phương trình quy về phương trình bậc nhất một ẩn",
         "Bài 2: Phương trình bậc nhất hai ẩn. Hệ hai phương trình bậc nhất hai ẩn",
@@ -90,17 +80,23 @@
         "Bài 30: Xác suất của biến cố trong một số mô hình xác suất đơn giản",
         "Bài 31: Bài tập cuối chương VII"
       ],
-      "summary": "Sách giáo khoa Toán học Lớp 9 gồm 31 bài học."
+      "subject": "Toán học",
+      "uploadedAt": "1/9/2026",
+      "summary": "Sách giáo khoa Toán học Lớp 9 gồm 31 bài học.",
+      "volume": "Cả năm / Không phân tập",
+      "title": "SGK Toán học Lớp 9 - SGK TOÁN 9 TẬP 1.pdf",
+      "id": "sgk_1788252138011_k0h2i",
+      "grade": "Lớp 9",
+      "fileSize": "19.32 MB",
+      "bookSeries": "Kết nối tri thức với cuộc sống",
+      "updatedAt": "2026-09-01T08:42:18.013Z",
+      "fileName": "SGK TOÁN 9 TẬP 1.pdf"
     },
     {
-      "title": "SGK Tin học Lớp 9 - SGK TIN HỌC 9 KNTT.pdf",
-      "fileSize": "19.52 MB",
-      "bookSeries": "Kết nối tri thức với cuộc sống",
-      "id": "sgk_1788267913706_g2xe15",
-      "volume": "Cả năm / Không phân tập",
-      "grade": "Lớp 9",
-      "uploadedAt": "1/9/2026",
       "summary": "Sách giáo khoa Tin học Lớp 9 gồm 30 bài học.",
+      "updatedAt": "2026-09-01T13:05:13.709Z",
+      "uploadedAt": "1/9/2026",
+      "subject": "Tin học",
       "lessons": [
         "Bài 1: Thông tin trong môi trường số",
         "Bài 2: Thông tin và dữ liệu",
@@ -133,17 +129,20 @@
         "Bài 29: Cấu trúc dữ liệu danh sách",
         "Bài 30: Thực hành lập trình với danh sách"
       ],
+      "grade": "Lớp 9",
+      "volume": "Cả năm / Không phân tập",
+      "id": "sgk_1788267913706_g2xe15",
+      "title": "SGK Tin học Lớp 9 - SGK TIN HỌC 9 KNTT.pdf",
       "fileName": "SGK TIN HỌC 9 KNTT.pdf",
-      "subject": "Tin học",
-      "updatedAt": "2026-09-01T13:05:13.709Z"
+      "fileSize": "19.52 MB",
+      "bookSeries": "Kết nối tri thức với cuộc sống"
     },
     {
       "volume": "Cả năm / Không phân tập",
+      "updatedAt": "2026-09-01T13:55:02.377Z",
+      "uploadedAt": "1/9/2026",
       "title": "SGK Tin học Lớp 9 - SGK TIN HỌC 9 KNTT.pdf",
-      "fileSize": "19.52 MB",
-      "bookSeries": "Kết nối tri thức với cuộc sống",
-      "id": "sgk_1788270902374_9xcui",
-      "summary": "Sách giáo khoa Tin học Lớp 9 gồm 32 bài học.",
+      "fileName": "SGK TIN HỌC 9 KNTT.pdf",
       "lessons": [
         "Bài 1: Thông tin trong môi trường số",
         "Bài 2: Thông tin và dữ liệu",
@@ -178,22 +177,17 @@
         "Bài 31: Thực hành cấu trúc lặp",
         "Bài 32: Dự án học tập: Thiết kế chương trình giải quyết vấn đề"
       ],
-      "grade": "Lớp 9",
-      "fileName": "SGK TIN HỌC 9 KNTT.pdf",
-      "uploadedAt": "1/9/2026",
       "subject": "Tin học",
-      "updatedAt": "2026-09-01T13:55:02.377Z"
+      "fileSize": "19.52 MB",
+      "summary": "Sách giáo khoa Tin học Lớp 9 gồm 32 bài học.",
+      "id": "sgk_1788270902374_9xcui",
+      "grade": "Lớp 9",
+      "bookSeries": "Kết nối tri thức với cuộc sống"
     },
     {
       "grade": "Lớp 10",
-      "id": "sgk_1788528638872_skqsfp",
-      "updatedAt": "2026-09-04T13:30:38.873Z",
-      "volume": "Cả năm / Không phân tập",
-      "uploadedAt": "4/9/2026",
-      "fileName": "SGK TOÁN 10 TẬP 1.pdf",
-      "title": "SGK Toán học Lớp 10 - SGK TOÁN 10 TẬP 1.pdf",
+      "summary": "Sách giáo khoa Toán học Lớp 10 gồm 27 bài học.",
       "subject": "Toán học",
-      "bookSeries": "Kết nối tri thức với cuộc sống",
       "lessons": [
         "Bài 1: Mệnh đề",
         "Bài 2: Tập hợp",
@@ -223,20 +217,22 @@
         "Bài 26: Biến cố và định nghĩa cổ điển của xác suất",
         "Bài 27: Thực hành tính xác suất theo định nghĩa cổ điển"
       ],
-      "summary": "Sách giáo khoa Toán học Lớp 10 gồm 27 bài học.",
-      "fileSize": "14.37 MB"
+      "id": "sgk_1788528638872_skqsfp",
+      "volume": "Cả năm / Không phân tập",
+      "uploadedAt": "4/9/2026",
+      "bookSeries": "Kết nối tri thức với cuộc sống",
+      "updatedAt": "2026-09-04T13:30:38.873Z",
+      "title": "SGK Toán học Lớp 10 - SGK TOÁN 10 TẬP 1.pdf",
+      "fileSize": "14.37 MB",
+      "fileName": "SGK TOÁN 10 TẬP 1.pdf"
     },
     {
+      "title": "SGK Khoa học tự nhiên (KHTN) Lớp 6 - Nhiều màu sắc Họa tiết và Hình dạng Trừu tượng Lời chúc mừng Bạn thân nhất Bản thuyết trình Vui nhộn.pdf",
       "id": "sgk_1788855599823_jwfl6b",
-      "grade": "Lớp 6",
+      "volume": "Cả năm / Không phân tập",
       "uploadedAt": "8/9/2026",
       "fileSize": "0.67 MB",
-      "updatedAt": "2026-09-08T08:19:59.835Z",
-      "bookSeries": "Kết nối tri thức với cuộc sống",
-      "title": "SGK Khoa học tự nhiên (KHTN) Lớp 6 - Nhiều màu sắc Họa tiết và Hình dạng Trừu tượng Lời chúc mừng Bạn thân nhất Bản thuyết trình Vui nhộn.pdf",
-      "subject": "Khoa học tự nhiên (KHTN)",
-      "volume": "Cả năm / Không phân tập",
-      "summary": "Sách giáo khoa Khoa học tự nhiên (KHTN) Lớp 6 gồm 46 bài học.",
+      "fileName": "Nhiều màu sắc Họa tiết và Hình dạng Trừu tượng Lời chúc mừng Bạn thân nhất Bản thuyết trình Vui nhộn.pdf",
       "lessons": [
         "Bài 1: Giới thiệu về Khoa học tự nhiên",
         "Bài 2: An toàn trong phòng thực hành",
@@ -285,7 +281,11 @@
         "Bài 45: Hệ Mặt Trời",
         "Bài 46: Ngân Hà"
       ],
-      "fileName": "Nhiều màu sắc Họa tiết và Hình dạng Trừu tượng Lời chúc mừng Bạn thân nhất Bản thuyết trình Vui nhộn.pdf"
+      "subject": "Khoa học tự nhiên (KHTN)",
+      "grade": "Lớp 6",
+      "updatedAt": "2026-09-08T08:19:59.835Z",
+      "summary": "Sách giáo khoa Khoa học tự nhiên (KHTN) Lớp 6 gồm 46 bài học.",
+      "bookSeries": "Kết nối tri thức với cuộc sống"
     }
   ],
   "ppcts": [
@@ -1164,39 +1164,49 @@
       "createdAt": "01/01/2025",
       "expiresAt": "Vĩnh viễn",
       "notes": "Tài khoản Quản trị viên cấp cao",
-      "lastLogin": "12:17:01 24/9/2026",
+      "lastLogin": "08:48:54 25/9/2026",
       "maxDevices": 10,
       "authorizedDevices": [
         {
+          "os": "Windows PC",
           "hardwareSig": "Windows PC|1920x1080|8|Asia/Bangkok|intel uhd graphics 620",
+          "deviceName": "Windows PC (1536x864, 8 Cores)",
           "browser": "Edge, Chrome",
           "appName": "KHBD AI PRO",
           "usedApps": [
             "KHBD AI PRO"
           ],
           "deviceId": "MC-5A2512D2-1Q3L",
-          "deviceName": "Windows PC (1536x864, 8 Cores)",
-          "os": "Windows PC",
-          "lastActive": "00:18:27 20/9/2026",
-          "firstLogin": "21:07:12 29/8/2026"
+          "firstLogin": "21:07:12 29/8/2026",
+          "lastActive": "00:18:27 20/9/2026"
         }
       ],
       "maxTrialGenerations": 9999,
       "trialGenerations": 0,
       "loginCountToday": 1,
-      "activeSecondsToday": 51,
-      "activeMinutesToday": 0,
+      "activeSecondsToday": 114,
+      "activeMinutesToday": 1,
       "totalLoginCount": 57,
       "loginLogs": [
         {
-          "timestamp": "11:57:51 24/9/2026",
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "08:48:54 25/9/2026",
+          "date": "25/9/2026"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "24/9/2026",
+          "timestamp": "20:47:42 24/9/2026"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "11:57:51 24/9/2026",
           "date": "24/9/2026"
         },
         {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
           "date": "22/9/2026",
-          "timestamp": "22:49:12 22/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+          "timestamp": "22:49:12 22/9/2026"
         },
         {
           "timestamp": "12:30:12 22/9/2026",
@@ -1204,9 +1214,9 @@
           "date": "22/9/2026"
         },
         {
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "10:49:18 22/9/2026",
           "date": "22/9/2026",
-          "timestamp": "10:49:18 22/9/2026"
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
         },
         {
           "deviceName": "Windows PC (1536x864, 8 Cores) (Chrome)",
@@ -1214,49 +1224,49 @@
           "date": "20/9/2026"
         },
         {
-          "timestamp": "00:16:10 20/9/2026",
           "deviceName": "Windows PC (1536x864, 8 Cores) (Chrome)",
+          "timestamp": "00:16:10 20/9/2026",
           "date": "20/9/2026"
         },
         {
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "23:55:51 19/9/2026",
-          "date": "19/9/2026"
-        },
-        {
           "date": "19/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "21:06:19 19/9/2026"
+          "timestamp": "23:55:51 19/9/2026"
         },
         {
+          "timestamp": "21:06:19 19/9/2026",
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "20:22:15 19/9/2026",
           "date": "19/9/2026"
         },
         {
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
           "date": "19/9/2026",
-          "timestamp": "19:19:03 19/9/2026"
+          "timestamp": "20:22:15 19/9/2026"
+        },
+        {
+          "timestamp": "19:19:03 19/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "19/9/2026"
         },
         {
           "date": "19/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "10:14:56 19/9/2026"
-        },
-        {
-          "date": "5/9/2026",
-          "timestamp": "16:12:24 5/9/2026",
+          "timestamp": "10:14:56 19/9/2026",
           "deviceName": "Máy tính (Nhận diện phiên quay lại)"
         },
         {
+          "timestamp": "16:12:24 5/9/2026",
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "15:34:48 2/9/2026",
-          "date": "2/9/2026"
+          "date": "5/9/2026"
         },
         {
-          "timestamp": "15:34:47 2/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "2/9/2026",
+          "timestamp": "15:34:48 2/9/2026"
+        },
+        {
+          "date": "2/9/2026",
           "deviceName": "Windows PC (1280x720, 8 Cores)",
-          "date": "2/9/2026"
+          "timestamp": "15:34:47 2/9/2026"
         },
         {
           "date": "1/9/2026",
@@ -1264,24 +1274,119 @@
           "deviceName": "Máy tính (Nhận diện phiên quay lại)"
         },
         {
-          "date": "1/9/2026",
           "timestamp": "12:02:08 1/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "1/9/2026"
         },
         {
-          "deviceName": "Windows PC (1536x864, 8 Cores)",
           "date": "30/8/2026",
+          "deviceName": "Windows PC (1536x864, 8 Cores)",
           "timestamp": "19:39:57 30/8/2026"
         },
         {
-          "date": "30/8/2026",
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "19:36:46 30/8/2026"
+          "timestamp": "19:36:46 30/8/2026",
+          "date": "30/8/2026"
         },
         {
+          "deviceName": "Windows PC (1536x864, 8 Cores)",
           "timestamp": "21:07:12 29/8/2026",
-          "date": "29/8/2026",
-          "deviceName": "Windows PC (1536x864, 8 Cores)"
+          "date": "29/8/2026"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "08:46:56 25/9/2026",
+          "date": "25/9/2026"
+        },
+        {
+          "date": "25/9/2026",
+          "timestamp": "08:39:38 25/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "date": "25/9/2026",
+          "timestamp": "08:36:18 25/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "date": "25/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "08:17:05 25/9/2026"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "07:55:57 25/9/2026",
+          "date": "25/9/2026"
+        },
+        {
+          "timestamp": "07:39:26 25/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "25/9/2026"
+        },
+        {
+          "date": "25/9/2026",
+          "timestamp": "07:26:03 25/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "07:06:59 25/9/2026",
+          "date": "25/9/2026"
+        },
+        {
+          "date": "25/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "07:02:54 25/9/2026"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "25/9/2026",
+          "timestamp": "07:00:39 25/9/2026"
+        },
+        {
+          "timestamp": "07:00:17 25/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "25/9/2026"
+        },
+        {
+          "date": "24/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "22:59:48 24/9/2026"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "22:47:49 24/9/2026",
+          "date": "24/9/2026"
+        },
+        {
+          "timestamp": "22:32:09 24/9/2026",
+          "date": "24/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "timestamp": "22:13:49 24/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "24/9/2026"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "24/9/2026",
+          "timestamp": "22:03:41 24/9/2026"
+        },
+        {
+          "timestamp": "21:46:17 24/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "24/9/2026"
+        },
+        {
+          "date": "24/9/2026",
+          "timestamp": "21:43:00 24/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "timestamp": "18:13:25 24/9/2026",
+          "date": "24/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
         },
         {
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
@@ -1332,120 +1437,83 @@
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
           "timestamp": "17:21:28 23/9/2026",
           "date": "23/9/2026"
-        },
-        {
-          "timestamp": "16:50:46 23/9/2026",
-          "date": "23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
-        },
-        {
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "date": "23/9/2026",
-          "timestamp": "16:47:49 23/9/2026"
-        },
-        {
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "16:47:46 23/9/2026",
-          "date": "23/9/2026"
-        },
-        {
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "16:30:38 23/9/2026",
-          "date": "23/9/2026"
-        },
-        {
-          "timestamp": "16:28:16 23/9/2026",
-          "date": "23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
-        },
-        {
-          "date": "23/9/2026",
-          "timestamp": "16:26:07 23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
-        },
-        {
-          "timestamp": "16:01:27 23/9/2026",
-          "date": "23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
-        },
-        {
-          "timestamp": "16:00:59 23/9/2026",
-          "date": "23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
-        },
-        {
-          "timestamp": "15:54:36 23/9/2026",
-          "date": "23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
-        },
-        {
-          "date": "23/9/2026",
-          "timestamp": "15:50:24 23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
-        },
-        {
-          "date": "23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "15:42:48 23/9/2026"
-        },
-        {
-          "date": "23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "15:39:55 23/9/2026"
-        },
-        {
-          "date": "23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "15:24:40 23/9/2026"
-        },
-        {
-          "timestamp": "15:12:23 23/9/2026",
-          "date": "23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
-        },
-        {
-          "timestamp": "15:09:35 23/9/2026",
-          "date": "23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
-        },
-        {
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "15:09:12 23/9/2026",
-          "date": "23/9/2026"
-        },
-        {
-          "date": "23/9/2026",
-          "timestamp": "15:07:10 23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
-        },
-        {
-          "timestamp": "15:04:13 23/9/2026",
-          "date": "23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
-        },
-        {
-          "timestamp": "14:49:38 23/9/2026",
-          "date": "23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
-        },
-        {
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "date": "23/9/2026",
-          "timestamp": "14:46:54 23/9/2026"
-        },
-        {
-          "date": "23/9/2026",
-          "timestamp": "13:58:39 23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
         }
       ],
-      "lastActiveTimestamp": 1790227040713,
-      "updatedAt": "2026-09-24T05:17:21.718Z",
-      "lastActiveDate": "24/9/2026",
-      "lastLoginDate": "24/9/2026",
+      "lastActiveTimestamp": 1790301063480,
+      "updatedAt": "2026-09-25T01:51:04.479Z",
+      "lastActiveDate": "25/9/2026",
+      "lastLoginDate": "25/9/2026",
       "avatar": "data:image/jpeg;base64,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",
       "apiKey": "AQ.Ab8RN6LbDo4q7sQ1oIyYRvZ_xWkN8czRfcrcJgF_Fb0jjU0s5g",
       "customApiKey": "AQ.Ab8RN6LbDo4q7sQ1oIyYRvZ_xWkN8czRfcrcJgF_Fb0jjU0s5g"
+    },
+    {
+      "id": "user_1790211724250_bqoat",
+      "schoolName": "Trường mầm non Lũng Phìn",
+      "phone": "0813545707",
+      "loginLogs": [
+        {
+          "browser": "Chrome",
+          "appName": "KHBD AI PRO",
+          "deviceName": "Windows PC (1920x1080, 4 Cores) (Chrome)",
+          "date": "24/9/2026",
+          "action": "Đăng nhập hệ thống",
+          "timestamp": "20:47:54 24/9/2026",
+          "os": "Windows PC"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "24/9/2026",
+          "timestamp": "20:38:47 24/9/2026"
+        },
+        {
+          "date": "24/9/2026",
+          "timestamp": "08:02:13 24/9/2026",
+          "deviceName": "Windows PC (1920x1080, 4 Cores) (Edge)",
+          "action": "Đăng nhập hệ thống",
+          "appName": "KHBD AI PRO",
+          "browser": "Edge",
+          "os": "Windows PC"
+        }
+      ],
+      "maxDevices": 2,
+      "loginCountToday": 0,
+      "expiresAt": "Chưa cấp",
+      "authorizedDevices": [
+        {
+          "os": "Windows PC",
+          "deviceName": "Windows PC (1920x1080, 4 Cores)",
+          "browser": "Edge, Chrome",
+          "appName": "KHBD AI PRO",
+          "hardwareSig": "Windows PC|1920x1080|4|Etc/GMT-7|intel hd graphics 520",
+          "usedApps": [
+            "KHBD AI PRO"
+          ],
+          "firstLogin": "08:02:04 24/9/2026",
+          "lastActive": "20:47:54 24/9/2026",
+          "deviceId": "MC-4CF72715-5E9B564E"
+        }
+      ],
+      "lastActiveTimestamp": 1790258636783,
+      "role": "teacher",
+      "createdAt": "24/9/2026",
+      "email": "huongmathi29@gmail.com",
+      "notes": "Người dùng tự đăng ký qua hệ thống",
+      "accessCode": "huong@2005",
+      "username": "huongmathi29@gmail.com",
+      "activeSecondsToday": 0,
+      "updatedAt": "2026-09-24T14:06:35.382Z",
+      "maxTrialGenerations": 10,
+      "fullName": "MA THỊ HƯỞNG",
+      "lastLogin": "20:47:54 24/9/2026",
+      "lastActiveDate": "24/9/2026",
+      "lastLoginDate": "24/9/2026",
+      "totalLoginCount": 3,
+      "trialGenerations": 3,
+      "activeMinutesToday": 0,
+      "status": "active",
+      "customApiKey": "AQ.Ab8RN6I_4JdqjBebxNvaAAZCQwYe2B0jirwA7X9PUsGvf7fELA",
+      "apiKey": "AQ.Ab8RN6I_4JdqjBebxNvaAAZCQwYe2B0jirwA7X9PUsGvf7fELA"
     },
     {
       "fullName": "Ly Thị Máy",
@@ -1453,35 +1521,35 @@
       "id": "user_1790057592051_klshi",
       "username": "lythimayhqp@gmail.com",
       "lastLoginDate": "24/9/2026",
-      "activeSecondsToday": 200,
+      "activeSecondsToday": 0,
       "notes": "Người dùng tự đăng ký qua hệ thống",
       "trialGenerations": 0,
       "accessCode": "123456",
-      "lastActiveTimestamp": 1790227021811,
+      "lastActiveTimestamp": 1790230791817,
       "schoolName": "Mầm non Lũng Phìn",
       "email": "lythimayhqp@gmail.com",
-      "updatedAt": "2026-09-24T05:17:22.812Z",
+      "updatedAt": "2026-09-24T06:19:52.812Z",
       "lastLogin": "12:01:32 24/9/2026",
-      "loginCountToday": 1,
-      "activeMinutesToday": 3,
+      "loginCountToday": 0,
+      "activeMinutesToday": 0,
       "createdAt": "22/9/2026",
       "apiKey": "AQ.Ab8RN6K3Noac0Jz9cVz_8oS7B1fSbrFo_1_Xqb1p7-vTOwNVfg",
       "customApiKey": "AQ.Ab8RN6K3Noac0Jz9cVz_8oS7B1fSbrFo_1_Xqb1p7-vTOwNVfg",
       "totalLoginCount": 5,
       "loginLogs": [
         {
+          "date": "24/9/2026",
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "12:01:32 24/9/2026",
-          "date": "24/9/2026"
+          "timestamp": "12:01:32 24/9/2026"
         },
         {
-          "timestamp": "12:01:30 24/9/2026",
           "date": "24/9/2026",
           "os": "Windows PC",
-          "deviceName": "Windows PC (1280x720, 8 Cores) (Chrome)",
           "action": "Đăng nhập hệ thống",
-          "browser": "Chrome",
-          "appName": "KHBD AI PRO"
+          "deviceName": "Windows PC (1280x720, 8 Cores) (Chrome)",
+          "timestamp": "12:01:30 24/9/2026",
+          "appName": "KHBD AI PRO",
+          "browser": "Chrome"
         },
         {
           "timestamp": "21:16:23 23/9/2026",
@@ -1489,18 +1557,18 @@
           "date": "23/9/2026"
         },
         {
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
           "timestamp": "15:57:13 22/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
           "date": "22/9/2026"
         },
         {
+          "deviceName": "Windows PC (1280x720, 8 Cores) (Chrome)",
           "browser": "Chrome",
-          "date": "22/9/2026",
           "appName": "KHBD AI PRO",
+          "date": "22/9/2026",
           "action": "Đăng nhập hệ thống",
           "timestamp": "13:13:18 22/9/2026",
-          "os": "Windows PC",
-          "deviceName": "Windows PC (1280x720, 8 Cores) (Chrome)"
+          "os": "Windows PC"
         }
       ],
       "expiresAt": "24/12/2027",
@@ -1508,17 +1576,17 @@
       "lastActiveDate": "24/9/2026",
       "authorizedDevices": [
         {
+          "deviceId": "MC-1016FA18-623096BF",
           "lastActive": "12:01:30 24/9/2026",
           "firstLogin": "13:13:12 22/9/2026",
-          "appName": "KHBD AI PRO",
           "hardwareSig": "Windows PC|1920x1080|8|Asia/Saigon|microsoft basic render driver",
-          "deviceId": "MC-1016FA18-623096BF",
+          "browser": "Chrome",
+          "appName": "KHBD AI PRO",
+          "os": "Windows PC",
           "usedApps": [
             "KHBD AI PRO"
           ],
-          "deviceName": "Windows PC (1280x720, 8 Cores)",
-          "os": "Windows PC",
-          "browser": "Chrome"
+          "deviceName": "Windows PC (1280x720, 8 Cores)"
         }
       ],
       "role": "teacher",
@@ -1526,17 +1594,17 @@
     },
     {
       "role": "teacher",
-      "lastLogin": "23:14:29 23/9/2026",
+      "lastLogin": "12:41:20 24/9/2026",
       "accessCode": "123456",
       "maxDevices": 2,
       "expiresAt": "19/09/2027",
-      "lastActiveDate": "23/9/2026",
-      "lastLoginDate": "23/9/2026",
+      "lastActiveDate": "24/9/2026",
+      "lastLoginDate": "24/9/2026",
       "loginCountToday": 0,
       "status": "active",
       "activeSecondsToday": 0,
-      "lastActiveTimestamp": 1790181518207,
-      "updatedAt": "2026-09-23T16:38:39.190Z",
+      "lastActiveTimestamp": 1790230509360,
+      "updatedAt": "2026-09-24T06:16:27.371Z",
       "fullName": "Duyên",
       "createdAt": "13/9/2026",
       "notes": "Người dùng tự đăng ký qua hệ thống",
@@ -1545,28 +1613,33 @@
       "loginLogs": [
         {
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "date": "23/9/2026",
-          "timestamp": "23:14:29 23/9/2026"
+          "date": "24/9/2026",
+          "timestamp": "12:41:20 24/9/2026"
         },
         {
-          "deviceName": "Windows PC (1536x864, 4 Cores) (Chrome)",
           "date": "20/9/2026",
-          "timestamp": "07:48:06 20/9/2026"
+          "timestamp": "07:48:06 20/9/2026",
+          "deviceName": "Windows PC (1536x864, 4 Cores) (Chrome)"
         },
         {
-          "timestamp": "20:00:15 13/9/2026",
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "20:00:15 13/9/2026",
           "date": "13/9/2026"
         },
         {
-          "timestamp": "09:24:46 13/9/2026",
           "deviceName": "Windows PC (1536x864, 4 Cores) (Edge)",
+          "timestamp": "09:24:46 13/9/2026",
           "date": "13/9/2026"
         },
         {
           "date": "13/9/2026",
           "deviceName": "Windows PC (1536x864, 4 Cores) (Edge)",
           "timestamp": "09:22:50 13/9/2026"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "23/9/2026",
+          "timestamp": "23:14:29 23/9/2026"
         },
         {
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
@@ -1588,20 +1661,20 @@
       "id": "user_1789266143500_3hh57",
       "authorizedDevices": [
         {
-          "deviceName": "Windows PC (1536x864, 4 Cores)",
-          "os": "Windows PC",
+          "firstLogin": "09:22:23 13/9/2026",
+          "lastActive": "07:48:06 20/9/2026",
           "hardwareSig": "Windows PC|1920x1080|4|Etc/GMT-7|intel hd graphics 620",
+          "os": "Windows PC",
           "appName": "KHBD AI PRO",
+          "browser": "Edge, Chrome",
+          "deviceName": "Windows PC (1536x864, 4 Cores)",
+          "deviceId": "MC-4CF72B98-5E9B528D",
           "usedApps": [
             "KHBD AI PRO"
-          ],
-          "deviceId": "MC-4CF72B98-5E9B528D",
-          "lastActive": "07:48:06 20/9/2026",
-          "browser": "Edge, Chrome",
-          "firstLogin": "09:22:23 13/9/2026"
+          ]
         }
       ],
-      "totalLoginCount": 8,
+      "totalLoginCount": 9,
       "schoolName": "Trường Mâm non Lũng Phìn",
       "username": "chauduyen"
     },
@@ -1612,38 +1685,38 @@
       "loginLogs": [
         {
           "date": "22/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "11:10:30 22/9/2026"
-        },
-        {
-          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)",
-          "date": "20/9/2026",
-          "timestamp": "08:33:50 20/9/2026"
-        },
-        {
-          "timestamp": "08:29:33 20/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "date": "20/9/2026"
-        },
-        {
-          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)",
-          "date": "20/9/2026",
-          "timestamp": "08:29:30 20/9/2026"
-        },
-        {
-          "timestamp": "12:08:05 15/9/2026",
-          "date": "15/9/2026",
+          "timestamp": "11:10:30 22/9/2026",
           "deviceName": "Máy tính (Nhận diện phiên quay lại)"
         },
         {
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "date": "14/9/2026",
-          "timestamp": "12:43:08 14/9/2026"
+          "date": "20/9/2026",
+          "timestamp": "08:33:50 20/9/2026",
+          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)"
         },
         {
+          "date": "20/9/2026",
+          "timestamp": "08:29:33 20/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)",
+          "timestamp": "08:29:30 20/9/2026",
+          "date": "20/9/2026"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "12:08:05 15/9/2026",
+          "date": "15/9/2026"
+        },
+        {
+          "timestamp": "12:43:08 14/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "14/9/2026"
+        },
+        {
+          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)",
           "date": "13/9/2026",
-          "timestamp": "19:39:40 13/9/2026",
-          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)"
+          "timestamp": "19:39:40 13/9/2026"
         },
         {
           "timestamp": "09:24:45 21/9/2026",
@@ -1671,17 +1744,17 @@
       "notes": "Người dùng tự đăng ký qua hệ thống",
       "authorizedDevices": [
         {
+          "deviceId": "MC-0726C010-6847C8C5",
           "deviceName": "Windows PC (1366x768, 4 Cores)",
           "hardwareSig": "Windows PC|1366x768|4|Etc/GMT-7|intel hd graphics 620",
-          "lastActive": "08:33:50 20/9/2026",
-          "firstLogin": "19:39:31 13/9/2026",
-          "appName": "KHBD AI PRO",
-          "deviceId": "MC-0726C010-6847C8C5",
           "usedApps": [
             "KHBD AI PRO"
           ],
+          "os": "Windows PC",
+          "appName": "KHBD AI PRO",
           "browser": "Chrome",
-          "os": "Windows PC"
+          "firstLogin": "19:39:31 13/9/2026",
+          "lastActive": "08:33:50 20/9/2026"
         }
       ],
       "loginCountToday": 0,
@@ -1696,10 +1769,10 @@
         {
           "deviceName": "Windows PC (1366x768, 8 Cores)",
           "lastActive": "21:57:43 3/9/2026",
-          "browser": "Chrome",
+          "firstLogin": "21:31:58 3/9/2026",
           "os": "Windows PC",
-          "deviceId": "MC-0FC15719-2574B7B2",
-          "firstLogin": "21:31:58 3/9/2026"
+          "browser": "Chrome",
+          "deviceId": "MC-0FC15719-2574B7B2"
         }
       ],
       "totalLoginCount": 4,
@@ -1721,24 +1794,24 @@
       "status": "active",
       "loginLogs": [
         {
-          "date": "3/9/2026",
-          "timestamp": "21:57:43 3/9/2026",
-          "deviceName": "Windows PC (1366x768, 8 Cores)"
-        },
-        {
-          "timestamp": "21:55:45 3/9/2026",
-          "date": "3/9/2026",
-          "deviceName": "Windows PC (1366x768, 8 Cores)"
-        },
-        {
           "deviceName": "Windows PC (1366x768, 8 Cores)",
-          "timestamp": "21:48:14 3/9/2026",
+          "timestamp": "21:57:43 3/9/2026",
           "date": "3/9/2026"
         },
         {
           "date": "3/9/2026",
           "deviceName": "Windows PC (1366x768, 8 Cores)",
-          "timestamp": "21:32:11 3/9/2026"
+          "timestamp": "21:55:45 3/9/2026"
+        },
+        {
+          "timestamp": "21:48:14 3/9/2026",
+          "deviceName": "Windows PC (1366x768, 8 Cores)",
+          "date": "3/9/2026"
+        },
+        {
+          "date": "3/9/2026",
+          "timestamp": "21:32:11 3/9/2026",
+          "deviceName": "Windows PC (1366x768, 8 Cores)"
         }
       ],
       "phone": "0339592685",
@@ -1763,21 +1836,21 @@
       "notes": "Người dùng tự đăng ký qua hệ thống",
       "loginLogs": [
         {
-          "deviceName": "Windows PC (1280x720, 8 Cores)",
+          "date": "2/9/2026",
           "timestamp": "06:20:01 2/9/2026",
-          "date": "2/9/2026"
+          "deviceName": "Windows PC (1280x720, 8 Cores)"
         }
       ],
       "loginCountToday": 0,
       "id": "user_1788340794409_77g7k",
       "authorizedDevices": [
         {
-          "deviceId": "MC-14AE0370-12E9E11F",
-          "os": "Windows PC",
           "deviceName": "Windows PC (1280x720, 8 Cores)",
-          "browser": "Edge",
+          "os": "Windows PC",
           "firstLogin": "06:19:54 2/9/2026",
-          "lastActive": "06:20:01 2/9/2026"
+          "lastActive": "06:20:01 2/9/2026",
+          "browser": "Edge",
+          "deviceId": "MC-14AE0370-12E9E11F"
         }
       ],
       "activeMinutesToday": 0,
@@ -1810,16 +1883,16 @@
       "authorizedDevices": [
         {
           "hardwareSig": "Windows PC|1920x1080|4|Asia/Bangkok|intel hd graphics 620",
-          "deviceId": "MC-071DC49F-623AB2D2",
-          "usedApps": [
-            "KHBD AI PRO"
-          ],
-          "os": "Windows PC",
-          "deviceName": "Windows PC (1280x720, 4 Cores)",
+          "appName": "KHBD AI PRO",
           "browser": "Chrome",
           "firstLogin": "10:28:04 20/9/2026",
           "lastActive": "10:28:04 20/9/2026",
-          "appName": "KHBD AI PRO"
+          "os": "Windows PC",
+          "usedApps": [
+            "KHBD AI PRO"
+          ],
+          "deviceId": "MC-071DC49F-623AB2D2",
+          "deviceName": "Windows PC (1280x720, 4 Cores)"
         }
       ],
       "updatedAt": "2026-09-20T04:18:43.116Z",
@@ -1834,13 +1907,13 @@
           "deviceName": "Máy tính (Nhận diện phiên quay lại)"
         },
         {
-          "date": "20/9/2026",
-          "timestamp": "10:28:04 20/9/2026",
-          "os": "Windows PC",
           "browser": "Chrome",
+          "appName": "KHBD AI PRO",
+          "date": "20/9/2026",
           "action": "Đăng nhập thiết bị mới",
+          "timestamp": "10:28:04 20/9/2026",
           "deviceName": "Windows PC (1280x720, 4 Cores) (Chrome)",
-          "appName": "KHBD AI PRO"
+          "os": "Windows PC"
         }
       ],
       "lastActiveDate": "20/9/2026",
@@ -1865,12 +1938,12 @@
       "lastLogin": "21:43:12 3/9/2026",
       "authorizedDevices": [
         {
+          "browser": "Chrome",
           "deviceId": "MC-25436ADF-5F5F1504",
           "os": "Windows PC",
-          "browser": "Chrome",
-          "deviceName": "Windows PC (1440x900, 4 Cores)",
           "firstLogin": "21:12:04 3/9/2026",
-          "lastActive": "21:12:04 3/9/2026"
+          "lastActive": "21:12:04 3/9/2026",
+          "deviceName": "Windows PC (1440x900, 4 Cores)"
         }
       ],
       "updatedAt": "2026-09-03T14:48:42.107Z",
@@ -1933,12 +2006,12 @@
       "lastLogin": "15:20:01 2/9/2026",
       "authorizedDevices": [
         {
-          "browser": "Chrome",
+          "deviceName": "Windows PC (1280x720, 8 Cores)",
           "firstLogin": "15:20:00 2/9/2026",
-          "deviceId": "MC-04C3AC77-555C9248",
           "lastActive": "15:20:00 2/9/2026",
           "os": "Windows PC",
-          "deviceName": "Windows PC (1280x720, 8 Cores)"
+          "browser": "Chrome",
+          "deviceId": "MC-04C3AC77-555C9248"
         }
       ],
       "loginCountToday": 0,
@@ -1947,8 +2020,8 @@
       "totalLoginCount": 1,
       "loginLogs": [
         {
-          "deviceName": "Windows PC (1280x720, 8 Cores)",
           "timestamp": "15:20:00 2/9/2026",
+          "deviceName": "Windows PC (1280x720, 8 Cores)",
           "date": "2/9/2026"
         }
       ],
@@ -2015,9 +2088,9 @@
       "notes": "Đồng tác giả",
       "loginLogs": [
         {
+          "deviceName": "Windows PC (1280x720, 8 Cores)",
           "date": "1/9/2026",
-          "timestamp": "20:29:01 1/9/2026",
-          "deviceName": "Windows PC (1280x720, 8 Cores)"
+          "timestamp": "20:29:01 1/9/2026"
         }
       ],
       "fullName": "Mạc Thị Kim Oanh",
@@ -2025,10 +2098,10 @@
       "username": "kimoanhmntanthanh@gmail.com",
       "authorizedDevices": [
         {
-          "firstLogin": "20:29:01 1/9/2026",
           "deviceId": "MC-32E215B1-4BCB1456",
-          "browser": "Edge",
           "lastActive": "20:29:01 1/9/2026",
+          "firstLogin": "20:29:01 1/9/2026",
+          "browser": "Edge",
           "os": "Windows PC",
           "deviceName": "Windows PC (1280x720, 8 Cores)"
         }
@@ -2069,16 +2142,16 @@
       "authorizedDevices": [
         {
           "deviceName": "Windows PC (1536x864, 4 Cores)",
-          "os": "Windows PC",
-          "lastActive": "10:15:04 20/9/2026",
-          "firstLogin": "10:15:04 20/9/2026",
-          "hardwareSig": "Windows PC|1920x1080|4|Asia/Bangkok|angle (intel intel hd graphics ) or similar",
-          "browser": "Firefox",
-          "deviceId": "MC-42F387ED-6E58446",
           "usedApps": [
             "KHBD AI PRO"
           ],
-          "appName": "KHBD AI PRO"
+          "os": "Windows PC",
+          "hardwareSig": "Windows PC|1920x1080|4|Asia/Bangkok|angle (intel intel hd graphics ) or similar",
+          "deviceId": "MC-42F387ED-6E58446",
+          "firstLogin": "10:15:04 20/9/2026",
+          "lastActive": "10:15:04 20/9/2026",
+          "appName": "KHBD AI PRO",
+          "browser": "Firefox"
         }
       ],
       "maxTrialGenerations": 9999,
@@ -2089,13 +2162,13 @@
       "lastActiveTimestamp": 1790052960209,
       "loginLogs": [
         {
+          "timestamp": "10:15:04 20/9/2026",
           "os": "Windows PC",
+          "deviceName": "Windows PC (1536x864, 4 Cores) (Firefox)",
           "action": "Đăng nhập thiết bị mới",
           "appName": "KHBD AI PRO",
-          "deviceName": "Windows PC (1536x864, 4 Cores) (Firefox)",
-          "date": "20/9/2026",
-          "timestamp": "10:15:04 20/9/2026",
-          "browser": "Firefox"
+          "browser": "Firefox",
+          "date": "20/9/2026"
         },
         {
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
@@ -2180,12 +2253,12 @@
       "loginCountToday": 0,
       "authorizedDevices": [
         {
-          "deviceName": "Windows PC (1280x720, 8 Cores)",
-          "os": "Windows PC",
-          "browser": "Chrome",
           "lastActive": "20:34:05 4/9/2026",
           "firstLogin": "20:33:54 4/9/2026",
-          "deviceId": "MC-49F9A3C6-7ED6BEAB"
+          "deviceName": "Windows PC (1280x720, 8 Cores)",
+          "browser": "Chrome",
+          "deviceId": "MC-49F9A3C6-7ED6BEAB",
+          "os": "Windows PC"
         }
       ],
       "id": "user_1788528834865_f3co5",
@@ -2205,8 +2278,8 @@
       "loginLogs": [
         {
           "deviceName": "Windows PC (1280x720, 8 Cores)",
-          "date": "4/9/2026",
-          "timestamp": "20:34:05 4/9/2026"
+          "timestamp": "20:34:05 4/9/2026",
+          "date": "4/9/2026"
         }
       ],
       "schoolName": "Trường THPT Quảng Xương 2",
@@ -2222,17 +2295,17 @@
       "expiresAt": "05/09/2027",
       "authorizedDevices": [
         {
-          "os": "Windows PC",
-          "lastActive": "09:05:30 13/9/2026",
+          "hardwareSig": "Windows PC|1366x768|4|Asia/Saigon|intel hd graphics 620",
+          "browser": "Chrome",
           "appName": "KHBD AI PRO",
+          "lastActive": "09:05:30 13/9/2026",
           "firstLogin": "11:41:44 6/9/2026",
           "deviceId": "MC-6246449F-B893BCC",
+          "os": "Windows PC",
           "usedApps": [
             "KHBD AI PRO"
           ],
-          "hardwareSig": "Windows PC|1366x768|4|Asia/Saigon|intel hd graphics 620",
-          "deviceName": "Windows PC (1366x768, 4 Cores)",
-          "browser": "Chrome"
+          "deviceName": "Windows PC (1366x768, 4 Cores)"
         }
       ],
       "maxTrialGenerations": 9999,
@@ -2255,8 +2328,8 @@
       "loginLogs": [
         {
           "date": "13/9/2026",
-          "timestamp": "09:05:30 13/9/2026",
-          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)"
+          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)",
+          "timestamp": "09:05:30 13/9/2026"
         },
         {
           "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)",
@@ -2265,13 +2338,13 @@
         },
         {
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "09:04:12 13/9/2026",
-          "date": "13/9/2026"
+          "date": "13/9/2026",
+          "timestamp": "09:04:12 13/9/2026"
         },
         {
-          "date": "6/9/2026",
           "deviceName": "Windows PC (1366x768, 4 Cores)",
-          "timestamp": "11:41:44 6/9/2026"
+          "timestamp": "11:41:44 6/9/2026",
+          "date": "6/9/2026"
         }
       ],
       "lastLoginDate": "13/9/2026",
@@ -2293,21 +2366,21 @@
       "username": "phamtuoiqa@gmail.com",
       "authorizedDevices": [
         {
-          "deviceName": "Windows PC (1280x720, 4 Cores)",
-          "os": "Windows PC",
           "browser": "Chrome",
+          "os": "Windows PC",
           "deviceId": "MC-25865955-3304083A",
           "lastActive": "22:27:50 5/9/2026",
-          "firstLogin": "22:27:50 5/9/2026"
+          "firstLogin": "22:27:50 5/9/2026",
+          "deviceName": "Windows PC (1280x720, 4 Cores)"
         }
       ],
       "role": "teacher",
       "activeSecondsToday": 0,
       "loginLogs": [
         {
-          "date": "5/9/2026",
+          "timestamp": "22:27:50 5/9/2026",
           "deviceName": "Windows PC (1280x720, 4 Cores)",
-          "timestamp": "22:27:50 5/9/2026"
+          "date": "5/9/2026"
         }
       ],
       "schoolName": "trương MN Tân Thành",
@@ -2327,19 +2400,19 @@
       "lastActiveDate": "8/9/2026",
       "loginLogs": [
         {
-          "timestamp": "12:17:16 8/9/2026",
           "date": "8/9/2026",
+          "timestamp": "12:17:16 8/9/2026",
           "deviceName": "Máy tính (Nhận diện phiên quay lại)"
         },
         {
-          "date": "6/9/2026",
           "deviceName": "Windows PC (1280x720, 4 Cores)",
-          "timestamp": "00:11:02 6/9/2026"
+          "timestamp": "00:11:02 6/9/2026",
+          "date": "6/9/2026"
         },
         {
           "timestamp": "23:10:34 5/9/2026",
-          "date": "5/9/2026",
-          "deviceName": "Windows PC (1280x720, 4 Cores)"
+          "deviceName": "Windows PC (1280x720, 4 Cores)",
+          "date": "5/9/2026"
         }
       ],
       "status": "active",
@@ -2362,12 +2435,12 @@
       "fullName": "Nguyễn Yến",
       "authorizedDevices": [
         {
-          "deviceId": "MC-19CFC661-6E7D7990",
           "browser": "Edge",
-          "os": "Windows PC",
           "deviceName": "Windows PC (1280x720, 4 Cores)",
-          "firstLogin": "23:10:34 5/9/2026",
-          "lastActive": "00:11:02 6/9/2026"
+          "os": "Windows PC",
+          "deviceId": "MC-19CFC661-6E7D7990",
+          "lastActive": "00:11:02 6/9/2026",
+          "firstLogin": "23:10:34 5/9/2026"
         }
       ]
     },
@@ -2387,9 +2460,9 @@
       "email": "Truongthaolinh22tq@gmail.com",
       "loginLogs": [
         {
-          "deviceName": "Windows PC (1280x720, 12 Cores)",
           "timestamp": "09:46:36 6/9/2026",
-          "date": "6/9/2026"
+          "date": "6/9/2026",
+          "deviceName": "Windows PC (1280x720, 12 Cores)"
         }
       ],
       "updatedAt": "2026-09-06T03:34:29.320Z",
@@ -2398,12 +2471,12 @@
       "trialGenerations": 0,
       "authorizedDevices": [
         {
+          "lastActive": "09:46:36 6/9/2026",
+          "firstLogin": "09:46:36 6/9/2026",
           "deviceName": "Windows PC (1280x720, 12 Cores)",
           "deviceId": "MC-44B27909-5150B2C2",
-          "firstLogin": "09:46:36 6/9/2026",
-          "os": "Windows PC",
           "browser": "Edge",
-          "lastActive": "09:46:36 6/9/2026"
+          "os": "Windows PC"
         }
       ],
       "lastLoginDate": "6/9/2026",
@@ -2419,12 +2492,12 @@
       "phone": "0386985163",
       "authorizedDevices": [
         {
+          "firstLogin": "18:02:50 6/9/2026",
+          "lastActive": "18:02:58 6/9/2026",
+          "browser": "Chrome",
           "deviceName": "macOS Apple (1440x900, 8 Cores)",
           "deviceId": "MC-3CC767B9-501B157C",
-          "browser": "Chrome",
-          "os": "macOS Apple",
-          "lastActive": "18:02:58 6/9/2026",
-          "firstLogin": "18:02:50 6/9/2026"
+          "os": "macOS Apple"
         }
       ],
       "maxDevices": 2,
@@ -2438,14 +2511,14 @@
       "loginCountToday": 0,
       "loginLogs": [
         {
-          "date": "17/9/2026",
           "timestamp": "07:55:29 17/9/2026",
+          "date": "17/9/2026",
           "deviceName": "Máy tính (Nhận diện phiên quay lại)"
         },
         {
           "deviceName": "macOS Apple (1440x900, 8 Cores)",
-          "date": "6/9/2026",
-          "timestamp": "18:02:58 6/9/2026"
+          "timestamp": "18:02:58 6/9/2026",
+          "date": "6/9/2026"
         }
       ],
       "fullName": "triệu ái làn",
@@ -2468,12 +2541,12 @@
       "id": "user_1788855767464_ief7w",
       "authorizedDevices": [
         {
-          "deviceName": "Windows PC (1536x864, 8 Cores)",
-          "os": "Windows PC",
           "deviceId": "MC-49854C2B-7D7BE142",
+          "deviceName": "Windows PC (1536x864, 8 Cores)",
+          "firstLogin": "15:22:47 8/9/2026",
           "browser": "Chrome, Edge",
           "lastActive": "17:36:07 8/9/2026",
-          "firstLogin": "15:22:47 8/9/2026"
+          "os": "Windows PC"
         }
       ],
       "schoolName": "TH THCS IA NAN",
@@ -2484,19 +2557,19 @@
       "accessCode": "231996",
       "loginLogs": [
         {
+          "deviceName": "Windows PC (1536x864, 8 Cores)",
           "timestamp": "17:36:07 8/9/2026",
-          "deviceName": "Windows PC (1536x864, 8 Cores)",
           "date": "8/9/2026"
         },
         {
-          "deviceName": "Windows PC (1536x864, 8 Cores)",
           "timestamp": "17:33:32 8/9/2026",
-          "date": "8/9/2026"
+          "date": "8/9/2026",
+          "deviceName": "Windows PC (1536x864, 8 Cores)"
         },
         {
-          "timestamp": "15:22:56 8/9/2026",
+          "date": "8/9/2026",
           "deviceName": "Windows PC (1536x864, 8 Cores)",
-          "date": "8/9/2026"
+          "timestamp": "15:22:56 8/9/2026"
         }
       ],
       "createdAt": "8/9/2026",
@@ -2525,19 +2598,19 @@
       "lastActiveTimestamp": 1789998574992,
       "loginLogs": [
         {
-          "timestamp": "18:48:28 21/9/2026",
           "date": "21/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "18:48:28 21/9/2026"
         },
         {
           "date": "20/9/2026",
-          "timestamp": "08:32:57 20/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "08:32:57 20/9/2026"
         },
         {
           "date": "20/9/2026",
-          "timestamp": "08:32:54 20/9/2026",
-          "deviceName": "Windows PC (1536x864, 4 Cores) (Chrome)"
+          "deviceName": "Windows PC (1536x864, 4 Cores) (Chrome)",
+          "timestamp": "08:32:54 20/9/2026"
         },
         {
           "date": "14/9/2026",
@@ -2546,8 +2619,8 @@
         },
         {
           "deviceName": "Windows PC (1536x864, 4 Cores) (Chrome)",
-          "date": "13/9/2026",
-          "timestamp": "08:41:18 13/9/2026"
+          "timestamp": "08:41:18 13/9/2026",
+          "date": "13/9/2026"
         },
         {
           "date": "20/9/2026",
@@ -2573,17 +2646,17 @@
       "id": "user_1789263667839_wyexm",
       "authorizedDevices": [
         {
-          "firstLogin": "08:41:07 13/9/2026",
-          "browser": "Chrome",
-          "os": "Windows PC",
-          "lastActive": "08:32:54 20/9/2026",
-          "hardwareSig": "Windows PC|1920x1080|4|Asia/Saigon|intel uhd graphics",
-          "appName": "KHBD AI PRO",
           "deviceName": "Windows PC (1536x864, 4 Cores)",
-          "deviceId": "MC-16A10238-5BDC31A9",
+          "os": "Windows PC",
+          "hardwareSig": "Windows PC|1920x1080|4|Asia/Saigon|intel uhd graphics",
           "usedApps": [
             "KHBD AI PRO"
-          ]
+          ],
+          "appName": "KHBD AI PRO",
+          "browser": "Chrome",
+          "lastActive": "08:32:54 20/9/2026",
+          "firstLogin": "08:41:07 13/9/2026",
+          "deviceId": "MC-16A10238-5BDC31A9"
         }
       ],
       "username": "habichngoc",
@@ -2635,8 +2708,8 @@
       "loginLogs": [
         {
           "timestamp": "20:05:29 16/9/2026",
-          "deviceName": "Windows PC (1536x864, 8 Cores) (Edge)",
-          "date": "16/9/2026"
+          "date": "16/9/2026",
+          "deviceName": "Windows PC (1536x864, 8 Cores) (Edge)"
         }
       ],
       "id": "user_1789563886757_2ewyq",
@@ -2650,17 +2723,17 @@
       "maxTrialGenerations": 0,
       "authorizedDevices": [
         {
-          "hardwareSig": "Windows PC|1920x1080|8|Etc/GMT-7|intel uhd graphics 620",
-          "deviceName": "Windows PC (1536x864, 8 Cores)",
-          "firstLogin": "20:04:46 16/9/2026",
-          "lastActive": "20:05:29 16/9/2026",
           "appName": "KHBD AI PRO",
           "browser": "Edge",
-          "os": "Windows PC",
+          "hardwareSig": "Windows PC|1920x1080|8|Etc/GMT-7|intel uhd graphics 620",
+          "lastActive": "20:05:29 16/9/2026",
+          "firstLogin": "20:04:46 16/9/2026",
           "usedApps": [
             "KHBD AI PRO"
           ],
-          "deviceId": "MC-2DE031EF-2CC54B06"
+          "deviceId": "MC-2DE031EF-2CC54B06",
+          "os": "Windows PC",
+          "deviceName": "Windows PC (1536x864, 8 Cores)"
         }
       ],
       "lastActiveTimestamp": 1789563949194
@@ -2691,18 +2764,18 @@
       "activeSecondsToday": 0,
       "loginLogs": [
         {
+          "date": "23/9/2026",
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "20:54:03 23/9/2026",
-          "date": "23/9/2026"
+          "timestamp": "20:54:03 23/9/2026"
         },
         {
-          "timestamp": "21:06:30 22/9/2026",
-          "appName": "KHBD AI PRO",
-          "action": "Đăng nhập hệ thống",
           "date": "22/9/2026",
+          "action": "Đăng nhập hệ thống",
           "deviceName": "Windows PC (1280x800, 12 Cores) (Chrome)",
           "os": "Windows PC",
-          "browser": "Chrome"
+          "appName": "KHBD AI PRO",
+          "browser": "Chrome",
+          "timestamp": "21:06:30 22/9/2026"
         },
         {
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
@@ -2717,17 +2790,17 @@
       ],
       "authorizedDevices": [
         {
-          "browser": "Chrome",
-          "hardwareSig": "Windows PC|1920x1200|12|Asia/Saigon|intel iris xe graphics",
+          "lastActive": "21:06:30 22/9/2026",
+          "firstLogin": "21:06:21 22/9/2026",
+          "os": "Windows PC",
           "appName": "KHBD AI PRO",
-          "deviceId": "MC-17E0C700-36B81953",
+          "browser": "Chrome",
           "usedApps": [
             "KHBD AI PRO"
           ],
+          "hardwareSig": "Windows PC|1920x1200|12|Asia/Saigon|intel iris xe graphics",
           "deviceName": "Windows PC (1280x800, 12 Cores)",
-          "lastActive": "21:06:30 22/9/2026",
-          "firstLogin": "21:06:21 22/9/2026",
-          "os": "Windows PC"
+          "deviceId": "MC-17E0C700-36B81953"
         }
       ],
       "updatedAt": "2026-09-23T16:15:38.385Z",
@@ -2740,39 +2813,44 @@
       "role": "teacher",
       "lastActiveDate": "24/9/2026",
       "username": "cantho",
-      "lastLogin": "12:08:52 24/9/2026",
+      "lastLogin": "14:31:56 24/9/2026",
       "lastLoginDate": "24/9/2026",
       "authorizedDevices": [
         {
-          "hardwareSig": "Windows PC|1920x1080|8|Asia/Saigon|intel iris xe graphics",
-          "lastActive": "12:18:52 22/9/2026",
-          "firstLogin": "12:18:46 22/9/2026",
+          "appName": "KHBD AI PRO",
+          "browser": "Chrome",
           "deviceName": "Windows PC (1536x864, 8 Cores)",
+          "deviceId": "MC-0E4EED8F-3725276",
+          "os": "Windows PC",
           "usedApps": [
             "KHBD AI PRO"
           ],
-          "deviceId": "MC-0E4EED8F-3725276",
-          "os": "Windows PC",
-          "appName": "KHBD AI PRO",
-          "browser": "Chrome"
+          "firstLogin": "12:18:46 22/9/2026",
+          "lastActive": "12:18:52 22/9/2026",
+          "hardwareSig": "Windows PC|1920x1080|8|Asia/Saigon|intel iris xe graphics"
         }
       ],
-      "updatedAt": "2026-09-24T05:17:22.174Z",
+      "updatedAt": "2026-09-24T09:14:22.146Z",
       "expiresAt": "22/09/2027",
       "loginLogs": [
+        {
+          "timestamp": "14:31:56 24/9/2026",
+          "date": "24/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "deviceName": "Windows PC (1536x864, 8 Cores) (Chrome)",
+          "os": "Windows PC",
+          "action": "Đăng nhập hệ thống",
+          "browser": "Chrome",
+          "appName": "KHBD AI PRO",
+          "timestamp": "12:18:52 22/9/2026",
+          "date": "22/9/2026"
+        },
         {
           "date": "24/9/2026",
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
           "timestamp": "12:08:52 24/9/2026"
-        },
-        {
-          "os": "Windows PC",
-          "browser": "Chrome",
-          "deviceName": "Windows PC (1536x864, 8 Cores) (Chrome)",
-          "date": "22/9/2026",
-          "action": "Đăng nhập hệ thống",
-          "appName": "KHBD AI PRO",
-          "timestamp": "12:18:52 22/9/2026"
         },
         {
           "date": "24/9/2026",
@@ -2868,23 +2946,33 @@
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
           "date": "22/9/2026",
           "timestamp": "14:19:48 22/9/2026"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "12:45:29 24/9/2026",
+          "date": "24/9/2026"
+        },
+        {
+          "date": "24/9/2026",
+          "timestamp": "12:26:51 24/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
         }
       ],
       "createdAt": "22/9/2026",
       "schoolName": "Trường mầm non Lung Phìn",
-      "totalLoginCount": 21,
+      "totalLoginCount": 24,
       "accessCode": "198383",
-      "lastActiveTimestamp": 1790227041174,
+      "lastActiveTimestamp": 1790241234752,
       "status": "active",
       "maxTrialGenerations": 9999,
       "maxDevices": 2,
       "notes": "Người dùng tự đăng ký qua hệ thống",
       "id": "user_1790054326243_zy9v1",
-      "activeSecondsToday": 70,
-      "activeMinutesToday": 1,
+      "activeSecondsToday": 0,
+      "activeMinutesToday": 0,
       "customApiKey": "AQ.Ab8RN6Ib_l7VOGoHY3zdLC2kyyuxOIOIlKesKj4BhxMw1hYA4g",
       "apiKey": "AQ.Ab8RN6Ib_l7VOGoHY3zdLC2kyyuxOIOIlKesKj4BhxMw1hYA4g",
-      "loginCountToday": 1
+      "loginCountToday": 0
     },
     {
       "schoolName": "Trường  mầm non Lũng Phìn",
@@ -2894,13 +2982,13 @@
       "id": "user_1790049813132_le4rk",
       "loginLogs": [
         {
-          "deviceName": "Windows PC (1536x864, 4 Cores) (Chrome)",
-          "appName": "KHBD AI PRO",
-          "os": "Windows PC",
           "action": "Đăng nhập hệ thống",
           "date": "22/9/2026",
-          "timestamp": "11:03:41 22/9/2026",
-          "browser": "Chrome"
+          "browser": "Chrome",
+          "appName": "KHBD AI PRO",
+          "os": "Windows PC",
+          "deviceName": "Windows PC (1536x864, 4 Cores) (Chrome)",
+          "timestamp": "11:03:41 22/9/2026"
         }
       ],
       "status": "active",
@@ -2913,16 +3001,16 @@
       "username": "nguyencucbk86@gmail.com",
       "authorizedDevices": [
         {
-          "deviceName": "Windows PC (1536x864, 4 Cores)",
-          "appName": "KHBD AI PRO",
-          "firstLogin": "11:03:33 22/9/2026",
-          "hardwareSig": "Windows PC|1920x1080|4|Asia/Saigon|intel uhd graphics",
           "browser": "Chrome",
-          "lastActive": "11:03:41 22/9/2026",
+          "appName": "KHBD AI PRO",
+          "deviceId": "MC-16A10238-5BDC31A9",
+          "hardwareSig": "Windows PC|1920x1080|4|Asia/Saigon|intel uhd graphics",
           "usedApps": [
             "KHBD AI PRO"
           ],
-          "deviceId": "MC-16A10238-5BDC31A9",
+          "lastActive": "11:03:41 22/9/2026",
+          "firstLogin": "11:03:33 22/9/2026",
+          "deviceName": "Windows PC (1536x864, 4 Cores)",
           "os": "Windows PC"
         }
       ],
@@ -2957,13 +3045,13 @@
           "deviceName": "Máy tính (Nhận diện phiên quay lại)"
         },
         {
+          "timestamp": "17:27:38 20/9/2026",
           "date": "20/9/2026",
+          "browser": "Chrome",
           "appName": "KHBD AI PRO",
           "deviceName": "Windows PC (1280x720, 8 Cores) (Chrome)",
-          "action": "Đăng nhập hệ thống",
-          "timestamp": "17:27:38 20/9/2026",
-          "browser": "Chrome",
-          "os": "Windows PC"
+          "os": "Windows PC",
+          "action": "Đăng nhập hệ thống"
         },
         {
           "timestamp": "21:04:57 21/9/2026",
@@ -2987,17 +3075,17 @@
       "notes": "Người dùng tự đăng ký qua hệ thống",
       "authorizedDevices": [
         {
+          "lastActive": "17:27:38 20/9/2026",
+          "firstLogin": "17:27:32 20/9/2026",
+          "hardwareSig": "Windows PC|1920x1080|8|Asia/Saigon|intel uhd graphics",
           "deviceName": "Windows PC (1280x720, 8 Cores)",
           "usedApps": [
             "KHBD AI PRO"
           ],
-          "deviceId": "MC-63E5ABB4-3B1B322D",
-          "firstLogin": "17:27:32 20/9/2026",
-          "hardwareSig": "Windows PC|1920x1080|8|Asia/Saigon|intel uhd graphics",
           "os": "Windows PC",
-          "lastActive": "17:27:38 20/9/2026",
+          "browser": "Chrome",
           "appName": "KHBD AI PRO",
-          "browser": "Chrome"
+          "deviceId": "MC-63E5ABB4-3B1B322D"
         }
       ],
       "id": "user_1789900052761_b998w",
@@ -3020,17 +3108,17 @@
       "loginLogs": [
         {
           "timestamp": "20:55:23 21/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "date": "21/9/2026"
+          "date": "21/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
         },
         {
-          "browser": "Chrome",
-          "deviceName": "Windows PC (1536x864, 8 Cores) (Chrome)",
-          "timestamp": "17:40:35 20/9/2026",
-          "action": "Đăng nhập hệ thống",
           "os": "Windows PC",
           "date": "20/9/2026",
-          "appName": "KHBD AI PRO"
+          "action": "Đăng nhập hệ thống",
+          "timestamp": "17:40:35 20/9/2026",
+          "deviceName": "Windows PC (1536x864, 8 Cores) (Chrome)",
+          "appName": "KHBD AI PRO",
+          "browser": "Chrome"
         },
         {
           "timestamp": "22:09:37 20/9/2026",
@@ -3055,13 +3143,13 @@
           "firstLogin": "17:40:27 20/9/2026",
           "hardwareSig": "Windows PC|1920x1080|8|Asia/Saigon|intel graphics",
           "deviceName": "Windows PC (1536x864, 8 Cores)",
-          "appName": "KHBD AI PRO",
+          "os": "Windows PC",
           "usedApps": [
             "KHBD AI PRO"
           ],
-          "deviceId": "MC-74A9D1CD-46F08F44",
           "browser": "Chrome",
-          "os": "Windows PC"
+          "appName": "KHBD AI PRO",
+          "deviceId": "MC-74A9D1CD-46F08F44"
         }
       ],
       "lastLoginDate": "21/9/2026",
@@ -3076,18 +3164,18 @@
       "totalLoginCount": 4,
       "loginLogs": [
         {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
           "date": "23/9/2026",
-          "timestamp": "19:41:53 23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+          "timestamp": "19:41:53 23/9/2026"
         },
         {
+          "action": "Đăng nhập hệ thống",
+          "os": "Windows PC",
           "timestamp": "17:59:37 20/9/2026",
           "appName": "KHBD AI PRO",
           "browser": "Chrome",
-          "action": "Đăng nhập hệ thống",
-          "os": "Windows PC",
-          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)",
-          "date": "20/9/2026"
+          "date": "20/9/2026",
+          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)"
         },
         {
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
@@ -3121,17 +3209,17 @@
       "username": "Luyen1988@",
       "authorizedDevices": [
         {
-          "hardwareSig": "Windows PC|1366x768|4|Etc/GMT-7|intel hd graphics 520",
-          "appName": "KHBD AI PRO",
           "deviceName": "Windows PC (1366x768, 4 Cores)",
-          "firstLogin": "17:59:31 20/9/2026",
+          "hardwareSig": "Windows PC|1366x768|4|Etc/GMT-7|intel hd graphics 520",
+          "deviceId": "MC-0726B413-6847C504",
+          "appName": "KHBD AI PRO",
           "browser": "Chrome",
           "os": "Windows PC",
           "usedApps": [
             "KHBD AI PRO"
           ],
-          "deviceId": "MC-0726B413-6847C504",
-          "lastActive": "17:59:37 20/9/2026"
+          "lastActive": "17:59:37 20/9/2026",
+          "firstLogin": "17:59:31 20/9/2026"
         }
       ],
       "schoolName": "Trường Mầm non Lũng Phìn",
@@ -3143,13 +3231,13 @@
     {
       "loginLogs": [
         {
-          "action": "Đăng nhập hệ thống",
-          "browser": "Chrome",
           "deviceName": "Windows PC (1280x720, 4 Cores) (Chrome)",
-          "date": "22/9/2026",
+          "action": "Đăng nhập hệ thống",
+          "appName": "KHBD AI PRO",
           "os": "Windows PC",
+          "browser": "Chrome",
           "timestamp": "13:01:16 22/9/2026",
-          "appName": "KHBD AI PRO"
+          "date": "22/9/2026"
         }
       ],
       "lastLoginDate": "22/9/2026",
@@ -3163,17 +3251,17 @@
       "expiresAt": "Dùng thử",
       "authorizedDevices": [
         {
+          "firstLogin": "13:00:54 22/9/2026",
+          "lastActive": "13:01:16 22/9/2026",
           "deviceId": "MC-451B34E0-2B066131",
           "usedApps": [
             "KHBD AI PRO"
           ],
+          "hardwareSig": "Windows PC|1920x1080|4|Asia/Bangkok|intel uhd graphics",
           "deviceName": "Windows PC (1280x720, 4 Cores)",
           "os": "Windows PC",
-          "appName": "KHBD AI PRO",
-          "hardwareSig": "Windows PC|1920x1080|4|Asia/Bangkok|intel uhd graphics",
-          "lastActive": "13:01:16 22/9/2026",
           "browser": "Chrome",
-          "firstLogin": "13:00:54 22/9/2026"
+          "appName": "KHBD AI PRO"
         }
       ],
       "loginCountToday": 0,
@@ -3195,12 +3283,12 @@
     },
     {
       "activeMinutesToday": 0,
-      "updatedAt": "2026-09-24T04:53:49.112Z",
+      "updatedAt": "2026-09-24T16:34:26.329Z",
       "apiKey": "AQ.Ab8RN6KsxPkdcbTDkc_kvH4WJB-W6FgMd48UbBgml8ZqXAjhyw",
       "notes": "Người dùng tự đăng ký qua hệ thống",
       "expiresAt": "23/10/2027",
       "fullName": "Lệnh Thị Thảo",
-      "loginCountToday": 1,
+      "loginCountToday": 0,
       "schoolName": "Trường Mầm non Lũng Phìn",
       "lastLoginDate": "24/9/2026",
       "status": "active",
@@ -3210,48 +3298,58 @@
       "createdAt": "22/9/2026",
       "trialGenerations": 0,
       "id": "user_1790089507685_63kc8",
-      "totalLoginCount": 4,
+      "totalLoginCount": 6,
       "customApiKey": "AQ.Ab8RN6KsxPkdcbTDkc_kvH4WJB-W6FgMd48UbBgml8ZqXAjhyw",
       "username": "lenhthao2901@gmail.com",
       "role": "teacher",
       "authorizedDevices": [
         {
+          "lastActive": "22:05:18 22/9/2026",
           "firstLogin": "22:05:07 22/9/2026",
+          "os": "Windows PC",
+          "deviceName": "Windows PC (1280x800, 12 Cores)",
           "usedApps": [
             "KHBD AI PRO"
           ],
-          "deviceId": "MC-5DE322BB-7068EF8A",
-          "os": "Windows PC",
           "browser": "Chrome",
-          "lastActive": "22:05:18 22/9/2026",
           "appName": "KHBD AI PRO",
-          "deviceName": "Windows PC (1280x800, 12 Cores)",
-          "hardwareSig": "Windows PC|1920x1200|12|Asia/Saigon|intel uhd graphics"
+          "hardwareSig": "Windows PC|1920x1200|12|Asia/Saigon|intel uhd graphics",
+          "deviceId": "MC-5DE322BB-7068EF8A"
         }
       ],
-      "lastActiveTimestamp": 1790225324099,
+      "lastActiveTimestamp": 1790267627429,
       "lastActiveDate": "24/9/2026",
       "maxTrialGenerations": 9999,
-      "lastLogin": "11:47:35 24/9/2026",
+      "lastLogin": "21:17:03 24/9/2026",
       "loginLogs": [
         {
-          "timestamp": "11:47:35 24/9/2026",
+          "date": "24/9/2026",
+          "timestamp": "21:17:03 24/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "timestamp": "11:38:05 23/9/2026",
+          "date": "23/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "deviceName": "Windows PC (1280x800, 12 Cores) (Chrome)",
+          "os": "Windows PC",
+          "date": "22/9/2026",
+          "appName": "KHBD AI PRO",
+          "browser": "Chrome",
+          "action": "Đăng nhập hệ thống",
+          "timestamp": "22:05:18 22/9/2026"
+        },
+        {
+          "timestamp": "15:54:47 24/9/2026",
           "date": "24/9/2026",
           "deviceName": "Máy tính (Nhận diện phiên quay lại)"
         },
         {
-          "date": "23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "11:38:05 23/9/2026"
-        },
-        {
-          "appName": "KHBD AI PRO",
-          "timestamp": "22:05:18 22/9/2026",
-          "action": "Đăng nhập hệ thống",
-          "deviceName": "Windows PC (1280x800, 12 Cores) (Chrome)",
-          "browser": "Chrome",
-          "os": "Windows PC",
-          "date": "22/9/2026"
+          "timestamp": "11:47:35 24/9/2026",
+          "date": "24/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
         },
         {
           "date": "24/9/2026",
@@ -3259,7 +3357,7 @@
           "deviceName": "Máy tính (Nhận diện phiên quay lại)"
         }
       ],
-      "activeSecondsToday": 27,
+      "activeSecondsToday": 0,
       "avatar": "data:image/jpeg;base64,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"
     },
     {
@@ -3268,11 +3366,11 @@
       "trialGenerations": 1,
       "expiresAt": "23/09/2027",
       "loginCountToday": 0,
-      "updatedAt": "2026-09-23T17:06:12.463Z",
+      "updatedAt": "2026-09-24T11:19:41.921Z",
       "role": "teacher",
       "accessCode": "481994",
       "createdAt": "23/9/2026",
-      "totalLoginCount": 2,
+      "totalLoginCount": 3,
       "phone": "0374326675",
       "username": "dinhsua4894@gmail.com",
       "maxTrialGenerations": 9999,
@@ -3283,43 +3381,48 @@
       "schoolName": "Trường Mầm Non Lũng Phìn",
       "authorizedDevices": [
         {
-          "deviceName": "Windows PC (1366x768, 4 Cores)",
-          "browser": "Chrome",
           "os": "Windows PC",
           "lastActive": "11:04:29 23/9/2026",
+          "firstLogin": "11:04:21 23/9/2026",
           "hardwareSig": "Windows PC|1366x768|4|Etc/GMT-7|intel hd graphics 4000",
-          "deviceId": "MC-14024E20-5F4FA035",
           "usedApps": [
             "KHBD AI PRO"
           ],
+          "deviceId": "MC-14024E20-5F4FA035",
+          "deviceName": "Windows PC (1366x768, 4 Cores)",
           "appName": "KHBD AI PRO",
-          "firstLogin": "11:04:21 23/9/2026"
+          "browser": "Chrome"
         }
       ],
       "activeSecondsToday": 0,
       "activeMinutesToday": 0,
       "loginLogs": [
         {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "18:18:01 24/9/2026",
+          "date": "24/9/2026"
+        },
+        {
+          "date": "23/9/2026",
+          "os": "Windows PC",
+          "browser": "Chrome",
+          "appName": "KHBD AI PRO",
+          "timestamp": "11:04:29 23/9/2026",
+          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)",
+          "action": "Đăng nhập hệ thống"
+        },
+        {
           "timestamp": "22:25:07 23/9/2026",
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
           "date": "23/9/2026"
-        },
-        {
-          "browser": "Chrome",
-          "action": "Đăng nhập hệ thống",
-          "date": "23/9/2026",
-          "timestamp": "11:04:29 23/9/2026",
-          "os": "Windows PC",
-          "appName": "KHBD AI PRO",
-          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)"
         }
       ],
-      "lastLogin": "22:25:07 23/9/2026",
-      "lastLoginDate": "23/9/2026",
+      "lastLogin": "18:18:01 24/9/2026",
+      "lastLoginDate": "24/9/2026",
       "apiKey": "AQ.Ab8RN6KQh6L4tuOBko_yqeCi-vFeKdMC-I08a0IiUAtOO1MuKw",
       "customApiKey": "AQ.Ab8RN6KQh6L4tuOBko_yqeCi-vFeKdMC-I08a0IiUAtOO1MuKw",
-      "lastActiveDate": "23/9/2026",
-      "lastActiveTimestamp": 1790180736448
+      "lastActiveDate": "24/9/2026",
+      "lastActiveTimestamp": 1790248780916
     },
     {
       "role": "teacher",
@@ -3327,17 +3430,17 @@
       "trialGenerations": 5,
       "authorizedDevices": [
         {
-          "deviceName": "Windows PC (1366x768, 4 Cores)",
-          "firstLogin": "11:55:07 23/9/2026",
-          "deviceId": "MC-3CDA4726-546D94DB",
           "usedApps": [
             "KHBD AI PRO"
           ],
-          "lastActive": "11:55:12 23/9/2026",
-          "os": "Windows PC",
+          "deviceName": "Windows PC (1366x768, 4 Cores)",
+          "deviceId": "MC-3CDA4726-546D94DB",
           "browser": "Chrome",
+          "appName": "KHBD AI PRO",
           "hardwareSig": "Windows PC|1366x768|4|Asia/Bangkok|intel hd graphics 520",
-          "appName": "KHBD AI PRO"
+          "firstLogin": "11:55:07 23/9/2026",
+          "lastActive": "11:55:12 23/9/2026",
+          "os": "Windows PC"
         }
       ],
       "expiresAt": "24/09/2028",
@@ -3347,39 +3450,49 @@
       "notes": "Người dùng tự đăng ký qua hệ thống",
       "loginCountToday": 1,
       "status": "active",
-      "updatedAt": "2026-09-24T05:17:45.995Z",
+      "updatedAt": "2026-09-24T23:06:44.358Z",
       "maxTrialGenerations": 9999,
       "schoolName": "Trường Mầm Non Lũng Phìn, Phân hiệu 1 Hố Quáng Phìn",
       "createdAt": "23/9/2026",
-      "totalLoginCount": 7,
+      "totalLoginCount": 9,
       "email": "Chosung194@gmail.com",
       "maxDevices": 2,
-      "activeSecondsToday": 107,
-      "activeMinutesToday": 1,
+      "activeSecondsToday": 2174,
+      "activeMinutesToday": 36,
       "loginLogs": [
+        {
+          "date": "25/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "04:46:44 25/9/2026"
+        },
+        {
+          "timestamp": "23:38:37 23/9/2026",
+          "date": "23/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)"
+        },
+        {
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "date": "23/9/2026",
+          "timestamp": "19:59:51 23/9/2026"
+        },
+        {
+          "os": "Windows PC",
+          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)",
+          "action": "Đăng nhập hệ thống",
+          "date": "23/9/2026",
+          "browser": "Chrome",
+          "appName": "KHBD AI PRO",
+          "timestamp": "11:55:12 23/9/2026"
+        },
+        {
+          "date": "24/9/2026",
+          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
+          "timestamp": "12:34:25 24/9/2026"
+        },
         {
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
           "date": "24/9/2026",
           "timestamp": "12:13:05 24/9/2026"
-        },
-        {
-          "timestamp": "23:38:37 23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "date": "23/9/2026"
-        },
-        {
-          "date": "23/9/2026",
-          "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "19:59:51 23/9/2026"
-        },
-        {
-          "timestamp": "11:55:12 23/9/2026",
-          "deviceName": "Windows PC (1366x768, 4 Cores) (Chrome)",
-          "appName": "KHBD AI PRO",
-          "os": "Windows PC",
-          "action": "Đăng nhập hệ thống",
-          "date": "23/9/2026",
-          "browser": "Chrome"
         },
         {
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
@@ -3397,32 +3510,32 @@
           "date": "24/9/2026"
         }
       ],
-      "lastLogin": "12:13:05 24/9/2026",
-      "lastLoginDate": "24/9/2026",
-      "lastActiveTimestamp": 1790227064995,
-      "lastActiveDate": "24/9/2026",
+      "lastLogin": "04:46:44 25/9/2026",
+      "lastLoginDate": "25/9/2026",
+      "lastActiveTimestamp": 1790291181637,
+      "lastActiveDate": "25/9/2026",
       "customApiKey": "AQ.Ab8RN6I59dES-33c5VCndOH0E1-eFXh3bcHF1c0pLCvkMbK24g",
       "apiKey": "AQ.Ab8RN6I59dES-33c5VCndOH0E1-eFXh3bcHF1c0pLCvkMbK24g"
     },
     {
-      "activeSecondsToday": 1665,
+      "activeSecondsToday": 0,
       "createdAt": "23/9/2026",
       "notes": "Người dùng tự đăng ký qua hệ thống",
       "expiresAt": "23/10/2027",
       "loginLogs": [
         {
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
-          "timestamp": "05:17:29 24/9/2026",
-          "date": "24/9/2026"
+          "date": "24/9/2026",
+          "timestamp": "05:17:29 24/9/2026"
         },
         {
           "appName": "KHBD AI PRO",
-          "timestamp": "22:10:48 23/9/2026",
-          "deviceName": "Windows PC (1280x720, 8 Cores) (Edge)",
-          "date": "23/9/2026",
-          "action": "Đăng nhập hệ thống",
           "browser": "Edge",
-          "os": "Windows PC"
+          "action": "Đăng nhập hệ thống",
+          "date": "23/9/2026",
+          "os": "Windows PC",
+          "deviceName": "Windows PC (1280x720, 8 Cores) (Edge)",
+          "timestamp": "22:10:48 23/9/2026"
         },
         {
           "deviceName": "Máy tính (Nhận diện phiên quay lại)",
@@ -3430,29 +3543,29 @@
           "date": "23/9/2026"
         },
         {
-          "appName": "KHBD AI PRO",
           "action": "Đăng nhập hệ thống",
-          "timestamp": "19:20:51 23/9/2026",
           "os": "Windows PC",
-          "browser": "Chrome",
           "deviceName": "Windows PC (1280x720, 8 Cores) (Chrome)",
-          "date": "23/9/2026"
+          "date": "23/9/2026",
+          "browser": "Chrome",
+          "appName": "KHBD AI PRO",
+          "timestamp": "19:20:51 23/9/2026"
         }
       ],
-      "activeMinutesToday": 27,
+      "activeMinutesToday": 0,
       "authorizedDevices": [
         {
-          "os": "Windows PC",
-          "lastActive": "22:10:48 23/9/2026",
+          "hardwareSig": "Windows PC|1920x1080|8|Asia/Saigon|amd radeon(tm) graphics",
           "appName": "KHBD AI PRO",
+          "browser": "Chrome, Edge",
+          "firstLogin": "19:20:46 23/9/2026",
+          "lastActive": "22:10:48 23/9/2026",
+          "os": "Windows PC",
+          "deviceId": "MC-5B25872C-518C195D",
+          "deviceName": "Windows PC (1280x720, 8 Cores)",
           "usedApps": [
             "KHBD AI PRO"
-          ],
-          "firstLogin": "19:20:46 23/9/2026",
-          "deviceId": "MC-5B25872C-518C195D",
-          "hardwareSig": "Windows PC|1920x1080|8|Asia/Saigon|amd radeon(tm) graphics",
-          "deviceName": "Windows PC (1280x720, 8 Cores)",
-          "browser": "Chrome, Edge"
+          ]
         }
       ],
       "maxTrialGenerations": 9999,
@@ -3466,7 +3579,7 @@
       "lastActiveTimestamp": 1790206128480,
       "lastActiveDate": "24/9/2026",
       "username": "sungthihoa0299@gmail.com",
-      "loginCountToday": 1,
+      "loginCountToday": 0,
       "accessCode": "Y@oslis",
       "updatedAt": "2026-09-24T04:36:15.452Z",
       "totalLoginCount": 4,
@@ -3489,12 +3602,12 @@
       "loginLogs": [
         {
           "browser": "Chrome",
-          "action": "Đăng nhập hệ thống",
-          "os": "Windows PC",
-          "timestamp": "19:42:33 23/9/2026",
-          "date": "23/9/2026",
           "appName": "KHBD AI PRO",
-          "deviceName": "Windows PC (1280x720, 8 Cores) (Chrome)"
+          "action": "Đăng nhập hệ thống",
+          "date": "23/9/2026",
+          "deviceName": "Windows PC (1280x720, 8 Cores) (Chrome)",
+          "os": "Windows PC",
+          "timestamp": "19:42:33 23/9/2026"
         }
       ],
       "fullName": "LÝ THỊ PHƯƠNG",
@@ -3508,17 +3621,17 @@
       "accessCode": "271196",
       "authorizedDevices": [
         {
-          "browser": "Chrome",
-          "hardwareSig": "Windows PC|1920x1080|8|Etc/GMT-7|intel uhd graphics 630",
-          "appName": "KHBD AI PRO",
-          "lastActive": "19:42:33 23/9/2026",
-          "os": "Windows PC",
           "firstLogin": "19:42:28 23/9/2026",
-          "deviceName": "Windows PC (1280x720, 8 Cores)",
+          "lastActive": "19:42:33 23/9/2026",
           "deviceId": "MC-2DE031D0-2CC54AE7",
+          "browser": "Chrome",
+          "appName": "KHBD AI PRO",
           "usedApps": [
             "KHBD AI PRO"
-          ]
+          ],
+          "os": "Windows PC",
+          "hardwareSig": "Windows PC|1920x1080|8|Etc/GMT-7|intel uhd graphics 630",
+          "deviceName": "Windows PC (1280x720, 8 Cores)"
         }
       ],
       "customApiKey": "AQ.Ab8RN6LgLtVsAA8CrsCqGnSaT1r2ku2_9G8CKZGTEcTi5mUxdg",
@@ -3528,58 +3641,6 @@
       "updatedAt": "2026-09-23T13:06:37.003Z",
       "status": "active",
       "notes": "Người dùng tự đăng ký qua hệ thống"
-    },
-    {
-      "id": "user_1790211724250_bqoat",
-      "schoolName": "Trường mầm non Lũng Phìn",
-      "phone": "0813545707",
-      "loginLogs": [
-        {
-          "deviceName": "Windows PC (1920x1080, 4 Cores) (Edge)",
-          "browser": "Edge",
-          "timestamp": "08:02:13 24/9/2026",
-          "date": "24/9/2026",
-          "appName": "KHBD AI PRO",
-          "os": "Windows PC",
-          "action": "Đăng nhập hệ thống"
-        }
-      ],
-      "maxDevices": 2,
-      "loginCountToday": 1,
-      "expiresAt": "Dùng thử",
-      "authorizedDevices": [
-        {
-          "deviceId": "MC-4CF72715-5E9B564E",
-          "usedApps": [
-            "KHBD AI PRO"
-          ],
-          "browser": "Edge",
-          "appName": "KHBD AI PRO",
-          "deviceName": "Windows PC (1920x1080, 4 Cores)",
-          "hardwareSig": "Windows PC|1920x1080|4|Etc/GMT-7|intel hd graphics 520",
-          "lastActive": "08:02:13 24/9/2026",
-          "os": "Windows PC",
-          "firstLogin": "08:02:04 24/9/2026"
-        }
-      ],
-      "lastActiveTimestamp": 1790226829107,
-      "role": "teacher",
-      "createdAt": "24/9/2026",
-      "email": "huongmathi29@gmail.com",
-      "notes": "Người dùng tự đăng ký qua hệ thống",
-      "accessCode": "huong@2005",
-      "username": "huongmathi29@gmail.com",
-      "activeSecondsToday": 39,
-      "updatedAt": "2026-09-24T05:13:50.104Z",
-      "maxTrialGenerations": 5,
-      "fullName": "MA THỊ HƯỞNG",
-      "lastLogin": "12:11:30 24/9/2026",
-      "lastActiveDate": "24/9/2026",
-      "lastLoginDate": "24/9/2026",
-      "totalLoginCount": 1,
-      "trialGenerations": 1,
-      "activeMinutesToday": 0,
-      "status": "active"
     }
   ],
   "deletedUserIds": [
@@ -3596,5 +3657,5 @@
     "user_admin_02",
     "trananh123k@gmail.com"
   ],
-  "lastUpdated": "2026-09-24T05:17:22.793Z"
+  "lastUpdated": "2026-09-25T01:51:06.609Z"
 }

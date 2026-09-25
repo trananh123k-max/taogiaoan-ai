@@ -220,6 +220,35 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
             </div>
           )}
 
+          {/* Optimal Multi-Tier AI Engine Banner */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-3 text-slate-800 space-y-1.5 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 font-bold text-xs text-blue-950">
+                <Zap className="w-4 h-4 text-blue-600 shrink-0" />
+                <span>Cấu hình Động cơ AI Tối ưu (Smart Failover Engine)</span>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-600 text-white font-black tracking-wide">
+                Đang kích hoạt
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
+              <div className="bg-white/80 border border-blue-100 rounded-lg p-2 flex items-start gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-bold text-slate-900">Ưu tiên 1 (Mặc định): Tốc độ siêu tốc</div>
+                  <div className="text-slate-600 text-[10.5px]"><code>gemini-3.1-flash-lite</code> & <code>gemini-flash-lite-latest</code> (2 - 3s/hoạt động).</div>
+                </div>
+              </div>
+              <div className="bg-white/80 border border-blue-100 rounded-lg p-2 flex items-start gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-bold text-slate-900">Ưu tiên 2 (Tự động chuyển tiếp - Failover)</div>
+                  <div className="text-slate-600 text-[10.5px]">Tự động chuyển <code>gemini-3-flash-preview</code> khi 503/429, giữ chuẩn khung bảng.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Multiple API Keys Input Box */}
           <div className="space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
             <div className="flex items-center justify-between">

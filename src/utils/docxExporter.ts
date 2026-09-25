@@ -253,7 +253,7 @@ function parseMarkdownRuns(
 function createDashListItem(
   text: string,
   fontName: string,
-  indentTwips: number = 284,
+  indentTwips: number = 0,
   colorHex?: string,
   fontSize: number = 28
 ): Paragraph {
@@ -262,7 +262,6 @@ function createDashListItem(
   return new Paragraph({
     alignment: AlignmentType.JUSTIFIED,
     spacing: { before: 30, after: 30 },
-    indent: { left: indentTwips, hanging: indentTwips },
     children: runs,
   });
 }
@@ -275,7 +274,7 @@ function createDashListItem(
 function createGeneralCompetencyDocxItem(
   text: string,
   fontName: string,
-  indentTwips: number = 284,
+  indentTwips: number = 0,
   fontSize: number = 28
 ): Paragraph {
   const clean = text.replace(/^[-•*]\s*/, '').trim();
@@ -296,7 +295,6 @@ function createGeneralCompetencyDocxItem(
     return new Paragraph({
       alignment: AlignmentType.JUSTIFIED,
       spacing: { before: 30, after: 30 },
-      indent: { left: indentTwips, hanging: indentTwips },
       children: [
         new TextRun({ text: `- ${standardTitle} `, bold: true, font: fontName, size: fontSize }),
         ...descRuns,
@@ -308,7 +306,6 @@ function createGeneralCompetencyDocxItem(
   return new Paragraph({
     alignment: AlignmentType.JUSTIFIED,
     spacing: { before: 30, after: 30 },
-    indent: { left: indentTwips, hanging: indentTwips },
     children: runs,
   });
 }
@@ -326,7 +323,7 @@ function createGeneralCompetencyDocxItem(
 function createSubjectCompetencyDocxItem(
   text: string,
   fontName: string,
-  indentTwips: number = 284,
+  indentTwips: number = 0,
   fontSize: number = 28
 ): Paragraph {
   const clean = text.replace(/^[-•*]\s*/, '').trim();
@@ -340,7 +337,6 @@ function createSubjectCompetencyDocxItem(
     return new Paragraph({
       alignment: AlignmentType.JUSTIFIED,
       spacing: { before: 30, after: 30 },
-      indent: { left: indentTwips, hanging: indentTwips },
       children: [
         new TextRun({ text: `- ${prefix} `, bold: true, font: fontName, size: fontSize }),
         ...descRuns,
@@ -374,7 +370,6 @@ function createSubjectCompetencyDocxItem(
     return new Paragraph({
       alignment: AlignmentType.JUSTIFIED,
       spacing: { before: 30, after: 30 },
-      indent: { left: indentTwips, hanging: indentTwips },
       children: [
         new TextRun({ text: `- ${standardPrefix} `, bold: true, font: fontName, size: fontSize }),
         ...descRuns,
@@ -391,7 +386,6 @@ function createSubjectCompetencyDocxItem(
     return new Paragraph({
       alignment: AlignmentType.JUSTIFIED,
       spacing: { before: 30, after: 30 },
-      indent: { left: indentTwips, hanging: indentTwips },
       children: [
         new TextRun({ text: `- ${prefix} `, bold: true, font: fontName, size: fontSize }),
         ...descRuns,
@@ -404,7 +398,6 @@ function createSubjectCompetencyDocxItem(
   return new Paragraph({
     alignment: AlignmentType.JUSTIFIED,
     spacing: { before: 30, after: 30 },
-    indent: { left: indentTwips, hanging: indentTwips },
     children: runs,
   });
 }
@@ -3141,225 +3134,74 @@ function buildPreschoolDocxElements(
 
   const preschoolInfo = getPreschoolHeaderInfo(plan);
 
-  if (preschoolInfo.isMusic) {
-    // 1. Header banner (e.g., GIÁO ÁN ÂM NHẠC with green highlight box matching reference)
+  // 1. Header Banner (CĂN GIỮA, KHUNG XANH LÁ #00FF00 IN ĐẬM)
+  elements.push(
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 80, after: 120 },
+      children: [
+        new TextRun({
+          text: preschoolInfo.mainHeader,
+          bold: true,
+          size: 28, // 14pt
+          font: fontName,
+          shading: {
+            fill: "00FF00", // Green highlight box matching user image
+          },
+        }),
+      ],
+    })
+  );
+
+  // 2. Nội dung chi tiết bên dưới (Đề tài, Hoạt động, Độ tuổi, Thời gian, Lĩnh vực, Chủ đề, Số lượng trẻ, Tác giả...):
+  // YÊU CẦU BẮT BUỘC: CĂN ĐỀU 2 BÊN (JUSTIFY) VÀ THỤT LỀ ĐẦU DÒNG 1 TAB (720 dxa = 0.5 inch)
+  const subLines = [
+    preschoolInfo.lessonTitle,
+    preschoolInfo.domainLine,
+    preschoolInfo.themeLine,
+    preschoolInfo.gradeLine,
+    preschoolInfo.classSizeLine,
+    preschoolInfo.timeLine,
+    ...preschoolInfo.contentLines,
+  ].filter(Boolean);
+
+  subLines.forEach((line) => {
+    const colonIdx = line.indexOf(':');
+    let labelText = line;
+    let valText = '';
+    if (colonIdx > 0 && colonIdx < 35) {
+      labelText = line.substring(0, colonIdx + 1);
+      valText = line.substring(colonIdx + 1);
+    }
+
     elements.push(
       new Paragraph({
-        alignment: AlignmentType.LEFT,
-        spacing: { before: 80, after: 80 },
+        alignment: AlignmentType.JUSTIFIED,
+        indent: { firstLine: 720 }, // Thụt vào đầu dòng 1 tab (0.5 inch = 720 dxa) và căn đều 2 bên
+        spacing: { before: 20, after: 20, line: 276 },
         children: [
           new TextRun({
-            text: preschoolInfo.mainHeader,
+            text: labelText,
             bold: true,
             size: 28, // 14pt
             font: fontName,
-            shading: {
-              fill: "00FF00", // Green highlight box matching image
-            },
+            color: '000000',
           }),
+          ...(valText
+            ? [
+                new TextRun({
+                  text: valText,
+                  bold: true,
+                  size: 28, // 14pt
+                  font: fontName,
+                  color: '000000',
+                }),
+              ]
+            : []),
         ],
       })
     );
-
-    // 2. Lesson Title (CĂN GIỮA, IN HOA, IN ĐẬM)
-    if (preschoolInfo.lessonTitle) {
-      elements.push(
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 80, after: 120 },
-          children: [
-            new TextRun({
-              text: preschoolInfo.lessonTitle.toUpperCase(),
-              bold: true,
-              size: 28, // 14pt
-              font: fontName,
-              color: '000000',
-            }),
-          ],
-        })
-      );
-    }
-
-    // 3. Sub-lines (Tác giả, Nghe hát, Trò chơi âm nhạc, Lĩnh vực, Chủ đề, Độ tuổi, Thời gian tách biệt xuống dòng rõ ràng)
-    const subLines = [
-      ...preschoolInfo.contentLines,
-      preschoolInfo.domainLine,
-      preschoolInfo.themeLine,
-      preschoolInfo.gradeLine,
-      preschoolInfo.classSizeLine,
-      preschoolInfo.timeLine,
-    ].filter(Boolean);
-
-    subLines.forEach(line => {
-      elements.push(
-        new Paragraph({
-          alignment: AlignmentType.LEFT,
-          indent: { left: 720 }, // 0.5 inch indentation
-          spacing: { before: 20, after: 20 },
-          children: [
-            new TextRun({
-              text: line,
-              size: 28, // 14pt
-              font: fontName,
-              color: '000000',
-            }),
-          ],
-        })
-      );
-    });
-  } else {
-    // NON-MUSIC PRESCHOOL (Science / Khám phá khoa học, Xã hội, Toán, v.v.)
-    // 1. Header banner (Centered green highlight box)
-    elements.push(
-      new Paragraph({
-        alignment: AlignmentType.CENTER,
-        spacing: { before: 80, after: 80 },
-        children: [
-          new TextRun({
-            text: preschoolInfo.mainHeader,
-            bold: true,
-            size: 28, // 14pt
-            font: fontName,
-            shading: {
-              fill: "00FF00",
-            },
-          }),
-        ],
-      })
-    );
-
-    // 2. Đề tài (CĂN GIỮA, IN ĐẬM)
-    if (preschoolInfo.lessonTitle) {
-      elements.push(
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 40, after: 40 },
-          children: [
-            new TextRun({
-              text: preschoolInfo.lessonTitle,
-              bold: true,
-              size: 28, // 14pt
-              font: fontName,
-              color: '000000',
-            }),
-          ],
-        })
-      );
-    }
-
-    // 3. Lĩnh vực (CĂN GIỮA, IN ĐẬM)
-    if (preschoolInfo.domainLine) {
-      elements.push(
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 20, after: 20 },
-          children: [
-            new TextRun({
-              text: preschoolInfo.domainLine,
-              bold: true,
-              size: 28, // 14pt
-              font: fontName,
-              color: '000000',
-            }),
-          ],
-        })
-      );
-    }
-
-    // 3.1. Chủ đề (CĂN GIỮA, IN ĐẬM) nếu có
-    if (preschoolInfo.themeLine) {
-      elements.push(
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 20, after: 20 },
-          children: [
-            new TextRun({
-              text: preschoolInfo.themeLine,
-              bold: true,
-              size: 28, // 14pt
-              font: fontName,
-              color: '000000',
-            }),
-          ],
-        })
-      );
-    }
-
-    // 4. Độ tuổi (CĂN GIỮA, IN ĐẬM)
-    if (preschoolInfo.gradeLine) {
-      elements.push(
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 20, after: 20 },
-          children: [
-            new TextRun({
-              text: preschoolInfo.gradeLine,
-              bold: true,
-              size: 28, // 14pt
-              font: fontName,
-              color: '000000',
-            }),
-          ],
-        })
-      );
-    }
-
-    // 4.1. Số lượng trẻ (nếu có)
-    if (preschoolInfo.classSizeLine) {
-      elements.push(
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 20, after: 20 },
-          children: [
-            new TextRun({
-              text: preschoolInfo.classSizeLine,
-              bold: true,
-              size: 28, // 14pt
-              font: fontName,
-              color: '000000',
-            }),
-          ],
-        })
-      );
-    }
-
-    // 5. Thời gian (CĂN GIỮA, IN ĐẬM)
-    if (preschoolInfo.timeLine) {
-      elements.push(
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 20, after: 60 },
-          children: [
-            new TextRun({
-              text: preschoolInfo.timeLine,
-              bold: true,
-              size: 28, // 14pt
-              font: fontName,
-              color: '000000',
-            }),
-          ],
-        })
-      );
-    }
-
-    // 6. Any other contentLines
-    preschoolInfo.contentLines.forEach(line => {
-      elements.push(
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 20, after: 20 },
-          children: [
-            new TextRun({
-              text: line,
-              size: 28, // 14pt
-              font: fontName,
-              color: '000000',
-            }),
-          ],
-        })
-      );
-    });
-  }
+  });
 
   // Empty spacing before Section I
   elements.push(

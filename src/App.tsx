@@ -50,13 +50,11 @@ import {
   Sliders,
   FileText,
   Download,
-  Presentation,
   Plus,
   Loader2,
   Key,
 } from 'lucide-react';
 import { exportLessonPlanToDocx } from './utils/docxExporter';
-import { exportLessonPlanToPptx } from './utils/pptxExporter';
 
 export type StepProgress = 'pending' | 'start' | 'done';
 
@@ -534,65 +532,32 @@ export default function App() {
         userExpiresAt: currentUser?.expiresAt,
       };
 
+      // 1. Tốc độ siêu tốc (1-Shot Fast Generation, chỉ 3 - 5 giây)
       try {
-        const response = await fetch('/api/gemini/generate-lesson-plan-stream', {
+        const response = await fetch('/api/gemini/generate-khbd', {
           method: 'POST',
           headers: getApiHeaders(),
           body: JSON.stringify(requestPayload),
           signal: controller.signal,
         });
 
-        if (response.ok) {
-          const reader = response.body?.getReader();
-          const decoder = new TextDecoder();
-          let buffer = "";
-          let doneReading = false;
-
-          while (!doneReading && reader) {
-            if (controller.signal.aborted) {
-              throw new DOMException('Aborted by user', 'AbortError');
-            }
-            const { value, done } = await reader.read();
-            if (done) {
-              doneReading = true;
-              break;
-            }
-            buffer += decoder.decode(value, { stream: true });
-            const events = buffer.split('\n\n');
-            buffer = events.pop() || '';
-            
-            for (const ev of events) {
-              if (ev.startsWith('data: ')) {
-                const dataStr = ev.substring(6);
-                try {
-                  const parsed = JSON.parse(dataStr);
-                  if (parsed.type === 'progress') {
-                    setProgressSteps((prev) => ({ ...prev, [parsed.data.step]: parsed.data.status }));
-                  } else if (parsed.type === 'complete') {
-                    finalPlan = parsed.data.lessonPlan;
-                  } else if (parsed.type === 'error') {
-                    if (parsed.data.requiresCustomApiKey) {
-                      setIsApiKeyModalOpen(true);
-                    }
-                    throw new Error(parsed.data.error);
-                  }
-                } catch (e: any) {
-                  if (e.message && (e.message.includes('quá tải') || e.message.includes('API Key'))) {
-                    throw e;
-                  }
-                }
-              }
-            }
-          }
+        const data = await response.json();
+        if (response.ok && data.success && (data.lessonPlan || data.data)) {
+          finalPlan = data.lessonPlan || data.data;
+        } else if (data.requiresCustomApiKey) {
+          setIsApiKeyModalOpen(true);
+          throw new Error(data.error || 'Cần cung cấp API Key');
+        } else if (!response.ok) {
+          console.warn('1-shot generation returned error, trying fallback...', data.error);
         }
-      } catch (streamErr: any) {
-        if (streamErr.name === 'AbortError' || controller.signal.aborted) {
-          throw streamErr;
+      } catch (fastErr: any) {
+        if (fastErr.name === 'AbortError' || controller.signal.aborted) {
+          throw fastErr;
         }
-        console.warn('Streaming connection interrupted or failed. Fallback to direct Sectional API...', streamErr);
+        console.warn('Fast 1-shot generation hiccup, attempting fallback...', fastErr);
       }
 
-      // If streaming did not complete, automatically fall back to direct Sectional JSON endpoint
+      // 2. Dự phòng khẩn cấp nếu 1-shot gặp sự cố
       if (!finalPlan && !controller.signal.aborted) {
         setProgressSteps({ 1: 'start', 2: 'start', 3: 'start', 4: 'start' });
         const directResp = await fetch('/api/gemini/generate-lesson-plan-sectional', {
@@ -673,7 +638,7 @@ export default function App() {
           subject: config.subject,
           grade: config.grade,
           tableLayout: config.tableLayout,
-          aiModel: (config.aiModel === 'gemini-3.1-flash-lite') ? 'gemini-3.1-flash-lite' : 'gemini-3.5-flash-lite',
+          aiModel: config.aiModel || 'gemini-3.1-flash-lite',
           customApiKey: getStoredApiKey(),
           userRole: currentUser?.role,
           userEmail: currentUser?.email,
@@ -712,7 +677,6 @@ export default function App() {
   };
 
   const [isExportingDocx, setIsExportingDocx] = useState(false);
-  const [isExportingPptx, setIsExportingPptx] = useState(false);
 
   const handleExportDocx = async () => {
     if (!currentPlan) return;
@@ -725,20 +689,6 @@ export default function App() {
       showToast('Không thể xuất file Word: ' + (err instanceof Error ? err.message : String(err)), 'error');
     } finally {
       setIsExportingDocx(false);
-    }
-  };
-
-  const handleExportPptx = async () => {
-    if (!currentPlan) return;
-    setIsExportingPptx(true);
-    try {
-      await exportLessonPlanToPptx(currentPlan, config.imageSlots);
-      showToast('Đã tải bài giảng PowerPoint (.pptx) thành công!', 'success');
-    } catch (err) {
-      console.error('Error exporting PPTX:', err);
-      showToast('Không thể xuất bài giảng PowerPoint: ' + (err instanceof Error ? err.message : String(err)), 'error');
-    } finally {
-      setIsExportingPptx(false);
     }
   };
 
@@ -905,31 +855,6 @@ export default function App() {
                     </select>
                   </div>
                 )}
-
-                {/* Nút Tải bài giảng (.pptx) */}
-                <button
-                  type="button"
-                  onClick={handleExportPptx}
-                  disabled={isExportingPptx || !currentPlan}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all shadow-2xs shrink-0 whitespace-nowrap ${
-                    !currentPlan
-                      ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-60'
-                      : 'bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 hover:from-amber-700 hover:via-orange-700 hover:to-rose-700 text-white border border-orange-400/30 hover:scale-[1.01] active:scale-[0.99] cursor-pointer'
-                  }`}
-                  title="Tải bài giảng trình chiếu PowerPoint (.pptx)"
-                >
-                  {isExportingPptx ? (
-                    <>
-                      <Loader2 className="w-3 h-3 animate-spin shrink-0" />
-                      <span>Đang tạo...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Presentation className="w-3 h-3 text-amber-100 shrink-0" />
-                      <span>Tải bài giảng (.pptx)</span>
-                    </>
-                  )}
-                </button>
 
                 {/* Nút Tải giáo án về máy */}
                 <button
