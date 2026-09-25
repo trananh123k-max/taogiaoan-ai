@@ -1722,23 +1722,6 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
             </div>
           </div>
         </div>
-
-        {/* Footer info */}
-        <div className="p-3.5 bg-slate-100 border-t border-slate-200 text-slate-600 text-xs flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 text-slate-600 font-medium">
-            <Info className="w-4 h-4 text-amber-700 shrink-0" />
-            <span>
-              Mỗi tài khoản được giới hạn số máy theo cấu hình cấp phát (Admin 10 máy, Giáo viên từ 1 - 10 máy). Khi người dùng đổi máy tính hoặc cài lại Windows/macOS, Quản trị viên chỉ cần bấm <strong>"Khôi phục"</strong>.
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
-          >
-            Đóng
-          </button>
-        </div>
       </div>
 
       {/* MODAL 1: CREATE / EDIT & FULL ACCOUNT DETAILS VIEW */}
