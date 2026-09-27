@@ -30,6 +30,33 @@ export interface PreschoolDomainInfo {
 }
 
 /**
+ * Strips all [Tích hợp AI], [Tích hợp NLS], and related AI/NLS codes
+ * from preschool lesson plans as required by kindergarten curriculum standards.
+ */
+export function stripPreschoolAICodes(text?: string): string {
+  if (!text || typeof text !== 'string') return text || '';
+  let cleaned = text;
+
+  // 1. Remove [Tích hợp AI] and any subsequent explanation block
+  cleaned = cleaned.replace(/\[\s*Tích\s*hợp\s*(?:Trí\s*tuệ\s*nhân\s*tạo|AI)\s*\][^\n]*\n?(?:-\s*)?(?:HS|Học sinh|Trẻ|Giáo viên)[^\n]*/gmi, '');
+  cleaned = cleaned.replace(/\[\s*Tích\s*hợp\s*(?:Trí\s*tuệ\s*nhân\s*tạo|AI)\s*\]/gmi, '');
+
+  // 2. Remove [Tích hợp NLS]
+  cleaned = cleaned.replace(/\[\s*Tích\s*hợp\s*(?:Năng\s*lực\s*số|NLS)\s*\][^\n]*\n?(?:-\s*)?(?:HS|Học sinh|Trẻ|Giáo viên)[^\n]*/gmi, '');
+  cleaned = cleaned.replace(/\[\s*Tích\s*hợp\s*(?:Năng\s*lực\s*số|NLS)\s*\]/gmi, '');
+
+  // 3. Remove (AI ...) / [AI ...] / (NLS ...) / [NLS ...]
+  cleaned = cleaned.replace(/[\[\(]\s*AI\s+[a-z0-9._\-]+\s*[\]\)]/gi, '');
+  cleaned = cleaned.replace(/[\[\(]\s*NLS\s+[a-z0-9._\-]+\s*[\]\)]/gi, '');
+
+  // 4. Remove standalone AI / NLS code patterns
+  cleaned = cleaned.replace(/\bAI\s+\d+\.[A-Z0-9\.]+\b/gi, '');
+  cleaned = cleaned.replace(/\bNLS\s+\d+\.[A-Z0-9\.]+\b/gi, '');
+
+  return cleaned.replace(/\n{3,}/g, '\n\n').trim();
+}
+
+/**
  * Intelligent Preschool Domain Classifier
  * Precisely determines the preschool domain and the exact standardized header
  */
@@ -358,33 +385,129 @@ export function detectPreschoolDomain(
   };
 }
 
-export function extractSongTitles(lessonTitle: string = '', extraText: string = ''): { mainSong: string; listeningSong: string } {
+export interface PreschoolMusicSongInfo {
+  mainSong: string;
+  listeningSong: string;
+  gameTitle: string;
+  focusType: 'HAT_VAN_DONG' | 'DAY_HAT' | 'NGHE_HAT';
+  movementType: string;
+}
+
+export function extractSongTitles(
+  lessonTitle: string = '',
+  extraText: string = ''
+): PreschoolMusicSongInfo {
   let mainSong = '';
   let listeningSong = '';
+  let gameTitle = '';
+  let focusType: 'HAT_VAN_DONG' | 'DAY_HAT' | 'NGHE_HAT' = 'DAY_HAT';
+  let movementType = 'Dạy hát';
 
   const combined = `${lessonTitle || ''}\n${extraText || ''}`;
+  const lowerCombined = combined.toLowerCase();
 
-  // 1. Match "Dạy hát: ..." or "Dạy hát '...'" or 'Dạy hát "..."" or "Dạy hát [Tên bài]"
-  const dayHatMatch = combined.match(/dạy hát\s*[:'"]\s*([^'"\n,–-]+)/i) ||
-                      combined.match(/dạy hát\s*["“]([^"”]+)["”]/i) ||
-                      combined.match(/dạy hát\s*['‘]([^'’]+)['’]/i) ||
-                      combined.match(/dạy hát\s+([^,\n\-–;:]+)/i);
-  if (dayHatMatch) {
-    mainSong = dayHatMatch[1].replace(/\(TT\)/i, '').replace(/nghe hát.*/i, '').trim();
+  // 1. Detect focusType and movementType
+  if (
+    lowerCombined.includes('vỗ tay theo tiết tấu chậm') ||
+    lowerCombined.includes('vỗ tay theo tiết tấu phối hợp') ||
+    lowerCombined.includes('vỗ tay tiết tấu chậm')
+  ) {
+    focusType = 'HAT_VAN_DONG';
+    movementType = 'Vỗ tay theo tiết tấu chậm';
+  } else if (lowerCombined.includes('vỗ tay theo tiết tấu nhanh')) {
+    focusType = 'HAT_VAN_DONG';
+    movementType = 'Vỗ tay theo tiết tấu nhanh';
+  } else if (lowerCombined.includes('vỗ tay theo phách')) {
+    focusType = 'HAT_VAN_DONG';
+    movementType = 'Vỗ tay theo phách';
+  } else if (lowerCombined.includes('vỗ tay theo nhịp')) {
+    focusType = 'HAT_VAN_DONG';
+    movementType = 'Vỗ tay theo nhịp';
+  } else if (lowerCombined.includes('vận động minh họa') || lowerCombined.includes('múa minh họa')) {
+    focusType = 'HAT_VAN_DONG';
+    movementType = 'Vận động minh họa';
+  } else if (lowerCombined.includes('vận động theo nhạc') || lowerCombined.includes('vdtn')) {
+    focusType = 'HAT_VAN_DONG';
+    movementType = 'Vận động theo nhạc';
+  } else if (
+    lowerCombined.includes('hát vận động') ||
+    lowerCombined.includes('hát vận đông') ||
+    lowerCombined.includes('dạy vận động') ||
+    lowerCombined.includes('hvd')
+  ) {
+    focusType = 'HAT_VAN_DONG';
+    movementType = 'Hát vận động';
+  } else if (
+    lowerCombined.includes('múa:') ||
+    lowerCombined.includes('múa ') ||
+    lowerCombined.startsWith('múa')
+  ) {
+    focusType = 'HAT_VAN_DONG';
+    movementType = 'Múa';
+  } else if (
+    (lowerCombined.includes('nghe hát (tt)') || lowerCombined.includes('ndtt: nghe hát') || /^nghe hát\b/i.test(lessonTitle.trim())) &&
+    !lowerCombined.includes('dạy hát') &&
+    !lowerCombined.includes('vận động')
+  ) {
+    focusType = 'NGHE_HAT';
+    movementType = 'Nghe hát';
+  } else if (lowerCombined.includes('dạy hát') || lowerCombined.includes('ndtt: dạy hát')) {
+    focusType = 'DAY_HAT';
+    movementType = 'Dạy hát';
+  } else if (lowerCombined.includes('vận động')) {
+    focusType = 'HAT_VAN_DONG';
+    movementType = 'Hát vận động';
+  } else {
+    focusType = 'DAY_HAT';
+    movementType = 'Dạy hát';
   }
 
-  // 2. Match "Nghe hát: ..." or "Nghe hát '...'" or 'Nghe hát "...""
-  const ngheHatMatch = combined.match(/nghe hát\s*[:'"]\s*([^'"\n,–-]+)/i) ||
-                        combined.match(/nghe hát\s*["“]([^"”]+)["”]/i) ||
-                        combined.match(/nghe hát\s*['‘]([^'’]+)['’]/i) ||
-                        combined.match(/nghe hát\s+([^,\n\-–;:]+)/i);
-  if (ngheHatMatch) {
-    listeningSong = ngheHatMatch[1].replace(/\(TT\)/i, '').trim();
+  // 2. Extract gameTitle (Trò chơi âm nhạc / T/C / TCÂN)
+  const gameMatch =
+    combined.match(/(?:trò chơi âm nhạc|tcân|t\/c|tc|trò chơi)\s*[:'"]\s*["“']?([^"”'\n\.,;–—\(\)]+)["”']?/i);
+  if (gameMatch && gameMatch[1]?.trim()) {
+    gameTitle = gameMatch[1].replace(/["'“‘”’]/g, '').trim();
+    // Strip trailing keywords
+    gameTitle = gameTitle.replace(/\s*(?:ndkh|ndtt|tác giả|tt).*$/i, '').trim();
   }
 
-  // 3. Fallback: if mainSong not found but lessonTitle has quoted titles
+  // 3. Clean string for song extraction (strip game parts so game title doesn't pollute song names)
+  const cleanedForSongs = combined
+    .replace(/(?:trò chơi âm nhạc|tcân|t\/c|tc|trò chơi)\s*[:'"][^\n\)]*/gi, '')
+    .replace(/\b(?:tc|t\/c)\b[^\n\)]*/gi, '');
+
+  // 4. Extract mainSong
+  if (focusType === 'HAT_VAN_DONG') {
+    const vdMatch =
+      cleanedForSongs.match(/(?:hát vận động|hát vận đông|vận động theo nhạc|vận động minh họa|vỗ tay theo tiết tấu chậm|vỗ tay theo tiết tấu nhanh|vỗ tay theo tiết tấu|vỗ tay theo phách|vỗ tay theo nhịp|múa|dạy vận động|vận động)\s*[:'"]\s*["“']?([^"”'\n,–—;\(\)]+)["”']?/i) ||
+      cleanedForSongs.match(/(?:hát vận động|hát vận đông|vận động theo nhạc|vận động minh họa|vỗ tay theo tiết tấu chậm|vỗ tay theo phách|vỗ tay theo nhịp|múa|dạy vận động|vận động)\s+["“']([^"”']+)["”']/i) ||
+      cleanedForSongs.match(/(?:hát vận động|hát vận đông|vận động theo nhạc|vận động minh họa|vỗ tay theo tiết tấu chậm|vỗ tay theo phách|vỗ tay theo nhịp|múa|dạy vận động|vận động)\s+bài\s+hát\s+["“']?([^"”'\n,–—;\(\)]+)["”']?/i) ||
+      cleanedForSongs.match(/(?:hát vận động|hát vận đông|vận động theo nhạc|vận động minh họa|vỗ tay theo tiết tấu chậm|vỗ tay theo phách|vỗ tay theo nhịp|múa|dạy vận động|vận động)\s+bài\s+["“']?([^"”'\n,–—;\(\)]+)["”']?/i);
+    if (vdMatch && vdMatch[1]?.trim()) {
+      mainSong = vdMatch[1].replace(/["'“‘”’]/g, '').replace(/\(TT\)/i, '').trim();
+    }
+  } else if (focusType === 'DAY_HAT') {
+    const dayHatMatch =
+      cleanedForSongs.match(/dạy hát\s*[:'"]\s*["“']?([^"”'\n,–—;\(\)]+)["”']?/i) ||
+      cleanedForSongs.match(/dạy hát\s+["“']([^"”']+)["”']/i) ||
+      cleanedForSongs.match(/dạy hát\s+bài\s+hát\s+["“']?([^"”'\n,–—;\(\)]+)["”']?/i) ||
+      cleanedForSongs.match(/dạy hát\s+bài\s+["“']?([^"”'\n,–—;\(\)]+)["”']?/i);
+    if (dayHatMatch && dayHatMatch[1]?.trim()) {
+      mainSong = dayHatMatch[1].replace(/["'“‘”’]/g, '').replace(/\(TT\)/i, '').trim();
+    }
+  } else if (focusType === 'NGHE_HAT') {
+    const ngheMatch =
+      cleanedForSongs.match(/nghe hát\s*[:'"]\s*["“']?([^"”'\n,–—;\(\)]+)["”']?/i) ||
+      cleanedForSongs.match(/nghe hát\s+["“']([^"”']+)["”']/i);
+    if (ngheMatch && ngheMatch[1]?.trim()) {
+      mainSong = ngheMatch[1].replace(/["'“‘”’]/g, '').replace(/\(TT\)/i, '').trim();
+    }
+  }
+
+  // Fallback: quotes from lessonTitle
   if (!mainSong && lessonTitle) {
-    const quotes = lessonTitle.match(/["'“‘]([^"'”’]+)["'”’]/g);
+    const cleanLessonTitleNoGame = lessonTitle.replace(/(?:trò chơi âm nhạc|tcân|t\/c|tc|trò chơi)\s*[:'"][^\n\)]*/gi, '');
+    const quotes = cleanLessonTitleNoGame.match(/["'“‘]([^"'”’]+)["'”’]/g);
     if (quotes && quotes.length > 0) {
       mainSong = quotes[0].replace(/["'“‘”’]/g, '').trim();
       if (!listeningSong && quotes.length > 1) {
@@ -393,36 +516,132 @@ export function extractSongTitles(lessonTitle: string = '', extraText: string = 
     }
   }
 
+  // Fallback: clean lessonTitle
   if (!mainSong && lessonTitle) {
     mainSong = lessonTitle
       .replace(/^(?:âm nhạc|giáo án âm nhạc|gdam|hoạt động âm nhạc|lĩnh vực nghệ thuật|lĩnh vực phát triển thẩm mỹ|thẩm mỹ)[\s:\-–—]*/i, '')
+      .replace(/^(?:ndtt|ndkh)[\s:\-–—]*/i, '')
+      .replace(/^(?:hát vận động|hát vận đông|vận động theo nhạc|vận động minh họa|vỗ tay theo tiết tấu chậm|vỗ tay theo phách|vỗ tay theo nhịp|dạy hát|múa|nghe hát)[\s:\-–—]*/i, '')
+      .replace(/(?:trò chơi âm nhạc|tcân|t\/c|tc|trò chơi)\s*[:'"][^\n\)]*/gi, '')
       .replace(/\(TT\)/i, '')
+      .replace(/["'“‘”’]/g, '')
+      .trim();
+    // Split by separator like - or . or ,
+    if (mainSong.includes('-')) {
+      mainSong = mainSong.split('-')[0].trim();
+    } else if (mainSong.includes('.')) {
+      mainSong = mainSong.split('.')[0].trim();
+    }
+  }
+
+  // Clean trailing artifacts from mainSong
+  if (mainSong) {
+    mainSong = mainSong
+      .replace(/^(?:bài\s+hát|bài)\s+/i, '')
+      .replace(/\s*(?:nghe hát|t\/c|tc|trò chơi|ndkh|ndtt|tác giả).*$/i, '')
+      .replace(/["'“‘”’]/g, '')
       .trim();
   }
 
   if (!mainSong) {
-    mainSong = 'Cháu yêu bà';
+    mainSong = 'Cái mũi';
   }
 
-  if (!listeningSong) {
-    // Intelligently determine an appropriate companion preschool listening song based on themes
+  // 5. Extract listeningSong
+  const ngheHatMatch =
+    cleanedForSongs.match(/(?:nghe hát|bài hát nghe|nghe)\s*[:'"]\s*["“']?([^"”'\n,–—;\(\)]+)["”']?/i) ||
+    cleanedForSongs.match(/(?:nghe hát|bài hát nghe)\s+["“']([^"”']+)["”']/i) ||
+    cleanedForSongs.match(/(?:nghe hát|bài hát nghe)\s+bài\s+hát\s+["“']?([^"”'\n,–—;\(\)]+)["”']?/i) ||
+    cleanedForSongs.match(/(?:nghe hát|bài hát nghe)\s+bài\s+["“']?([^"”'\n,–—;\(\)]+)["”']?/i);
+
+  if (ngheHatMatch && ngheHatMatch[1]?.trim()) {
+    listeningSong = ngheHatMatch[1]
+      .replace(/["'“‘”’]/g, '')
+      .replace(/\(TT\)/i, '')
+      .replace(/\(NDKH\)/i, '')
+      .replace(/\s*(?:t\/c|tc|trò chơi|tác giả).*$/i, '')
+      .trim();
+  }
+
+  // Clean listeningSong of any game words or if equal to mainSong
+  if (listeningSong) {
+    listeningSong = listeningSong
+      .replace(/^(?:bài\s+hát|bài)\s+/i, '')
+      .replace(/\s*(?:t\/c|tc|trò chơi|tai ai thính|tác giả).*$/i, '')
+      .replace(/["'“‘”’]/g, '')
+      .trim();
+  }
+
+  // If listeningSong matches mainSong, or contains game keywords, or is empty:
+  const isInvalidListeningSong =
+    !listeningSong ||
+    listeningSong.toLowerCase() === mainSong.toLowerCase() ||
+    /tai ai thính|trò chơi|t\/c|tcân/i.test(listeningSong);
+
+  if (isInvalidListeningSong) {
     const lower = `${lessonTitle} ${mainSong} ${extraText}`.toLowerCase();
-    if (lower.includes('bà') || lower.includes('mẹ') || lower.includes('bố') || lower.includes('gia đình') || lower.includes('nhà')) {
-      listeningSong = 'Cho con';
-    } else if (lower.includes('cô') || lower.includes('trường') || lower.includes('lớp') || lower.includes('bạn')) {
-      listeningSong = 'Bàn tay cô giáo';
-    } else if (lower.includes('cây') || lower.includes('hoa') || lower.includes('xuân') || lower.includes('tết') || lower.includes('mưa') || lower.includes('nắng')) {
-      listeningSong = 'Hoa thơm bướm lượn';
-    } else if (lower.includes('bộ đội') || lower.includes('công nhân') || lower.includes('nghề')) {
+    if (
+      lower.includes('mũi') ||
+      lower.includes('tai') ||
+      lower.includes('mắt') ||
+      lower.includes('miệng') ||
+      lower.includes('tay') ||
+      lower.includes('chân') ||
+      lower.includes('bản thân') ||
+      lower.includes('khuôn mặt') ||
+      lower.includes('cơ thể')
+    ) {
+      listeningSong = mainSong.toLowerCase().includes('thật đáng yêu') ? 'Tay thơm tay ngoan' : 'Thật đáng yêu';
+    } else if (
+      lower.includes('bà') ||
+      lower.includes('mẹ') ||
+      lower.includes('bố') ||
+      lower.includes('gia đình') ||
+      lower.includes('nhà')
+    ) {
+      listeningSong = mainSong.toLowerCase().includes('cho con') ? 'Bàn tay mẹ' : 'Cho con';
+    } else if (
+      lower.includes('cô') ||
+      lower.includes('trường') ||
+      lower.includes('lớp') ||
+      lower.includes('bạn')
+    ) {
+      listeningSong = mainSong.toLowerCase().includes('bàn tay cô giáo') ? 'Ngày đầu tiên đi học' : 'Bàn tay cô giáo';
+    } else if (
+      lower.includes('cây') ||
+      lower.includes('hoa') ||
+      lower.includes('xuân') ||
+      lower.includes('tết') ||
+      lower.includes('mưa') ||
+      lower.includes('nắng')
+    ) {
+      listeningSong = mainSong.toLowerCase().includes('hoa thơm bướm lượn') ? 'Em yêu cây xanh' : 'Hoa thơm bướm lượn';
+    } else if (
+      lower.includes('bộ đội') ||
+      lower.includes('công nhân') ||
+      lower.includes('nghề')
+    ) {
       listeningSong = 'Cháu hát về đảo xa';
-    } else if (lower.includes('gà') || lower.includes('mèo') || lower.includes('vịt') || lower.includes('chim') || lower.includes('cá') || lower.includes('con vật')) {
-      listeningSong = 'Gà gáy le te';
+    } else if (
+      lower.includes('gà') ||
+      lower.includes('mèo') ||
+      lower.includes('vịt') ||
+      lower.includes('chim') ||
+      lower.includes('cá') ||
+      lower.includes('con vật') ||
+      lower.includes('động vật')
+    ) {
+      listeningSong = mainSong.toLowerCase().includes('gà gáy le te') ? 'Chú voi con ở Bản Đôn' : 'Gà gáy le te';
     } else {
-      listeningSong = 'Cho con';
+      listeningSong = mainSong.toLowerCase().includes('cho con') ? 'Thật đáng yêu' : 'Cho con';
     }
   }
 
-  return { mainSong, listeningSong };
+  if (!gameTitle) {
+    gameTitle = 'Tai ai thính';
+  }
+
+  return { mainSong, listeningSong, gameTitle, focusType, movementType };
 }
 
 export function isPreschoolMusicPlan(plan: any): boolean {
@@ -543,15 +762,13 @@ export function formatPreschoolPhysicalActivities(
       }
     }
 
-    step1.teacherAction = teacherAction
-      .split('\n')
+    step1.teacherAction = expandPreschoolTextLines(teacherAction)
       .map((l) => cleanPreschoolBulletLine(l))
       .filter(Boolean)
       .join('\n')
       .trim();
 
-    step1.studentAction = studentAction
-      .split('\n')
+    step1.studentAction = expandPreschoolTextLines(studentAction)
       .map((l) => cleanPreschoolBulletLine(l))
       .filter(Boolean)
       .join('\n')
@@ -573,6 +790,228 @@ export function generateDefaultPreschoolActivities(
 ): any[] {
   const domain = domainInfo || detectPreschoolDomain(subject, lessonTitle);
   const title = lessonTitle || 'chủ đề bài học';
+
+  if (domain.domainType === 'MUSIC') {
+    const { mainSong, listeningSong, gameTitle, focusType, movementType } = extractSongTitles(lessonTitle);
+    const headerA = focusType === 'HAT_VAN_DONG'
+      ? `a. ${movementType}: "${mainSong}" (TT)`
+      : (focusType === 'NGHE_HAT' ? `a. Nghe hát: "${mainSong}" (TT)` : `a. Dạy hát: "${mainSong}" (TT)`);
+    const headerB = focusType === 'NGHE_HAT'
+      ? `b. Hát vận động: "${listeningSong}"`
+      : `b. Nghe hát: "${listeningSong}"`;
+
+    let teacherActionAct3A: string[] = [];
+    let studentActionAct3A: string[] = [];
+
+    if (focusType === 'HAT_VAN_DONG') {
+      teacherActionAct3A = [
+        headerA,
+        `- Cô cho cả lớp hát lại bài hát "${mainSong}" 1 - 2 lần để trẻ nhớ lại giai điệu và lời ca.`,
+        `- Cô giới thiệu và thực hiện vận động mẫu:`,
+        `+ Lần 1: Làm mẫu toàn phần kết hợp hát và vận động nhịp nhàng, biểu cảm từ đầu đến hết bài.`,
+        `+ Lần 2: Làm mẫu kết hợp phân tích kỹ thuật từng động tác vận động minh họa / vỗ tay nhịp nhàng theo câu hát của bài "${mainSong}".`,
+        `+ Lần 3: Nhấn mạnh các động tác tạo điểm nhấn và tư thế biểu diễn tự tin.`,
+        `- Tổ chức cho trẻ thực hành vận động:`,
+        `+ Cho cả lớp cùng đứng dậy hát và vận động theo cô (2 - 3 lần).`,
+        `+ Cho các tổ, nhóm bạn trai, nhóm bạn gái thi đua hát và vận động luân phiên (kết hợp dụng cụ gõ đệm: phách tre, xắc xô, gáo dừa...).`,
+        `+ Mời cá nhân trẻ tự tin lên sân khấu biểu diễn hát vận động. Cô chú ý quan sát, sửa sai và khích lệ trẻ biểu diễn tự nhiên, đúng nhịp.`
+      ];
+      studentActionAct3A = [
+        `- Trẻ quây quần bên cô, hào hứng hát lại bài hát "${mainSong}" cùng cô để nhớ lại giai điệu.`,
+        `- Trẻ chăm chú quan sát cô làm mẫu từng động tác vận động và lắng nghe cô phân tích kỹ thuật.`,
+        `- Cả lớp đứng lên cùng hát và vận động nhịp nhàng theo cô (2 - 3 lần).`,
+        `- Từng tổ, nhóm bạn trai, bạn gái và cá nhân trẻ tự tin lên sân khấu thể hiện hát vận động kết hợp dụng cụ gõ đệm trong tiếng vỗ tay cổ vũ của các bạn.`
+      ];
+    } else {
+      teacherActionAct3A = [
+        headerA,
+        `- Cô trò chuyện gợi mở về giai điệu và lời ca của bài hát "${mainSong}".`,
+        `- Cô hát mẫu lần 1: Rõ lời, đúng giai điệu và tính chất bài hát.`,
+        `- Cô hát mẫu lần 2: Kết hợp cử chỉ, điệu bộ minh họa và giảng giải nội dung bài hát "${mainSong}".`,
+        `- Dạy trẻ hát:`,
+        `+ Cô bắt nhịp cho cả lớp hát cùng cô từ đầu đến hết bài (2 - 3 lần).`,
+        `+ Cho các tổ, nhóm bạn trai, nhóm bạn gái thi đua hát luân phiên (kết hợp vỗ tay theo nhịp).`,
+        `+ Mời cá nhân trẻ thể hiện bài hát. Cô chú ý lắng nghe, sửa sai cao độ, nhịp điệu và lời ca cho trẻ kịp thời.`
+      ];
+      studentActionAct3A = [
+        `- Trẻ quây quần bên cô, chăm chú lắng nghe cô hát mẫu và quan sát các động tác cử chỉ của cô.`,
+        `- Cả lớp vui tươi, hào hứng hát cùng cô từ đầu đến hết bài (2 - 3 lần).`,
+        `- Từng tổ, nhóm và cá nhân trẻ tự tin đứng lên biểu diễn bài hát.`,
+        `- Trẻ lắng nghe bạn hát và sửa sai theo sự hướng dẫn của cô.`
+      ];
+    }
+
+    const teacherActionAct3B = [
+      headerB,
+      `- Cô giới thiệu tên bài hát nghe "${listeningSong}", tên tác giả.`,
+      `- Cô hát cho trẻ nghe lần 1: Thể hiện tình cảm tha thiết, truyền cảm của giai điệu bài hát.`,
+      `- Giảng giải nội dung, ý nghĩa bài hát: Giáo dục trẻ biết yêu thương, trân trọng và biết ơn.`,
+      `- Cô hát cho trẻ nghe lần 2: Kết hợp động tác múa minh họa mềm mại, khuyến khích trẻ đứng lên cùng nhún nhảy, đung đưa hưởng ứng theo giai điệu bài hát.`
+    ];
+    const studentActionAct3B = [
+      `- Trẻ ngồi yên lặng, chăm chú lắng nghe cô hát bài nghe hát "${listeningSong}".`,
+      `- Trẻ hiểu nội dung bài hát qua lời giảng giải của cô.`,
+      `- Trẻ vui vẻ đứng dậy nhún nhảy, làm động tác đung đưa hưởng ứng cùng cô theo nhịp điệu bài hát.`
+    ];
+
+    return [
+      {
+        id: 'act-1',
+        index: 1,
+        name: '1. Khởi động – Tạo tình huống',
+        duration: '3 - 5 phút',
+        objective: 'Trẻ hào hứng, tập trung chú ý và sẵn sàng bước vào hoạt động âm nhạc',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô cùng cả lớp chơi trò chơi âm thanh ("Lắng nghe âm thanh kỳ diệu"): Cô phát các âm thanh vui tươi, tiếng chuông gió hoặc tiếng kêu của các con vật quen thuộc để trẻ lắng nghe và phán đoán.\n- Cô tạo tình huống dẫn dắt dịu dàng, truyền cảm: "Các con ơi! Hôm nay lớp chúng mình sẽ cùng bước vào một không gian âm nhạc vô cùng rộn rã với những giai điệu thật tươi vui đấy! Chúng mình đã sẵn sàng chưa nào?".\n- Cô giới thiệu đề tài và mời các bé cùng chuẩn bị tham gia biểu diễn.`,
+          studentAction: `- Trẻ chăm chú lắng nghe âm thanh và hào hứng reo vui, đoán đúng nguồn âm thanh.\n- Trẻ hưởng ứng vỗ tay nồng nhiệt, tươi cười sẵn sàng bước vào bài học âm nhạc cùng cô.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        }
+      },
+      {
+        id: 'act-2',
+        index: 2,
+        name: '2. Khám phá – Trải nghiệm',
+        duration: '5 - 7 phút',
+        objective: 'Trẻ tự do cảm nhận giai điệu bài hát và khám phá các nhạc cụ gõ đệm',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô mở bản nhạc bài hát "${mainSong}" với giai điệu vui tươi, rộn rã.\n- Cô khuyến khích trẻ tản ra không gian lớp học, tự do lắng nghe, nhún nhảy và tự sáng tạo các động tác điệu bộ, vỗ tay minh họa theo cảm nhận của riêng mình.\n- Cô để trẻ tự tìm đến khay nhạc cụ (xắc xô, phách tre, gáo dừa, trống lắc) chọn món đồ chơi âm nhạc yêu thích và tự gõ đệm theo nhịp điệu bài hát cùng bạn.\n- Cô bao quát, mỉm cười khích lệ trẻ cảm nhận giai điệu (không uốn nắn hay dạy kỹ thuật ngay lúc này).`,
+          studentAction: `- Trẻ di chuyển tự do trong lớp, hào hứng lắng nghe giai điệu bài hát "${mainSong}".\n- Trẻ tự nghĩ ra các động tác nhún nhảy, lắc lư cơ thể và tự nhẩm hát theo lời ca.\n- Trẻ vui vẻ chọn xắc xô, phách tre tự gõ đệm hòa nhịp cùng bạn bên cạnh.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        }
+      },
+      {
+        id: 'act-3',
+        index: 3,
+        name: '3. Chia sẻ – Thảo luận',
+        duration: '12 - 15 phút',
+        objective: 'Trẻ nắm vững kỹ năng hát vận động / dạy hát và biết cảm thụ giai điệu bài hát nghe',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: [...teacherActionAct3A, ...teacherActionAct3B].join('\n'),
+          studentAction: [...studentActionAct3A, ...studentActionAct3B].join('\n'),
+          productExpected: '',
+          digitalOrAiTool: '',
+        }
+      },
+      {
+        id: 'act-4',
+        index: 4,
+        name: '4. Vận dụng – Mở rộng',
+        duration: '6 - 8 phút',
+        objective: 'Trẻ tự tin biểu diễn giao lưu âm nhạc và hào hứng tham gia trò chơi âm nhạc',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô tổ chức hoạt động giao lưu âm nhạc và trò chơi củng cố:\n- Mời các nhóm trẻ lên sân khấu đeo mũ múa biểu diễn giao lưu bài hát "${mainSong}" kết hợp gõ đệm nhạc cụ tự tạo (phách tre, xắc xô).\n- Cô bao quát, cổ vũ và khen ngợi sự tự tin, sáng tạo của các nhóm.\n\n+ Trò chơi âm nhạc: “${gameTitle}”\n- **Cách chơi:** Cô chuẩn bị các nốt nhạc / vòng tròn may mắn trên sàn. Khi nhạc nổi lên, cả lớp vừa đi vừa hát bài "Ngày vui của bé". Khi nhạc dừng hoặc có hiệu lệnh của cô, mỗi trẻ nhanh chân nhảy vào 1 nốt nhạc / gọi đúng tên bạn hát hoặc thực hiện yêu cầu âm nhạc vui nhộn.\n- **Luật chơi:** Bạn nào không tìm được nốt nhạc hoặc đoán sai tên bạn hát sẽ phải nhảy lò cò 1 vòng hoặc hát tặng cả lớp 1 câu hát.\n- Tổ chức cho trẻ chơi 2 - 3 lần sôi nổi.`,
+          studentAction: `- Trẻ hào hứng đeo mũ múa, tự tin bước lên sân khấu biểu diễn giao lưu cùng các bạn:\n  + Nhóm 1: Trẻ hát vang kết hợp gõ phách tre nhịp nhàng.\n  + Nhóm 2: Trẻ vừa hát vừa nhún nhảy, lắc xắc xô rộn rã.\n  + Nhóm 3: Trẻ tự tin biểu diễn các động tác minh họa sinh động.\n- Trẻ hào hứng lắng nghe cô phổ biến luật chơi và tham gia trò chơi âm nhạc “${gameTitle}” 2 - 3 lần.\n- Trẻ phản xạ nhanh nhạy, reo vui khi đoán đúng và vui vẻ nhảy lò cò khi bị phạm quy.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        }
+      },
+      {
+        id: 'act-5',
+        index: 5,
+        name: '5. Chia sẻ – Đánh giá',
+        duration: '3 - 5 phút',
+        objective: 'Trẻ chia sẻ cảm xúc sau buổi học âm nhạc, củng cố nề nếp thu dọn nhạc cụ gọn gàng',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô tập trung trẻ lại, trò chuyện hỏi cảm nhận của trẻ:\n  + "Hôm nay các con cảm thấy thế nào sau giờ học âm nhạc?"\n  + "Các con thích nhất bài hát, điệu múa hay trò chơi âm nhạc nào?"\n  + "Về nhà các con sẽ hát tặng ai bài hát tuyệt vời này?"\n- Cô nhận xét, tuyên dương sự nỗ lực, giọng hát trong sáng, điệu bộ tự tin và tinh thần hợp tác của trẻ trong suốt buổi học.\n- Hướng dẫn trẻ cùng cô thu dọn nhạc cụ (phách tre, xắc xô, trống lắc), mũ múa cất vào đúng góc âm nhạc, củng cố nề nếp ngăn nắp vệ sinh lớp học.`,
+          studentAction: `- Trẻ tự tin chia sẻ cảm xúc, niềm vui khi được hát múa và chơi trò chơi âm nhạc cùng cô và các bạn.\n- Trẻ tích cực trả lời: "Con rất vui và thích biểu diễn bài hát ạ!", "Về nhà con sẽ hát cho ông bà, bố mẹ nghe!".\n- Trẻ tươi cười lắng nghe cô nhận xét và đón nhận lời khen ngợi.\n- Trẻ tự giác cùng cô và các bạn thu dọn xắc xô, phách tre, mũ múa xếp gọn gàng vào các khay ở góc âm nhạc.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        }
+      }
+    ];
+  }
+
+  if (domain.domainType === 'LETTER_GAME') {
+    // Extract specific letters from title if mentioned (e.g. "l, m, n", "o, ô, ơ", "a, ă, â", "e, ê", "u, ư", "i, t, c", "b, d, đ")
+    let letters = 'o, ô, ơ';
+    const letterMatch = (lessonTitle || '').match(/(?:chữ cái|chữ|với)\s+([a-zA-Zà-ỹÀ-Ỹ\s,–—\-]+)/i);
+    if (letterMatch && letterMatch[1]) {
+      const parsed = letterMatch[1].trim().replace(/\s*[,–—\-]\s*/g, ', ');
+      if (parsed.length > 0 && parsed.length < 25) {
+        letters = parsed;
+      }
+    }
+
+    return [
+      {
+        id: 'act-1',
+        index: 1,
+        name: '1. Gợi hứng thú – hình thành và lựa chọn ý tưởng chơi',
+        duration: '3 - 5 phút',
+        objective: 'Trẻ hào hứng, ghi nhớ và gọi tên các chữ cái trọng tâm bài học',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô cho trẻ hát và vận động theo bài hát ngắn có chứa các chữ cái trọng tâm ${letters} gắn với "${title}".\n- Cô đưa các thẻ chữ cái trọng tâm ra và đố vui trẻ: "Các con có biết đây là những chữ cái gì không?", "Chúng mình có thể chơi những trò chơi thú vị nào với các chữ cái này nhỉ?".\n- Cô giới thiệu chuỗi 5 trò chơi chữ cái hấp dẫn (Trò chơi 1: Ai tìm chữ nhanh, Trò chơi 2: Về đúng nhà, Trò chơi 3: Chuyền chữ tiếp sức, Trò chơi 4: Ghép chữ tạo từ, Trò chơi 5: Săn tìm chữ cái sáng tạo) và cho trẻ lựa chọn.`,
+          studentAction: `- Trẻ hát và nhún nhảy vui tươi theo giai điệu bài hát cùng cô.\n- Trẻ quan sát, hào hứng gọi to tên các chữ cái trọng tâm ${letters}.\n- Trẻ nêu ý tưởng, sôi nổi lựa chọn các trò chơi chữ cái mình yêu thích.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-2',
+        index: 2,
+        name: '2. Thỏa thuận – Lập kế hoạch chơi',
+        duration: '3 - 5 phút',
+        objective: 'Trẻ về nhóm, thống nhất luật chơi văn minh và chuẩn bị học cụ cho chuỗi 5 trò chơi',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô chia trẻ thành các nhóm/đội chơi phù hợp theo các chữ cái ${letters}.\n- Cùng trẻ thỏa thuận và thống nhất kế hoạch:\n  + Tham gia chuỗi 5 trò chơi chữ cái theo hiệu lệnh của cô.\n  + Phân công vị trí chơi, đồ dùng học liệu cho từng đội.\n  + Thống nhất luật chơi văn minh: Chơi trung thực, không xô đẩy, biết chờ lượt, đoàn kết và giúp đỡ bạn bè.\n- Cô nhắc nhở trẻ chuẩn bị sẵn sàng rổ đựng chữ cái, vòng bật nhảy, thẻ tranh từ.`,
+          studentAction: `- Trẻ nhanh nhẹn về nhóm theo sự phân công.\n- Trẻ cùng bạn trao đổi về cách chơi và cam kết tuân thủ đúng luật chơi.\n- Trẻ chuẩn bị sẵn sàng tâm thế và đồ dùng học liệu của nhóm mình.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-3',
+        index: 3,
+        name: '3. Thực hiện hoạt động chơi',
+        duration: '15 - 18 phút',
+        objective: 'Trẻ tham gia đầy đủ chuỗi 5 trò chơi chữ cái, rèn phản xạ, nhận biết mặt chữ và tinh thần đồng đội',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô tổ chức cho trẻ lần lượt tham gia trọn vẹn chuỗi 5 trò chơi chữ cái:\n\nTrò chơi 1: AI TÌM CHỮ NHANH?\n- **Cách chơi:** Cô đặt nhiều thẻ chữ cái lẫn nhau trong rổ. Cô phát âm hoặc nêu đặc điểm nét (ví dụ: tìm chữ cái theo hiệu lệnh). Trẻ nhanh tay tìm đúng thẻ chữ giơ lên thật nhanh và đọc to.\n- **Luật chơi:** Chọn đúng chữ và phát âm chuẩn mới được tính điểm thưởng.\n- **Mục tiêu:** Rèn nhận biết mặt chữ, phát âm chuẩn xác và phản xạ nhanh với các chữ cái ${letters}.\n\nTrò chơi 2: VỀ ĐÚNG NHÀ\n- **Cách chơi:** Bố trí các ngôi nhà mang ký hiệu chữ cái ở các góc. Mỗi trẻ cầm một thẻ chữ cái đi vòng tròn hát theo nhạc; khi nhạc dừng hoặc có hiệu lệnh "Trời mưa", trẻ nhanh chân chạy về đúng ngôi nhà có chữ cái giống thẻ trên tay mình.\n- **Luật chơi:** Về đúng nhà và đọc to tên chữ cái của ngôi nhà; về nhầm nhà phải nhảy lò cò về đúng nhà.\n- **Mục tiêu:** Củng cố phân biệt các chữ cái đã học, rèn luyện vận động và phản xạ định hướng không gian.\n\nTrò chơi 3: CHUYỀN CHỮ TIẾP SỨC\n- **Cách chơi:** Chia các đội xếp hàng dọc trước vạch xuất phát. Khi có hiệu lệnh, bạn đầu hàng bật qua các vòng thể dục, chạy lên rổ chọn đúng chữ cái của đội mình mang về rổ đội, rồi chạy về đập tay bạn tiếp theo.\n- **Luật chơi:** Mỗi lượt chỉ lấy 1 thẻ chữ, đội nào lấy đúng và nhiều thẻ chữ nhất trong thời gian 1 bản nhạc là thắng cuộc.\n- **Mục tiêu:** Rèn tinh thần hợp tác đồng đội, phản xạ nhanh và sự khéo léo.\n\nTrò chơi 4: GHÉP CHỮ TẠO TỪ\n- **Cách chơi:** Cô phát các bức tranh kèm từ bên dưới còn khuyết chữ cái. Trẻ quan sát tranh, tìm các thẻ chữ cái ${letters} còn thiếu gắn vào đúng vị trí để hoàn thiện từ có nghĩa.\n- **Luật chơi:** Ghép đúng vị trí và phát âm to từ hoàn chỉnh.\n- **Mục tiêu:** Khắc sâu cấu tạo nét của chữ cái, nhận diện chữ cái trong từ hoàn chỉnh gắn với tranh.\n\nTrò chơi 5: SĂN TÌM CHỮ CÁI SÁNG TẠO\n- **Cách chơi:** Cô phân công các nhóm: Nhóm đi săn tìm thẻ chữ ẩn giấu quanh lớp; Nhóm phối hợp 2–3 bạn uốn mình tạo dáng chữ cái; Nhóm dùng hột hạt, sỏi màu, dây len xếp viền thành chữ cái sinh động.\n- **Luật chơi:** Tìm đúng số lượng chữ theo yêu cầu, không tranh giành thẻ của bạn, thuyết minh về chữ cái sáng tạo của nhóm mình.\n- **Mục tiêu:** Phát huy tư duy sáng tạo nghệ thuật, định hướng không gian và tinh thần phối hợp.`,
+          studentAction: `- Trẻ hào hứng tham gia lần lượt cả 5 trò chơi chữ cái:\n  + Trò chơi 1: Trẻ tinh mắt, nhanh tay tìm đúng thẻ chữ trong rổ giơ lên và phát âm to, rõ ràng.\n  + Trò chơi 2: Trẻ vừa đi vừa hát, khi nhạc dừng nhanh chân chạy về đúng ngôi nhà chữ cái và đọc to tên chữ.\n  + Trò chơi 3: Trẻ khéo léo bật qua vòng, chọn đúng chữ cái tiếp sức cho đội mình trong tiếng reo hò cổ vũ.\n  + Trò chơi 4: Trẻ chăm chú quan sát tranh, tìm đúng chữ cái còn thiếu gắn vào từ và phát âm từ trọn vẹn.\n  + Trò chơi 5: Trẻ hào hứng săn tìm chữ cái quanh lớp, cùng bạn tạo dáng chữ bằng cơ thể hoặc khéo léo xếp chữ bằng sỏi màu, hột hạt.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-4',
+        index: 4,
+        name: '4. Mở rộng và phát triển',
+        duration: '5 - 7 phút',
+        objective: 'Trẻ nhận diện chữ cái trong môi trường thực tế và phân tích cấu tạo nét',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô tăng độ khó:\n  + Cho trẻ quan sát và tìm các chữ cái vừa học xuất hiện trong các từ trên bảng tuyên truyền, góc sách truyện xung quanh lớp.\n  + Đàm thoại phân tích sâu: So sánh điểm giống và khác nhau về cấu tạo nét giữa các chữ cái đã học.\n  + Khuyến khích trẻ tự nghĩ thêm các từ ngữ quen thuộc trong đời sống hàng ngày có chứa các chữ cái vừa học.\n- Cô khích lệ trẻ sáng tạo thêm các cách chơi mới với thẻ chữ cái.`,
+          studentAction: `- Trẻ tích cực quan sát không gian lớp học và chỉ ra các chữ cái trong từ trên tranh, góc sách.\n- Trẻ phân tích và nêu rõ đặc điểm nét giống và khác nhau của các chữ cái.\n- Trẻ tự tin kể thêm các từ quen thuộc trong cuộc sống có chứa chữ cái vừa học.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+      {
+        id: 'act-5',
+        index: 5,
+        name: '5. Chia sẻ – Đánh giá – Kết thúc chơi',
+        duration: '3 - 5 phút',
+        objective: 'Trẻ chia sẻ cảm xúc, củng cố phát âm chuẩn xác và cất dọn học cụ gọn gàng',
+        step1: {
+          title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
+          teacherAction: `- Cô trò chuyện đàm thoại củng cố: "Hôm nay các con đã tham gia những trò chơi chữ cái nào?", "Con thích nhất trò chơi nào trong 5 trò chơi hôm nay?", "Chúng mình đã được chơi với những chữ cái gì?".\n- Cho cả lớp đồng thanh phát âm lại rõ ràng, chuẩn xác các chữ cái.\n- Cô nhận xét quá trình chơi, tuyên dương tinh thần đoàn kết, chơi trung thực và sự nhanh nhạy của các đội chơi; trao hoa thưởng/sticker khích lệ.\n- Hướng dẫn trẻ cùng cô thu dọn đồ dùng thẻ chữ, rổ đồ chơi vào đúng nơi quy định của lớp.`,
+          studentAction: `- Trẻ hào hứng chia sẻ cảm xúc và kết quả đạt được sau 5 trò chơi.\n- Cả lớp đồng thanh phát âm to, rõ ràng các chữ cái trọng tâm.\n- Trẻ vui sướng đón nhận hoa thưởng và vỗ tay chúc mừng các bạn.\n- Trẻ tự giác cùng cô thu dọn thẻ chữ, rổ đồ dùng cất gọn gàng vào góc lớp.`,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+      },
+    ];
+  }
 
   if (domain.domainType === 'PHYSICAL') {
     return [
@@ -699,11 +1138,11 @@ export function generateDefaultPreschoolActivities(
         index: 4,
         name: '4. Vận dụng và mở rộng',
         duration: '6 - 8 phút',
-        objective: 'Trẻ áp dụng kỹ năng ứng xử và tham gia trò chơi gắn kết tập thể',
+        objective: 'Trẻ tự tin áp dụng kỹ năng xã hội, tham gia trò chơi vận động tập thể có luật rõ ràng',
         step1: {
           title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
-          teacherAction: `- Cô tổ chức hoạt động vận dụng thực hành kỹ năng xã hội gắn liền với "${title}":\n  + Trò chơi củng cố: Tổ chức trò chơi tập thể sôi động (ví dụ: "Tiếp sức yêu thương", "Tìm hành vi đúng - sai", "Bé gắn hoa việc tốt").\n  + Tình huống ứng xử thực tế: Đưa ra tình huống đóng vai thực tế để trẻ thực hành cách chào hỏi lễ phép, biết chia sẻ đồ chơi hoặc an ủi bạn khi bạn buồn.\n- Cô đồng hành, khích lệ trẻ tham gia nhiệt tình và xử lý tình huống khéo léo.`,
-          studentAction: `- Trẻ chăm chú lắng nghe cô phổ biến luật chơi và cách chơi.\n- Trẻ tích cực tham gia trò chơi, phối hợp nhịp nhàng và cổ vũ các bạn trong đội.\n- Trẻ hào hứng nhập vai xử lý tình huống: khoanh tay chào hỏi, mỉm cười nói lời cảm ơn, chia sẻ đồ chơi cùng bạn.`,
+          teacherAction: `- Cô hướng dẫn, dẫn dắt sư phạm cụ thể trước khi vào trò chơi:\n  + Cô tổ chức trò chơi trải nghiệm “Hướng dẫn viên nhí”: Cô đóng vai khách tham quan, mời các nhóm trẻ đóng vai hướng dẫn viên giới thiệu về các khu vực, góc chơi trong lớp và trường mầm non.\n  + Mời 1 - 2 trẻ tự tin kể tên cô giáo chủ nhiệm của mình và kể tên một số bạn học thân thiết trong lớp.\n  + Cô giới thiệu thêm cho trẻ biết trong trường/điểm trường còn có các cô giáo khác, hỏi trẻ tên trường mầm non nơi trẻ đang học và cô giới thiệu thêm tên cô hiệu trưởng, cô hiệu phó của trường mầm non.\n  + Cô bao quát, cổ vũ và khen ngợi sự tự tin, tinh thần hợp tác của các nhóm trước khi vào trò chơi củng cố.\n\n+ Trò chơi: “Ai nhanh, bạn trai hay bạn gái”\n- **Mục tiêu:** Củng cố sự hiểu biết về bản thân, bạn bè, giới tính và tinh thần đoàn kết tập thể; rèn luyện khả năng quan sát, phản xạ nhanh nhẹn theo hiệu lệnh, tính kỷ luật và niềm vui gắn kết cho trẻ mầm non.\n- **Chuẩn bị:** Sân lớp rộng rãi, các ô hình tròn (dành cho bạn trai) và ô hình vuông (dành cho bạn gái) được bố trí rõ ràng trên sàn, nhạc bài hát "Ngày vui của bé".\n- **Cách chơi:** Cô và các con cùng nắm tay nhau đi vòng tròn, vừa đi vừa hát vang bài hát "Ngày vui của bé". Các con chú ý lắng tai nghe thật kỹ hiệu lệnh của cô nhé! Khi cô hô to hiệu lệnh "Tạo nhóm! Tạo nhóm!", các bạn trai sẽ nhanh chân chạy về ô hình tròn, còn các bạn gái sẽ nhanh chân chạy về ô hình vuông (hoặc ngược lại). Sau khi đã về đúng nhóm của mình, các con hãy cùng gọi tên các bạn trong nhóm và bắt tay chào nhau thật vui vẻ nhé!\n- **Luật chơi:** Bạn nào về sai nhóm hoặc không về được đúng nhóm theo hiệu lệnh của cô sẽ phải nhảy lò cò 1 vòng quanh nhóm để tìm về đúng bạn của mình. Nhóm nào về nhanh, đúng và đoàn kết nhất sẽ được cô và cả lớp vỗ tay hoan hô khen ngợi.\n- Tổ chức cho trẻ chơi 2 – 3 lần sôi nổi (Cô bao quát, khích lệ trẻ, có thể đổi hiệu lệnh nhóm bạn mặc áo màu đỏ/màu vàng, hoặc đổi vị trí hình để rèn phản xạ linh hoạt cho trẻ).`,
+          studentAction: `- Trẻ tự tin đóng vai hướng dẫn viên nhí, hào hứng giới thiệu về trường lớp với khách tham quan (cô giáo) theo từng nhóm:\n  + Nhóm 1: "Ôi sân trường rộng quá, có nhiều cây xanh và bồn hoa đẹp lắm ạ!".\n  + Nhóm 2: "Đây là góc sách, còn kia là góc xây dựng của chúng con với nhiều khối gỗ đẹp ạ!".\n  + Nhóm 3: "Đây là khu nhà bóng, bên kia là khu vực cầu trượt chúng con rất thích chơi ạ!".\n- Trẻ tự do đặt câu hỏi cho cô và bạn, tự tin kể tên cô giáo chủ nhiệm, cô hiệu trưởng và các bạn trong lớp.\n- Trẻ chăm chú lắng nghe cô phổ biến mục tiêu, cách chơi và luật chơi của trò chơi “Ai nhanh, bạn trai hay bạn gái”.\n- Trẻ hào hứng tham gia chơi 2 – 3 lần sôi nổi: Vừa đi vòng tròn vừa hát vang bài hát, khi có hiệu lệnh trẻ nhanh nhẹn chạy về đúng nhóm của mình và gọi tên bạn thân trong nhóm.\n- Trẻ chấp hành nghiêm túc luật chơi, vui vẻ nhảy lò cò khi phạm quy và nhiệt tình cổ vũ đồng đội.`,
           productExpected: '',
           digitalOrAiTool: '',
         },
@@ -716,8 +1155,8 @@ export function generateDefaultPreschoolActivities(
         objective: 'Trẻ chia sẻ cảm xúc sau buổi học, hình thành thói quen ngăn nắp tự giác',
         step1: {
           title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
-          teacherAction: `- Cô trò chuyện hỏi cảm nhận của trẻ: "Hôm nay con thích hoạt động nào nhất?", "Con cảm thấy như thế nào sau bài học?".\n- Quan sát, biểu dương tinh thần tham gia tự tin, sự đoàn kết và những lời nói, hành vi đẹp của trẻ trong giờ học.\n- Động viên, khích lệ trẻ tiếp tục phát huy những hành vi lễ phép, yêu thương mọi người trong sinh hoạt hằng ngày.\n- Nhắc nhở trẻ tự giác cùng cô thu dọn đồ dùng, học liệu cất gọn gàng vào các góc quy định.`,
-          studentAction: `- Trẻ vui vẻ chia sẻ cảm xúc hào hứng và những điều mình yêu thích nhất.\n- Trẻ tự tin đón nhận lời khen ngợi của cô và vỗ tay chúc mừng cả lớp.\n- Trẻ tự giác cùng bạn thu dọn đồ dùng, học liệu ngăn nắp vào đúng nơi quy định.`,
+          teacherAction: `- Cô tập trung trẻ lại, trò chuyện hỏi cảm xúc gợi mở của trẻ:\n  + "Hôm nay các con cảm thấy thế nào sau buổi học?"\n  + "Con thích nhất hoạt động nào hay góc chơi nào trong ngày hôm nay?"\n  + "Con sẽ làm gì để trường Mầm non của chúng mình luôn sạch đẹp, lớp học luôn chan hòa tình yêu thương?"\n- Cô nhận xét, tuyên dương sự cố gắng, tinh thần tự giác, tự tin và sự đoàn kết giúp đỡ bạn bè của trẻ trong suốt buổi học.\n- Cô hướng dẫn trẻ cùng cô thu dọn giáo cụ, phân loại đồ dùng đồ chơi vào đúng góc quy định, củng cố nề nếp vệ sinh sạch sẽ lớp học.`,
+          studentAction: `- Trẻ tự tin chia sẻ cảm xúc, niềm vui khi được khám phá về trường lớp và bạn bè: "Con rất vui và yêu quý trường lớp, cô giáo và các bạn ạ!".\n- Trẻ tích cực trả lời các câu hỏi liên hệ thực tế: "Con sẽ cùng các bạn giữ gìn trường lớp sạch đẹp, không vứt rác bừa bãi và luôn vâng lời cô giáo ạ!".\n- Trẻ tươi cười đón nhận lời khen ngợi của cô và vỗ tay chúc mừng cả lớp.\n- Trẻ tự giác cùng cô và các bạn thu dọn đồ dùng, học liệu, xếp ngăn nắp vào đúng góc quy định.`,
           productExpected: '',
           digitalOrAiTool: '',
         },
@@ -736,7 +1175,7 @@ export function generateDefaultPreschoolActivities(
         objective: 'Khơi gợi trí tò mò, khám phá khoa học của trẻ',
         step1: {
           title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
-          teacherAction: `- Cô tạo tình huống bất ngờ với "Chiếc túi kỳ diệu" / một thí nghiệm nhỏ hoặc video ngắn khơi gợi sự tò mò gắn với "${title}".\n- Cô đặt câu hỏi kích thích óc quan sát: "Các con có nhìn thấy điều gì kỳ lạ vừa xảy ra không?".\n- Dẫn dắt trẻ vào hành trình khám phá khoa học hôm nay.`,
+          teacherAction: `- Cô tạo tình huống bất ngờ với "Chiếc túi kỳ diệu" / một thí nghiệm nhỏ khơi gợi sự tò mò gắn với "${title}".\n- Cô đặt câu hỏi kích thích óc quan sát: "Các con có nhìn thấy điều gì kỳ lạ vừa xảy ra không?".\n- Dẫn dắt trẻ vào hành trình khám phá khoa học hôm nay.`,
           studentAction: `- Trẻ tập trung chú ý, quan sát hiện tượng và hào hứng phán đoán.\n- Trẻ sôi nổi đưa ra ý kiến của mình và háo hức muốn tự tay làm thử.`,
           productExpected: '',
           digitalOrAiTool: '',
@@ -751,7 +1190,7 @@ export function generateDefaultPreschoolActivities(
         step1: {
           title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
           teacherAction: `- Chia trẻ về các nhóm khám phá, cung cấp đồ dùng học liệu thí nghiệm/vật thật liên quan đến "${title}".\n- Hướng dẫn trẻ sử dụng các giác quan (mắt nhìn, tai nghe, tay sờ, mũi ngửi...) để quan sát và khám phá đặc điểm, sự biến đổi.\n- Cô đi lại gợi mở câu hỏi khám phá: "Con thấy vật này thế nào?", "Khi làm như vậy thì điều gì xuất hiện?".`,
-          studentAction: `- Trẻ về nhóm, chủ động sờ, ngửi, quan sát và thao tác với học liệu.\n- Trẻ trao đổi râm ran với bạn trong nhóm về những điều mình nhìn thấy và cảm nhận được.`,
+          studentAction: `- Trẻ về nhóm, chủ động sờ, ngửi, quan sát và thao tác với học liệu:\n  + Nhóm 1: Trẻ hào hứng quan sát hiện tượng và trao đổi rôm rả cùng bạn.\n  + Nhóm 2: Trẻ tự tay thực hiện thao tác thử nghiệm và reo vui khi thấy sự thay đổi.\n  + Nhóm 3: Trẻ chăm chú ghi nhận kết quả và đối chiếu cùng cô.`,
           productExpected: '',
           digitalOrAiTool: '',
         },
@@ -775,11 +1214,11 @@ export function generateDefaultPreschoolActivities(
         index: 4,
         name: '4. Vận dụng – Mở rộng',
         duration: '6 - 8 phút',
-        objective: 'Trẻ áp dụng kiến thức vào trò chơi khoa học sáng tạo',
+        objective: 'Trẻ áp dụng kiến thức vào trò chơi khoa học sáng tạo và trò chơi vận động có luật rõ ràng',
         step1: {
           title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
-          teacherAction: `- Tổ chức trò chơi khoa học củng cố hoặc thử thách sáng tạo (ví dụ: "Thử tài nhà bác học nhí", "Phân loại thông minh").\n- Gợi mở liên hệ hiện tượng thực tế trong cuộc sống xung quanh trẻ.`,
-          studentAction: `- Trẻ tham gia trò chơi nhiệt tình, vận dụng kiến thức vừa học để vượt qua thử thách.\n- Trẻ hào hứng kể về những điều tương tự mình từng thấy ở nhà hoặc ngoài thiên nhiên.`,
+          teacherAction: `- Cô hướng dẫn, dẫn dắt sư phạm trước khi vào trò chơi:\n  + Cô tổ chức hoạt động trải nghiệm mở rộng đóng vai "Nhà khoa học nhí" / thực hành ứng dụng khoa học vào thực tế quanh lớp học.\n  + Mời đại diện 1 - 2 nhóm trẻ giới thiệu về phát hiện khoa học, hiện tượng biến đổi hoặc các vật dụng mà nhóm vừa khám phá.\n  + Cô đàm thoại gợi mở ứng dụng thực tế: "Trong cuộc sống hằng ngày, các con thấy điều kỳ diệu này xuất hiện ở những đâu?".\n  + Cô bao quát, cổ vũ và khen ngợi tinh thần say mê tìm tòi, hợp tác tích cực của các nhóm trước khi bước vào phần trò chơi củng cố.\n\n+ Trò chơi: “Ai nhanh hơn – Đội nào giỏi nhất”\n- **Mục tiêu:** Củng cố kiến thức khoa học cốt lõi trẻ vừa khám phá (nhận biết đặc điểm, phân loại đúng đối tượng/hiện tượng khoa học); rèn luyện kỹ năng quan sát, thao tác nhanh nhẹn, tinh thần đồng đội, tính kỷ luật và phản xạ tự tin cho trẻ mầm non.\n- **Chuẩn bị:** Vạch xuất phát, các vòng thể dục bật nhảy tiếp sức, rổ đựng thẻ tranh/vật thật khoa học theo yêu cầu, bảng từ gắn kết quả của các đội, nhạc nền sôi động.\n- **Cách chơi:** Cô chia lớp mình thành 2 đội chơi xuất sắc có số lượng bạn bằng nhau, đứng xếp hàng trước vạch xuất phát nhé! Phía trước mỗi đội là con đường vòng thể dục và một rổ đựng thẻ tranh/vật thật khoa học. Khi bản nhạc sôi động vang lên và có hiệu lệnh xuất phát của cô, bạn đầu hàng của mỗi đội sẽ bật liên tục qua các vòng thể dục, nhanh chân chạy lên bàn chọn đúng 1 thẻ hình ảnh/vật thật theo yêu cầu khoa học gắn lên bảng của đội mình. Sau đó, các con nhanh chân chạy về cuối hàng đập nhẹ vào tay bạn tiếp theo để bạn tiếp tục lên chơi nhé! Trò chơi sẽ kết thúc khi bản nhạc dừng lại!\n- **Luật chơi:** Mỗi lượt lên chơi, mỗi bạn chỉ được chọn đúng 1 thẻ tranh/vật thật. Bạn nào chọn sai hoặc dẫm chân vào viền vòng thể dục thì lượt đó sẽ không được tính điểm. Đội nào chọn đúng và gắn được nhiều thẻ nhất sẽ là đội chiến thắng. Đội về sau sẽ cùng nhau làm động tác mô phỏng chú ếch nhảy / chú chim bay vui nhộn để chúc mừng đội bạn.\n- Tổ chức cho trẻ chơi 2 – 3 lần sôi nổi (Cô bao quát, cổ vũ tinh thần các đội, đổi tranh ảnh/nhiệm vụ phân loại có độ khó tăng dần ở lượt chơi sau).`,
+          studentAction: `- Trẻ tự tin đóng vai nhà khoa học nhí, hào hứng phát biểu rôm rả theo từng nhóm:\n  + Nhóm 1: "Thưa cô, nhóm con phát hiện ra khi thử nghiệm sẽ tạo ra điều kỳ diệu rất đẹp ạ!".\n  + Nhóm 2: "Nhóm con thấy các vật dụng có đặc điểm rất đặc biệt ạ!".\n  + Nhóm 3: "Chúng con tìm thấy rất nhiều đồ dùng, đồ chơi tương ứng trong các góc học tập ạ!".\n- Trẻ tự do đặt câu hỏi và tự tin trả lời các câu hỏi liên hệ thực tế của cô giáo.\n- Trẻ chăm chú lắng nghe cô phổ biến mục tiêu, cách chơi và luật chơi của trò chơi “Ai nhanh hơn – Đội nào giỏi nhất”.\n- Trẻ tích cực tham gia chơi 2 – 3 lần, bật nhảy khéo léo qua các vòng thể dục, phối hợp tiếp sức nhịp nhàng và reo hò cổ vũ bạn cùng đội.\n- Trẻ chấp hành nghiêm túc luật chơi và vui vẻ chúc mừng đội chiến thắng.`,
           productExpected: '',
           digitalOrAiTool: '',
         },
@@ -789,11 +1228,11 @@ export function generateDefaultPreschoolActivities(
         index: 5,
         name: '5. Chia sẻ - Đánh giá',
         duration: '3 - 5 phút',
-        objective: 'Trẻ chia sẻ cảm nhận và rèn luyện nề nếp thu dọn đồ dùng',
+        objective: 'Trẻ chia sẻ cảm nhận, cô nhận xét tuyên dương và rèn luyện nề nếp thu dọn đồ dùng',
         step1: {
           title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
-          teacherAction: `- Trò chuyện hỏi trẻ cảm nhận về buổi khám phá khoa học.\n- Nhận xét tuyên dương tinh thần chủ động tìm tòi của cả lớp.\n- Hướng dẫn trẻ cùng cô rửa sạch dụng cụ thí nghiệm, cất dọn ngăn nắp.`,
-          studentAction: `- Trẻ chia sẻ niềm vui khám phá điều mới lạ.\n- Trẻ tự giác cùng bạn thu dọn đồ dùng, lau bàn và cất học liệu đúng nơi quy định.`,
+          teacherAction: `- Cô tập trung trẻ lại, trò chuyện hỏi cảm nhận gợi mở của trẻ:\n  + "Hôm nay các con cảm thấy thế nào khi được làm những nhà khoa học nhí khám phá thế giới xung quanh?"\n  + "Qua buổi học hôm nay, con thích nhất trải nghiệm hay trò chơi khoa học nào?"\n  + "Về nhà con sẽ làm gì để giữ gìn môi trường và ứng dụng điều kỳ diệu này cùng bố mẹ?"\n- Cô nhận xét, tuyên dương sự cố gắng, tinh thần say mê tìm tòi và ý thức tự giác, hợp tác của trẻ trong suốt buổi học.\n- Cô hướng dẫn trẻ cùng cô thu dọn đồ dùng thí nghiệm, phân loại học liệu vào đúng góc quy định, củng cố nề nếp vệ sinh sạch sẽ, ngăn nắp lớp học.`,
+          studentAction: `- Trẻ hào hứng chia sẻ cảm xúc, niềm vui khi được khám phá khoa học: "Con thấy rất vui và thích làm thí nghiệm cùng các bạn ạ!".\n- Trẻ tích cực trả lời các câu hỏi liên hệ thực tế của cô giáo.\n- Trẻ tươi cười lắng nghe cô nhận xét và tự hào đón nhận lời khen ngợi của cô.\n- Trẻ tự giác cùng cô và các bạn thu dọn đồ dùng, học liệu thí nghiệm cất ngăn nắp vào đúng nơi quy định.`,
           productExpected: '',
           digitalOrAiTool: '',
         },
@@ -851,11 +1290,11 @@ export function generateDefaultPreschoolActivities(
         index: 4,
         name: '4. Vận dụng – Mở rộng',
         duration: '6 - 8 phút',
-        objective: 'Trẻ vận dụng kiến thức toán vào các trò chơi củng cố',
+        objective: 'Trẻ tham gia các trò chơi củng cố kiến thức toán học, rèn luyện phản xạ và tinh thần hợp tác',
         step1: {
           title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
-          teacherAction: `- Tổ chức trò chơi củng cố sôi nổi (ví dụ: "Ai nhanh hơn", "Về đúng nhà", "Tìm bạn cho số").\n- Quan sát, động viên trẻ tham gia chơi đúng luật, đếm chuẩn xác.`,
-          studentAction: `- Trẻ hào hứng tham gia trò chơi, nhanh nhẹn tìm đúng nhà, gắn đúng số lượng.\n- Cả lớp vỗ tay chúc mừng các bạn thắng cuộc.`,
+          teacherAction: `- Cô hướng dẫn, dẫn dắt sư phạm cụ thể trước khi vào trò chơi:\n  + Cô cùng trẻ đàm thoại, tổ chức hoạt động trải nghiệm toán học thực tế quanh lớp học: "Các con ơi! Xung quanh lớp mình có rất nhiều góc chơi với những đồ dùng, đồ chơi mang số lượng/hình khối như bài học hôm nay đấy!".\n  + Cô mời các nhóm trẻ quan sát nhanh và tìm các nhóm đồ vật quanh lớp có số lượng tương ứng với bài học (ví dụ: 5 bông hoa ở góc thiên nhiên, 5 khối gỗ ở góc xây dựng, 5 quyển truyện ở góc sách...).\n  + Mời đại diện 1 - 2 trẻ lên chỉ vào các nhóm đồ vật vừa tìm thấy, cả lớp cùng đếm kiểm tra lại và mời trẻ chọn thẻ số tương ứng gắn vào.\n  + Cô bao quát, cổ vũ và khen ngợi tinh thần nhanh mắt, khéo léo của các nhóm trẻ trước khi bước vào trò chơi củng cố.\n\n+ Trò chơi: “Về đúng nhà”\n- **Mục tiêu:** Củng cố biểu tượng toán học (nhận biết chữ số, đếm đúng số lượng và phân biệt hình khối nhanh nhạy); rèn luyện khả năng quan sát, phản xạ nhanh nhẹn theo hiệu lệnh, tinh thần đồng đội và tính kỷ luật cho trẻ mầm non.\n- **Chuẩn bị:** 3 - 4 ngôi nhà mang các thẻ số/chữ số tương ứng được bố trí ở các góc lớp, mỗi trẻ cầm 1 thẻ số trên tay, nhạc bài hát "Ngày vui của bé".\n- **Cách chơi:** Cô phát cho mỗi bạn một thẻ số bất kỳ. Các con cầm thẻ số trên tay và cùng nắm tay nhau đi vòng tròn theo điệu nhạc bài hát "Ngày vui của bé". Khi bản nhạc dừng lại hoặc cô hô to hiệu lệnh "Tìm nhà! Tìm nhà!", các con hãy quan sát thật nhanh xem thẻ số trên tay mình là số mấy rồi chạy thật nhanh về đúng ngôi nhà mang chữ số tương ứng nhé! Về đến nhà, các con hãy giơ cao thẻ số của mình lên và đọc to số của mình cùng các bạn trong nhà nhé!\n- **Luật chơi:** Bạn nào về sai nhà hoặc không về được đúng nhà theo hiệu lệnh của cô sẽ phải nhảy lò cò 1 vòng quanh lớp để tìm về đúng ngôi nhà của mình. Đội nào/bạn nào về nhanh, đúng nhà và giơ đúng thẻ số sẽ được cô và cả lớp vỗ tay khen ngợi thật to!\n- Tổ chức cho trẻ chơi 2 – 3 lần sôi nổi (Cô hướng dẫn trẻ đổi thẻ số cho bạn bên cạnh sau mỗi lần chơi, cô bao quát, khích lệ động viên trẻ còn nhút nhát và tạo không khí vui tươi, hào hứng).`,
+          studentAction: `- Trẻ tự tin quan sát xung quanh lớp học và hào hứng phát biểu rôm rả theo từng nhóm:\n  + Nhóm 1: "Thưa cô, chúng con tìm thấy các nhóm đồ vật rất đẹp ở góc thiên nhiên và góc sách ạ!".\n  + Nhóm 2: "Nhóm con tìm thấy các khối đồ chơi ở góc xây dựng và đã gắn đúng thẻ số rồi ạ!".\n  + Nhóm 3: "Góc học tập của chúng con có đủ đồ dùng học toán ngồi ngay ngắn ạ!".\n- Cả lớp cùng đếm to kiểm tra lại số lượng bạn vừa tìm và vỗ tay chúc mừng.\n- Trẻ chăm chú lắng nghe cô phổ biến mục tiêu, cách chơi và luật chơi của trò chơi “Về đúng nhà”.\n- Trẻ hào hứng tham gia chơi 2 – 3 lần sôi nổi: Vừa đi vừa hát vui tươi, khi nghe hiệu lệnh nhanh chân chạy về đúng ngôi nhà mang chữ số của mình, tươi cười giơ cao thẻ số đọc vang.\n- Trẻ vui vẻ đổi thẻ cho bạn sau mỗi lượt chơi, chấp hành nghiêm túc luật chơi và vui vẻ nhảy lò cò khi về nhầm nhà.`,
           productExpected: '',
           digitalOrAiTool: '',
         },
@@ -865,11 +1304,11 @@ export function generateDefaultPreschoolActivities(
         index: 5,
         name: '5. Chia sẻ - Đánh giá',
         duration: '3 - 5 phút',
-        objective: 'Trẻ củng cố bài học và cất dọn đồ dùng toán',
+        objective: 'Trẻ củng cố bài học, chia sẻ cảm xúc và cất dọn đồ dùng toán ngăn nắp',
         step1: {
           title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
-          teacherAction: `- Cô đàm thoại hỏi lại tên bài học toán hôm nay.\n- Khen ngợi trẻ học chăm chỉ, đếm giỏi, nhận biết nhanh.\n- Hướng dẫn trẻ xếp đồ dùng gọn gàng vào rổ và mang về góc cất.`,
-          studentAction: `- Trẻ nhắc lại tên bài học và số lượng/hình khối vừa học.\n- Trẻ tự giác xếp từng món đồ chơi vào rổ và cất gọn gàng.`,
+          teacherAction: `- Cô tập trung trẻ lại, trò chuyện hỏi cảm nhận gợi mở của trẻ:\n  + "Hôm nay các con đã được học bài học toán gì thú vị?"\n  + "Chúng mình đã được làm quen với nội dung gì và chơi những trò chơi nào?"\n  + "Các con cảm thấy buổi học hôm nay như thế nào? Về nhà các con sẽ đếm những đồ dùng gì giúp ông bà, bố mẹ?"\n- Cô nhận xét, tuyên dương sự nỗ lực, kỹ năng đếm thành thạo, xếp tương ứng chuẩn xác và tinh thần học tập chăm chỉ, tự giác của trẻ trong suốt buổi học.\n- Cô giáo dục trẻ biết giữ gìn đồ dùng học tập, đoàn kết giúp đỡ bạn bè trong lớp.\n- Hướng dẫn trẻ cùng cô thu dọn rổ đồ dùng, xếp thẻ số gọn gàng và cất vào đúng góc học tập, củng cố nề nếp ngăn nắp của lớp.`,
+          studentAction: `- Trẻ lắng nghe và hào hứng chia sẻ cảm xúc: "Hôm nay chúng con học toán rất vui và thích thú ạ!".\n- Trẻ tích cực trả lời: "Về nhà con sẽ đếm bát đũa giúp mẹ trong bữa cơm ạ!".\n- Trẻ tươi cười đón nhận lời khen ngợi của cô và vỗ tay chúc mừng cả lớp.\n- Trẻ tự giác cùng cô và các bạn thu dọn rổ đồ dùng, xếp thẻ số ngay ngắn và cất vào góc học tập.`,
           productExpected: '',
           digitalOrAiTool: '',
         },
@@ -902,7 +1341,7 @@ export function generateDefaultPreschoolActivities(
       step1: {
         title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
         teacherAction: `- Cô tổ chức cho trẻ tiếp cận đối tượng học tập gắn với "${title}" (qua tranh ảnh, vật thật, video, bài thơ, câu chuyện hoặc các trạm trải nghiệm).\n- Cô hướng dẫn, đặt câu hỏi gợi mở để trẻ tự quan sát, cảm nhận và tìm hiểu đặc điểm chính.`,
-        studentAction: `- Trẻ tập trung quan sát, lắng nghe và tự tay trải nghiệm học liệu.\n- Trẻ hào hứng chia sẻ cảm nhận ban đầu với bạn và cô.`,
+        studentAction: `- Trẻ tập trung quan sát, lắng nghe và tự tay trải nghiệm học liệu:\n  + Nhóm 1: Trẻ quan sát, sờ vào các vật dụng, trao đổi rôm rả với bạn.\n  + Nhóm 2: Trẻ hào hứng thảo luận và chỉ ra những điểm nổi bật.\n  + Nhóm 3: Trẻ mạnh dạn đặt câu hỏi và chia sẻ cảm nhận với cô.`,
         productExpected: '',
         digitalOrAiTool: '',
       },
@@ -926,11 +1365,11 @@ export function generateDefaultPreschoolActivities(
       index: 4,
       name: '4. Vận dụng – Mở rộng',
       duration: '6 - 8 phút',
-      objective: 'Trẻ củng cố kiến thức qua trò chơi hoặc thực hành sáng tạo',
+      objective: 'Trẻ củng cố kiến thức qua trò chơi đóng vai trải nghiệm và trò chơi vận động tập thể',
       step1: {
         title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
-        teacherAction: `- Cô tổ chức trò chơi củng cố hoặc bài tập thực hành ứng dụng gắn với "${title}".\n- Cô phổ biến cách chơi, luật chơi rõ ràng và khích lệ trẻ tham gia tự tin.`,
-        studentAction: `- Trẻ tích cực tham gia trò chơi, phối hợp cùng bạn và tuân thủ luật chơi.\n- Trẻ hào hứng thể hiện kỹ năng đã học để hoàn thành nhiệm vụ.`,
+        teacherAction: `- Cô hướng dẫn, dẫn dắt sư phạm cụ thể trước khi vào trò chơi:\n  + Cô tổ chức trò chơi trải nghiệm “Hướng dẫn viên nhí”: Cô đóng vai khách tham quan, mời các nhóm trẻ đóng vai hướng dẫn viên giới thiệu về các khu vực/góc chơi trong lớp, trường học.\n  + Mời 1 - 2 trẻ kể tên cô giáo chủ nhiệm, các bạn trong lớp và những điều mình yêu thích.\n  + Hỏi trẻ về ngôi trường mầm non nơi trẻ đang học, cô giới thiệu thêm tên cô hiệu trưởng và cô hiệu phó.\n  + Cô bao quát, cổ vũ và khen ngợi sự hợp tác của các nhóm trước khi vào trò chơi củng cố.\n\n+ Trò chơi: “Ai nhanh, bạn trai hay bạn gái”\n- **Mục tiêu:** Củng cố kiến thức bài học, rèn luyện kỹ năng quan sát, phản xạ nhanh nhẹn theo hiệu lệnh, tinh thần đồng đội, tính kỷ luật và niềm vui học tập cho trẻ mầm non.\n- **Chuẩn bị:** Sân lớp rộng rãi, các ô hình tròn (dành cho bạn trai) và ô hình vuông (dành cho bạn gái) trên sàn, nhạc bài hát "Ngày vui của bé".\n- **Cách chơi:** Cô và các con cùng nắm tay nhau đi vòng tròn, vừa đi vừa hát bài "Ngày vui của bé". Khi có hiệu lệnh “Tạo nhóm! Tạo nhóm!”, các bạn trai nhanh chân chạy về nhóm hình tròn, bạn gái về nhóm hình vuông (hoặc ngược lại), sau đó cho trẻ gọi tên một số bạn trong nhóm của mình.\n- **Luật chơi:** Bạn nào về sai nhóm hoặc không về được đúng nhóm theo hiệu lệnh sẽ phải nhảy lò cò 1 vòng quanh nhóm để tìm về đúng bạn của mình. Nhóm nào về nhanh, đúng và đoàn kết nhất sẽ được cô và cả lớp hoan hô khen ngợi.\n- Tổ chức cho trẻ chơi 2 – 3 lần sôi nổi (Cô bao quát, khích lệ động viên trẻ).`,
+        studentAction: `- Trẻ hào hứng đóng vai hướng dẫn viên, tự tin giới thiệu về trường lớp với khách tham quan (cô giáo):\n  + Nhóm 1: "Ôi sân trường rộng quá, có nhiều cây xanh ạ!".\n  + Nhóm 2: "Đây là góc sách, còn kia là góc xây dựng của chúng con ạ!".\n  + Nhóm 3: "Đây là khu nhà bóng, bên kia là khu vực cầu trượt rất vui ạ!".\n- Trẻ tự tin trả lời các câu hỏi liên hệ thực tế của cô về trường lớp, thầy cô và bạn bè.\n- Trẻ chăm chú lắng nghe cô phổ biến mục tiêu, cách chơi và luật chơi của trò chơi.\n- Trẻ hào hứng tham gia trò chơi "Ai nhanh, bạn trai hay bạn gái" 2 – 3 lần: Vừa đi vòng tròn vừa hát, khi có hiệu lệnh trẻ nhanh nhẹn tìm về đúng nhóm và gọi tên bạn thân trong nhóm.\n- Trẻ chấp hành nghiêm túc luật chơi, vui vẻ nhảy lò cò khi phạm quy và nhiệt tình cổ vũ bạn.`,
         productExpected: '',
         digitalOrAiTool: '',
       },
@@ -940,16 +1379,176 @@ export function generateDefaultPreschoolActivities(
       index: 5,
       name: '5. Chia sẻ - Đánh giá',
       duration: '3 - 5 phút',
-      objective: 'Trẻ chia sẻ cảm xúc, cô nhận xét động viên và thu dọn đồ dùng',
+      objective: 'Trẻ chia sẻ cảm xúc, cô nhận xét tuyên dương và hướng dẫn cất dọn đồ dùng',
       step1: {
         title: 'Bước 1: Chuyển giao nhiệm vụ học tập',
-        teacherAction: `- Cô cùng trẻ trò chuyện hỏi cảm xúc sau buổi học hôm nay.\n- Cô nhận xét, tuyên dương tinh thần học tập tích cực của cả lớp.\n- Hướng dẫn trẻ tự giác thu dọn đồ dùng, học liệu cất gọn gàng vào các góc quy định.`,
-        studentAction: `- Trẻ hào hứng chia sẻ niềm vui và những điều mình thích nhất.\n- Trẻ đón nhận lời khen và cùng bạn thu dọn đồ dùng ngăn nắp.`,
+        teacherAction: `- Cô mời trẻ chia sẻ cảm xúc và bài học thực tế:\n  + "Hôm nay con cảm thấy thế nào sau buổi học?"\n  + "Con sẽ làm gì để trường Mầm non của chúng mình luôn sạch đẹp, đoàn kết yêu thương nhau?"\n- Cô nhận xét, tuyên dương sự cố gắng, tự tin và tinh thần tự giác của trẻ trong suốt buổi học.\n- Cô hướng dẫn trẻ cùng cô thu dọn giáo cụ, phân loại đồ dùng vào đúng góc quy định, củng cố nề nếp vệ sinh lớp học.`,
+        studentAction: `- Trẻ tự tin chia sẻ cảm xúc, niềm vui khi được khám phá về bài học và trường lớp.\n- Trẻ tích cực trả lời: "Con sẽ cùng các bạn giữ gìn trường lớp sạch đẹp, không vứt rác bừa bãi ạ!".\n- Trẻ tươi cười đón nhận lời khen ngợi của cô.\n- Trẻ tự giác cùng cô và các bạn thu dọn đồ dùng đồ chơi, xếp ngăn nắp vào đúng góc quy định.`,
         productExpected: '',
         digitalOrAiTool: '',
       },
     },
   ];
+}
+
+export function enrichPreschoolStep4(
+  teacherAction: string,
+  studentAction: string,
+  lessonTitle: string = '',
+  subject: string = '',
+  domain: any
+): { teacherAction: string; studentAction: string } {
+  // If it's Physical Education, formatPreschoolPhysicalActivities already handles it
+  if (domain.domainType === 'PHYSICAL' || domain.domainType === 'MUSIC') {
+    return { teacherAction, studentAction };
+  }
+
+  const isMath = domain.domainType === 'MATH';
+  const isScience = domain.domainType === 'SCIENCE';
+  const isSocial = domain.domainType === 'SOCIAL';
+
+  let tText = teacherAction.trim();
+  let sText = studentAction.trim();
+
+  // 1. Check if there is already a game
+  const hasGame = /trò chơi/i.test(tText);
+
+  // If no game at all, or text is very short (less than 60 chars), use the standard activity 4 from generateDefaultPreschoolActivities
+  if (!hasGame || tText.length < 60) {
+    const defaultActs = generateDefaultPreschoolActivities(lessonTitle, subject, domain);
+    const act4 = defaultActs.find(a => a.index === 4) || defaultActs[3];
+    if (act4?.step1?.teacherAction) {
+      tText = act4.step1.teacherAction;
+    }
+    if (act4?.step1?.studentAction) {
+      sText = act4.step1.studentAction;
+    }
+    return { teacherAction: tText, studentAction: sText };
+  }
+
+  // 2. Ensure pedagogical lead-in before the game (văn phong sư phạm mầm non)
+  const startsWithGame = /^[-\s*+•–—]*trò chơi/i.test(tText) || /^[-\s*+•–—]*\+\s*trò chơi/i.test(tText);
+  const hasLeadInKeywords = /hướng dẫn viên|nhà khoa học|đàm thoại|liên hệ|tìm các nhóm|góc chơi|khu vực|thực tế quanh lớp|trải nghiệm mở rộng/i.test(tText);
+
+  let leadIn = '';
+  if (isMath) {
+    leadIn = `- Cô hướng dẫn, dẫn dắt sư phạm cụ thể trước khi vào trò chơi:\n  + Cô cùng trẻ đàm thoại, tổ chức hoạt động trải nghiệm toán học thực tế quanh lớp học: "Các con ơi! Xung quanh lớp mình có rất nhiều góc chơi với những đồ dùng, đồ chơi mang số lượng/hình khối như bài học hôm nay đấy!".\n  + Cô mời các nhóm trẻ quan sát nhanh và tìm các nhóm đồ vật quanh lớp có số lượng tương ứng với bài học.\n  + Mời đại diện 1 - 2 trẻ lên chỉ vào các nhóm đồ vật vừa tìm thấy, cả lớp cùng đếm kiểm tra lại và mời trẻ chọn thẻ số tương ứng gắn vào.\n  + Cô bao quát, cổ vũ và khen ngợi tinh thần nhanh mắt, khéo léo của các nhóm trẻ trước khi bước vào trò chơi củng cố.`;
+  } else if (isScience) {
+    leadIn = `- Cô hướng dẫn, dẫn dắt sư phạm cụ thể trước khi vào trò chơi:\n  + Cô tổ chức hoạt động trải nghiệm mở rộng đóng vai "Nhà khoa học nhí" / thực hành ứng dụng khoa học vào thực tế quanh lớp học.\n  + Mời đại diện 1 - 2 nhóm trẻ giới thiệu về phát hiện khoa học, hiện tượng biến đổi hoặc các vật dụng mà nhóm vừa khám phá.\n  + Cô đàm thoại gợi mở ứng dụng thực tế: "Trong cuộc sống hằng ngày, các con thấy điều kỳ diệu này xuất hiện ở những đâu?".\n  + Cô bao quát, cổ vũ và khen ngợi tinh thần say mê tìm tòi, hợp tác tích cực của các nhóm trước khi bước vào phần trò chơi củng cố.`;
+  } else {
+    leadIn = `- Cô hướng dẫn, dẫn dắt sư phạm cụ thể trước khi vào trò chơi:\n  + Cô tổ chức trò chơi trải nghiệm “Hướng dẫn viên nhí”: Cô đóng vai khách tham quan, mời các nhóm trẻ đóng vai hướng dẫn viên giới thiệu về các khu vực, góc chơi trong lớp và trường mầm non.\n  + Mời 1 - 2 trẻ tự tin kể tên cô giáo chủ nhiệm của mình và kể tên một số bạn học thân thiết trong lớp.\n  + Cô giới thiệu thêm cho trẻ biết trong trường/điểm trường còn có các cô giáo khác, hỏi trẻ tên trường mầm non nơi trẻ đang học và cô giới thiệu thêm tên cô hiệu trưởng, cô hiệu phó của trường mầm non.\n  + Cô bao quát, cổ vũ và khen ngợi sự tự tin, tinh thần hợp tác của các nhóm trước khi vào trò chơi củng cố.`;
+  }
+
+  if (startsWithGame || !hasLeadInKeywords) {
+    tText = `${leadIn}\n\n${tText}`;
+  }
+
+  // 3. Ensure Game Objective (- Mục tiêu:) is present in the game section
+  const hasGameObjective = /mục tiêu\s*:/i.test(tText);
+  if (!hasGameObjective) {
+    let defaultObjective = '';
+    if (isMath) {
+      defaultObjective = `- **Mục tiêu:** Củng cố biểu tượng toán học (nhận biết chữ số, đếm đúng số lượng và phân biệt hình khối nhanh nhạy); rèn luyện khả năng quan sát, phản xạ nhanh nhẹn theo hiệu lệnh, tinh thần đồng đội và tính kỷ luật cho trẻ mầm non.`;
+    } else if (isScience) {
+      defaultObjective = `- **Mục tiêu:** Củng cố kiến thức khoa học cốt lõi trẻ vừa khám phá (nhận biết đặc điểm, phân loại đúng đối tượng/hiện tượng khoa học); rèn luyện kỹ năng quan sát, thao tác nhanh nhẹn, tinh thần đồng đội, tính kỷ luật và phản xạ tự tin cho trẻ mầm non.`;
+    } else if (isSocial) {
+      defaultObjective = `- **Mục tiêu:** Củng cố sự hiểu biết về bản thân, bạn bè, giới tính và tinh thần đoàn kết tập thể; rèn luyện khả năng quan sát, phản xạ nhanh nhẹn theo hiệu lệnh, tính kỷ luật và niềm vui gắn kết cho trẻ mầm non.`;
+    } else {
+      defaultObjective = `- **Mục tiêu:** Củng cố kiến thức bài học, rèn luyện kỹ năng quan sát, phản xạ nhanh nhẹn theo hiệu lệnh, tinh thần đồng đội, tính kỷ luật và niềm vui học tập cho trẻ mầm non.`;
+    }
+
+    const gameMatch = tText.match(/(?:^|\n)([-•*+\s–—]*(?:Trò chơi|T\/C|TC|Trò chơi củng cố)[^\n]+)/i);
+    if (gameMatch && gameMatch[1]) {
+      tText = tText.replace(gameMatch[1], `${gameMatch[1]}\n${defaultObjective}`);
+    } else {
+      tText = `${tText}\n${defaultObjective}`;
+    }
+  }
+
+  // 4. Ensure Cách chơi is present & rich
+  const hasCachChoi = /cách chơi\s*:/i.test(tText);
+  if (!hasCachChoi) {
+    let defaultCachChoi = '';
+    if (isMath) {
+      defaultCachChoi = `- **Cách chơi:** Cô phát cho mỗi bạn một thẻ số bất kỳ. Các con cầm thẻ số trên tay và cùng nắm tay nhau đi vòng tròn theo điệu nhạc bài hát "Ngày vui của bé". Khi bản nhạc dừng lại hoặc cô hô to hiệu lệnh "Tìm nhà! Tìm nhà!", các con hãy quan sát thật nhanh xem thẻ số trên tay mình là số mấy rồi chạy thật nhanh về đúng ngôi nhà mang chữ số tương ứng nhé! Về đến nhà, các con hãy giơ cao thẻ số của mình lên và đọc to số của mình cùng các bạn trong nhà nhé!`;
+    } else if (isScience) {
+      defaultCachChoi = `- **Cách chơi:** Cô chia lớp mình thành 2 đội chơi xuất sắc có số lượng bạn bằng nhau, đứng xếp hàng trước vạch xuất phát nhé! Phía trước mỗi đội là con đường vòng thể dục và một rổ đựng thẻ tranh/vật thật khoa học. Khi bản nhạc sôi động vang lên và có hiệu lệnh xuất phát của cô, bạn đầu hàng của mỗi đội sẽ bật liên tục qua các vòng thể dục, nhanh chân chạy lên bàn chọn đúng 1 thẻ hình ảnh/vật thật theo yêu cầu khoa học gắn lên bảng của đội mình. Sau đó, các con nhanh chân chạy về cuối hàng đập nhẹ vào tay bạn tiếp theo để bạn tiếp tục lên chơi nhé! Trò chơi sẽ kết thúc khi bản nhạc dừng lại!`;
+    } else {
+      defaultCachChoi = `- **Cách chơi:** Cô và các con cùng nắm tay nhau đi vòng tròn, vừa đi vừa hát bài "Ngày vui của bé". Khi có hiệu lệnh “tạo nhóm” thì các bạn trai về nhóm hình tròn, bạn gái về nhóm hình vuông (hoặc ngược lại), sau đó cho trẻ gọi tên một số bạn trong nhóm của mình.`;
+    }
+    tText = `${tText}\n${defaultCachChoi}`;
+  }
+
+  // 5. Ensure Luật chơi is present
+  const hasLuatChoi = /luật chơi\s*:/i.test(tText);
+  if (!hasLuatChoi) {
+    let defaultLuatChoi = '';
+    if (isMath) {
+      defaultLuatChoi = `- **Luật chơi:** Bạn nào về sai nhà hoặc không về được đúng nhà theo hiệu lệnh của cô sẽ phải nhảy lò cò 1 vòng quanh lớp để tìm về đúng ngôi nhà của mình. Đội nào/bạn nào về nhanh, đúng nhà và giơ đúng thẻ số sẽ được cô và cả lớp vỗ tay khen ngợi thật to!`;
+    } else if (isScience) {
+      defaultLuatChoi = `- **Luật chơi:** Mỗi lượt lên chơi, mỗi bạn chỉ được chọn đúng 1 thẻ tranh/vật thật. Bạn nào chọn sai hoặc dẫm chân vào viền vòng thể dục thì lượt đó sẽ không được tính điểm. Đội nào chọn đúng và gắn được nhiều thẻ nhất sẽ là đội chiến thắng. Đội về sau sẽ cùng nhau làm động tác mô phỏng chú ếch nhảy / chú chim bay vui nhộn để chúc mừng đội bạn.`;
+    } else {
+      defaultLuatChoi = `- **Luật chơi:** Bạn nào về sai nhóm hoặc không về được đúng nhóm theo hiệu lệnh của cô sẽ phải nhảy lò cò 1 vòng quanh nhóm để tìm về đúng bạn của mình. Nhóm nào về nhanh, đúng và đoàn kết nhất sẽ được cô và cả lớp vỗ tay hoan hô khen ngợi.`;
+    }
+    tText = `${tText}\n${defaultLuatChoi}`;
+  }
+
+  // 6. Ensure 2-3 rounds
+  if (!/2\s*[-–—]\s*3\s*lần/i.test(tText)) {
+    tText = `${tText}\n- Tổ chức cho trẻ chơi 2 – 3 lần sôi nổi (Cô bao quát, khích lệ động viên trẻ).`;
+  }
+
+  // 7. Student Action enrichment
+  const hasGroups = /nhóm\s*\d/i.test(sText);
+  if (!hasGroups) {
+    let groupDialogue = '';
+    if (isMath) {
+      groupDialogue = `  + Nhóm 1: "Thưa cô, chúng con tìm thấy các nhóm đồ vật rất đẹp ở góc thiên nhiên và góc sách ạ!".\n  + Nhóm 2: "Nhóm con tìm thấy các khối đồ chơi ở góc xây dựng và đã gắn đúng thẻ số rồi ạ!".\n  + Nhóm 3: "Góc học tập của chúng con có đủ đồ dùng học toán ngồi ngay ngắn ạ!".\n- Cả lớp cùng đếm to kiểm tra lại số lượng bạn vừa tìm và vỗ tay chúc mừng.`;
+    } else if (isScience) {
+      groupDialogue = `  + Nhóm 1: "Thưa cô, nhóm con phát hiện ra khi thử nghiệm sẽ tạo ra điều kỳ diệu rất đẹp ạ!".\n  + Nhóm 2: "Nhóm con thấy các vật dụng có đặc điểm rất đặc biệt ạ!".\n  + Nhóm 3: "Chúng con tìm thấy rất nhiều đồ dùng, đồ chơi tương ứng trong các góc học tập ạ!".`;
+    } else {
+      groupDialogue = `  + Nhóm 1: "Ôi sân trường rộng quá, có nhiều cây xanh ạ!".\n  + Nhóm 2: "Đây là góc sách, còn kia là góc xây dựng của chúng con ạ!".\n  + Nhóm 3: "Đây là khu nhà bóng, bên kia là khu vực cầu trượt rất vui ạ!".`;
+    }
+    sText = `- Trẻ tự tin trao đổi, phát biểu rôm rả theo từng nhóm:\n${groupDialogue}\n${sText}`;
+  }
+
+  if (!/lắng nghe/i.test(sText) || !/mục tiêu|luật chơi|cách chơi/i.test(sText)) {
+    sText = `${sText}\n- Trẻ chăm chú lắng nghe cô phổ biến mục tiêu, cách chơi và luật chơi của trò chơi.`;
+  }
+  if (!/2\s*[-–—]\s*3\s*lần/i.test(sText)) {
+    sText = `${sText}\n- Trẻ hào hứng tham gia chơi 2 – 3 lần sôi nổi, nhanh nhẹn phối hợp cùng bạn, chấp hành nghiêm túc luật chơi và vui vẻ nhảy lò cò khi phạm quy.`;
+  }
+
+  return { teacherAction: tText, studentAction: sText };
+}
+
+export function enrichPreschoolStep5(
+  teacherAction: string,
+  studentAction: string,
+  domain: any
+): { teacherAction: string; studentAction: string } {
+  if (domain.domainType === 'PHYSICAL' || domain.domainType === 'MUSIC') {
+    return { teacherAction, studentAction };
+  }
+
+  let tText = teacherAction.trim();
+  let sText = studentAction.trim();
+
+  const hasFeelings = /cảm xúc|cảm thấy|thích nhất/i.test(tText);
+  const hasCleanup = /thu dọn|dọn dẹp|cất đồ|vệ sinh/i.test(tText);
+
+  if (!hasFeelings || !hasCleanup || tText.length < 50) {
+    tText = `- Cô tập trung trẻ lại, trò chuyện hỏi cảm xúc gợi mở của trẻ:\n  + "Hôm nay các con cảm thấy thế nào sau buổi học?"\n  + "Con thích nhất hoạt động nào hay góc chơi nào trong ngày hôm nay?"\n  + "Con sẽ làm gì để trường lớp/môi trường luôn sạch đẹp, lớp học luôn chan hòa tình yêu thương?"\n- Cô nhận xét, tuyên dương sự cố gắng, tinh thần tự giác, tự tin và sự đoàn kết giúp đỡ bạn bè của trẻ trong suốt buổi học.\n- Cô hướng dẫn trẻ cùng cô thu dọn giáo cụ, phân loại đồ dùng đồ chơi vào đúng góc quy định, củng cố nề nếp vệ sinh sạch sẽ lớp học.`;
+  }
+
+  const sHasFeelings = /cảm xúc|rất vui|thích/i.test(sText);
+  const sHasCleanup = /thu dọn|cất/i.test(sText);
+
+  if (!sHasFeelings || !sHasCleanup || sText.length < 50) {
+    sText = `- Trẻ tự tin chia sẻ cảm xúc, niềm vui khi được tham gia hoạt động cùng cô và các bạn.\n- Trẻ tích cực trả lời các câu hỏi liên hệ thực tế của cô giáo.\n- Trẻ tươi cười đón nhận lời khen ngợi của cô và vỗ tay chúc mừng cả lớp.\n- Trẻ tự giác cùng cô và các bạn thu dọn đồ dùng, học liệu, xếp ngăn nắp vào đúng góc quy định.`;
+  }
+
+  return { teacherAction: tText, studentAction: sText };
 }
 
 export function formatPreschoolActivities(activities: any[], lessonTitle: string = '', subject: string = '', oldPlanContent: string = ''): any[] {
@@ -1068,14 +1667,24 @@ export function formatPreschoolActivities(activities: any[], lessonTitle: string
       }
     }
 
-    step1.teacherAction = teacherAction
-      .split('\n')
+    if (determinedIndex === 4) {
+      const enriched = enrichPreschoolStep4(teacherAction, studentAction, lessonTitle, subject, domain);
+      teacherAction = enriched.teacherAction;
+      studentAction = enriched.studentAction;
+    } else if (determinedIndex === 5) {
+      const enriched = enrichPreschoolStep5(teacherAction, studentAction, domain);
+      teacherAction = enriched.teacherAction;
+      studentAction = enriched.studentAction;
+    }
+
+    step1.teacherAction = expandPreschoolTextLines(teacherAction)
       .map((l) => cleanPreschoolBulletLine(l))
+      .filter(Boolean)
       .join('\n')
       .trim();
-    step1.studentAction = studentAction
-      .split('\n')
+    step1.studentAction = expandPreschoolTextLines(studentAction)
       .map((l) => cleanPreschoolBulletLine(l))
+      .filter(Boolean)
       .join('\n')
       .trim();
     newAct.step1 = step1;
@@ -1088,7 +1697,7 @@ export function formatPreschoolMusicActivities(activities: any[], lessonTitle: s
     return generateDefaultPreschoolActivities(lessonTitle, 'Âm nhạc', { domainType: 'MUSIC' });
   }
 
-  const { mainSong, listeningSong } = extractSongTitles(lessonTitle, oldPlanContent);
+  const { mainSong, listeningSong, gameTitle, focusType, movementType } = extractSongTitles(lessonTitle, oldPlanContent);
 
   return activities.map((act, idx) => {
     let determinedIndex = idx + 1;
@@ -1112,30 +1721,46 @@ export function formatPreschoolMusicActivities(activities: any[], lessonTitle: s
     const newAct = { ...act };
     const step1 = { ...(newAct.step1 || {}) };
 
-    let teacherAction = (step1.teacherAction || '').replace(/\*\*/g, '');
-    let studentAction = (step1.studentAction || '').replace(/\*\*/g, '');
+    let teacherAction = (step1.teacherAction || '').trim();
+    let studentAction = (step1.studentAction || '').trim();
 
     if (determinedIndex === 1) {
       newAct.name = "1. Khởi động – Tạo tình huống";
+      if (!teacherAction || (!teacherAction.includes('âm thanh') && !teacherAction.includes('hát') && !teacherAction.includes('nhạc'))) {
+        teacherAction = `- Cô cùng cả lớp chơi trò chơi âm thanh ("Lắng nghe âm thanh kỳ diệu"): Cô phát các âm thanh vui tươi, tiếng chuông gió hoặc tiếng kêu của các con vật quen thuộc để trẻ lắng nghe và phán đoán.\n- Cô tạo tình huống dẫn dắt dịu dàng, truyền cảm: "Các con ơi! Hôm nay lớp chúng mình sẽ cùng bước vào một không gian âm nhạc vô cùng rộn rã với những giai điệu thật tươi vui đấy! Chúng mình đã sẵn sàng chưa nào?".\n- Cô giới thiệu đề tài và mời các bé cùng chuẩn bị tham gia biểu diễn.`;
+        studentAction = `- Trẻ chăm chú lắng nghe âm thanh và hào hứng reo vui, đoán đúng nguồn âm thanh.\n- Trẻ hưởng ứng vỗ tay nồng nhiệt, tươi cười sẵn sàng bước vào bài học âm nhạc cùng cô.`;
+      }
     } else if (determinedIndex === 2) {
       newAct.name = "2. Khám phá – Trải nghiệm";
-    } else if (determinedIndex === 3) {
-      newAct.name = "3. Chia sẻ – Thảo luận";
+      if (!teacherAction || (!teacherAction.includes('nhạc cụ') && !teacherAction.includes('nhún nhảy') && !teacherAction.includes('gõ đệm'))) {
+        teacherAction = `- Cô mở bản nhạc bài hát "${mainSong}" với giai điệu vui tươi, rộn rã.\n- Cô khuyến khích trẻ tản ra không gian lớp học, tự do lắng nghe, nhún nhảy và tự sáng tạo các động tác điệu bộ, vỗ tay minh họa theo cảm nhận của riêng mình.\n- Cô để trẻ tự tìm đến khay nhạc cụ (xắc xô, phách tre, gáo dừa, trống lắc) chọn món đồ chơi âm nhạc yêu thích và tự gõ đệm theo nhịp điệu bài hát cùng bạn.\n- Cô bao quát, mỉm cười khích lệ trẻ cảm nhận giai điệu (không uốn nắn hay dạy kỹ thuật ngay lúc này).`;
+        studentAction = `- Trẻ di chuyển tự do trong lớp, hào hứng lắng nghe giai điệu bài hát "${mainSong}".\n- Trẻ tự nghĩ ra các động tác nhún nhảy, lắc lư cơ thể và tự nhẩm hát theo lời ca.\n- Trẻ vui vẻ chọn xắc xô, phách tre tự gõ đệm hòa nhịp cùng bạn bên cạnh.`;
+      }
     } else if (determinedIndex === 4) {
       newAct.name = "4. Vận dụng – Mở rộng";
+      const hasGameDetails = /cách chơi/i.test(teacherAction) && /luật chơi/i.test(teacherAction);
+      if (!hasGameDetails) {
+        teacherAction = `- Cô tổ chức hoạt động giao lưu âm nhạc và trò chơi củng cố:\n- Mời các nhóm trẻ lên sân khấu đeo mũ múa biểu diễn giao lưu bài hát "${mainSong}" kết hợp gõ đệm nhạc cụ tự tạo (phách tre, xắc xô).\n- Cô bao quát, cổ vũ và khen ngợi sự tự tin, sáng tạo của các nhóm.\n\n+ Trò chơi âm nhạc: “${gameTitle}”\n- **Cách chơi:** Cô chuẩn bị các nốt nhạc / vòng tròn may mắn trên sàn. Khi nhạc nổi lên, cả lớp vừa đi vừa hát bài "Ngày vui của bé". Khi nhạc dừng hoặc có hiệu lệnh của cô, mỗi trẻ nhanh chân nhảy vào 1 nốt nhạc / gọi đúng tên bạn hát hoặc thực hiện yêu cầu âm nhạc vui nhộn.\n- **Luật chơi:** Bạn nào không tìm được nốt nhạc hoặc đoán sai tên bạn hát sẽ phải nhảy lò cò 1 vòng hoặc hát tặng cả lớp 1 câu hát.\n- Tổ chức cho trẻ chơi 2 - 3 lần sôi nổi.`;
+        studentAction = `- Trẻ hào hứng đeo mũ múa, tự tin bước lên sân khấu biểu diễn giao lưu cùng các bạn:\n  + Nhóm 1: Trẻ hát vang kết hợp gõ phách tre nhịp nhàng.\n  + Nhóm 2: Trẻ vừa hát vừa nhún nhảy, lắc xắc xô rộn rã.\n  + Nhóm 3: Trẻ tự tin biểu diễn các động tác minh họa sinh động.\n- Trẻ hào hứng lắng nghe cô phổ biến luật chơi và tham gia trò chơi âm nhạc “${gameTitle}” 2 - 3 lần.\n- Trẻ phản xạ nhanh nhạy, reo vui khi đoán đúng và vui vẻ nhảy lò cò khi bị phạm quy.`;
+      }
     } else if (determinedIndex === 5) {
-      newAct.name = "5. Đánh giá – Điều chỉnh";
+      newAct.name = "5. Chia sẻ – Đánh giá";
+      const hasCleanUp = /thu dọn|dọn dẹp|cất đồ|cất nhạc cụ/i.test(teacherAction);
+      if (!hasCleanUp) {
+        teacherAction = `- Cô tập trung trẻ lại, trò chuyện hỏi cảm nhận của trẻ:\n  + "Hôm nay các con cảm thấy thế nào sau giờ học âm nhạc?"\n  + "Các con thích nhất bài hát, điệu múa hay trò chơi âm nhạc nào?"\n  + "Về nhà các con sẽ hát tặng ai bài hát tuyệt vời này?"\n- Cô nhận xét, tuyên dương sự nỗ lực, giọng hát trong sáng, điệu bộ tự tin và tinh thần hợp tác của trẻ trong suốt buổi học.\n- Hướng dẫn trẻ cùng cô thu dọn nhạc cụ (phách tre, xắc xô, trống lắc), mũ múa cất vào đúng góc âm nhạc, củng cố nề nếp ngăn nắp vệ sinh lớp học.`;
+        studentAction = `- Trẻ tự tin chia sẻ cảm xúc, niềm vui khi được hát múa và chơi trò chơi âm nhạc cùng cô và các bạn.\n- Trẻ tích cực trả lời: "Con rất vui và thích biểu diễn bài hát ạ!", "Về nhà con sẽ hát cho ông bà, bố mẹ nghe!".\n- Trẻ tươi cười lắng nghe cô nhận xét và đón nhận lời khen ngợi.\n- Trẻ tự giác cùng cô và các bạn thu dọn xắc xô, phách tre, mũ múa xếp gọn gàng vào các khay ở góc âm nhạc.`;
+      }
     }
 
     if (determinedIndex !== 3) {
-      step1.teacherAction = teacherAction
-        .split('\n')
+      step1.teacherAction = expandPreschoolTextLines(teacherAction)
         .map((l) => cleanPreschoolBulletLine(l))
+        .filter(Boolean)
         .join('\n')
         .trim();
-      step1.studentAction = studentAction
-        .split('\n')
+      step1.studentAction = expandPreschoolTextLines(studentAction)
         .map((l) => cleanPreschoolBulletLine(l))
+        .filter(Boolean)
         .join('\n')
         .trim();
       newAct.step1 = step1;
@@ -1144,8 +1769,8 @@ export function formatPreschoolMusicActivities(activities: any[], lessonTitle: s
 
     newAct.name = "3. Chia sẻ – Thảo luận";
 
-    // 1. Process Teacher Action - BẮT BUỘC PHẢI CÓ ĐỦ CẢ a. Dạy hát: VÀ b. Nghe hát:
-    const lines = teacherAction.split('\n').map(l => l.trim()).filter(Boolean);
+    // 1. Process Teacher Action - BẮT BUỘC PHẢI CÓ ĐỦ CẢ a. (Hát vận động hoặc Dạy hát) VÀ b. Nghe hát:
+    const lines = expandPreschoolTextLines(teacherAction);
     
     let aLines: string[] = [];
     let bLines: string[] = [];
@@ -1156,7 +1781,7 @@ export function formatPreschoolMusicActivities(activities: any[], lessonTitle: s
       if (/^([-\s]*[bB][\.\)]\s*(?:Nghe hát|Bài hát nghe|Nghe|b\.))/i.test(cleanLine) || /^[-\s]*b[\.\)]/i.test(cleanLine)) {
         currentPart = 'B';
         bLines.push(cleanLine);
-      } else if (/^([-\s]*[aA][\.\)]\s*(?:Dạy hát|Hát|Trọng tâm|a\.))/i.test(cleanLine) || /^[-\s]*a[\.\)]/i.test(cleanLine)) {
+      } else if (/^([-\s]*[aA][\.\)]\s*(?:Hát vận động|Vận động theo nhạc|Dạy vận động|Vận động|Vỗ tay|Múa|Dạy hát|Hát|Trọng tâm|a\.))/i.test(cleanLine) || /^[-\s]*a[\.\)]/i.test(cleanLine)) {
         currentPart = 'A';
         aLines.push(cleanLine);
       } else if (currentPart === 'B') {
@@ -1175,23 +1800,54 @@ export function formatPreschoolMusicActivities(activities: any[], lessonTitle: s
       }
     });
 
-    // Ensure aLines has valid header
-    const defaultAHeader = `a. Dạy hát: "${mainSong}" (TT)`;
+    // Determine correct header for section A
+    let defaultAHeader = `a. Dạy hát: "${mainSong}" (TT)`;
+    if (focusType === 'HAT_VAN_DONG') {
+      defaultAHeader = `a. ${movementType}: "${mainSong}" (TT)`;
+    } else if (focusType === 'NGHE_HAT') {
+      defaultAHeader = `a. Nghe hát: "${mainSong}" (TT)`;
+    }
+
     if (aLines.length === 0) {
-      aLines = [
-        defaultAHeader,
-        `- Cô hát mẫu lần 1: Rõ lời, đúng giai điệu và tính chất bài hát.`,
-        `- Cô hát mẫu lần 2: Kết hợp cử chỉ, điệu bộ minh họa và giảng giải nội dung bài hát "${mainSong}".`,
-        `- Dạy trẻ hát:`,
-        `+ Cô bắt nhịp cho cả lớp hát cùng cô từ đầu đến hết bài (2 - 3 lần).`,
-        `+ Cho các tổ, nhóm bạn trai, nhóm bạn gái thi đua hát luân phiên.`,
-        `+ Mời cá nhân trẻ thể hiện bài hát. Cô chú ý lắng nghe, sửa sai cao độ, nhịp điệu và lời ca cho trẻ kịp thời.`
-      ];
+      if (focusType === 'HAT_VAN_DONG') {
+        aLines = [
+          defaultAHeader,
+          `- Cô cho cả lớp hát lại bài hát "${mainSong}" 1 - 2 lần để trẻ nhớ lại giai điệu và lời ca.`,
+          `- Cô giới thiệu và thực hiện vận động mẫu:`,
+          `+ Lần 1: Làm mẫu toàn phần kết hợp hát và vận động nhịp nhàng, biểu cảm từ đầu đến hết bài.`,
+          `+ Lần 2: Làm mẫu kết hợp phân tích kỹ thuật từng động tác vận động minh họa / vỗ tay nhịp nhàng theo câu hát của bài "${mainSong}".`,
+          `+ Lần 3: Nhấn mạnh các động tác tạo điểm nhấn và tư thế biểu diễn tự tin.`,
+          `- Tổ chức cho trẻ thực hành vận động:`,
+          `+ Cho cả lớp cùng đứng dậy hát và vận động theo cô (2 - 3 lần).`,
+          `+ Cho các tổ, nhóm bạn trai, nhóm bạn gái thi đua hát và vận động luân phiên (kết hợp dụng cụ gõ đệm: phách tre, xắc xô, gáo dừa...).`,
+          `+ Mời cá nhân trẻ tự tin lên sân khấu biểu diễn hát vận động. Cô chú ý quan sát, sửa sai và khích lệ trẻ biểu diễn tự nhiên, đúng nhịp.`
+        ];
+      } else {
+        aLines = [
+          defaultAHeader,
+          `- Cô hát mẫu lần 1: Rõ lời, đúng giai điệu và tính chất bài hát.`,
+          `- Cô hát mẫu lần 2: Kết hợp cử chỉ, điệu bộ minh họa và giảng giải nội dung bài hát "${mainSong}".`,
+          `- Dạy trẻ hát:`,
+          `+ Cô bắt nhịp cho cả lớp hát cùng cô từ đầu đến hết bài (2 - 3 lần).`,
+          `+ Cho các tổ, nhóm bạn trai, nhóm bạn gái thi đua hát luân phiên.`,
+          `+ Mời cá nhân trẻ thể hiện bài hát. Cô chú ý lắng nghe, sửa sai cao độ, nhịp điệu và lời ca cho trẻ kịp thời.`
+        ];
+      }
     } else {
-      // Normalize first line of aLines to start cleanly with a. Dạy hát:
+      // Normalize first line of aLines: If focusType is HAT_VAN_DONG, it MUST NOT start with "Dạy hát"!
       let firstA = aLines[0].replace(/^[-•*+\s]*a[\.\)]\s*/i, '').trim();
-      if (!firstA.toLowerCase().startsWith('dạy hát')) {
-        firstA = `Dạy hát: "${mainSong}" (TT) - ${firstA}`;
+      if (focusType === 'HAT_VAN_DONG') {
+        // Strip any accidental "Dạy hát"
+        firstA = firstA.replace(/^dạy hát\s*[:\-\–—]?\s*/i, '');
+        if (!firstA.toLowerCase().includes(movementType.toLowerCase()) && !firstA.toLowerCase().includes('vận động')) {
+          firstA = `${movementType}: "${mainSong}" (TT) - ${firstA}`;
+        } else if (!firstA.toLowerCase().startsWith(movementType.toLowerCase())) {
+          firstA = `${movementType}: "${mainSong}" (TT)`;
+        }
+      } else if (focusType === 'DAY_HAT') {
+        if (!firstA.toLowerCase().startsWith('dạy hát')) {
+          firstA = `Dạy hát: "${mainSong}" (TT) - ${firstA}`;
+        }
       }
       aLines[0] = `a. ${firstA}`;
       if (!/\(TT\)/i.test(aLines[0])) {
@@ -1199,8 +1855,8 @@ export function formatPreschoolMusicActivities(activities: any[], lessonTitle: s
       }
     }
 
-    // Ensure bLines has valid header and content
-    const defaultBHeader = `b. Nghe hát: "${listeningSong}"`;
+    // Ensure bLines has valid header and content (STRICTLY NO GAMES IN B. NGHE HÁT)
+    const defaultBHeader = focusType === 'NGHE_HAT' ? `b. Hát vận động: "${listeningSong}"` : `b. Nghe hát: "${listeningSong}"`;
     if (bLines.length === 0) {
       bLines = [
         defaultBHeader,
@@ -1210,12 +1866,18 @@ export function formatPreschoolMusicActivities(activities: any[], lessonTitle: s
         `- Cô hát cho trẻ nghe lần 2: Kết hợp động tác múa minh họa mềm mại, khuyến khích trẻ đứng lên cùng nhún nhảy, đung đưa hưởng ứng theo giai điệu bài hát.`
       ];
     } else {
-      // Normalize first line of bLines to start cleanly with b. Nghe hát:
-      let firstB = bLines[0].replace(/^[-•*+\s]*b[\.\)]\s*/i, '').trim();
+      // Normalize first line of bLines to start cleanly with b. Nghe hát: (Strip any game text like T/C: Tai ai thính)
+      let firstB = bLines[0]
+        .replace(/^[-•*+\s]*b[\.\)]\s*/i, '')
+        .replace(/(?:trò chơi âm nhạc|tcân|t\/c|tc|trò chơi)\s*[:'"][^\n\)]*/gi, '')
+        .replace(/\btai ai thính\b/gi, '')
+        .trim();
       if (!firstB.toLowerCase().startsWith('nghe hát')) {
-        firstB = `Nghe hát: "${listeningSong}" - ${firstB}`;
+        firstB = `Nghe hát: "${listeningSong}"`;
       }
       bLines[0] = `b. ${firstB}`;
+      // Clean any accidental game lines in bLines
+      bLines = bLines.filter(l => !/^(?:[-\s]*\+?\s*)?(?:trò chơi âm nhạc|tcân|t\/c|tc)\b/i.test(l));
     }
 
     // Clean bullet formatting for sub-items of A and B
@@ -1231,7 +1893,7 @@ export function formatPreschoolMusicActivities(activities: any[], lessonTitle: s
 
     step1.teacherAction = [...finalALines, ...finalBLines].join('\n');
 
-    // 2. Process Student Action - BẮT BUỘC PHẢI TƯƠNG ỨNG VỚI CẢ DẠY HÁT VÀ NGHE HÁT
+    // 2. Process Student Action - BẮT BUỘC PHẢI TƯƠNG ỨNG VỚI CẢ (HÁT VẬN ĐỘNG / DẠY HÁT) VÀ NGHE HÁT
     let sLines = studentAction.split('\n').map(l => l.trim()).filter(Boolean);
     // Strip any floating standalone a. or b. labels
     sLines = sLines.filter(l => !/^[-\s]*[ab][\.\)]\s*$/i.test(l) && !/^[ab][\.\)]$/i.test(l));
@@ -1256,12 +1918,21 @@ export function formatPreschoolMusicActivities(activities: any[], lessonTitle: s
     });
 
     if (sPartA.length === 0) {
-      sPartA = [
-        'Trẻ chú ý lắng nghe cô hát mẫu và quan sát các động tác cử chỉ của cô.',
-        'Cả lớp vui tươi, hào hứng hát cùng cô từ đầu đến hết bài (2 - 3 lần).',
-        'Từng tổ, nhóm và cá nhân trẻ tự tin đứng lên biểu diễn bài hát.',
-        'Trẻ lắng nghe bạn hát và sửa sai theo sự hướng dẫn của cô.'
-      ];
+      if (focusType === 'HAT_VAN_DONG') {
+        sPartA = [
+          `- Trẻ quây quần bên cô, hào hứng hát lại bài hát "${mainSong}" cùng cô để nhớ lại giai điệu.`,
+          `- Trẻ chăm chú quan sát cô làm mẫu từng động tác vận động và lắng nghe cô phân tích kỹ thuật.`,
+          `- Cả lớp đứng lên cùng hát và vận động nhịp nhàng theo cô (2 - 3 lần).`,
+          `- Từng tổ, nhóm bạn trai, bạn gái và cá nhân trẻ tự tin lên sân khấu thể hiện hát vận động kết hợp dụng cụ gõ đệm trong tiếng vỗ tay cổ vũ của các bạn.`
+        ];
+      } else {
+        sPartA = [
+          'Trẻ chú ý lắng nghe cô hát mẫu và quan sát các động tác cử chỉ của cô.',
+          'Cả lớp vui tươi, hào hứng hát cùng cô từ đầu đến hết bài (2 - 3 lần).',
+          'Từng tổ, nhóm và cá nhân trẻ tự tin đứng lên biểu diễn bài hát.',
+          'Trẻ lắng nghe bạn hát và sửa sai theo sự hướng dẫn của cô.'
+        ];
+      }
     }
 
     if (sPartB.length === 0) {
@@ -1289,7 +1960,49 @@ export interface PreschoolPairRow {
 }
 
 /**
- * Normalizes preschool bullet lines to avoid redundant or conflicting symbols like (-) +, - +, + -
+ * Splits and expands any squashed run-on text lines in preschool activities into clean individual lines.
+ * Handles <br>, escaped newlines, squashed bullet points, game sections, age differentiations, etc.
+ */
+export function expandPreschoolTextLines(text: string): string[] {
+  if (!text || typeof text !== 'string') return [];
+  
+  // 1. Normalize all forms of newlines and line breaks
+  let normalized = text
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/\\n/g, '\n')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n');
+
+  // 2. Expand squashed game headers: e.g. "...hết bài. Trò chơi 2:..." or "...vui vẻ. + Trò chơi: “..."
+  // CRITICAL: ONLY split after sentence-ending punctuation (. ! ? … ;) followed by a game header or bulleted game.
+  // NEVER match inside running sentences like "Cô tổ chức trò chơi", "tham gia trò chơi", "chơi trò chơi", etc.
+  normalized = normalized.replace(/(?<=[.!?…;])\s+(?=(?:[-+•*]\s*(?:\*\*)?\s*Trò chơi|Trò chơi\s+\d+[:\s]|(?:\*\*)?Trò chơi\s*:\s*[“"”']))/gi, '\n\n');
+
+  // 3. Expand squashed game subheadings: "- Cách chơi:", "- Luật chơi:", "- Mục tiêu:"
+  // ONLY split after sentence-ending punctuation (. ! ? … ;)
+  normalized = normalized.replace(/(?<=[.!?…;])\s+(?=[-\+•*]?\s*(?:\*\*)?\s*(?:Cách chơi|Luật chơi|Mục tiêu)\s*:)/gi, '\n');
+
+  // 4. Expand squashed physical subheadings: "* Bài tập phát triển chung:", "* Vận động cơ bản:"
+  normalized = normalized.replace(/(?<=[.!?…;])\s+(?=[-\+•*]?\s*(?:\*\*)?\s*(?:Bài tập phát triển chung|Vận động cơ bản|BTPTC|VĐCB)\b)/gi, '\n\n');
+
+  // 5. Expand squashed age/group differentiations: e.g. "+ Trẻ 5 tuổi:", "+ Trẻ 4 tuổi:", "+ Trẻ 3 tuổi:", "+ Nhóm 1:"
+  normalized = normalized.replace(/(?<=[.!?…;])\s+(?=[-\+•*]?\s*(?:\*\*)?\s*(?:Trẻ\s+\d+\s+tuổi|Nhóm\s+\d+|Tổ\s+\d+)\s*:)/gi, '\n');
+
+  // 6. Expand squashed bullet items starting with + or - or * after sentence endings (. ! ? ; : " ')
+  normalized = normalized.replace(/(?<=[.!?…;])\s+(?=[-\+•*]\s+[A-ZÀ-Ỵa-zà-ỹ0-9])/g, '\n');
+
+  // 7. Expand sub-items a., b., c.
+  normalized = normalized.replace(/(?<=[.!?…;])\s+(?=[ab][\.\)]\s*(?:Dạy hát|Nghe hát|Hát vận động|Trò chơi|Khám phá|Bài tập|Vận động)\b)/gi, '\n\n');
+
+  // Split, trim, and filter
+  return normalized
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Normalizes preschool bullet lines to avoid redundant or conflicting symbols like (-) +, - +, + -, *, ->
  * If line has +, it uses single clean '+ '
  * If line has -, it uses single clean '- '
  */
@@ -1298,18 +2011,66 @@ export function cleanPreschoolBulletLine(line: string): string {
   let trimmed = line.trim();
   if (!trimmed) return '';
 
-  const cleanNoMD = trimmed.replace(/\*\*/g, '').trim();
+  // Clean arrow symbols -> or --> into clean arrow →
+  trimmed = trimmed.replace(/\s*--?>\s*/g, ' → ');
 
-  // Preserve subheader lines like "a. Dạy hát..." or "b. Nghe hát..."
-  if (/^[-\s]*[ab][\.\)]\s*(?:Dạy hát|Nghe hát|Hát vận động|Trò chơi|Khám phá)/i.test(cleanNoMD) || /^([ab][\.\)]\s*.*)$/i.test(cleanNoMD)) {
-    let cleanSub = cleanNoMD.replace(/^-\s*/, '');
-    return cleanSub;
+  // If the line is a teacher or student instruction/narrative sentence (e.g. "Cô tổ chức...", "Mời 1-2 trẻ...", "Hỏi trẻ...", "Cô bao quát...", "Trẻ hào hứng...")
+  // It must remain a normal bullet line, NEVER treated as a standalone game title!
+  if (/^[-•*+\s–—]*(?:Cô|Giáo viên|Mời|Hỏi|Cho trẻ|Hướng dẫn|Tổ chức cho trẻ|Bao quát|Tuyên dương|Trẻ|Cả lớp)\b/i.test(trimmed)) {
+    let bullet = '-';
+    if (/^\s*\+\s*/.test(trimmed) || /^[-•*\s]*\+\s*/.test(trimmed)) {
+      bullet = '+';
+    }
+    const cleanContent = trimmed.replace(/^[-•*+\s–—]+/, '').trim();
+    return `${bullet} ${cleanContent}`;
   }
 
-  // Preserve physical education subheaders like "* Bài tập phát triển chung:" or "* Vận động cơ bản:"
-  if (/^\*?\s*(Bài tập phát triển chung|Vận động cơ bản|BTPTC|VĐCB)/i.test(cleanNoMD)) {
-    let cleanSub = cleanNoMD.replace(/^[\*•\-–—\s]+/, '').trim();
-    return `* ${cleanSub}`;
+  // 1. Standalone Game Header: e.g. "* Trò chơi 1: ...", "**Trò chơi 1: ...**", "+ Trò chơi: “Ai nhanh...”", "- Trò chơi 1: ...", "Trò chơi 1: ..."
+  if (/^[-•*+\s–—]*(?:Trò chơi|\*\*Trò chơi)\s*\d*[:\s]/i.test(trimmed)) {
+    const hasPlus = /^\s*\+\s*/.test(trimmed) || /^[-•*\s]*\+\s*/.test(trimmed);
+    const cleanGameHeader = trimmed.replace(/^[-•*+\s–—]+/, '').replace(/\*\*/g, '').trim();
+    if (hasPlus) {
+      return `+ **${cleanGameHeader}**`;
+    }
+    return `**${cleanGameHeader}**`;
+  }
+
+  // 2. Physical Education / Music subheaders
+  if (/^[-•*+\s–—]*(?:Bài tập phát triển chung|Vận động cơ bản|BTPTC|VĐCB)/i.test(trimmed)) {
+    const cleanSub = trimmed.replace(/^[-•*+\s–—]+/, '').replace(/\*\*/g, '').trim();
+    return `**${cleanSub}**`;
+  }
+
+  // 3. Section subheadings like "a. Dạy hát..." or "b. Nghe hát..."
+  if (/^[-\s]*[ab][\.\)]\s*(?:Dạy hát|Nghe hát|Hát vận động|Trò chơi|Khám phá)/i.test(trimmed) || /^([ab][\.\)]\s*.*)$/i.test(trimmed)) {
+    let cleanSub = trimmed.replace(/^-\s*/, '').replace(/\*\*/g, '').trim();
+    return `**${cleanSub}**`;
+  }
+
+  // 4. Auto-bold standard game subheadings: Cách chơi, Luật chơi, Mục tiêu, Chuẩn bị (Strip ANY existing **, * or - symbols cleanly)
+  if (/^[-•*+\s–—]*(?:\*\*)?\s*Cách chơi\s*:?/i.test(trimmed)) {
+    let content = trimmed.replace(/^[-•*+\s–—]*(?:\*\*)?\s*Cách chơi\s*:?\s*(?:\*\*)?\s*/i, '').replace(/^\*\*\s*/, '').trim();
+    return `- **Cách chơi:** ${content}`;
+  }
+  if (/^[-•*+\s–—]*(?:\*\*)?\s*Luật chơi\s*:?/i.test(trimmed)) {
+    let content = trimmed.replace(/^[-•*+\s–—]*(?:\*\*)?\s*Luật chơi\s*:?\s*(?:\*\*)?\s*/i, '').replace(/^\*\*\s*/, '').trim();
+    return `- **Luật chơi:** ${content}`;
+  }
+  if (/^[-•*+\s–—]*(?:\*\*)?\s*Mục tiêu\s*:?/i.test(trimmed)) {
+    let content = trimmed.replace(/^[-•*+\s–—]*(?:\*\*)?\s*Mục tiêu\s*:?\s*(?:\*\*)?\s*/i, '').replace(/^\*\*\s*/, '').trim();
+    return `- **Mục tiêu:** ${content}`;
+  }
+  if (/^[-•*+\s–—]*(?:\*\*)?\s*Chuẩn bị\s*:?/i.test(trimmed)) {
+    let content = trimmed.replace(/^[-•*+\s–—]*(?:\*\*)?\s*Chuẩn bị\s*:?\s*(?:\*\*)?\s*/i, '').replace(/^\*\*\s*/, '').trim();
+    return `- **Chuẩn bị:** ${content}`;
+  }
+
+  // 5. Age group / differentiation labels: "Trẻ 5 tuổi:", "Trẻ 4 tuổi:", "Trẻ 3 tuổi:", "Nhóm 1 (Trẻ 5 tuổi):"
+  const ageMatch = trimmed.match(/^[-•*+\s–—]*(?:\*\*)?\s*(Trẻ\s+\d+\s+tuổi|Nhóm\s+\d+(?:\s*\([^)]+\))?|Tổ\s+\d+)\s*:\s*(?:\*\*)?\s*(.*)$/i);
+  if (ageMatch) {
+    const label = ageMatch[1].trim();
+    const content = ageMatch[2].replace(/^\*\*\s*/, '').trim();
+    return `+ **${label}:** ${content}`;
   }
 
   // Clean (-)+ or (-) + or (-)\s*\+
@@ -1332,6 +2093,90 @@ export function cleanPreschoolBulletLine(line: string): string {
   trimmed = trimmed.replace(/^[-•*+\s–—]+/, '').trim();
   if (!trimmed) return '';
   return `${bullet} ${trimmed}`;
+}
+
+/**
+ * Format and standardize Letter Game activities, ensuring:
+ * 1. 5 distinct, highly engaging games in Act 3
+ * 2. Every game has separate lines for Name (Trò chơi x: ...), - **Cách chơi:**, - **Luật chơi:**, - **Mục tiêu:**
+ * 3. Never squashed into a single continuous block and no stray *, ->, **
+ */
+export function formatPreschoolLetterGameActivities(
+  activities: any[],
+  lessonTitle: string = '',
+  subject: string = ''
+): any[] {
+  if (!activities || !Array.isArray(activities) || activities.length === 0) {
+    return generateDefaultPreschoolActivities(lessonTitle, subject, { domainType: 'LETTER_GAME' });
+  }
+
+  const defaultActs = generateDefaultPreschoolActivities(lessonTitle, subject, { domainType: 'LETTER_GAME' });
+
+  return activities.map((act, idx) => {
+    let determinedIndex = idx + 1;
+    if (typeof act.index === 'number' && act.index >= 1 && act.index <= 5) {
+      determinedIndex = act.index;
+    } else if (act.name) {
+      const lower = act.name.toLowerCase();
+      if (/^1[\.\s\-–—]/.test(lower) || lower.includes('gợi hứng thú') || lower.includes('khởi động')) determinedIndex = 1;
+      else if (/^2[\.\s\-–—]/.test(lower) || lower.includes('thỏa thuận') || lower.includes('kế hoạch')) determinedIndex = 2;
+      else if (/^3[\.\s\-–—]/.test(lower) || lower.includes('thực hiện hoạt động chơi') || lower.includes('thực hiện')) determinedIndex = 3;
+      else if (/^4[\.\s\-–—]/.test(lower) || lower.includes('mở rộng')) determinedIndex = 4;
+      else if (/^5[\.\s\-–—]/.test(lower) || lower.includes('chia sẻ') || lower.includes('kết thúc')) determinedIndex = 5;
+    }
+
+    const newAct = { ...act };
+    const step1 = { ...(newAct.step1 || {}) };
+    let teacherAction = (step1.teacherAction || '').trim();
+    let studentAction = (step1.studentAction || '').trim();
+
+    if (determinedIndex === 3) {
+      newAct.name = "3. Thực hiện hoạt động chơi";
+
+      // Break squashed bullet game markers into real newlines if returned as single run-on paragraph
+      if (teacherAction.includes('- Trò chơi 2') || teacherAction.includes('* Trò chơi 2') || teacherAction.includes('Trò chơi 2:')) {
+        teacherAction = teacherAction
+          .replace(/(?:^|\n|[\.\!\?])\s*[-•*]?\s*(Trò chơi\s*\d+[:\s][^\n]+?)(?=(?:[-•*]?\s*Trò chơi\s*\d+[:\s]|$))/gi, (_match, p1) => {
+            return `\n\n${p1.replace(/^[-•*+\s]+/, '').trim()}\n`;
+          });
+      }
+
+      // Check if games have structured Cách chơi / Luật chơi / Mục tiêu
+      const lines = teacherAction.split('\n').map(l => l.trim()).filter(Boolean);
+      const hasProperStructure = lines.filter(l => l.includes('Cách chơi') || l.includes('Luật chơi') || l.includes('Mục tiêu')).length >= 5;
+
+      if (!hasProperStructure || lines.length < 10) {
+        const defaultAct3 = defaultActs[2]?.step1?.teacherAction;
+        if (defaultAct3) {
+          teacherAction = defaultAct3;
+        }
+      }
+
+      if (!studentAction || studentAction.length < 50) {
+        const defaultStudent3 = defaultActs[2]?.step1?.studentAction;
+        if (defaultStudent3) {
+          studentAction = defaultStudent3;
+        }
+      }
+    }
+
+    step1.teacherAction = teacherAction
+      .split('\n')
+      .map(l => cleanPreschoolBulletLine(l))
+      .filter(Boolean)
+      .join('\n')
+      .trim();
+
+    step1.studentAction = studentAction
+      .split('\n')
+      .map(l => cleanPreschoolBulletLine(l))
+      .filter(Boolean)
+      .join('\n')
+      .trim();
+
+    newAct.step1 = step1;
+    return newAct;
+  });
 }
 
 export function parseActivityPairs(act: any): PreschoolPairRow[] {
@@ -1368,8 +2213,8 @@ export function parseActivityPairs(act: any): PreschoolPairRow[] {
     /Vận động cơ bản/i.test(teacherAction);
 
   if (hasSubheaders) {
-    const tLines = teacherAction.split('\n').map(l => l.trim()).filter(Boolean);
-    const sLines = studentAction.split('\n').map(l => l.trim()).filter(Boolean);
+    const tLines = expandPreschoolTextLines(teacherAction);
+    const sLines = expandPreschoolTextLines(studentAction);
 
     let currentSubheader = '';
     let teacherSubGroup: string[] = [];
@@ -1442,8 +2287,8 @@ export function parseActivityPairs(act: any): PreschoolPairRow[] {
 
   } else {
     // Standard activity
-    const tLines = teacherAction.split('\n').map(l => l.trim()).filter(Boolean);
-    const sLines = studentAction.split('\n').map(l => l.trim()).filter(Boolean);
+    const tLines = expandPreschoolTextLines(teacherAction);
+    const sLines = expandPreschoolTextLines(studentAction);
 
     const maxCount = Math.max(tLines.length, sLines.length);
     for (let i = 0; i < maxCount; i++) {
@@ -1900,6 +2745,207 @@ ${is345 ? `    - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh số l
   };
 }
 
+export interface PreschoolLessonContext {
+  lessonTitle?: string;
+  subject?: string;
+  grade?: string;
+  mainTheme?: string;
+  subTheme?: string;
+  topic?: string;
+}
+
+export function cleanPreschoolLessonName(raw?: string): string {
+  if (!raw) return 'bài học';
+  let clean = raw
+    .replace(/^(\d+[\.\)]|\-|\*)\s*/, '')
+    .replace(/^(dạy hát|hát vận động|nghe hát|vận động múa|vđcb|vận động cơ bản|btptc|bài tập phát triển chung|khám phá khoa học|khám phá xã hội|khám phá|kpk|kpxh|toán|làm quen với toán|lqvt|văn học|thơ|truyện|kể chuyện|tạo hình|vẽ|nặn|xé dán|chữ cái|làm quen chữ cái|lqcc|thể dục|gdtc|kỹ năng sống|knxh)\s*[:–-]\s*/i, '')
+    .replace(/^bài\s*\d*\s*[:–-]\s*/i, '')
+    .trim();
+  return clean || raw.trim() || 'bài học';
+}
+
+export function isGenericPreschoolParentCollab(list?: string[]): boolean {
+  if (!list || list.length === 0) return true;
+  return list.every((item) => {
+    const trimmed = item.trim();
+    if (!trimmed) return true;
+    return (
+      /hỗ trợ sưu tầm nguyên vật liệu mở an toàn và trò chuyện cùng con/i.test(trimmed) ||
+      /trò chuyện, củng cố kiến thức và chuẩn bị một số nguyên vật liệu/i.test(trimmed) ||
+      /hỗ trợ nguyên vật liệu mở\/tái chế an toàn/i.test(trimmed) ||
+      /chuẩn bị nguyên vật liệu và trò chuyện cùng con ở nhà/i.test(trimmed) ||
+      /củng cố rèn luyện cho trẻ tại nhà/i.test(trimmed) ||
+      /^phối hợp với phụ huynh\s*:\s*$/i.test(trimmed) ||
+      trimmed === 'Phối hợp với phụ huynh' ||
+      trimmed === '3. Phối hợp với phụ huynh:'
+    );
+  });
+}
+
+/**
+ * Tạo nội dung phối hợp phụ huynh riêng biệt, sâu sắc và bám sát từng bài học mầm non cụ thể
+ */
+export function generatePreschoolParentCollaboration(context?: PreschoolLessonContext): string[] {
+  const subject = context?.subject || '';
+  const lessonTitle = context?.lessonTitle || '';
+  const cleanName = cleanPreschoolLessonName(lessonTitle);
+  const domainInfo = detectPreschoolDomain(subject, lessonTitle, context?.topic || '');
+  const domain = domainInfo.domainType;
+  const tLow = lessonTitle.toLowerCase();
+  const sLow = subject.toLowerCase();
+
+  switch (domain) {
+    case 'MUSIC':
+      return [
+        `Trao đổi với phụ huynh về nội dung và giai điệu tươi vui của bài hát "${cleanName}", khuyến khích cha mẹ mở nhạc cho trẻ nghe và cùng hát, nhún nhảy với con tại gia đình.`,
+        `Động viên phụ huynh dành lời khen ngợi, vỗ tay cổ vũ khi trẻ tự tin biểu diễn các động tác múa, vận động minh họa hoặc gõ đệm nhịp nhàng đã được cô hướng dẫn ở lớp.`,
+        `Nhờ phụ huynh quay video ngắn khoảnh khắc bé biểu diễn bài hát tại nhà gửi vào nhóm lớp để cô giáo tuyên dương trẻ trước tập thể lớp.`
+      ];
+
+    case 'MATH': {
+      if (/đếm|số lượng|chữ số|thêm bớt|tách gộp|phạm vi|số \d/i.test(tLow)) {
+        return [
+          `Phối hợp cùng phụ huynh đố vui và hướng dẫn trẻ đếm số lượng các đồ dùng, đồ chơi, các loại bánh kẹo hoặc hoa quả quen thuộc trong gia đình bám sát nội dung bài học "${cleanName}".`,
+          `Khuyến khích cha mẹ cùng con chơi trò đố nhanh tìm nhóm đồ vật có số lượng tương ứng xung quanh nhà, rèn luyện cho trẻ sự nhanh mắt và phát âm chuẩn các số lượng.`,
+          `Trao đổi với phụ huynh biểu dương sự tiến bộ, tinh thần tập trung chú ý và khả năng đếm thành thạo của trẻ sau buổi học.`
+        ];
+      }
+      if (/hình tròn|hình vuông|hình tam giác|hình chữ nhật|khối cầu|khối trụ|khối vuông|hình khối/i.test(tLow)) {
+        return [
+          `Hướng dẫn phụ huynh cùng con chơi trò "Thám tử nhí tìm hình khối", cùng bé tìm kiếm và gọi tên chính xác các đồ vật trong gia đình có hình dạng gắn với bài học "${cleanName}" (như mặt đồng hồ, quyển sách, khung ảnh, cánh cửa...).`,
+          `Khuyến khích trẻ cùng cha mẹ ghép các đồ dùng gia đình (que tính, ống hút, đũa) hoặc dùng đất nặn tạo thành các hình khối đã học để khắc sâu biểu tượng hình học.`,
+          `Phối hợp trao đổi với cha mẹ về khả năng phân biệt, so sánh đặc điểm góc, cạnh của các hình khối mà bé đã thể hiện trên lớp.`
+        ];
+      }
+      if (/to - nhỏ|to nhỏ|cao - thấp|cao thấp|dài - ngắn|dài ngắn|rộng - hẹp|nhiều hơn - ít hơn|so sánh/i.test(tLow)) {
+        return [
+          `Khuyến khích phụ huynh cùng con thực hành so sánh kích thước các đồ vật quen thuộc trong nhà (chiếc bát to - bát nhỏ, đôi dép của bố - dép của con, cái thìa dài - thìa ngắn) theo bài học "${cleanName}".`,
+          `Hướng dẫn trẻ diễn đạt trọn câu mối quan hệ so sánh trong sinh hoạt hàng ngày nhằm củng cố tư duy logic và ngôn ngữ toán học cho trẻ.`,
+          `Trao đổi với phụ huynh về sự tích cực tham gia các thao tác trải nghiệm và so sánh kích thước của trẻ trên lớp.`
+        ];
+      }
+      if (/trên - dưới|trước - sau|phải - trái|phía trên|phía dưới|phía trước|phía sau|tay phải|tay trái/i.test(tLow)) {
+        return [
+          `Nhờ phụ huynh thường xuyên nhắc nhở, đố vui con xác định vị trí đồ vật trong phòng và phân biệt chính xác tay phải (tay cầm thìa), tay trái khi ăn cơm, mặc quần áo gắn với bài học "${cleanName}".`,
+          `Khuyến khích cha mẹ cùng con chơi trò "Vật đó ở đâu", giúp bé củng cố khả năng định hướng không gian nhanh nhẹn và tự tin trong cuộc sống hàng ngày.`
+        ];
+      }
+      return [
+        `Phối hợp cùng phụ huynh củng cố kiến thức bài học "${cleanName}" thông qua các tình huống thực tế gần gũi trong sinh hoạt gia đình.`,
+        `Khuyến khích cha mẹ động viên, khen ngợi khi trẻ chủ động nhận biết, phân loại và đếm đồ vật xung quanh nhà.`,
+        `Trao đổi thông tin thường xuyên giữa cô giáo và phụ huynh về mức độ nhận thức và khả năng tư duy toán học của con.`
+      ];
+    }
+
+    case 'SCIENCE': {
+      if (/cây|hoa|quả|rau|lá|hạt|thực vật/i.test(tLow)) {
+        return [
+          `Phối hợp cùng phụ huynh sưu tầm các loại lá cây rụng, hạt giống, rau củ quả thật hoặc tranh ảnh sinh động mang đến lớp phục vụ tiết học trải nghiệm "${cleanName}".`,
+          `Khuyến khích cha mẹ cùng con chăm sóc cây xanh tại nhà (tưới nước, bắt sâu, nhặt lá úa), trò chuyện về các bộ phận và lợi ích của cây cối đối với đời sống con người.`,
+          `Nhắc nhở phụ huynh phối hợp giáo dục trẻ tình yêu thiên nhiên, không ngắt hoa bẻ cành và biết ăn nhiều loại rau củ quả sạch để cơ thể khỏe mạnh.`
+        ];
+      }
+      if (/con vật|động vật|thú|chim|cá|côn trùng|chó|mèo|gà|vịt/i.test(tLow)) {
+        return [
+          `Trao đổi với phụ huynh về bài học "${cleanName}", khuyến khích cha mẹ cùng con quan sát các con vật nuôi trong nhà hoặc xem video khoa học về thế giới động vật.`,
+          `Gợi ý phụ huynh đặt câu hỏi để trẻ mô tả đặc điểm nổi bật, tiếng kêu, thức ăn và thói quen vận động của các con vật mà con đã được quan sát ở lớp.`,
+          `Phối hợp giáo dục trẻ lòng nhân ái, biết yêu thương, chăm sóc và không trêu chọc các con vật nuôi an toàn.`
+        ];
+      }
+      if (/nước|không khí|thời tiết|mùa|pha màu|chìm nổi|ánh sáng|nam châm|thí nghiệm/i.test(tLow)) {
+        return [
+          `Phối hợp cùng phụ huynh sưu tầm vỏ chai nhựa, cốc trong suốt hoặc các vật liệu tái chế sạch mang đến lớp phục vụ các hoạt động thí nghiệm của bài "${cleanName}".`,
+          `Khuyến khích cha mẹ cùng con làm các thí nghiệm vui đơn giản tại nhà (quan sát đá tan, pha màu nước, thử vật chìm vật nổi) và giải thích hiện tượng cho trẻ.`,
+          `Nhắc nhở trẻ ý thức tiết kiệm nước sạch, biết mặc trang phục phù hợp với thời tiết (mưa, nắng, nóng, lạnh) để bảo vệ sức khỏe.`
+        ];
+      }
+      return [
+        `Phối hợp cùng phụ huynh sưu tầm mẫu vật thật hoặc hình ảnh liên quan đến bài học "${cleanName}" mang đến lớp phục vụ góc trải nghiệm khám phá.`,
+        `Khuyến khích cha mẹ dành thời gian cùng con quan sát thực tế thiên nhiên quanh nhà, khơi gợi trí tò mò, khám phá và kiên nhẫn giải đáp các thắc mắc của bé.`,
+        `Nhắc nhở phụ huynh phối hợp giáo dục con ý thức giữ gìn vệ sinh, yêu quý và bảo vệ môi trường sống.`
+      ];
+    }
+
+    case 'SOCIAL': {
+      if (/gia đình|ngôi nhà|bố mẹ|ông bà|anh chị|đồ dùng gia đình/i.test(tLow)) {
+        return [
+          `Trao đổi với phụ huynh về bài học "${cleanName}", khuyến khích cha mẹ trò chuyện cùng con về các thành viên, tình cảm yêu thương và sự gắn kết trong gia đình.`,
+          `Phối hợp tạo điều kiện để trẻ cùng tham gia các công việc nhà vừa sức (gấp quần áo nhỏ, nhặt rau, dọn bát đũa, cất giày dép) rèn tính tự lập.`,
+          `Khuyến khích cha mẹ chụp ảnh hoặc chia sẻ những khoảnh khắc sum vầy ấm áp của gia đình gửi vào nhóm lớp để bé tự tin giới thiệu với các bạn.`
+        ];
+      }
+      if (/nghề|cô giáo|bác sĩ|bộ đội|công an|nông dân|công nhân|thợ/i.test(tLow)) {
+        return [
+          `Khuyến khích phụ huynh trò chuyện cùng con về công việc, trang phục và đồ dùng đặc trưng của các nghề nghiệp trong xã hội bám sát bài học "${cleanName}".`,
+          `Giáo dục trẻ thái độ kính trọng, biết ơn những người lao động và nuôi dưỡng ước mơ nghề nghiệp tương lai tốt đẹp.`,
+          `Nhờ phụ huynh hỗ trợ tranh ảnh hoặc đồ chơi mô hình nghề nghiệp mang đến lớp phục vụ góc đóng vai của trẻ.`
+        ];
+      }
+      if (/giao thông|xe|đèn đỏ|ngã tư|tàu|máy bay/i.test(tLow)) {
+        return [
+          `Nhắc nhở phụ huynh gương mẫu chấp hành luật an toàn giao thông khi đưa đón con (đội mũ bảo hiểm cho trẻ, dừng đúng đèn đỏ, đi đúng làn đường).`,
+          `Cùng con đố vui nhận biết các biển báo, phương tiện giao thông và đèn tín hiệu trên đường đi học bám sát bài học "${cleanName}".`,
+          `Rèn luyện cho trẻ thói quen quan sát cẩn thận, không chạy nhảy dưới lòng đường và luôn nắm tay người lớn khi qua đường.`
+        ];
+      }
+      return [
+        `Trao đổi với phụ huynh về nội dung bài học "${cleanName}", khuyến khích cha mẹ trò chuyện cùng con về môi trường trường lớp và các quy tắc ứng xử văn minh.`,
+        `Phối hợp tạo cơ hội cho trẻ thực hành thói quen tốt tại gia đình: biết chào hỏi lễ phép, nói lời cảm ơn - xin lỗi, tự giác thu dọn đồ dùng đồ chơi sau khi chơi.`,
+        `Khuyến khích cha mẹ ghi nhận và khen ngợi kịp thời những hành vi tích cực, thái độ thân thiện, biết chia sẻ và giúp đỡ bạn bè của trẻ.`
+      ];
+    }
+
+    case 'POETRY':
+      return [
+        `Gửi nội dung bài thơ "${cleanName}" qua bảng tin tuyên truyền hoặc nhóm Zalo lớp để phụ huynh đọc cho con nghe vào buổi tối trước khi đi ngủ.`,
+        `Khuyến khích cha mẹ đàm thoại cùng con về nội dung bài thơ, giải thích các từ ngữ giàu hình ảnh và giáo dục tình cảm yêu thương, thái độ sống tích cực cho trẻ.`,
+        `Động viên bé tự tin đọc diễn cảm bài thơ kết hợp cử chỉ, điệu bộ đáng yêu cho ông bà, cha mẹ nghe tại nhà.`
+      ];
+
+    case 'STORY':
+      return [
+        `Tóm tắt nội dung câu chuyện "${cleanName}" gửi tới phụ huynh, khuyến khích cha mẹ kể lại câu chuyện cho con nghe trong không gian ấm áp của gia đình.`,
+        `Gợi ý cha mẹ đặt câu hỏi gợi mở về hành động của các nhân vật, giúp bé phân biệt việc tốt - việc chưa tốt và khắc sâu bài học đạo đức ý nghĩa của câu chuyện.`,
+        `Động viên trẻ tập đóng vai hoặc kể lại câu chuyện theo ngôn ngữ tự nhiên, sáng tạo của con cho người thân nghe.`
+      ];
+
+    case 'ART':
+      return [
+        `Phối hợp cùng phụ huynh sưu tầm các nguyên vật liệu mở an toàn, phong phú tại gia đình (vỏ hộp, lõi giấy, nắp chai nhựa, lá khô, cúc áo, giấy màu báo cũ...) mang đến lớp phục vụ tiết học tạo hình "${cleanName}".`,
+        `Khuyến khích cha mẹ tạo một "Góc triển lãm nhỏ" tại gia đình để treo và trân trọng các bức tranh, sản phẩm tạo hình bé mang về từ lớp, tạo niềm tự hào cho con.`,
+        `Dành thời gian ngày nghỉ cuối tuần cùng con vẽ, tô màu, nặn những hình thù sáng tạo, khích lệ đôi bàn tay khéo léo và trí tưởng tượng của bé.`
+      ];
+
+    case 'PHYSICAL':
+      return [
+        `Thông báo tới phụ huynh chuẩn bị trang phục gọn gàng, thấm hút mồ hôi, đi giày mềm hoặc dép quai hậu vừa chân để trẻ thoải mái, an toàn khi tham gia bài học thể dục "${cleanName}".`,
+        `Khuyến khích cha mẹ cùng con duy trì thói quen tập thể dục buổi sáng tại nhà, cùng chơi các hoạt động vận động ngoài trời (chạy bộ, nhảy dây, đá bóng mini, tung bắt bóng...) tăng cường thể lực.`,
+        `Trao đổi với phụ huynh về chế độ dinh dưỡng hợp lý, nhắc nhở con uống đủ nước và ngủ đúng giờ giúp cơ thể phát triển cân đối, khỏe mạnh.`
+      ];
+
+    case 'LETTER':
+      return [
+        `Phối hợp với phụ huynh cùng con chơi trò đố vui tìm các chữ cái trong bài học "${cleanName}" trên biển quảng cáo, bảng tin, nhãn hộp bánh kẹo, bìa truyện tranh tại nhà.`,
+        `Khuyến khích cha mẹ hướng dẫn con nhận diện chữ cái qua việc xếp hột hạt, uốn dây kẽm nhung hoặc tô vẽ chữ cái sáng tạo.`,
+        `Nhắc nhở phụ huynh phối hợp rèn tư thế ngồi ngay ngắn và cách cầm bút đúng quy cách khi con ngồi vào bàn học tập ở nhà.`
+      ];
+
+    case 'SKILLS':
+      return [
+        `Trao đổi với phụ huynh về kỹ năng trọng tâm của bài học "${cleanName}", thống nhất phương pháp rèn luyện tính tự lập cho trẻ ở cả lớp và ở nhà.`,
+        `Tạo điều kiện để trẻ tự thực hành các kỹ năng tự phục vụ tại gia đình (tự rửa mặt, rửa tay bằng xà phòng theo quy trình, tự thay quần áo, tự xúc ăn gọn gàng).`,
+        `Khen ngợi, khích lệ kịp thời mỗi khi con thể hiện sự chủ động, tự tin và có trách nhiệm với bản thân và mọi người xung quanh.`
+      ];
+
+    default:
+      return [
+        `Trao đổi với phụ huynh về chủ đề và nội dung bài học "${cleanName}", phối hợp cùng con ôn luyện và trò chuyện về bài học tại gia đình.`,
+        `Khuyến khích cha mẹ hỗ trợ sưu tầm học liệu, đồ dùng trực quan phù hợp bài học và tạo điều kiện cho trẻ khám phá, trải nghiệm thực tế.`,
+        `Thường xuyên trao đổi hai chiều giữa giáo viên và phụ huynh về sự tiến bộ, tinh thần hứng thú tham gia các hoạt động học tập của trẻ tại lớp.`
+      ];
+  }
+}
+
 /**
  * Trích xuất và chuẩn hóa mục "II. Chuẩn bị:" mầm non thành đúng cấu trúc 3 mục chuẩn:
  * 1. Chuẩn bị của cô:
@@ -1909,11 +2955,26 @@ ${is345 ? `    - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh số l
  * - Trang phục:
  * - Đồ dùng của trẻ:
  * - Tâm sinh lý của trẻ:
- * 3. Phối hợp với phụ huynh:
+ * 3. Phối hợp với phụ huynh: (Mỗi bài học một nội dung riêng biệt, độc đáo, không trùng lặp)
  */
-export function getPreschoolPreparation(equipment: any): PreschoolPreparationData {
+export function getPreschoolPreparation(equipment: any, context?: PreschoolLessonContext): PreschoolPreparationData {
+  const effectiveContext: PreschoolLessonContext = context || (equipment?._context || {
+    lessonTitle: equipment?.lessonTitle,
+    subject: equipment?.subject,
+    grade: equipment?.grade,
+    mainTheme: equipment?.mainTheme,
+    subTheme: equipment?.subTheme,
+  });
+
   if (equipment?.preschoolPreparation) {
     const pp = equipment.preschoolPreparation;
+    const rawParent: string[] = (Array.isArray(pp.parentCollaboration) && pp.parentCollaboration.length > 0)
+      ? pp.parentCollaboration
+      : [];
+    const parentCollab = (rawParent.length > 0 && !isGenericPreschoolParentCollab(rawParent))
+      ? rawParent
+      : generatePreschoolParentCollaboration(effectiveContext);
+
     return {
       teacherEnvironment: (pp.teacherEnvironment && pp.teacherEnvironment.length > 0)
         ? pp.teacherEnvironment
@@ -1930,9 +2991,7 @@ export function getPreschoolPreparation(equipment: any): PreschoolPreparationDat
       studentPsychology: (pp.studentPsychology && pp.studentPsychology.length > 0)
         ? pp.studentPsychology
         : ['Tâm thế vui tươi, thoải mái, hào hứng, tự tin, sẵn sàng tham gia hoạt động.'],
-      parentCollaboration: (pp.parentCollaboration && pp.parentCollaboration.length > 0)
-        ? pp.parentCollaboration
-        : ['Phối hợp với phụ huynh hỗ trợ sưu tầm nguyên vật liệu mở an toàn và trò chuyện cùng con về bài học ở nhà.'],
+      parentCollaboration: parentCollab,
     };
   }
 
@@ -1993,6 +3052,10 @@ export function getPreschoolPreparation(equipment: any): PreschoolPreparationDat
     }
   });
 
+  const finalParentCollab = (parentCollab.length > 0 && !isGenericPreschoolParentCollab(parentCollab))
+    ? parentCollab
+    : generatePreschoolParentCollaboration(effectiveContext);
+
   return {
     teacherEnvironment: teacherEnv.length > 0
       ? teacherEnv
@@ -2009,9 +3072,7 @@ export function getPreschoolPreparation(equipment: any): PreschoolPreparationDat
     studentPsychology: studentPsychology.length > 0
       ? studentPsychology
       : ['Tâm thế vui tươi, thoải mái, hào hứng, sẵn sàng tham gia hoạt động cùng cô và bạn.'],
-    parentCollaboration: parentCollab.length > 0
-      ? parentCollab
-      : ['Phối hợp cùng phụ huynh trò chuyện, củng cố kiến thức và chuẩn bị một số nguyên vật liệu tự nhiên/tái chế an toàn cho trẻ.'],
+    parentCollaboration: finalParentCollab,
   };
 }
 

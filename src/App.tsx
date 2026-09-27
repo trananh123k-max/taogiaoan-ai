@@ -72,14 +72,15 @@ export default function App() {
     periods: 2,
     tableLayout: 'two_column',
     mathFormulaFormat: 'word_equation',
-    enableNLS: true,
+    enableNLS: false,
     nlsMode: 'ppct',
     customNLS: '',
     selectedNLSDomains: ['nls_info', 'nls_creation', 'nls_problem_solving'],
-    enableAI: true,
+    enableAI: false,
     aiMode: 'ppct',
     customAI: '',
     selectedAIDomains: ['ai_prompting', 'ai_critical_thinking', 'ai_creativity'],
+    enableSTEM: false,
     oldPlanContent: '',
     imageSlots: [],
     schoolName: 'Chưa cập nhật trường',
@@ -307,6 +308,10 @@ export default function App() {
   }, [isLoggedIn]);
 
   const showToast = (text: string, type: 'success' | 'error' | 'info' = 'success') => {
+    // Bỏ thông báo đang soạn giáo án hay thông báo đã hoàn tất khi đã soạn xong ở cuối trang theo yêu cầu
+    if (/đang soạn|hoàn tất/i.test(text)) {
+      return;
+    }
     setToastMessage({ type, text });
     setTimeout(() => setToastMessage(null), 4000);
   };
@@ -440,8 +445,6 @@ export default function App() {
 
       if (nextUsed >= accessStatus.maxTrials) {
         showToast(`Bạn đang sử dụng lượt dùng thử cuối cùng (${nextUsed}/${accessStatus.maxTrials} lượt)! Sau lượt này cần liên hệ Admin để cấp quyền.`, 'info');
-      } else {
-        showToast(`Đang soạn bài dạy (Dùng thử: Lượt ${nextUsed}/${accessStatus.maxTrials}, còn ${accessStatus.maxTrials - nextUsed} lượt)`, 'info');
       }
     }
     // --------------------------------------
@@ -477,7 +480,6 @@ export default function App() {
           match.lessonTitle?.toLowerCase().includes('tích hợp stem')
         );
         if (hasStem) {
-          finalConfig.enableSTEM = true;
           finalConfig.hasStemFromPPCT = true;
           if (match.stemTopic) {
             finalConfig.stemTopic = match.stemTopic;
@@ -491,7 +493,7 @@ export default function App() {
           ...prev,
           periods: finalConfig.periods,
           targetPeriodDetail: finalConfig.targetPeriodDetail ?? prev.targetPeriodDetail,
-          enableSTEM: finalConfig.enableSTEM ?? prev.enableSTEM,
+          enableSTEM: prev.enableSTEM || false,
           stemTopic: finalConfig.stemTopic ?? prev.stemTopic,
           hasStemFromPPCT: finalConfig.hasStemFromPPCT ?? prev.hasStemFromPPCT
         }));
@@ -512,7 +514,6 @@ export default function App() {
     setIsGenerating(true);
     setCurrentPlan(null); // Clear previous plan to show empty/generating state
     setActiveTab('result'); // Switch to Tab 2 to watch progress and result
-    showToast('Đang tiến hành soạn giáo án bài dạy, vui lòng chờ trong giây lát...', 'info');
 
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
@@ -532,6 +533,25 @@ export default function App() {
         userExpiresAt: currentUser?.expiresAt,
       };
 
+      // Helper to safely parse JSON from fetch responses
+      const safeParseResponse = async (res: Response) => {
+        const ct = res.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+          try {
+            return await res.json();
+          } catch (e) {
+            return { success: false, error: 'Phản hồi JSON không hợp lệ từ máy chủ.' };
+          }
+        }
+        const text = await res.text();
+        return {
+          success: false,
+          error: res.status >= 500
+            ? 'Máy chủ AI đang bận hoặc quá tải, vui lòng thử lại sau giây lát.'
+            : (text.length > 200 ? text.slice(0, 200) + '...' : text || 'Phản hồi không đúng định dạng JSON'),
+        };
+      };
+
       // 1. Tốc độ siêu tốc (1-Shot Fast Generation, chỉ 3 - 5 giây)
       try {
         const response = await fetch('/api/gemini/generate-khbd', {
@@ -541,7 +561,7 @@ export default function App() {
           signal: controller.signal,
         });
 
-        const data = await response.json();
+        const data = await safeParseResponse(response);
         if (response.ok && data.success && (data.lessonPlan || data.data)) {
           finalPlan = data.lessonPlan || data.data;
         } else if (data.requiresCustomApiKey) {
@@ -567,18 +587,15 @@ export default function App() {
           signal: controller.signal,
         });
 
-        if (directResp.ok) {
-          const directData = await directResp.json();
-          if (directData.success && (directData.lessonPlan || directData.data)) {
-            finalPlan = directData.lessonPlan || directData.data;
-          }
+        const directData = await safeParseResponse(directResp);
+        if (directResp.ok && directData.success && (directData.lessonPlan || directData.data)) {
+          finalPlan = directData.lessonPlan || directData.data;
         } else {
-          const directErr = await directResp.json().catch(() => ({}));
-          if (directErr.requiresCustomApiKey) {
+          if (directData.requiresCustomApiKey) {
             setIsApiKeyModalOpen(true);
           }
-          if (directErr.error) {
-            throw new Error(directErr.error);
+          if (directData.error) {
+            throw new Error(directData.error);
           }
         }
       }
@@ -586,7 +603,6 @@ export default function App() {
       if (finalPlan) {
         setCurrentPlan(finalPlan);
         setProgressSteps({ 1: 'done', 2: 'done', 3: 'done', 4: 'done' });
-        showToast('Soạn giáo án hoàn tất!', 'success');
       } else if (!controller.signal.aborted) {
         throw new Error('Hệ thống đang bận hoặc quá tải, vui lòng thử lại sau giây lát.');
       }
@@ -646,7 +662,19 @@ export default function App() {
         }),
       });
 
-      const data = await response.json();
+      let data: any = {};
+      const ct = response.headers.get('content-type') || '';
+      if (ct.includes('application/json')) {
+        try {
+          data = await response.json();
+        } catch {
+          data = { success: false, error: 'Phản hồi không hợp lệ' };
+        }
+      } else {
+        const text = await response.text();
+        data = { success: false, error: text.slice(0, 150) || 'Lỗi kết nối' };
+      }
+
       if (data.requiresCustomApiKey) {
         setIsApiKeyModalOpen(true);
       }

@@ -18,7 +18,7 @@ import {
 import fileSaver from 'file-saver';
 const saveAs = (fileSaver as any)?.saveAs || fileSaver;
 import { LessonPlanOutput, ImageSlot, StepDetail, MathFormulaFormatType } from '../types';
-import { formatPreschoolActivities, formatPreschoolMusicActivities, parseActivityPairs, detectPreschoolDomain, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, analyzePreschoolAgeProfile, cleanPreschoolBulletLine, getPreschoolPreparation } from './preschoolUtils';
+import { formatPreschoolActivities, formatPreschoolMusicActivities, parseActivityPairs, detectPreschoolDomain, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, analyzePreschoolAgeProfile, cleanPreschoolBulletLine, expandPreschoolTextLines, getPreschoolPreparation } from './preschoolUtils';
 import { latexToDocxMath, splitTextAndMath } from './latexToDocxMath';
 
 // Global state for current math formula export format (default: 'word_equation' - Phương án 2)
@@ -187,8 +187,8 @@ function parseMarkdownRuns(
   // Clean bullet asterisks or dots at start
   const cleaned = text.replace(/^[*•]\s*/, '').trim();
 
-  // Check if this entire line is a Roman numeral or numbered heading (e.g. "I. THÔNG TIN VÀ DỮ LIỆU:", "1. Thấy gì? Biết gì ?", "1. Thế giới kĩ thuật số")
-  const isNumberedHeading = /^\s*(?:[IVXLCDM]+\.|\d+\.|\b[a-e]\))\s+[A-ZÀ-Ỵ0-9\?]/i.test(cleaned) || /^[IVXLCDM]+\.\s+/i.test(cleaned);
+  // Check if this entire line is a genuine Roman numeral section heading (e.g. "I. THÔNG TIN VÀ DỮ LIỆU:")
+  const isRomanSectionHeading = /^\s*[IVXLCDM]+\.\s+[A-ZÀ-Ỵ]/i.test(cleaned);
 
   // Split by markdown bold (**...**)
   const boldParts = cleaned.split(/(\*\*.*?\*\*)/g);
@@ -229,7 +229,7 @@ function parseMarkdownRuns(
             runs.push(
               new TextRun({
                 text: sanitized,
-                bold: isNumberedHeading ? true : undefined,
+                bold: isRomanSectionHeading ? true : undefined,
                 font: fontName,
                 size,
                 color: colorHex || '000000',
@@ -243,7 +243,7 @@ function parseMarkdownRuns(
 
   return runs.length > 0
     ? runs
-    : [new TextRun({ text: cleaned.replace(/\*+/g, ''), bold: isNumberedHeading ? true : undefined, font: fontName, size, color: colorHex || '000000' })];
+    : [new TextRun({ text: cleaned.replace(/\*+/g, ''), bold: isRomanSectionHeading ? true : undefined, font: fontName, size, color: colorHex || '000000' })];
 }
 
 /**
@@ -2846,7 +2846,10 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
                           lower.startsWith('nghe hát') || 
                           lower.startsWith('trò chơi') || 
                           lower.startsWith('tcân') || 
-                          lower.startsWith('tc:');
+                          lower.startsWith('tc:') ||
+                          lower.startsWith('t/c:') ||
+                          lower.startsWith('tc ') ||
+                          lower.startsWith('t/c ');
 
     if (idx === 0 && !isMetadataLine) {
       rawLessonTitle = part;
@@ -2896,7 +2899,7 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
     if (!extractedAuthor) {
       const act3Teacher = act3?.step1?.teacherAction || '';
       // Try to match the author explicitly from the main song (item 'a.' with TT)
-      const mainAuthorMatch = act3Teacher.match(/a[\.\)]\s*(?:Dạy hát|Nghe hát|Hát vận động)[^\n]+?\(\s*(?:Tác giả|Nhạc và lời|Sáng tác)\s*[:\-\–—]\s*([^)]+)\)/i);
+      const mainAuthorMatch = act3Teacher.match(/a[\.\)]\s*(?:Dạy hát|Nghe hát|Hát vận động|Vận động theo nhạc|Vận động|Múa)[^\n]+?\(\s*(?:Tác giả|Nhạc và lời|Sáng tác)\s*[:\-\–—]\s*([^)]+)\)/i);
       if (mainAuthorMatch && mainAuthorMatch[1]?.trim()) {
         const candidate = cleanAuthorName(mainAuthorMatch[1]);
         if (candidate) extractedAuthor = candidate;
@@ -2918,6 +2921,7 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
       else if (lowerTitle.includes('vui đến trường')) extractedAuthor = 'Hồ Bắc';
       else if (lowerTitle.includes('bé đi nhà trẻ')) extractedAuthor = 'Nguyễn Văn Chung';
       else if (lowerTitle.includes('đố bạn')) extractedAuthor = 'Hồng Đăng';
+      else if (lowerTitle.includes('cái mũi')) extractedAuthor = 'Thu Hiền';
       else if (lowerTitle.includes('tìm bạn thân')) extractedAuthor = 'Việt Anh';
       else if (lowerTitle.includes('tập tầm vông')) extractedAuthor = 'Đồng dao (nhạc Lê Vy)';
       else if (lowerTitle.includes('cháu yêu cô chú') || lowerTitle.includes('công nhân')) extractedAuthor = 'Hoàng Văn Yến';
@@ -2944,15 +2948,21 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
       const listenMatch = act3Teacher.match(/(?:nghe hát\s*["“']([^"”']+)["”'](?:\s*\((?:tác giả\s*:\s*)?([^)]+)\))?)/i) ||
                           act3Teacher.match(/b[\.\)]\s*Nghe hát\s*["“']?([^"”'\n\.]+)/i);
       if (listenMatch) {
-        const song = cleanPreschoolText(listenMatch[1]?.trim());
+        let song = cleanPreschoolText(listenMatch[1]?.trim());
+        song = song
+          .replace(/(?:trò chơi âm nhạc|tcân|t\/c|tc|trò chơi)\s*[:'"][^\n\)]*/gi, '')
+          .replace(/\btai ai thính\b/gi, '')
+          .replace(/["'“‘”’]/g, '')
+          .trim();
         const author = cleanAuthorName(listenMatch[2]?.trim());
-        if (song) {
+        if (song && !song.toLowerCase().includes('cái mũi') && !song.toLowerCase().includes('tai ai thính')) {
           listenSongText = `Nghe hát: "${song}"${author ? ` (Tác giả: ${author})` : ''}`;
         }
       }
       if (!listenSongText) {
         const lowerTitle = (lessonTitle + ' ' + rawTitle).toLowerCase();
-        if (lowerTitle.includes('gà trống') || lowerTitle.includes('mèo con') || lowerTitle.includes('cún con')) listenSongText = 'Nghe hát: "Gà gáy le te" (Dân ca Cống Khao)';
+        if (lowerTitle.includes('cái mũi') || lowerTitle.includes('bản thân')) listenSongText = 'Nghe hát: "Thật đáng yêu" (Tác giả: Nghiêm Mạ)';
+        else if (lowerTitle.includes('gà trống') || lowerTitle.includes('mèo con') || lowerTitle.includes('cún con')) listenSongText = 'Nghe hát: "Gà gáy le te" (Dân ca Cống Khao)';
         else if (lowerTitle.includes('trường chúng cháu')) listenSongText = 'Nghe hát: "Ngày đầu tiên đi học" (Tác giả: Nguyễn Ngọc Thiện)';
         else if (lowerTitle.includes('vui đến trường')) listenSongText = 'Nghe hát: "Đi học về" (Tác giả: Hoàng Long, Hoàng Lân)';
         else if (lowerTitle.includes('bé đi nhà trẻ')) listenSongText = 'Nghe hát: "Cháu đi mẫu giáo" (Tác giả: Phạm Minh Tuấn)';
@@ -2980,10 +2990,12 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
         gameText = `Trò chơi âm nhạc: "${gameName}"`;
       } else {
         const lowerTitle = (lessonTitle + ' ' + rawTitle).toLowerCase();
-        if (lowerTitle.includes('gà trống') || lowerTitle.includes('mèo con') || lowerTitle.includes('cún con')) {
+        if (lowerTitle.includes('cái mũi') || lowerTitle.includes('thính')) {
+          gameText = 'Trò chơi âm nhạc: "Tai ai thính"';
+        } else if (lowerTitle.includes('gà trống') || lowerTitle.includes('mèo con') || lowerTitle.includes('cún con')) {
           gameText = 'Trò chơi âm nhạc: "Tai ai tinh (Đoán tiếng kêu các con vật)"';
         } else {
-          gameText = 'Trò chơi âm nhạc: "Nốt nhạc vui"';
+          gameText = 'Trò chơi âm nhạc: "Tai ai thính"';
         }
       }
       contentLines.push(gameText);
@@ -3257,7 +3269,13 @@ function buildPreschoolDocxElements(
   // II. Chuẩn bị: (Đúng chuẩn 3 mục: 1. Chuẩn bị của cô, 2. Chuẩn bị của trẻ, 3. Phối hợp với phụ huynh)
   elements.push(createSectionHeading('II. Chuẩn bị:', fontName, primaryColor));
 
-  const prep = getPreschoolPreparation(plan.equipment);
+  const prep = getPreschoolPreparation(plan.equipment, {
+    lessonTitle: plan.lessonTitle,
+    subject: plan.subject,
+    grade: plan.grade,
+    mainTheme: plan.mainTheme,
+    subTheme: plan.subTheme,
+  });
 
   // 1. Chuẩn bị của cô:
   elements.push(createSubHeading('1. Chuẩn bị của cô:', fontName));
@@ -3357,8 +3375,8 @@ function buildPreschoolDocxElements(
     const teacherRaw = (step1.teacherAction || '').replace(/\*\*/g, '').trim();
     const studentRaw = (step1.studentAction || '').replace(/\*\*/g, '').trim();
 
-    const tLines = teacherRaw.split('\n').map((l: string) => l.trim()).filter(Boolean);
-    const sLines = studentRaw.split('\n').map((l: string) => l.trim()).filter(Boolean);
+    const tLines = expandPreschoolTextLines(teacherRaw);
+    const sLines = expandPreschoolTextLines(studentRaw);
 
     // Tiêu đề bước (ví dụ: 1. Khởi động – Tạo hứng thú và giao nhiệm vụ)
     // Đặt trực tiếp trong cột Cô, in đậm, cách trên thoáng để phân biệt bước
@@ -3381,23 +3399,21 @@ function buildPreschoolDocxElements(
     }
 
     tLines.forEach((line: string) => {
-      const isSubheader = /^([ab][\.\)]\s*.*)$/i.test(line) ||
-        /^\*?\s*(Bài tập phát triển chung|Vận động cơ bản|BTPTC|VĐCB|Trò chơi)/i.test(line);
+      const isTeacherSentence = /^[-•*+\s–—]*(?:Cô|Giáo viên|Mời|Hỏi|Cho trẻ|Hướng dẫn|Tổ chức cho trẻ|Bao quát|Tuyên dương|Trẻ|Cả lớp)\b/i.test(line);
+      const isGameHeader = !isTeacherSentence && /^[-•*+\s–—]*(?:Trò chơi|\*\*Trò chơi)\s*\d*[:\s]/i.test(line);
+      const isSubheader = !isTeacherSentence && (
+        /^([ab][\.\)]\s*.*)$/i.test(line) ||
+        /^[-•*+\s–—]*(?:Bài tập phát triển chung|Vận động cơ bản|BTPTC|VĐCB)/i.test(line) ||
+        isGameHeader
+      );
 
       if (isSubheader) {
+        const formattedLine = cleanPreschoolBulletLine(line);
         allTeacherParas.push(
           new Paragraph({
             alignment: AlignmentType.BOTH,
-            spacing: { before: 80, after: 40, line: 260 },
-            children: [
-              new TextRun({
-                text: line,
-                bold: true,
-                size: 28,
-                font: fontName,
-                color: '000000',
-              }),
-            ],
+            spacing: { before: isGameHeader ? 120 : 80, after: 40, line: 260 },
+            children: parseMarkdownRuns(formattedLine, fontName, undefined, 28),
           })
         );
       } else {

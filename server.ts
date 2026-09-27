@@ -1,5 +1,5 @@
 import { PRESCHOOL_CURRICULUM_MATRIX, PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE } from './src/data/preschoolCurriculum.js';
-import { formatPreschoolMusicActivities, formatPreschoolActivities, isPreschoolMusicPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, sanitizePreschoolObjectives, analyzePreschoolAgeProfile, detectPreschoolDomain, generateDefaultPreschoolActivities } from './src/utils/preschoolUtils.js';
+import { formatPreschoolMusicActivities, formatPreschoolLetterGameActivities, formatPreschoolActivities, isPreschoolMusicPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, stripPreschoolAICodes, sanitizePreschoolObjectives, analyzePreschoolAgeProfile, detectPreschoolDomain, generateDefaultPreschoolActivities, generatePreschoolParentCollaboration, isGenericPreschoolParentCollab } from './src/utils/preschoolUtils.js';
 import { NLS_DICTIONARY } from './src/data/nlsDictionary';
 import { getVerifiedLessons } from './src/data/verifiedCurriculumList';
 import { getTextbookLessonStructure } from './src/data/textbookStructureDictionary';
@@ -30,12 +30,16 @@ function extractApiKeyFromReq(req: express.Request): string | undefined {
 }
 
 // Clean and parse multiple keys from an input string (supports comma, semicolon, newline, whitespace)
-// Automatically filters UI copy artifacts like 'content_copy', 'content_cop', etc.
+// Automatically handles Google AI Studio's new "AQ." format, classic "AIzaSy..." format,
+// and filters UI copy artifacts like 'content_copy', 'content_cop', etc.
 function extractKeysFromInput(inputStr?: string): string[] {
   if (!inputStr || typeof inputStr !== 'string') return [];
-  return inputStr
+  const normalized = inputStr
     .replace(/[\u200B-\u200D\uFEFF\u00A0]/g, ' ')
     .replace(/\b(content_copy|content_cop|copied|copy|api_key|apikey|key)\b/gi, ' ')
+    .replace(/\bAQ\.\s+/g, 'AQ.');
+
+  return normalized
     .split(/[,;\n\r\s]+/)
     .map((k) => k.trim().replace(/^["':=]+|["':=]+$/g, ''))
     .filter((k) => {
@@ -225,24 +229,28 @@ function resolveCandidateKeys(req: express.Request): {
   };
 }
 
-// Task-Specific Model Hierarchies:
-// Đặt duy nhất gemini-3.1-flash-lite làm mô hình tiêu chuẩn cho toàn bộ ứng dụng để ĐẠT TỐC ĐỘ SIÊU TỐC (1-2s), TIẾT KIỆM QUOTA TỐI ĐA VÀ 0 LỖI NGHẼN TẢI/401:
+// Task-Specific Model Hierarchies with seamless automatic fallbacks (Chỉ sử dụng gemini-3.1-flash-lite và gemini-3.5-flash-lite):
 const PEDAGOGICAL_MODELS = [
-  'gemini-3.1-flash-lite',  // Tối ưu tuyệt đối: Tiết kiệm Quota tối đa, tốc độ siêu tốc (1-2s), 0 lỗi nghẽn tải, 0 lỗi 401
+  'gemini-3.1-flash-lite',
+  'gemini-3.5-flash-lite',
 ];
 
 // 2. Phục vụ Trợ lý Trò chuyện Sư phạm (Chatbot):
 const CHAT_MODELS = [
   'gemini-3.1-flash-lite',
+  'gemini-3.5-flash-lite',
 ];
 
 // 3. Phục vụ Tác vụ Tiện ích phụ, Kiểm tra thông tin, Ping, Quét mục lục SGK:
 const UTILITY_MODELS = [
   'gemini-3.1-flash-lite',
+  'gemini-3.5-flash-lite',
 ];
 
-function normalizeModelName(mName: string): string {
-  // Luôn luôn sử dụng duy nhất mô hình gemini-3.1-flash-lite cực nhanh, siêu nhẹ và ổn định tuyệt đối
+function normalizeModelName(mName?: string): string {
+  if (!mName) return 'gemini-3.1-flash-lite';
+  const lower = mName.toLowerCase().trim();
+  if (lower.includes('3.5')) return 'gemini-3.5-flash-lite';
   return 'gemini-3.1-flash-lite';
 }
 
@@ -354,14 +362,10 @@ async function generateContentWithRetryAndFallback(options: {
 
           // 3. If 401 Auth error on a specific key or preview model:
           if (is401) {
-            console.warn(`[Auto-Failover 401] Key [${kIdx + 1}/${keysToTry.length}] không có quyền trên model "${currentModel}".`);
-            if (kIdx < keysToTry.length - 1) {
-              break; // break attempt loop to try next candidate key
-            }
-            if (mIdx < models.length - 1) {
-              modelUnavailable = true;
-              break; // break attempt loop to try next model
-            }
+            console.warn(`[Auto-Failover 401] Key [${kIdx + 1}/${keysToTry.length}] không hợp lệ hoặc không có quyền trên model "${currentModel}".`);
+            keysToTry.splice(kIdx, 1);
+            kIdx--;
+            break; // break attempt loop to try next candidate key
           }
 
           // 4. If daily quota or rate-limit with multiple keys:
@@ -1333,8 +1337,8 @@ app.post('/api/check-api-key', async (req, res) => {
           const client = new GoogleGenAI({ apiKey: k });
           let success = false;
           let lastErr: any = null;
-          // Test with Priority 1 (gemini-3.1-flash-lite & gemini-flash-lite-latest) and Priority 2 (gemini-3.1-flash-lite)
-          const testModels = ['gemini-3.1-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.1-flash-lite'];
+          // Test with Priority 1 (gemini-3.1-flash-lite) and Priority 2 (gemini-3.5-flash-lite)
+          const testModels = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite'];
           
           for (const m of testModels) {
             try {
@@ -1350,14 +1354,12 @@ app.post('/api/check-api-key', async (req, res) => {
               lastErr = err;
               const errMsg = err?.message || String(err);
               const status = err?.status;
+              const is401 = status === 401 || errMsg.includes('401') || errMsg.includes('invalid authentication credentials') || errMsg.includes('UNAUTHENTICATED');
+              const is400 = status === 400 && (errMsg.includes('API_KEY_INVALID') || errMsg.includes('API key not valid') || errMsg.includes('INVALID_ARGUMENT'));
+
               console.warn(`[Validate Key] Key ${preview} model ${m} failed (Status: ${status}): ${errMsg.substring(0, 150)}`);
-              // Only abort immediately if key itself is syntactically invalid or expired (400)
-              if (
-                status === 400 &&
-                (errMsg.includes('API_KEY_INVALID') ||
-                 errMsg.includes('API key not valid') ||
-                 errMsg.includes('INVALID_ARGUMENT'))
-              ) {
+              // Abort immediately if credentials are fundamentally invalid (401/400)
+              if (is401 || is400) {
                 break;
               }
               // For 403 (model restriction) or 429 (quota on this model), DO NOT BREAK: proceed to next candidate model!
@@ -1372,12 +1374,15 @@ app.post('/api/check-api-key', async (req, res) => {
         } catch (apiErr: any) {
           const errMsg = apiErr?.message || String(apiErr);
           const status = apiErr?.status;
+          const is401 = status === 401 || errMsg.includes('401') || errMsg.includes('invalid authentication credentials') || errMsg.includes('UNAUTHENTICATED');
           const isQuota = status === 429 || errMsg.includes('429') || errMsg.includes('RESOURCE_EXHAUSTED') || errMsg.includes('quota') || errMsg.includes('rate limit');
           const isDenied = status === 403 || errMsg.includes('403') || errMsg.includes('denied access') || errMsg.includes('PERMISSION_DENIED') || errMsg.includes('access denied');
           const isInvalid = status === 400 || errMsg.includes('API_KEY_INVALID') || errMsg.includes('API key not valid') || errMsg.includes('API key expired') || errMsg.includes('INVALID_ARGUMENT') || errMsg.includes('not valid');
 
           let cleanError = 'Lỗi kết nối';
-          if (isQuota) {
+          if (is401) {
+            cleanError = 'Sai mã khóa hoặc không được cấp quyền (401 Invalid Credentials. Vui lòng sao chép lại mã khóa mới từ Google AI Studio)';
+          } else if (isQuota) {
             cleanError = 'Key đã hết hạn mức Quota (429 Resource Exhausted)';
           } else if (isDenied) {
             cleanError = 'Dự án Google của Key này bị khóa quyền truy cập (403 Project Denied)';
@@ -1485,7 +1490,7 @@ app.post('/api/check-api-key', async (req, res) => {
       const client = new GoogleGenAI({ apiKey: serverKeys[0] });
       let success = false;
       let lastErr: any = null;
-      for (const m of ['gemini-3.1-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.1-flash-lite']) {
+      for (const m of ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite']) {
         try {
           await client.models.generateContent({
             model: m,
@@ -1697,24 +1702,34 @@ function formatHomeworkText(text: string): string {
 }
 
 /**
- * Strips any inline NLS codes/indicators (e.g., 1.1.TC1a, [1.1.NC1b], (Mã NLS: ...))
- * from text fields in activities and products as requested by user.
+ * Strips any inline NLS or AI codes/indicators (e.g., [Tích hợp AI], [Tích hợp NLS], 1.1.TC1a, AI 6.A1.1)
+ * from text fields in activities and products when not requested.
  */
 function stripNLSCodes(text: string): string {
   if (!text || typeof text !== 'string') return text || '';
   let cleaned = text;
 
-  // 1. Remove bracketed/parenthesized NLS codes/labels: (Mã NLS: 1.1.TC1a), [NLS 1.1.TC1a], (Chỉ báo NLS: 3.1.NC1a), (1.1.TC1a), [3.1.NC1a]
+  // 1. Remove [Tích hợp AI] and [Tích hợp NLS] blocks
+  cleaned = cleaned.replace(/\[\s*Tích\s*hợp\s*(?:Trí\s*tuệ\s*nhân\s*tạo|AI)\s*\][^\n]*\n?(?:-\s*)?(?:HS|Học sinh|Trẻ|Giáo viên)[^\n]*/gmi, '');
+  cleaned = cleaned.replace(/\[\s*Tích\s*hợp\s*(?:Trí\s*tuệ\s*nhân\s*tạo|AI)\s*\]/gmi, '');
+  cleaned = cleaned.replace(/\[\s*Tích\s*hợp\s*(?:Năng\s*lực\s*số|NLS)\s*\][^\n]*\n?(?:-\s*)?(?:HS|Học sinh|Trẻ|Giáo viên)[^\n]*/gmi, '');
+  cleaned = cleaned.replace(/\[\s*Tích\s*hợp\s*(?:Năng\s*lực\s*số|NLS)\s*\]/gmi, '');
+
+  // 2. Remove bracketed/parenthesized NLS and AI codes/labels
   cleaned = cleaned.replace(/[\[\(]\s*(?:mã\s*)?(?:chỉ\s*báo\s*)?(?:nls|năng\s*lực\s*số)?\s*[:\-–]?\s*\d+\.\d+\.(?:cb|tc|nc)\d+[a-z]?\s*[\]\)]/gi, '');
   cleaned = cleaned.replace(/[\[\(]\s*(?:mã\s*)?(?:chỉ\s*báo\s*)?(?:nls|năng\s*lực\s*số)\s*[:\-–]?\s*[a-z0-9._\-]+\s*[\]\)]/gi, '');
+  cleaned = cleaned.replace(/[\[\(]\s*AI\s+[a-z0-9._\-]+\s*[\]\)]/gi, '');
+  cleaned = cleaned.replace(/[\[\(]\s*NLS\s+[a-z0-9._\-]+\s*[\]\)]/gi, '');
 
-  // 2. Remove unbracketed prefixes: "Mã NLS: 1.1.TC1a", "Chỉ báo NLS: 1.1.TC1a", "Mã chỉ báo NLS: 1.1.TC1a"
+  // 3. Remove unbracketed prefixes
   cleaned = cleaned.replace(/(?:mã\s*)?(?:chỉ\s*báo\s*)?(?:nls|năng\s*lực\s*số)\s*[:\-–]?\s*\d+\.\d+\.(?:cb|tc|nc)\d+[a-z]?\s*[:\-–]?/gi, '');
+  cleaned = cleaned.replace(/\bAI\s+\d+\.[A-Z0-9\.]+\b/gi, '');
+  cleaned = cleaned.replace(/\bNLS\s+\d+\.[A-Z0-9\.]+\b/gi, '');
 
-  // 3. Remove standalone indicator codes like 1.1.TC1a, 3.1.NC1b, 1.1.CB2a
+  // 4. Remove standalone indicator codes
   cleaned = cleaned.replace(/(?<=\s|^)\d+\.\d+\.(?:cb|tc|nc)\d+[a-z]?(?=\s|[.,;:!?]|$)/gi, '');
 
-  // 4. Cleanup dangling empty parens/brackets or duplicate punctuation
+  // 5. Cleanup dangling empty parens/brackets or duplicate punctuation
   cleaned = cleaned.replace(/\(\s*\)/g, '');
   cleaned = cleaned.replace(/\[\s*\]/g, '');
   cleaned = cleaned.replace(/:\s*:/g, ':');
@@ -1868,7 +1883,11 @@ function enforcePPCTCompetencies(
   if (!plan.equipment) plan.equipment = {};
   if (!plan.competencyMatrix) plan.competencyMatrix = { nlsItems: [], aiItems: [] };
 
-  const isPreschool = config.schoolLevel === 'Mầm non';
+  const isPreschool = config.schoolLevel === 'Mầm non' || 
+    /mầm\s*non|mẫu\s*giáo|nhà\s*trẻ/i.test(config.schoolLevel || '') ||
+    /mầm\s*non|mẫu\s*giáo|nhà\s*trẻ/i.test(config.grade || plan.grade || '') ||
+    /mầm\s*non|mẫu\s*giáo|nhà\s*trẻ/i.test(config.subject || plan.subject || '');
+
   const lessonTitle = config.lessonTitle || plan.lessonTitle || 'Bài học';
   const subject = config.subject || plan.subject || 'Môn học';
 
@@ -1935,26 +1954,69 @@ function enforcePPCTCompetencies(
   }
 
   if (isPreschool) {
+    if (!Array.isArray(plan.equipment.parentCollaboration) || plan.equipment.parentCollaboration.length === 0 || isGenericPreschoolParentCollab(plan.equipment.parentCollaboration)) {
+      plan.equipment.parentCollaboration = generatePreschoolParentCollaboration({
+        subject: config.subject || plan.subject,
+        lessonTitle: config.lessonTitle || plan.lessonTitle,
+        grade: config.grade || plan.grade,
+        mainTheme: config.preschoolMainTheme || plan.mainTheme,
+        subTheme: config.preschoolSubTheme || plan.subTheme,
+      });
+    }
+
     const isNew8 = isPreschoolNew8Activity(config.subject || plan.subject, config.lessonTitle || plan.lessonTitle);
     if (!isNew8 && plan.objectives) {
       sanitizePreschoolObjectives(plan.objectives);
     }
   }
-  const isHighSchool = config.schoolLevel === 'THPT' || /thpt/i.test(config.schoolLevel || '') || /lớp\s*(?:10|11|12)/i.test(config.grade || plan.grade || '');
-  const isMiddleSchool = config.schoolLevel === 'THCS' || /thcs/i.test(config.schoolLevel || '') || /lớp\s*(?:6|7|8|9)/i.test(config.grade || plan.grade || '');
+
+  const isHighSchool = !isPreschool && (config.schoolLevel === 'THPT' || /thpt/i.test(config.schoolLevel || '') || /lớp\s*(?:10|11|12)/i.test(config.grade || plan.grade || ''));
+  const isMiddleSchool = !isPreschool && (config.schoolLevel === 'THCS' || /thcs/i.test(config.schoolLevel || '') || /lớp\s*(?:6|7|8|9)/i.test(config.grade || plan.grade || ''));
   const isMiddleOrHighSchool = isMiddleSchool || isHighSchool;
-  const isMathSubject = /toán|math/i.test(config.subject || plan.subject || '') || /toán|math/i.test(config.lessonTitle || plan.lessonTitle || '');
-  const isTinHoc = /tin\s*học|tin\s*hoc|computer|informatics/i.test(config.subject || plan.subject || '') || /tin\s*học|tin\s*hoc/i.test(config.lessonTitle || plan.lessonTitle || '');
+  const isMathSubject = !isPreschool && (/toán|math/i.test(config.subject || plan.subject || '') || /toán|math/i.test(config.lessonTitle || plan.lessonTitle || ''));
+  const isTinHoc = !isPreschool && (/tin\s*học|tin\s*hoc|computer|informatics/i.test(config.subject || plan.subject || '') || /tin\s*học|tin\s*hoc/i.test(config.lessonTitle || plan.lessonTitle || ''));
   const isMath4Column = config.tableLayout === 'math_4_column';
 
   // For all THCS and THPT subjects and Math: integrate NLS & AI into Hoạt động của GV/HS like Math!
-  // Keep Tin học unchanged.
-  const isIntegratedSubject = (isMathSubject || isMiddleOrHighSchool || config.enableNLS || config.enableAI) && !isTinHoc;
-  const shouldIntegrateIntoTable = (isMathSubject || isMiddleOrHighSchool) && !isTinHoc;
+  // Keep Tin học unchanged. STRICTLY EXCLUDE PRESCHOOL!
+  const isIntegratedSubject = !isPreschool && (isMathSubject || isMiddleOrHighSchool || config.enableNLS || config.enableAI) && !isTinHoc;
+  const shouldIntegrateIntoTable = !isPreschool && (isMathSubject || isMiddleOrHighSchool) && !isTinHoc;
 
   // Process activities & ensure non-empty
   if (Array.isArray(plan.activities) && plan.activities.length > 0) {
     plan.activities = plan.activities.map((act: any) => cleanActivityNLSCodes(act, isIntegratedSubject, isMath4Column));
+
+    // For Preschool: strictly strip ALL [Tích hợp AI], [Tích hợp NLS], and related codes from everywhere!
+    if (isPreschool) {
+      plan.activities = plan.activities.map((act: any) => {
+        const cleaned = { ...act };
+        cleaned.aiFocus = '';
+        cleaned.nlsFocus = '';
+        cleaned.digitalOrAiTool = '';
+        if (cleaned.objective) cleaned.objective = stripPreschoolAICodes(cleaned.objective);
+        if (cleaned.content) cleaned.content = stripPreschoolAICodes(cleaned.content);
+        if (cleaned.productSummary) cleaned.productSummary = stripPreschoolAICodes(cleaned.productSummary);
+        ['step1', 'step2', 'step3', 'step4'].forEach((sk) => {
+          if (cleaned[sk]) {
+            cleaned[sk] = {
+              ...cleaned[sk],
+              teacherAction: stripPreschoolAICodes(cleaned[sk].teacherAction || ''),
+              studentAction: stripPreschoolAICodes(cleaned[sk].studentAction || ''),
+              productExpected: stripPreschoolAICodes(cleaned[sk].productExpected || ''),
+              digitalOrAiTool: '',
+            };
+          }
+        });
+        return cleaned;
+      });
+      if (plan.objectives) {
+        plan.objectives.aiCompetencies = [];
+        plan.objectives.digitalCompetencies = [];
+      }
+      if (plan.competencyMatrix) {
+        plan.competencyMatrix = { nlsItems: [], aiItems: [] };
+      }
+    }
 
     // Ensure lesson with NLS enabled has the required [Tích hợp NLS] indicator in teacher/student action ONLY for 2-column templates
     if (shouldIntegrateIntoTable && config.enableNLS && plan.activities.length > 0 && !isMath4Column) {
@@ -2016,6 +2078,13 @@ function enforcePPCTCompetencies(
           }
         }
       }
+    }
+  }
+
+  if (isPreschool && plan && Array.isArray(plan.activities) && plan.activities.length > 0) {
+    const domain = detectPreschoolDomain(config.subject || plan.subject || '', config.lessonTitle || plan.lessonTitle || '', config.oldPlanContent || '');
+    if (domain.domainType === 'LETTER_GAME') {
+      plan.activities = formatPreschoolLetterGameActivities(plan.activities, config.lessonTitle || plan.lessonTitle || '', config.subject || plan.subject || '');
     }
   }
 
@@ -2269,17 +2338,21 @@ async function generateKHBDSectional(
                  (lessonTitle || '').toLowerCase().includes('sinh hoạt dưới cờ') ||
                  (lessonTitle || '').toLowerCase().includes('sinh hoạt lớp');
 
-  const isTinHoc = (subject || '').toLowerCase().includes('tin') ||
+  const isPreschool = config.schoolLevel === 'Mầm non' ||
+    /mầm\s*non|mẫu\s*giáo|nhà\s*trẻ/i.test(config.schoolLevel || '') ||
+    /mầm\s*non|mẫu\s*giáo|nhà\s*trẻ/i.test(config.grade || '') ||
+    /mầm\s*non|mẫu\s*giáo|nhà\s*trẻ/i.test(config.subject || '');
+
+  const isElementary = !isPreschool && (config.schoolLevel === 'Tiểu học' || /tiểu\s*học|lớp\s*[1-5]/i.test(config.grade || ''));
+  const isMiddleSchool = !isPreschool && (config.schoolLevel === 'THCS' || /thcs|lớp\s*[6-9]/i.test(config.grade || ''));
+  const isHighSchool = !isPreschool && (config.schoolLevel === 'THPT' || /thpt|lớp\s*(?:10|11|12)/i.test(config.grade || ''));
+
+  const isTinHoc = !isPreschool && ((subject || '').toLowerCase().includes('tin') ||
                    (subject || '').toLowerCase().includes('công nghệ thông tin') ||
-                   (lessonTitle || '').toLowerCase().includes('tin học');
+                   (lessonTitle || '').toLowerCase().includes('tin học'));
 
-  const isMath = (subject || '').toLowerCase().includes('toán') ||
-                 (lessonTitle || '').toLowerCase().includes('toán');
-
-  const isPreschool = config.schoolLevel === 'Mầm non';
-  const isElementary = config.schoolLevel === 'Tiểu học';
-  const isMiddleSchool = config.schoolLevel === 'THCS';
-  const isHighSchool = config.schoolLevel === 'THPT';
+  const isMath = !isPreschool && ((subject || '').toLowerCase().includes('toán') ||
+                 (lessonTitle || '').toLowerCase().includes('toán'));
 
   const hasUploadedSample = Boolean(config.oldPlanContent && config.oldPlanContent.trim().length > 0);
 
@@ -2478,6 +2551,20 @@ MỤC ĐÍCH DUY NHẤT: BẢO TỒN NGUYÊN VẸN NỘI DUNG, HÌNH ẢNH, BÀI
     'Khám phá quy trình công nghệ đơn giản; Thí nghiệm STEM': '[NT 3.3, NT 5.3] Ứng dụng khoa học kỹ thuật giải quyết vấn đề.',
     'Hát ngẫu hứng, sáng tạo lời ca mới theo bài quen thuộc': '[NgT 5.1, NgT 5.2] Sáng tạo âm nhạc, múa ngẫu hứng bộc lộ ý tưởng.',
     'Đóng kịch phân vai theo cốt truyện sáng tạo của nhóm': '[NgT 4.2, NgT 7.3] Biểu cảm diễn xuất, tự chủ đạo cụ và lời thoại vai kịch.',
+
+    // Hoạt động trò chơi chữ cái (Chuẩn 8 hoạt động mới QĐ 388)
+    'Chơi với chữ cái o, ô, ơ': '[NN 5.1, NN 5.2, NT 1.1, NN 2.2, TC 1.2, TX 4.4] Nhận biết cấu tạo nét và phát âm đúng o, ô, ơ; tham gia hào hứng chuỗi 5 trò chơi chữ cái.',
+    'Chơi với chữ cái a, ă, â': '[NN 5.1, NN 5.2, NT 1.1, NN 2.2, TC 1.2, TX 4.4] Nhận biết cấu tạo nét và phát âm đúng a, ă, â; phối hợp nhóm chơi chuỗi 5 trò chơi chữ cái.',
+    'Chơi với chữ cái e, ê': '[NN 5.1, NN 5.2, NT 1.1, NN 2.2, TC 1.2, TX 4.4] Nhận biết cấu tạo nét và phát âm đúng e, ê; phản xạ nhanh trong chuỗi 5 trò chơi chữ cái.',
+    'Chơi với chữ cái u, ư': '[NN 5.1, NN 5.2, NT 1.1, NN 2.2, TC 1.2, TX 4.4] Nhận biết cấu tạo nét và phát âm đúng u, ư; phối hợp tiếp sức chuỗi 5 trò chơi chữ cái.',
+    'Chơi với chữ cái i, t, c': '[NN 5.1, NN 5.2, NT 1.1, NN 2.2, TC 1.2, TX 4.4] Nhận biết phân biệt i, t, c; ghép chữ tạo từ và tham gia chuỗi 5 trò chơi chữ cái.',
+    'Chơi với chữ cái b, d, đ': '[NN 5.1, NN 5.2, NT 1.1, NN 2.2, TC 1.2, TX 4.4] Nhận biết phân biệt b, d, đ; chơi tiếp sức và săn tìm chữ cái sáng tạo.',
+    'Chơi với chữ cái l, m, n': '[NN 5.1, NN 5.2, NT 1.1, NN 2.2, TC 1.2, TX 4.4] Nhận biết phân biệt l, m, n; phát âm chuẩn xác trong chuỗi 5 trò chơi chữ cái.',
+    'Chơi với chữ cái h, k': '[NN 5.1, NN 5.2, NT 1.1, NN 2.2, TC 1.2, TX 4.4] Nhận biết phân biệt h, k; tạo dáng chữ và tham gia chuỗi 5 trò chơi chữ cái.',
+    'Chơi với chữ cái p, q': '[NN 5.1, NN 5.2, NT 1.1, NN 2.2, TC 1.2, TX 4.4] Nhận biết phân biệt p, q; rèn phản xạ và tinh thần đồng đội qua 5 trò chơi chữ cái.',
+    'Chơi với chữ cái g, y': '[NN 5.1, NN 5.2, NT 1.1, NN 2.2, TC 1.2, TX 4.4] Nhận biết phân biệt g, y; ghép từ và tham gia chuỗi 5 trò chơi chữ cái.',
+    'Chơi với chữ cái s, x': '[NN 5.1, NN 5.2, NT 1.1, NN 2.2, TC 1.2, TX 4.4] Nhận biết phân biệt s, x; phát âm chuẩn xác qua 5 trò chơi chữ cái.',
+    'Chơi với 29 chữ cái tiếng Việt tổng hợp': '[NN 5.1, NN 5.2, NT 1.1, NN 2.2, TC 1.2, TX 4.4] Củng cố nhận diện 29 chữ cái tiếng Việt qua chuỗi 5 trò chơi chữ cái hấp dẫn.',
   };
 
 
@@ -2578,8 +2665,8 @@ II. Chuẩn bị: (BẮT BUỘC ĐÚNG 100% CẤU TRÚC 3 MỤC SAU)
 - Trang phục: [Trang phục gọn gàng, phù hợp thời tiết, thoải mái, thuận tiện cho vận động và trải nghiệm]
 - Đồ dùng của trẻ: [Mỗi trẻ hoặc nhóm trẻ có đủ rổ đồ dùng, học cụ trải nghiệm phù hợp với bài học]
 - Tâm sinh lý của trẻ: [Tâm thế vui tươi, hào hứng, tự tin, sẵn sàng tham gia hoạt động cùng cô và các bạn]
-3. Phối hợp với phụ huynh:
-- [Nội dung cụ thể phối hợp phụ huynh: hỗ trợ nguyên vật liệu mở/tái chế an toàn, trao đổi thông tin, củng cố rèn luyện cho trẻ tại nhà]
+3. Phối hợp với phụ huynh: (BẮT BUỘC: NỘI DUNG MỖI TIẾT DẠY PHẢI HOÀN TOÀN KHÁC NHAU, BÁM SÁT TRỌNG TÂM ĐỀ TÀI BÀI HỌC, TUYỆT ĐỐI KHÔNG DÙNG CÂU MẪU CHUNG CHUNG TRÙNG LẶP)
+- [Ghi rõ 2 đến 3 gạch đầu dòng phối hợp cụ thể với cha mẹ gắn liền trực tiếp với bài học "${lessonTitle}" và chủ đề: phụ huynh cùng con ôn luyện/thực hành điều gì cụ thể ở nhà (hát bài gì, đếm đồ vật gì, kể chuyện/đọc thơ gì, quan sát điều gì, rèn kỹ năng nào...), chuẩn bị học liệu mở/mẫu vật đặc thù nào cho bài học, rèn thói quen và giáo dục thái độ gì...].
 III. Tiến trình hoạt động
 Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động của trẻ" (Tiến trình 5 bước theo đúng chuẩn của Hoạt động / Lĩnh vực bài dạy).
 - KHỔNG ĐƯỢC BỎ BẤT KỲ NỘI DUNG NÀO TỪ FILE GIÁO ÁN CŨ TẢI LÊN (oldPlanContent). Tái cấu trúc chuẩn hóa nội dung giáo án cũ khớp đúng 5 bước của Lĩnh vực bài dạy.
@@ -2609,8 +2696,42 @@ Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động củ
   + Bước 3: "3. Thực hiện hoạt động": Trẻ thực hành từng bước (tư thế ngồi, đặt vở, cầm bút, tay giữ vở, tô/đồ/sao chép); Cô quan sát đến từng bàn nhẹ nhàng sửa tư thế ngồi, cách cầm bút và nét vẽ; khuyến khích trẻ tự kiểm tra.
   + Bước 4: "4. Mở rộng và phát triển kỹ năng": Trò chơi 1 "Nét nào biến mất?" (hoặc "Chữ cái nào biến mất?"), Trò chơi 2 "Bé làm họa sĩ nhí" (vận dụng nét vẽ tranh đơn giản) hoặc "Tìm chữ trong từ/tranh".
   + Bước 5: "5. Chia sẻ – Đánh giá – Kết thúc": BẮT BUỘC gồm 3 nội dung: "* Chia sẻ:" (trẻ đặt bút, thả lỏng ngón tay, giới thiệu và nhận xét sản phẩm), "* Đánh giá:" (khen ngợi tư thế ngồi, cách cầm bút, nét tô đồ đúng hướng; khắc sâu bí quyết "Ngồi đúng – Cầm bút đúng – Nhìn mẫu kỹ – Đưa bút đúng hướng"), "* Kết thúc:" (thu dọn đồ dùng, vận động nhẹ ngón tay/cổ tay).
-- ĐỐI VỚI LĨNH VỰC NHẬN THỨC (KHÁM PHÁ KHOA HỌC / KHÁM PHÁ XÃ HỘI / TOÁN) VÀ CÁC LĨNH VỰC KHÁC: Áp dụng đúng 5 bước tiến trình: 1. Khởi động – Tạo tình huống, 2. Khám phá – Trải nghiệm, 3. Chia sẻ – Thảo luận, 4. Vận dụng – Mở rộng, 5. Đánh giá – Điều chỉnh. Trẻ được trực tiếp thao tác, làm thí nghiệm, trải nghiệm thực tế trước; giáo viên quan sát, gợi mở và tổng kết sau. Toàn bộ nằm trong 1 bảng 2 cột duy nhất (Hoạt động của Cô | Hoạt động của Trẻ). Tuyệt đối KHÔNG chèn các đề mục âm nhạc (a. Dạy hát, b. Nghe hát) vào các môn khoa học/xã hội/toán/thơ/truyện.
-- Mỗi mục, mỗi ý BẮT BUỘC phải xuống dòng. Sử dụng gạch đầu dòng (-) rõ ràng ở mỗi ý con.`;
+- RIÊNG ĐỐI VỚI HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI (TRONG 8 HOẠT ĐỘNG MỚI THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT):
+  BẮT BUỘC TRONG TIẾN TRÌNH PHẢI CÓ ĐỦ CHUỖI 5 TRÒ CHƠI CHỮ CÁI (TỪ TRÒ CHƠI 1 ĐẾN TRÒ CHƠI 5), TUYỆT ĐỐI KHÔNG ĐƯỢC CHỈ SOẠN 3 TRÒ CHƠI:
+  + Trò chơi 1: "Ai tìm chữ nhanh" (hoặc "Ai tinh mắt / Vòng quay chữ cái") - Nhận biết mặt chữ, phát âm và phản xạ nhanh.
+  + Trò chơi 2: "Về đúng nhà" (hoặc "Bật qua vòng tìm chữ cái") - Kết hợp vận động, định hướng không gian và phân biệt chữ cái.
+  + Trò chơi 3: "Chuyền chữ tiếp sức" (hoặc "Chuyền bóng chữ cái theo nhạc") - Rèn tinh thần hợp tác đồng đội.
+  + Trò chơi 4: "Ghép chữ tạo từ" (hoặc "Thử tài ghép nét tạo chữ") - Ghép nét, nhận diện chữ cái trong từ theo tranh.
+  + Trò chơi 5: "Săn tìm chữ cái" (hoặc "Tạo dáng chữ cái sáng tạo bằng cơ thể / hột hạt / dây nơ") - Sáng tạo nghệ thuật, tư duy giải quyết vấn đề.
+  Mỗi trò chơi BẮT BUỘC ghi rõ đầy đủ: Tên trò chơi, Mục tiêu, Cách chơi, Luật chơi và diễn biến hoạt động của cô - hoạt động của trẻ.
+- ĐỐI VỚI LĨNH VỰC NHẬN THỨC (KHÁM PHÁ KHOA HỌC / KHÁM PHÁ XÃ HỘI / TOÁN) VÀ CÁC LĨNH VỰC MẦM NON:
+  Áp dụng đúng 5 bước tiến trình: 1. Khởi động – Tạo tình huống, 2. Khám phá – Trải nghiệm, 3. Chia sẻ – Thảo luận, 4. Vận dụng – Mở rộng, 5. Chia sẻ – Đánh giá (hoặc Đánh giá – Điều chỉnh). Trẻ được trực tiếp thao tác, làm thí nghiệm, trải nghiệm thực tế trước; giáo viên quan sát, gợi mở và tổng kết sau. Toàn bộ nằm trong 1 bảng 2 cột duy nhất (Hoạt động của Cô | Hoạt động của Trẻ). Tuyệt đối KHÔNG chèn các đề mục âm nhạc (a. Dạy hát, b. Nghe hát) vào các môn khoa học/xã hội/toán/thơ/truyện.
+  + ĐẶC BIỆT YÊU CẦU CHO PHẦN 4 ("4. Vận dụng – Mở rộng"):
+    * BẮT BUỘC TRƯỚC KHI VÀO TRÒ CHƠI PHẢI CÓ CÁC HƯỚNG DẪN, DẪN DẮT CỤ THỂ, TRẢI NGHIỆM ĐÓNG VAI VÀ ĐÀM THOẠI LIÊN HỆ THỰC TẾ (TUYỆT ĐỐI KHÔNG VÀO TRÒ CHƠI NGAY LẬP TỨC):
+      - Cô tổ chức hoạt động trải nghiệm / đóng vai thực tế theo chủ đề (Ví dụ: Cô đóng vai khách tham quan, mời các nhóm trẻ đóng vai hướng dẫn viên nhí giới thiệu về các khu vực trong lớp/trường hoặc sản phẩm/vật dụng...).
+      - Mời 1-2 trẻ kể tên cô giáo chủ nhiệm của mình, kể tên một số bạn học trong lớp, đồ dùng, các góc chơi...
+      - Cô giới thiệu mở rộng thêm cho trẻ biết (ví dụ: các cô giáo trong trường, hỏi tên trường MN nơi trẻ đang học, cô giới thiệu tên cô hiệu trưởng và cô hiệu phó...).
+      - Cô bao quát, cổ vũ và khen ngợi sự hợp tác của các nhóm.
+      - SAU ĐÓ MỚI ĐẾN TRÒ CHƠI VẬN ĐỘNG CỦNG CỐ: **Trò chơi: “[Tên trò chơi]”** (- **Cách chơi:** [cụ thể], - **Luật chơi:** [bạn nào về sai phải nhảy lò cò 1 vòng], - Tổ chức cho trẻ chơi 2-3 lần).
+  + ĐẶC BIỆT YÊU CẦU CHO PHẦN 5 ("5. Chia sẻ – Đánh giá" hoặc "5. Đánh giá – Điều chỉnh"):
+    * BẮT BUỘC SOẠN CHI TIẾT, ĐẦY ĐỦ VÀ SÂU SẮC, TUYỆT ĐỐI KHÔNG SOẠN SƠ SÀI RẬP KHUÔN 2-3 DÒNG:
+      - Cô mời trẻ chia sẻ: "Hôm nay con cảm thấy thế nào?", "Con sẽ làm gì để trường lớp/gia đình/môi trường luôn sạch đẹp, đoàn kết yêu thương nhau?".
+      - Cô nhận xét, tuyên dương cụ thể sự cố gắng, tự tin và tinh thần tự giác của trẻ trong suốt buổi học.
+      - Cô hướng dẫn trẻ cùng cô thu dọn giáo cụ, phân loại đồ dùng vào đúng góc quy định, củng cố nề nếp vệ sinh lớp học.
+    * CỘT HOẠT ĐỘNG CỦA TRẺ Ở BƯỚC 4 VÀ BƯỚC 5 PHẢI MÔ TẢ PHONG PHÚ:
+      - Trẻ hào hứng nhảy múa theo nhạc, tập trung quan sát, tích cực trả lời.
+      - Trẻ quan sát, sờ vào các vật dụng, trao đổi rôm rả theo từng nhóm:
+        + Nhóm 1: "Ôi sân trường rộng quá, có nhiều cây xanh ạ!" (hoặc lời thoại liên quan bài học).
+        + Nhóm 2: "Đây là góc sách, còn kia là góc xây dựng của chúng con ạ!".
+        + Nhóm 3: "Đây là khu nhà bóng, bên kia là khu vực cầu trượt ạ!".
+      - Trẻ tự do đặt câu hỏi cho cô và bạn, tự tin đóng vai hướng dẫn viên giới thiệu về trường lớp với khách tham quan (cô giáo).
+      - Trẻ trả lời to rõ ràng, lắng nghe cô tổng kết và hiểu rõ hơn về bài học.
+      - Trẻ hào hứng tham gia chơi trò chơi 2-3 lần.
+      - Trẻ tự tin chia sẻ cảm xúc, niềm vui khi được khám phá và tự giác thu dọn đồ dùng đồ chơi vào đúng nơi quy định.
+- QUY ĐỊNH BẮT BUỘC VỀ XUỐNG DÒNG VÀ IN ĐẬM:
+  + Mỗi mục, mỗi ý, mỗi hành động, mỗi câu lệnh của cô và phản hồi của trẻ BẮT BUỘC PHẢI XUỐNG DÒNG RIÊNG BIỆT (dùng ký tự \n). Sử dụng gạch đầu dòng (-) hoặc (+) rõ ràng ở mỗi ý con. TUYỆT ĐỐI KHÔNG viết dồn ép các ý vào cùng một dòng.
+  + Phân hóa độ tuổi (+ Trẻ 5 tuổi: ..., + Trẻ 4 tuổi: ..., + Trẻ 3 tuổi: ...), các trò chơi (Trò chơi 1:, Trò chơi 2:), và các phần (Cách chơi:, Luật chơi:, Mục tiêu:) BẮT BUỘC MỖI MỤC PHẢI XUỐNG DÒNG RIÊNG BIỆT.
+  + VỀ IN ĐẬM: CHỈ in đậm tên trò chơi (dạng **Trò chơi 1: [Tên]**) và các nhãn mục con (dạng **Cách chơi:**, **Luật chơi:**, **Mục tiêu:**, **Trẻ 5 tuổi:**). TUYỆT ĐỐI KHÔNG in đậm tùy tiện nguyên cả câu, không in đậm lung tung các từ ngữ giữa câu, không để dấu sao đơn lẻ (*) hoặc dấu sao chưa đóng (**).`;
 
   const textbookStructure = (!hasUploadedSample) ? getTextbookLessonStructure(subject, grade, lessonTitle) : null;
   const textbookStructureInstruction = textbookStructure ? `
@@ -2805,6 +2926,7 @@ ${aiReq}
 3. CHUẨN BỊ:
 - Chuẩn bị của cô (equipment.teacher): Bắt buộc có "- Môi trường và không gian: ...", "- Đồ dùng, học liệu của giáo viên: ...".
 - Chuẩn bị của trẻ (equipment.student): Trang phục, đồ dùng, tâm thế...
+- Phối hợp với phụ huynh (equipment.parentCollaboration): BẮT BUỘC 2 đến 3 gạch đầu dòng NỘI DUNG PHỐI HỢP RIÊNG BIỆT, ĐẶC THÙ CHO BÀI HỌC "${lessonTitle}" (TUYỆT ĐỐI KHÔNG DÙNG CÂU MẪU CHUNG CHUNG TRÙNG LẶP). Phối hợp cha mẹ cùng con ôn luyện gì, rèn kỹ năng nào, chuẩn bị mẫu vật/nguyên liệu gì gắn chặt với đề tài bài học.
 
 Yêu cầu: Trả về JSON với cấu trúc:
 {
@@ -2820,6 +2942,11 @@ Yêu cầu: Trả về JSON với cấu trúc:
   "equipment": {
     "teacher": ["- Môi trường và không gian: ...", "- Đồ dùng, học liệu của giáo viên: ..."],
     "student": ["Trang phục, đồ dùng, tâm thế..."],
+    "parentCollaboration": [
+      "- Trao đổi với phụ huynh về nội dung bài học, khuyến khích cha mẹ cùng con...",
+      "- Hướng dẫn phụ huynh phối hợp rèn luyện cho trẻ tại nhà...",
+      "- Phối hợp chuẩn bị nguyên vật liệu đặc thù phục vụ tiết học..."
+    ],
     "digitalAssets": [],
     "stemMaterials": []
   }
@@ -2855,6 +2982,7 @@ ${aiReq}
 3. CHUẨN BỊ:
 - Chuẩn bị của cô (equipment.teacher): Bắt buộc có "- Môi trường và không gian: ...", "- Đồ dùng, học liệu của giáo viên: ...".
 - Chuẩn bị của trẻ (equipment.student): Trang phục, đồ dùng, tâm thế...${isMixedAgeClass ? ' (Bắt buộc phân loại học liệu cụ thể cho từng nhóm tuổi).' : ''}
+- Phối hợp với phụ huynh (equipment.parentCollaboration): BẮT BUỘC 2 đến 3 gạch đầu dòng NỘI DUNG PHỐI HỢP RIÊNG BIỆT, ĐẶC THÙ CHO BÀI HỌC "${lessonTitle}" (TUYỆT ĐỐI KHÔNG DÙNG CÂU MẪU CHUNG CHUNG TRÙNG LẶP). Phối hợp cha mẹ cùng con ôn luyện gì, rèn kỹ năng nào, chuẩn bị mẫu vật/nguyên liệu gì gắn chặt với đề tài bài học.
 
 Yêu cầu: Trả về JSON với cấu trúc:
 {
@@ -2878,6 +3006,11 @@ Yêu cầu: Trả về JSON với cấu trúc:
   "equipment": {
     "teacher": ["- Môi trường và không gian: ...", "- Đồ dùng, học liệu của giáo viên: ..."],
     "student": ["Trang phục, đồ dùng, tâm thế..."],
+    "parentCollaboration": [
+      "- Trao đổi với phụ huynh về nội dung bài học, khuyến khích cha mẹ cùng con...",
+      "- Hướng dẫn phụ huynh phối hợp rèn luyện cho trẻ tại nhà...",
+      "- Phối hợp chuẩn bị nguyên vật liệu đặc thù phục vụ tiết học..."
+    ],
     "digitalAssets": [],
     "stemMaterials": []
   }
@@ -3035,15 +3168,15 @@ BẮT BUỘC ĐẶC BIỆT CHO HOẠT ĐỘNG TẬP TÔ CHỮ CÁI (VÀ TẬP T�
 ` : '';
 
       const letterGameGuidancePart1 = isLetterGame ? `
-BẮT BUỘC ĐẶC BIỆT CHO HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI:
+BẮT BUỘC ĐẶC BIỆT CHO HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI (CHUẨN 8 HOẠT ĐỘNG MỚI QĐ 388):
 - Tên Hoạt động 1: "1. Gợi hứng thú – hình thành và lựa chọn ý tưởng chơi":
   + Cho trẻ hát/vận động bài hát ngắn có từ chứa chữ cái trọng tâm (ví dụ o, ô, ơ).
-  + Đưa chữ cái ra gợi ý và hỏi trẻ muốn chơi những trò chơi gì với chữ cái đó.
-  + Gợi ý các trò chơi hấp dẫn (Ai tìm chữ nhanh, Về đúng nhà, Chuyền chữ tiếp sức, Ghép chữ tạo từ, Săn tìm chữ cái...) và cho trẻ lựa chọn.
+  + Đưa chữ cái ra gợi ý, đố vui nhận diện mặt chữ và hỏi trẻ muốn chơi những trò chơi gì với các chữ cái đó.
+  + Giới thiệu chuỗi 5 trò chơi chữ cái hấp dẫn (Trò chơi 1: Ai tìm chữ nhanh, Trò chơi 2: Về đúng nhà, Trò chơi 3: Chuyền chữ tiếp sức, Trò chơi 4: Ghép chữ tạo từ, Trò chơi 5: Săn tìm chữ cái sáng tạo) và cho trẻ lựa chọn.
 - Tên Hoạt động 2: "2. Thỏa thuận – Lập kế hoạch chơi":
-  + Chia trẻ thành các nhóm/đội chơi.
-  + Cùng trẻ thống nhất: Chơi trò gì? Chơi ở đâu? Chơi như thế nào? Luật chơi ra sao?
-  + Nhắc nhở trẻ chơi vui vẻ, không tranh giành, biết chờ lượt và giúp đỡ bạn.
+  + Chia trẻ thành các nhóm/đội chơi (ví dụ: Đội chữ O, Đội chữ Ô, Đội chữ Ơ...).
+  + Cùng trẻ thống nhất: Chuẩn bị tham gia đầy đủ chuỗi 5 trò chơi, phân công vị trí chơi, đồ dùng và luật chơi văn minh.
+  + Nhắc nhở trẻ chơi vui vẻ, trung thực, không tranh giành, biết chờ lượt và giúp đỡ bạn.
 ` : '';
 
       const learningGameGuidancePart1 = isLearningGame ? `
@@ -3339,15 +3472,42 @@ Trả về JSON dạng:
       } else if (isScience) {
         domainSpecificGuidance = `ĐẶC BIỆT LƯU Ý CHO LĨNH VỰC NHẬN THỨC (KHÁM PHÁ KHOA HỌC):
 - TUYỆT ĐỐI KHÔNG DÙNG CÁC ĐỀ MỤC ÂM NHẠC (KHÔNG có a. Dạy hát, KHÔNG có b. Nghe hát, KHÔNG có Trò chơi âm nhạc).
-- Hoạt động 3 "3. Chia sẻ - Thảo luận": Trẻ quây quần chia sẻ kết quả trải nghiệm / thí nghiệm khoa học (pha màu, ánh sáng, vật chìm nổi...); Cô gợi mở câu hỏi đàm thoại và chuẩn hóa kiến thức khoa học bằng hình ảnh/slide/video trực quan.
-- Hoạt động 4 "4. Vận dụng – Mở rộng": Tổ chức thử thách khám phá sáng tạo / trò chơi khoa học vận dụng (ví dụ "Vũ hội sắc màu", Trạm pha màu sáng tạo, Săn tìm màu sắc tự nhiên, Phân loại đồ vật).
-- Hoạt động 5 "5. Chia sẻ - Đánh giá": Trẻ chia sẻ cảm xúc, cô nhận xét biểu dương tinh thần chủ động tìm tòi và hướng dẫn trẻ tự giác thu dọn đồ dùng học liệu.`;
+- Hoạt động 3 "3. Chia sẻ - Thảo luận": Trẻ quây quần chia sẻ kết quả trải nghiệm / thí nghiệm khoa học; Cô gợi mở câu hỏi đàm thoại và chuẩn hóa kiến thức khoa học bằng hình ảnh/slide/video trực quan.
+- Hoạt động 4 "4. Vận dụng – Mở rộng": BẮT BUỘC PHẢI CÓ ĐỦ 2 PHẦN HOẠT ĐỘNG PHONG PHÚ:
+  1. Trải nghiệm / Trò chơi đóng vai / Thử thách thực tế (ví dụ: Đóng vai "Nhà khoa học nhí / Bác sĩ nhí / Chuyên gia môi trường", đàm thoại mở rộng liên hệ thực tế trường lớp, các nhóm tương tác sôi nổi: Nhóm 1, Nhóm 2, Nhóm 3...).
+  2. Trò chơi vận động củng cố có tổ chức bài bản (ví dụ: "**Trò chơi: “Ai nhanh hơn / Về đúng nhà / Đội nào nhanh nhất”**", - **Cách chơi:**, - **Luật chơi:** có hình phạt vui nhộn nhảy lò cò/hát, tổ chức chơi 2-3 lần).
+  Cột Hoạt động của Trẻ mô tả chi tiết từng nhóm phát biểu, lời thoại và hành động cụ thể.
+- Hoạt động 5 "5. Chia sẻ - Đánh giá": 
+  + Cô mời trẻ chia sẻ: "Hôm nay con cảm thấy thế nào?", "Con khám phá được điều gì thú vị nhất?", "Con sẽ làm gì để bảo vệ/ứng dụng điều đã học vào cuộc sống?".
+  + Cô nhận xét, tuyên dương cụ thể sự nỗ lực, tính tự giác và tinh thần hợp tác của trẻ.
+  + Hướng dẫn trẻ cùng cô thu dọn đồ dùng, học liệu thí nghiệm, phân loại vào đúng góc quy định, rửa tay vệ sinh sạch sẽ.
+  + Cột Hoạt động của Trẻ: Trẻ hào hứng chia sẻ cảm xúc, trả lời to rõ ràng, lắng nghe cô nhận xét và cùng bạn cất dọn đồ chơi ngăn nắp.`;
       } else if (isMath) {
         domainSpecificGuidance = `ĐẶC BIỆT LƯU Ý CHO LĨNH VỰC NHẬN THỨC (LÀM QUEN VỚI TOÁN):
 - TUYỆT ĐỐI KHÔNG DÙNG CÁC ĐỀ MỤC ÂM NHẠC.
 - Hoạt động 3 "3. Chia sẻ - Thảo luận": Trẻ chia sẻ thao tác xếp tương ứng, đếm số lượng; Cô đặt câu hỏi khơi gợi bản chất toán học, khẳng định quy tắc toán, giới thiệu chữ số/hình khối mới và hướng dẫn chọn thẻ số gắn vào nhóm.
-- Hoạt động 4 "4. Vận dụng – Mở rộng": Các trạm thử thách toán học (Tìm bạn cho số, Tạo hình chữ số từ đất nặn/sỏi/dây thừng, Vận động tạo hình số).
-- Hoạt động 5 "5. Chia sẻ - Đánh giá": Trẻ chia sẻ điều học được, cô nhận xét biểu dương và cùng trẻ cất đồ dùng.`;
+- Hoạt động 4 "4. Vận dụng – Mở rộng": BẮT BUỘC PHẢI CÓ ĐỦ 2 TRÒ CHƠI CỦNG CỐ TOÁN HỌC SINH ĐỘNG:
+  1. Trò chơi liên hệ thực tế / Trải nghiệm theo nhóm: Ví dụ tìm nhóm đồ vật quanh lớp, đàm thoại liên hệ các khu vực trong trường/lớp, phân hóa các nhóm thực hành.
+  2. Trò chơi vận động củng cố: "**Trò chơi: “Ai nhanh hơn / Về đúng nhà / Tìm bạn cho số”**" (- **Cách chơi:**, - **Luật chơi:**, tổ chức chơi 2-3 lần).
+  Cột Hoạt động của Trẻ mô tả chi tiết: trẻ 5 tuổi, 4 tuổi, 3 tuổi hoặc các nhóm 1, 2, 3 tham gia sôi nổi.
+- Hoạt động 5 "5. Chia sẻ - Đánh giá":
+  + Cô mời trẻ chia sẻ: "Hôm nay các con được học số mấy/hình gì?", "Con thích trò chơi nào nhất?", "Con sẽ ứng dụng đếm đồ dùng/đồ chơi như thế nào?".
+  + Cô nhận xét, tuyên dương sự cố gắng, đếm chính xác, tinh thần đoàn kết của trẻ.
+  + Hướng dẫn trẻ xếp thẻ số, đồ dùng học toán vào rổ gọn gàng, cất vào góc học tập.
+  + Cột Hoạt động của Trẻ: Trẻ tự tin chia sẻ cảm nhận, vui vẻ đón nhận lời khen và tự giác cất đồ dùng.`;
+      } else if (isSocialExploration) {
+        domainSpecificGuidance = `ĐẶC BIỆT LƯU Ý CHO LĨNH VỰC NHẬN THỨC (KHÁM PHÁ XÃ HỘI):
+- TUYỆT ĐỐI KHÔNG DÙNG CÁC ĐỀ MỤC ÂM NHẠC.
+- Hoạt động 3 "3. Chia sẻ - Thảo luận": Trẻ đàm thoại, chia sẻ về hiện tượng xã hội, nghề nghiệp, lễ hội, quê hương đất nước, trường lớp mầm non; Cô chuẩn hóa kiến thức qua tranh ảnh, video trực quan.
+- Hoạt động 4 "4. Vận dụng và mở rộng": BẮT BUỘC SOẠN CHI TIẾT VÀ PHONG PHÚ:
+  + Trò chơi đóng vai / trải nghiệm thực tế gắn liền với chủ đề: Ví dụ trò chơi "Hướng dẫn viên nhí" (cô đóng vai khách tham quan, các nhóm trẻ đóng vai hướng dẫn viên giới thiệu về các khu vực/góc chơi trong lớp, trường...), mời 1-2 trẻ kể tên cô giáo chủ nhiệm, các bạn trong lớp, cô hiệu trưởng/hiệu phó của trường mầm non.
+  + Trò chơi vận động củng cố: "**Trò chơi: “Ai nhanh, bạn trai hay bạn gái” (hoặc “Bé thông minh / Về đúng nhà”)**" (- **Cách chơi:**, - **Luật chơi:** ai về sai phải nhảy lò cò 1 vòng, tổ chức chơi 2-3 lần).
+  + Cột Hoạt động của Trẻ: Mô tả chi tiết lời thoại của trẻ theo từng nhóm (Nhóm 1, Nhóm 2, Nhóm 3), trẻ tự tin đóng vai giới thiệu, trả lời to rõ ràng và hào hứng chơi trò chơi.
+- Hoạt động 5 "5. Đánh giá và điều chỉnh": 
+  + Cô mời trẻ chia sẻ: "Hôm nay con cảm thấy thế nào?", "Con sẽ làm gì để trường lớp/gia đình/môi trường xung quanh luôn sạch đẹp, đoàn kết yêu thương nhau?".
+  + Cô nhận xét, tuyên dương sự cố gắng, tự tin và tinh thần tự giác của trẻ trong suốt buổi học.
+  + Hướng dẫn trẻ cùng cô thu dọn giáo cụ, phân loại đồ dùng vào đúng góc quy định, củng cố nề nếp vệ sinh.
+  + Cột Hoạt động của Trẻ: Trẻ tự tin chia sẻ cảm xúc, trả lời to rõ ràng, lắng nghe nhận xét và tự giác thu dọn đồ dùng đồ chơi.`;
       } else if (isPoetry) {
         domainSpecificGuidance = `ĐẶC BIỆT LƯU Ý CHO LĨNH VỰC PHÁT TRIỂN NGÔN NGỮ (THƠ) / GIÁO ÁN VĂN HỌC (THƠ):
 - TUYỆT ĐỐI KHÔNG DÙNG CÁC ĐỀ MỤC ÂM NHẠC.
@@ -3382,18 +3542,44 @@ Trả về JSON dạng:
     * Đánh giá: Nhận xét chung, khen ngợi trẻ ngồi đúng tư thế, cầm bút đúng, tô đồ đúng hướng; Động viên trẻ còn gặp khó khăn; Khắc sâu: "Ngồi đúng – Cầm bút đúng – Nhìn mẫu kỹ – Đưa bút đúng hướng."
     * Kết thúc: Cất bút, vở đúng nơi quy định; Vận động nhẹ các ngón tay, cổ tay thư giãn; Chuyển sang hoạt động tiếp theo.`;
       } else if (isLetterGame) {
-        domainSpecificGuidance = `ĐẶC BIỆT LƯU Ý CHO HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI:
+        domainSpecificGuidance = `ĐẶC BIỆT LƯU Ý CHO HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI (CHUẨN 8 HOẠT ĐỘNG MỚI QĐ 388):
 - TUYỆT ĐỐI KHÔNG DÙNG CÁC ĐỀ MỤC ÂM NHẠC.
 - Hoạt động 3 "3. Thực hiện hoạt động chơi":
-  + Tổ chức chuỗi các trò chơi chữ cái hấp dẫn (từ 3 đến 5 trò chơi, ví dụ: Trò chơi 1 "Ai tìm chữ nhanh", Trò chơi 2 "Về đúng nhà", Trò chơi 3 "Chuyền chữ tiếp sức", Trò chơi 4 "Ghép chữ tạo từ", Trò chơi 5 "Săn tìm chữ cái").
-  + Với mỗi trò chơi BẮT BUỘC ghi rõ các mục: Cách chơi, Luật chơi, Mục tiêu và diễn biến chơi của trẻ.
-  + Trẻ chủ động tương tác, phát âm chuẩn chữ cái, phối hợp đồng đội nhịp nhàng.
+  + BẮT BUỘC SOẠN ĐỦ VÀ CHI TIẾT CHUỖI 5 TRÒ CHƠI CHỮ CÁI (TỪ TRÒ CHƠI 1 ĐẾN TRÒ CHƠI 5), TUYỆT ĐỐI KHÔNG ĐƯỢC THIẾU HOẶC CHỈ SOẠN 3 TRÒ CHƠI.
+  + CẤU TRÚC MỖI TRÒ CHƠI BẮT BUỘC THEO ĐÚNG THỨ TỰ 3 BƯỚC SAU:
+    * Trò chơi (x): [TÊN TRÒ CHƠI]
+    - Cách chơi: [Mô tả chi tiết cách chơi]
+    - Luật chơi: [Mô tả chi tiết luật chơi]
+    - Mục tiêu: [Mục tiêu của trò chơi]
+
+  + CHI TIẾT 5 TRÒ CHƠI CHỮ CÁI CHUẨN MỰC:
+    * Trò chơi 1: "AI TÌM CHỮ NHANH?" (hoặc "AI TINH MẮT / VÒNG QUAY CHỮ CÁI"):
+      - Cách chơi: Cô đặt nhiều thẻ chữ cái lẫn nhau. Khi cô phát âm hoặc nêu đặc điểm nét (ví dụ: "Tìm cho cô chữ ô có dấu mũ!"), trẻ nhanh tay tìm đúng thẻ chữ trong rổ và giơ lên thật nhanh.
+      - Luật chơi: Chọn đúng chữ và phát âm to, rõ ràng mới được tính điểm/nhận hoa thưởng.
+      - Mục tiêu: Nhận biết mặt chữ, phát âm chuẩn xác và rèn phản xạ nhanh với chữ cái.
+    * Trò chơi 2: "VỀ ĐÚNG NHÀ" (hoặc "BẬT QUA VÒNG TÌM CHỮ CÁI"):
+      - Cách chơi: Đặt các ngôi nhà mang ký hiệu chữ cái ở các góc. Mỗi trẻ cầm một thẻ chữ cái vừa đi vừa hát theo nhạc. Khi có hiệu lệnh nhạc dừng / "Trời mưa", trẻ nhanh chân chạy về đúng ngôi nhà mang chữ cái giống thẻ trên tay mình (Ví dụ: cầm chữ ô -> về nhà ô).
+      - Luật chơi: Về đúng nhà và đọc to tên chữ cái của ngôi nhà; ai về nhầm nhà phải nhảy lò cò về đúng nhà.
+      - Mục tiêu: Củng cố phân biệt các chữ cái đã học, kết hợp rèn luyện thể lực và phản xạ định hướng không gian.
+    * Trò chơi 3: "CHUYỀN CHỮ TIẾP SỨC" (hoặc "CHUYỀN BÓNG CHỮ CÁI THEO NHẠC"):
+      - Cách chơi: Chia các đội xếp hàng dọc. Phía trước mỗi đội có rổ chứa nhiều thẻ chữ. Khi có hiệu lệnh còi, từng bạn đầu hàng chạy lên chọn đúng chữ cái của đội mình mang về rổ đội, rồi chạy về đập tay bạn tiếp theo.
+      - Luật chơi: Mỗi lượt chơi chỉ được lấy 1 thẻ chữ; đội nào chọn đúng và nhiều thẻ chữ nhất trong thời gian 1 bản nhạc là đội chiến thắng.
+      - Mục tiêu: Rèn tinh thần hợp tác đồng đội, phối hợp nhịp nhàng và trách nhiệm với tập thể.
+    * Trò chơi 4: "GHÉP CHỮ TẠO TỪ" (hoặc "THỬ TÀI GHÉP NÉT TẠO CHỮ"):
+      - Cách chơi: Cô phát tranh có hình ảnh và từ bên dưới (ví dụ: tranh "con ong", "ô tô", "cái nơ"...). Trẻ quan sát tranh, tìm các thẻ chữ cái còn thiếu ghép vào đúng vị trí để hoàn thiện từ có nghĩa.
+      - Luật chơi: Ghép đúng vị trí chữ cái và phát âm to từ hoàn chỉnh.
+      - Mục tiêu: Khắc sâu cấu tạo nét của chữ cái và bước đầu nhận diện chữ cái trong từ hoàn chỉnh gắn với hình ảnh.
+    * Trò chơi 5: "SĂN TÌM CHỮ CÁI" (hoặc "TẠO DÁNG CHỮ CÁI SÁNG TẠO BẰNG CƠ THỂ / HỘT HẠT"):
+      - Cách chơi: Nhóm thì đi săn tìm các thẻ chữ cái ẩn giấu quanh lớp học theo nhiệm vụ; nhóm thì phối hợp 2-3 bạn uốn mình tạo dáng chữ cái; nhóm dùng hột hạt, sỏi màu xếp thành chữ cái sinh động.
+      - Luật chơi: Tìm đúng số lượng chữ theo yêu cầu, không tranh giành thẻ của bạn, thuyết minh về chữ cái sáng tạo của nhóm mình.
+      - Mục tiêu: Phát huy tư duy sáng tạo, khả năng quan sát không gian và vận dụng nghệ thuật tạo hình chữ cái.
+  + Với mỗi trò chơi BẮT BUỘC ghi rõ đầy đủ theo đúng thứ tự: Tên trò chơi (* Trò chơi (x): ...), - Cách chơi:, - Luật chơi:, - Mục tiêu: và diễn biến hoạt động của cô - hoạt động của trẻ chi tiết.
 - Hoạt động 4 "4. Mở rộng và phát triển":
-  + Tăng độ khó: Tìm chữ cái trong từ xung quanh lớp, phân tích nét (nét cong, thêm mũ, thêm râu...).
-  + Cho trẻ tự nghĩ thêm từ có chứa chữ cái trong thực tế.
+  + Tăng độ khó: Tìm chữ cái vừa học trong các từ trên bảng tuyên truyền, góc sách truyện xung quanh lớp, phân tích nét (nét cong, thêm mũ, thêm râu...).
+  + Cho trẻ tự nghĩ thêm từ có chứa chữ cái trong thực tế đời sống hàng ngày.
   + Khuyến khích trẻ sáng tạo trò chơi mới với các thẻ chữ cái.
 - Hoạt động 5 "5. Chia sẻ – Đánh giá – Kết thúc chơi":
-  + Đàm thoại củng cố: Hỏi cảm nhận, tên các trò chơi, những chữ cái đã học và so sánh đặc điểm cấu tạo nét.
+  + Đàm thoại củng cố: Hỏi cảm nhận của trẻ về 5 trò chơi, những chữ cái đã học và so sánh đặc điểm cấu tạo nét.
   + Cả lớp phát âm lại đồng thanh rõ ràng các chữ cái.
   + Đánh giá tuyên dương tinh thần đoàn kết, chơi trung thực, trách nhiệm; cùng cô thu dọn đồ dùng thẻ chữ vào rổ gọn gàng.`;
       } else if (isLearningGame) {
@@ -3464,8 +3650,22 @@ Trả về JSON dạng:
 YÊU CẦU SÁNG TẠO ĐỔI MỚI VÀ ĐA DẠNG HÓA HOẠT ĐỘNG (HOẠT ĐỘNG 3, 4, 5):
 - Hãy là một giáo viên mầm non đổi mới thời đại: Tạo ra các hoạt động thực hành, trò chơi, tình huống xử lý, câu hỏi đàm thoại phong phú, hấp dẫn, gắn liền mật thiết với chủ đề "${lessonTitle}".
 - Hoạt động 3 (${act3Name}): Đàm thoại khơi gợi tư duy phản biện và khả năng ngôn ngữ của trẻ; kết hợp visual/media trực quan hoặc sản phẩm thực tế của trẻ.
-- Hoạt động 4 (${act4Name}): Thử thách đóng vai, xử lý tình huống thực tế, trò chơi đồng đội, xưởng sáng tạo ứng dụng sản phẩm vào đời sống.
-- Hoạt động 5 (${act5Name}): Tạo không gian mở để trẻ tự do chia sẻ cảm xúc, tự đánh giá và nhận xét bạn bè; cô lắng nghe, khích lệ và giáo dục nề nếp tự giác.
+- Hoạt động 4 (${act4Name}):
+  + BẮT BUỘC TRƯỚC KHI VÀO TRÒ CHƠI PHẢI CÓ CÁC HƯỚNG DẪN, DẪN DẮT CỤ THỂ, TRẢI NGHIỆM ĐÓNG VAI VÀ ĐÀM THOẠI LIÊN HỆ THỰC TẾ (TUYỆT ĐỐI KHÔNG VÀO TRÒ CHƠI NGAY LẬP TỨC):
+    * Cô tổ chức trải nghiệm đóng vai thực tế theo chủ đề (Ví dụ: Cô đóng vai khách tham quan, mời các nhóm trẻ đóng vai hướng dẫn viên nhí giới thiệu về các khu vực trong lớp/trường, đồ dùng, sản phẩm...).
+    * Mời 1-2 trẻ kể tên cô giáo chủ nhiệm, các bạn trong lớp, đồ dùng, các góc chơi...
+    * Cô giới thiệu mở rộng thêm cho trẻ biết (ví dụ: các cô giáo trong trường, hỏi tên trường MN nơi trẻ đang học, cô giới thiệu tên cô hiệu trưởng và cô hiệu phó...).
+    * Cô bao quát, cổ vũ và khen ngợi sự hợp tác của các nhóm.
+    * SAU ĐÓ MỚI ĐẾN TRÒ CHƠI VẬN ĐỘNG CỦNG CỐ: **Trò chơi: “[Tên trò chơi]”** (- **Cách chơi:** [cụ thể], - **Luật chơi:** [bạn nào về sai phải nhảy lò cò 1 vòng], - Tổ chức cho trẻ chơi 2-3 lần).
+- Hoạt động 5 (${act5Name}):
+  + BẮT BUỘC SOẠN CHI TIẾT, ĐẦY ĐỦ VÀ SÂU SẮC, TUYỆT ĐỐI KHÔNG SOẠN SƠ SÀI RẬP KHUÔN 2-3 DÒNG:
+    * Cô mời trẻ chia sẻ: "Hôm nay con cảm thấy thế nào?", "Con sẽ làm gì để trường lớp/gia đình/môi trường luôn sạch đẹp, đoàn kết yêu thương nhau?".
+    * Cô nhận xét, tuyên dương cụ thể sự cố gắng, tự tin và tinh thần tự giác của trẻ trong suốt buổi học.
+    * Cô hướng dẫn trẻ cùng cô thu dọn giáo cụ, phân loại đồ dùng vào đúng góc quy định, củng cố nề nếp vệ sinh lớp học.
+- CỘT HOẠT ĐỘNG CỦA TRẺ Ở BƯỚC 4 VÀ BƯỚC 5:
+  + Mô tả chi tiết: Trẻ hào hứng nhảy múa theo nhạc, tập trung quan sát, tích cực trả lời.
+  + Trẻ trao đổi rôm rả theo từng nhóm (+ Nhóm 1: ..., + Nhóm 2: ..., + Nhóm 3: ...), tự tin đóng vai hướng dẫn viên giới thiệu với khách tham quan (cô giáo).
+  + Trẻ hào hứng tham gia chơi trò chơi 2-3 lần, tự tin chia sẻ cảm xúc và tự giác cùng bạn thu dọn đồ dùng đồ chơi.
 ${domainSpecificGuidance}
 Hãy soạn chi tiết phần tiếp theo của Tiến trình hoạt động Mầm non (Các bước: ${act3Name}, ${act4Name}, ${act5Name}). NẾU CÓ GIÁO ÁN MẪU, BẮT BUỘC DÙNG TÊN BƯỚC CỦA GIÁO ÁN MẪU.
 TUYỆT ĐỐI KHÔNG dùng 4 bước CV 5512. Mỗi hoạt động chỉ dùng duy nhất step1 để chứa Hoạt động của cô (teacherAction) và Hoạt động của trẻ (studentAction). Để trống step2, 3, 4.
@@ -3728,6 +3928,10 @@ Trả về JSON dạng:
         });
       }
     }
+
+    if (domain.domainType === 'LETTER_GAME') {
+      rawActivities = formatPreschoolLetterGameActivities(rawActivities, lessonTitle, subject);
+    }
   } else {
     // Primary / Middle / High School plans MUST have 4 activities (CV 5512)
     if (rawActivities.length < 4) {
@@ -3876,7 +4080,15 @@ Trả về JSON dạng:
           ],
       digitalAssets: res1.equipment?.digitalAssets || [],
       stemMaterials: hasStem ? (res1.equipment?.stemMaterials || []) : [],
-      parentCollaboration: res1.equipment?.parentCollaboration || [],
+      parentCollaboration: (Array.isArray(res1.equipment?.parentCollaboration) && res1.equipment.parentCollaboration.length > 0 && !isGenericPreschoolParentCollab(res1.equipment.parentCollaboration))
+        ? res1.equipment.parentCollaboration
+        : generatePreschoolParentCollaboration({
+            subject: config.subject,
+            lessonTitle: config.lessonTitle,
+            grade: config.grade,
+            mainTheme: config.preschoolMainTheme,
+            subTheme: config.preschoolSubTheme,
+          }),
       preschoolPreparation: res1.equipment?.preschoolPreparation,
     } : {
       teacher: (Array.isArray(res1.equipment?.teacher) && res1.equipment.teacher.length > 0)
@@ -4075,15 +4287,18 @@ II. Chuẩn bị: (BẮT BUỘC ĐÚNG 100% CẤU TRÚC 3 MỤC SAU)
 - Trang phục: [Trang phục gọn gàng, phù hợp thời tiết, thoải mái, thuận tiện cho vận động và trải nghiệm]
 - Đồ dùng của trẻ: [Mỗi trẻ hoặc nhóm trẻ có đủ rổ đồ dùng, học cụ trải nghiệm phù hợp với bài học]
 - Tâm sinh lý của trẻ: [Tâm thế vui tươi, hào hứng, tự tin, sẵn sàng tham gia hoạt động cùng cô và các bạn]
-3. Phối hợp với phụ huynh:
-- [Nội dung cụ thể phối hợp phụ huynh: hỗ trợ nguyên vật liệu mở/tái chế an toàn, trao đổi thông tin, củng cố rèn luyện cho trẻ tại nhà]
+3. Phối hợp với phụ huynh: (BẮT BUỘC: NỘI DUNG MỖI TIẾT DẠY PHẢI HOÀN TOÀN KHÁC NHAU, BÁM SÁT TRỌNG TÂM ĐỀ TÀI BÀI HỌC, TUYỆT ĐỐI KHÔNG DÙNG CÂU MẪU CHUNG CHUNG TRÙNG LẶP)
+- [Ghi rõ 2 đến 3 gạch đầu dòng phối hợp cụ thể với cha mẹ gắn liền trực tiếp với bài học "${config.lessonTitle || 'bài học'}" và chủ đề: phụ huynh cùng con ôn luyện/thực hành điều gì cụ thể ở nhà (hát bài gì, đếm đồ vật gì, kể chuyện/đọc thơ gì, quan sát điều gì, rèn kỹ năng nào...), chuẩn bị học liệu mở/mẫu vật đặc thù nào cho bài học, rèn thói quen và giáo dục thái độ gì...].
 III. Tiến trình hoạt động
 Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động của trẻ" (Tiến trình 5 bước theo đúng chuẩn của Hoạt động / Lĩnh vực bài dạy).
 - KHỔNG ĐƯỢC BỎ BẤT KỲ NỘI DUNG NÀO TỪ FILE GIÁO ÁN CŨ TẢI LÊN (oldPlanContent). Tái cấu trúc chuẩn hóa nội dung giáo án cũ khớp đúng 5 bước của Lĩnh vực bài dạy.
 - YÊU CẦU ĐẶC BIỆT CHO PHẦN "2. Khám phá - Trải nghiệm": BẮT BUỘC thiết kế theo hướng trải nghiệm. Giáo viên cho trẻ trải nghiệm/thực hiện thử nhiệm vụ trước -> Đặt câu hỏi gợi mở để trẻ tự suy nghĩ và nêu lên cách thực hiện -> SAU ĐÓ giáo viên mới thực hiện làm mẫu và chuẩn hóa lại kỹ năng. Tuyệt đối KHÔNG làm mẫu hoặc giải thích cách làm trước khi trẻ được trải nghiệm.
 - TRÌNH BÀY RÕ RÀNG VÀ CHI TIẾT: Các hoạt động 1, 2, 3, 4, 5 (Tiến trình hoạt động) PHẢI SOẠN RẤT CHI TIẾT, ĐẦY ĐỦ VÀ SÂU SẮC. Bắt buộc mô tả cụ thể từng lời nói, câu lệnh, câu hỏi gợi mở của giáo viên và hành động, lời đáp, thái độ dự kiến của trẻ. Không viết chung chung sơ sài.
 - RIÊNG ĐỐI VỚI MÔN ÂM NHẠC (LĨNH VỰC NGHỆ THUẬT): Soạn RẤT CHI TIẾT VÀ KỸ LƯỠNG. Dùng VĂN PHONG SƯ PHẠM MẦM NON NGỌT NGÀO, DỊU DÀNG, TRÌU MẾN, GIÀU TÍNH NGHỆ THUẬT VÀ CẢM XÚC. Sử dụng nhiều ngữ điệu tình cảm mầm non ("các con ơi", "nhé", "nhỉ", "nào", "à", "ơi", "nào chúng mình...", "thật là hay đúng không nào!"). QUY ĐỊNH BẮT BUỘC: Ở Mục "3. Chia sẻ – Thảo luận" BẮT BUỘC PHẢI CÓ 2 PHẦN CHI TIẾT Ở CỘT HOẠT ĐỘNG CỦA CÔ theo đúng trọng tâm: Nếu là Dạy hát thì có "a. Dạy hát (TT)" và "b. Nghe hát". Nếu là Nghe hát thì có "a. Nghe hát (TT)" và "b. Hát vận động (hoặc Trò chơi)". Nếu là Hát vận động thì có "a. Hát vận động (TT)" và "b. Nghe hát". Trong cột Hoạt động của trẻ tuyệt đối KHÔNG chứa nhãn "a." hay "b." đứng riêng lẻ, chỉ ghi các gạch đầu dòng. Mô tả chi tiết từng câu thoại truyền cảm của cô, cử chỉ điệu bộ và sự hào hứng của trẻ. KHÔNG ĐƯỢC soạn ngắn gọn khô cứng như môn Thể dục.
-- Mỗi mục, mỗi ý BẮT BUỘC phải xuống dòng. Sử dụng gạch đầu dòng (-) rõ ràng ở mỗi ý con.`;
+- QUY ĐỊNH BẮT BUỘC VỀ XUỐNG DÒNG VÀ IN ĐẬM:
+  + Mỗi mục, mỗi ý, mỗi hành động, mỗi câu lệnh của cô và phản hồi của trẻ BẮT BUỘC PHẢI XUỐNG DÒNG RIÊNG BIỆT (dùng ký tự \n). Sử dụng gạch đầu dòng (-) hoặc (+) rõ ràng ở mỗi ý con. TUYỆT ĐỐI KHÔNG viết dồn ép các ý vào cùng một dòng.
+  + Phân hóa độ tuổi (+ Trẻ 5 tuổi: ..., + Trẻ 4 tuổi: ..., + Trẻ 3 tuổi: ...), các trò chơi (Trò chơi 1:, Trò chơi 2:), và các phần (Cách chơi:, Luật chơi:, Mục tiêu:) BẮT BUỘC MỖI MỤC PHẢI XUỐNG DÒNG RIÊNG BIỆT.
+  + VỀ IN ĐẬM: CHỈ in đậm tên trò chơi (dạng **Trò chơi 1: [Tên]**) và các nhãn mục con (dạng **Cách chơi:**, **Luật chơi:**, **Mục tiêu:**, **Trẻ 5 tuổi:**). TUYỆT ĐỐI KHÔNG in đậm tùy tiện nguyên cả câu, không in đậm lung tung các từ ngữ giữa câu, không để dấu sao đơn lẻ (*) hoặc dấu sao chưa đóng (**).`;
 
     const systemInstruction = `Bạn là Chuyên gia Cao cấp về Giáo dục số, Phương pháp Dạy học và Đổi mới Sư phạm theo Chương trình GDPT 2018, Công văn số 5512/BGDĐT, Thông tư số 02/2025/TT-BGDĐT, Công văn số 3456/BGDĐT-GDPT và QUYẾT ĐỊNH SỐ 2422/QĐ-BGDĐT (Khung nội dung giáo dục trí tuệ nhân tạo cho học sinh phổ thông) của Bộ Giáo dục và Đào tạo Việt Nam.
 ĐẶC BIỆT: Bạn biên soạn bám sát 100% theo Bộ sách giáo khoa "Kết nối tri thức với cuộc sống" (Nhà xuất bản Giáo dục Việt Nam), sử dụng đúng thuật ngữ khoa học, chuỗi bài học, hoạt động khám phá và phong cách sư phạm của bộ sách Kết nối tri thức. Tuyệt đối không pha trộn hoặc sử dụng nội dung của các bộ sách khác.
@@ -4234,7 +4449,7 @@ ${isPreschool
       const response = await generateContentWithRetryAndFallback({
         systemInstruction,
         candidateKeys: auth.keys,
-        primaryModel: (config.aiModel && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.6-flash',
+        primaryModel: (config.aiModel && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.1-flash-lite',
         taskType: 'pedagogical',
         contents: userPrompt,
         config: {
@@ -4246,7 +4461,7 @@ ${isPreschool
     } catch (monolithicErr: any) {
       console.warn('Monolithic generation hit spike/timeout. Switching to Sectional Assembly pipeline...', monolithicErr?.message);
       // Automatic fallback to sectional pipeline
-      const sectionalResult = await generateKHBDSectional(config, undefined, auth.keys, (config.aiModel && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.6-flash');
+      const sectionalResult = await generateKHBDSectional(config, undefined, auth.keys, (config.aiModel && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.1-flash-lite');
       return res.json({ success: true, data: sectionalResult, lessonPlan: sectionalResult });
     }
 
@@ -4261,7 +4476,7 @@ ${isPreschool
         config,
         undefined,
         auth.keys,
-        (config.aiModel && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.6-flash'
+        (config.aiModel && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.1-flash-lite'
       );
       return res.json({ success: true, data: sectionalResult, lessonPlan: sectionalResult });
     }
@@ -4307,7 +4522,7 @@ app.post('/api/gemini/generate-lesson-plan-sectional', async (req, res) => {
       config,
       undefined,
       auth.keys,
-      (config.aiModel && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.6-flash'
+      (config.aiModel && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.1-flash-lite'
     );
     res.json({ success: true, data: sectionalResult, lessonPlan: sectionalResult });
   } catch (error: any) {
@@ -4350,7 +4565,7 @@ app.post('/api/gemini/generate-lesson-plan-stream', async (req, res) => {
       config,
       onProgress,
       auth.keys,
-      (config.aiModel && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.6-flash'
+      (config.aiModel && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.1-flash-lite'
     );
     sendEvent('complete', { success: true, lessonPlan: result });
   } catch (error: any) {

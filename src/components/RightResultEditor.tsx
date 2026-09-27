@@ -787,7 +787,13 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
 
             {(isPreschoolPlan(plan) || (plan as any)?.schoolLevel === 'Mầm non') ? (
               (() => {
-                const prep = getPreschoolPreparation(plan.equipment);
+                const prep = getPreschoolPreparation(plan.equipment, {
+                  lessonTitle: plan.lessonTitle,
+                  subject: plan.subject,
+                  grade: plan.grade,
+                  mainTheme: plan.mainTheme,
+                  subTheme: plan.subTheme,
+                });
                 return (
                   <div className="space-y-4 text-[13pt]">
                     {/* 1. Chuẩn bị của cô */}

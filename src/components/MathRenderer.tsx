@@ -216,22 +216,24 @@ function renderSingleLineHighlights(text: string, nlsRed: boolean = false, suppr
     return <span className="text-red-600 font-medium">{text}</span>;
   }
 
-  // Check if text is a Roman numeral heading (e.g. "I. THÔNG TIN VÀ DỮ LIỆU:") or numbered section heading (e.g. "1. Thấy gì? Biết gì ?")
-  const isNumberedHeading = /^\s*(?:[IVXLCDM]+\.|\d+\.|\b[a-e]\))\s+[A-ZÀ-Ỵ0-9\?]/i.test(text) || /^[IVXLCDM]+\.\s+/i.test(text);
+  // Check if text is a genuine Roman numeral section heading (e.g. "I. MỤC TIÊU", "II. THIẾT BỊ")
+  const isRomanSectionHeading = /^\s*[IVXLCDM]+\.\s+[A-ZÀ-Ỵ]/i.test(text);
 
-  // Parse markdown bold **text** first
+  // Parse markdown bold **text** and clean stray asterisks
   const boldRegex = /(\*\*[^*]+\*\*)/g;
   const boldParts = text.split(boldRegex);
 
   const renderedContent = boldParts.map((bPart, bIdx) => {
-    if (bPart.startsWith('**') && bPart.endsWith('**')) {
-      const boldText = bPart.slice(2, -2);
+    if (bPart.startsWith('**') && bPart.endsWith('**') && bPart.length >= 4) {
+      const boldText = bPart.slice(2, -2).replace(/\*+/g, '');
       return <strong key={bIdx} className="font-bold text-slate-950">{renderCompetencyTags(boldText)}</strong>;
     }
-    return <React.Fragment key={bIdx}>{renderCompetencyTags(bPart)}</React.Fragment>;
+    // Clean any stray asterisks in non-bold parts
+    const cleanNonBold = bPart.replace(/\*+/g, '');
+    return <React.Fragment key={bIdx}>{renderCompetencyTags(cleanNonBold)}</React.Fragment>;
   });
 
-  if (isNumberedHeading) {
+  if (isRomanSectionHeading) {
     return <span className="font-bold text-slate-950 block mt-2.5 mb-1 first:mt-0">{renderedContent}</span>;
   }
 

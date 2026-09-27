@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ActivityDetail, ImageSlot } from '../types';
 import { MathRenderer } from './MathRenderer';
-import { cleanPreschoolBulletLine } from '../utils/preschoolUtils';
+import { cleanPreschoolBulletLine, expandPreschoolTextLines } from '../utils/preschoolUtils';
 import { Edit3, Sparkles, Check, X, Loader2, Wand2 } from 'lucide-react';
 
 interface PreschoolSingleTableProps {
@@ -106,11 +106,11 @@ export const PreschoolSingleTable: React.FC<PreschoolSingleTableProps> = ({
                 const isCurrentEditing = editingActIdx === actIdx;
                 const isCurrentRefining = refiningActIdx === actIdx;
                 const actTitle = (act.name || `Hoạt động ${act.index || actIdx + 1}`).replace(/\[TIẾT\s*\d+\]\s*/i, '').trim();
-                const teacherRaw = (act.step1?.teacherAction || '').replace(/\*\*/g, '').trim();
-                const studentRaw = (act.step1?.studentAction || '').replace(/\*\*/g, '').trim();
+                const teacherRaw = (act.step1?.teacherAction || '').trim();
+                const studentRaw = (act.step1?.studentAction || '').trim();
 
-                const tLines = teacherRaw.split('\n').map((l: string) => l.trim()).filter(Boolean);
-                const sLines = studentRaw.split('\n').map((l: string) => l.trim()).filter(Boolean);
+                const tLines = expandPreschoolTextLines(teacherRaw);
+                const sLines = expandPreschoolTextLines(studentRaw);
 
                 if (isCurrentEditing) {
                   return (
@@ -282,18 +282,23 @@ export const PreschoolSingleTable: React.FC<PreschoolSingleTableProps> = ({
 
                       {/* Các ý hành động của Cô */}
                       {tLines.map((line, lIdx) => {
-                        const isSubheader = /^([ab][\.\)]\s*.*)$/i.test(line) ||
-                          /^\*?\s*(Bài tập phát triển chung|Vận động cơ bản|BTPTC|VĐCB|Trò chơi)/i.test(line);
+                        const isTeacherSentence = /^[-•*+\s–—]*(?:Cô|Giáo viên|Mời|Hỏi|Cho trẻ|Hướng dẫn|Tổ chức cho trẻ|Bao quát|Tuyên dương|Trẻ|Cả lớp)\b/i.test(line);
+                        const isGameHeader = !isTeacherSentence && /^[-•*+\s–—]*(?:Trò chơi|\*\*Trò chơi)\s*\d*[:\s]/i.test(line);
+                        const isSubheader = !isTeacherSentence && (
+                          /^([ab][\.\)]\s*.*)$/i.test(line) ||
+                          /^[-•*+\s–—]*(?:Bài tập phát triển chung|Vận động cơ bản|BTPTC|VĐCB)/i.test(line) ||
+                          isGameHeader
+                        );
 
                         if (isSubheader) {
                           return (
-                            <div key={`t-sub-${lIdx}`} className="font-bold text-slate-900 pt-1 text-left">
-                              <MathRenderer text={line} slotMap={slotMap} />
+                            <div key={`t-sub-${lIdx}`} className={`${isGameHeader ? 'pt-3 pb-1' : 'pt-2 pb-0.5'} text-left text-[14pt]`}>
+                              <MathRenderer text={cleanPreschoolBulletLine(line)} slotMap={slotMap} />
                             </div>
                           );
                         }
                         return (
-                          <div key={`t-line-${lIdx}`} className="text-justify">
+                          <div key={`t-line-${lIdx}`} className="text-justify leading-relaxed">
                             <MathRenderer text={cleanPreschoolBulletLine(line)} slotMap={slotMap} />
                           </div>
                         );

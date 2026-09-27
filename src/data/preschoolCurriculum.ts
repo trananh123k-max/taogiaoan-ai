@@ -144,8 +144,8 @@ II. Chuẩn bị:
 - Trang phục: Gọn gàng, thoải mái, thuận tiện vận động...
 - Đồ dùng của trẻ: Mỗi trẻ/nhóm trẻ có đủ rổ học liệu, đồ dùng trải nghiệm...
 - Tâm sinh lý của trẻ: Tâm thế vui vẻ, hào hứng, tự tin, sẵn sàng tham gia hoạt động...
-3. Phối hợp với phụ huynh:
-- Phối hợp cùng phụ huynh chuẩn bị nguyên vật liệu và trò chuyện cùng con ở nhà...
+3. Phối hợp với phụ huynh: (QUY TẮC BẮT BUỘC: NỘI DUNG MỖI TIẾT DẠY PHẢI HOÀN TOÀN KHÁC NHAU, BÁM SÁT ĐỀ TÀI VÀ ĐẶC TRƯNG MÔN HỌC, TUYỆT ĐỐI KHÔNG DÙNG CÂU MẪU CHUNG CHUNG TRÙNG LẶP)
+- Mỗi bài dạy phải đưa ra ít nhất 2 - 3 nội dung phối hợp thiết thực, sinh động, phù hợp đặc trưng bài học (ví dụ: đối với Âm nhạc thì hướng dẫn phụ huynh cùng nghe/hát bài hát với trẻ tại nhà, cổ vũ trẻ múa hát; đối với Toán thì cùng trẻ đếm, tìm đồ vật trong nhà theo số lượng hoặc hình khối đã học; đối với Khám phá thì cùng trẻ quan sát hiện tượng, chuẩn bị mẫu vật thực tế; đối với Tạo hình thì sưu tầm vỏ hộp, lá cây, giấy màu và động viên trẻ hoàn thành sản phẩm; đối với Thể dục thì khuyến khích vận động, nhắc nhở trang phục giày dép; đối với Văn học thì đọc thơ, kể lại câu chuyện cho trẻ nghe trước giờ đi ngủ...).
 
 III. Tiến trình hoạt động 
 QUY TẮC BẮT BUỘC VỀ BẢNG TIẾN TRÌNH HOẠT ĐỘNG:
@@ -154,20 +154,56 @@ QUY TẮC BẮT BUỘC VỀ BẢNG TIẾN TRÌNH HOẠT ĐỘNG:
 
 2. CẤU TRÚC CHI TIẾT 5 BƯỚC TIẾN TRÌNH THEO TỪNG LĨNH VỰC CỤ THỂ:
 
+QUY ĐỊNH ĐẶC BIỆT BẮT BUỘC CHO MỤC 4 & MỤC 5 CỦA LĨNH VỰC PHÁT TRIỂN NHẬN THỨC (TOÁN, KHÁM PHÁ KHOA HỌC, KHÁM PHÁ XÃ HỘI):
+- BƯỚC 4. VẬN DỤNG – MỞ RỘNG:
+  + TRƯỚC KHI VÀO TRÒ CHƠI BẮT BUỘC PHẢI CÓ HƯỚNG DẪN, DẪN DẮT SƯ PHẠM CỤ THỂ:
+    * Tuyệt đối KHÔNG vào trò chơi luôn cộc lốc.
+    * Cô phải tổ chức hoạt động trải nghiệm thực tế, đàm thoại liên hệ kiến thức với đời sống xung quanh lớp học, trường học, điểm trường mầm non.
+    * Mời 1 - 2 trẻ đứng lên kể tên, chỉ ra các đồ vật, hiện tượng, nhóm số lượng, khu vực hoặc các cô giáo, bạn bè trong trường lớp...
+    * Cô giới thiệu mở rộng thêm cho trẻ, bao quát, cổ vũ và khen ngợi sự tự tin, hợp tác của trẻ rồi mới dẫn dắt vào trò chơi.
+  + PHẦN TRÒ CHƠI CỦNG CỐ BẮT BUỘC PHẢI CÓ ĐỦ 6 NỘI DUNG:
+    * 1. Tên trò chơi: + Trò chơi: “[Tên trò chơi phù hợp đề tài]” (hoặc Trò chơi củng cố: ...)
+    * 2. - Mục tiêu: [BẮT BUỘC PHẢI CÓ - Nêu rõ ràng mục tiêu giáo dục nhận thức: củng cố kiến thức gì, rèn luyện kỹ năng quan sát/đếm/so sánh/phân loại/nhận biết gì, phát triển phản xạ nhanh nhẹn, tinh thần đồng đội và tính kỷ luật cho trẻ mầm non].
+    * 3. - Chuẩn bị: [Nêu rõ học cụ trực quan: rổ, thẻ số, thẻ hình, bảng từ, các ngôi nhà, vòng thể dục, nhạc nền...].
+    * 4. - Cách chơi: [Phân tích rõ ràng, tỉ mỉ từng bước với văn phong của giáo viên mầm non nói với trẻ: cách chia đội, hiệu lệnh của cô, hành động cụ thể của trẻ khi chơi, cách phối hợp tiếp sức...].
+    * 5. - Luật chơi: [Phân tích rõ ràng, dễ hiểu, vui vẻ, mang tính động viên mầm non: bạn nào chọn sai / về sai nhóm / phạm quy sẽ phải nhảy lò cò 1 vòng hoặc làm động tác chú ếch/hát 1 câu bài hát theo yêu cầu của các bạn; đội nào làm đúng và nhanh nhất sẽ được cả lớp hoan hô chúc mừng].
+    * 6. - Tổ chức cho trẻ chơi: [BẮT BUỘC ghi rõ: Tổ chức cho trẻ chơi 2 – 3 lần sôi nổi (cô bao quát, khích lệ động viên trẻ)].
+  + CỘT HOẠT ĐỘNG CỦA TRẺ Ở MỤC 4 BẮT BUỘC PHẢI CÓ:
+    * Trẻ tự tin trả lời câu hỏi liên hệ thực tế của cô, thảo luận rôm rả theo từng nhóm (+ Nhóm 1: ..., + Nhóm 2: ..., + Nhóm 3: ...).
+    * Trẻ chăm chú lắng nghe cô phổ biến mục tiêu, cách chơi và luật chơi của trò chơi.
+    * Trẻ tích cực tham gia chơi 2 – 3 lần, phối hợp nhịp nhàng, reo hò cổ vũ bạn và chấp hành nghiêm túc luật chơi.
+- BƯỚC 5. CHIA SẺ – ĐÁNH GIÁ:
+  + Hoạt động của Cô: Cô tập trung trẻ lại hỏi cảm xúc gợi mở ("Hôm nay con cảm thấy thế nào?", "Con thích nhất điều gì?", "Con sẽ làm gì để trường lớp/môi trường luôn sạch đẹp, đoàn kết?"), nhận xét tuyên dương cụ thể sự nỗ lực của trẻ, hướng dẫn trẻ cùng cô thu dọn đồ dùng, học liệu ngăn nắp vào đúng góc quy định.
+  + Hoạt động của Trẻ: Trẻ tự tin chia sẻ cảm xúc, niềm vui; tích cực trả lời câu hỏi liên hệ thực tế; tươi cười đón nhận lời khen; tự giác cùng cô thu dọn đồ dùng học liệu gọn gàng.
+
+
 A. LĨNH VỰC NGHỆ THUẬT (ÂM NHẠC):
 YÊU CẦU ĐẶC THÙ BẮT BUỘC SOẠN GIÁO ÁN MÔN ÂM NHẠC:
 - Môn Âm nhạc BẮT BUỘC phải soạn RẤT CHI TIẾT, KỸ LƯỠNG VÀ ĐẦY ĐỦ HƠN NHIỀU so với các môn khác (nhất là môn Thể dục).
 - QUY ĐỊNH BẮT BUỘC Ở MỤC 3: Mục "3. Chia sẻ – Thảo luận" BẮT BUỘC PHẢI CÓ ĐỦ 2 PHẦN CHI TIẾT tuỳ theo loại giáo án trọng tâm:
-  + Nếu trọng tâm là Dạy hát: a. Dạy hát (TT) và b. Nghe hát
-  + Nếu trọng tâm là Nghe hát: a. Nghe hát (TT) và b. Hát vận động (hoặc Trò chơi)
-  + Nếu trọng tâm là Hát vận động: a. Hát vận động (TT) và b. Nghe hát
+  + Nếu trọng tâm là Hát vận động (hoặc Vận động theo nhạc / Vỗ tay theo phách / Vỗ tay theo tiết tấu / Múa / Vận động minh họa):
+    * BẮT BUỘC GHI LÀ: a. Hát vận động "[Tên bài hát trọng tâm]" (TT) hoặc a. Vận động theo nhạc "[Tên bài hát trọng tâm]" (TT).
+    * TUYỆT ĐỐI KHÔNG ĐƯỢC GHI LÀ "a. Dạy hát" (vì trẻ đã thuộc bài hát, giờ học nhằm rèn luyện kỹ năng vận động, vỗ tay, múa minh họa theo nhạc).
+    * Phần b: b. Nghe hát "[Tên bài nghe hát]". CHỈ DÀNH RIÊNG CHO BÀI HÁT NGHE (Cô hát cho trẻ nghe cảm thụ, giảng giải ý nghĩa, múa minh họa cho trẻ hưởng ứng). TUYỆT ĐỐI KHÔNG ĐƯỢC GỘP TRÒ CHƠI VÀO MỤC NÀY (ví dụ: "Nghe hát: Cái mũi T/C: Tai ai thính" là SAI NGHIÊM TRỌNG).
+  + Nếu trọng tâm là Dạy hát:
+    * a. Dạy hát "[Tên bài hát trọng tâm]" (TT) và b. Nghe hát "[Tên bài nghe hát]".
+  + Nếu trọng tâm là Nghe hát:
+    * a. Nghe hát "[Tên bài hát trọng tâm]" (TT) và b. Hát vận động / Hát "[Tên bài kết hợp]".
   (Nếu thiếu một trong hai phần a hoặc b tức là SAI YÊU CẦU nghiêm trọng).
+- QUY ĐỊNH BẮT BUỘC Ở MỤC 4 & MỤC 5:
+  + Mục "4. Vận dụng – Mở rộng": Trước khi vào trò chơi âm nhạc, BẮT BUỘC phải có lời dẫn dắt sư phạm cụ thể (ví dụ: cô tổ chức giao lưu biểu diễn sân khấu, trẻ đội mũ múa kết hợp gõ đệm phách tre, xắc xô). Sau đó mới đến Trò chơi âm nhạc riêng biệt với đầy đủ:
+    * Tên trò chơi: + Trò chơi âm nhạc: “[Tên trò chơi, ví dụ: Tai ai thính / Ai nhanh nhất / Nghe tiếng hát tìm đồ vật]”
+    * Cách chơi: [Mô tả chi tiết cách chơi]
+    * Luật chơi: [Mô tả chi tiết luật chơi, ví dụ: Bạn nào đoán sai / về sai phải nhảy lò cò 1 vòng]
+    * Tổ chức cho trẻ chơi 2 - 3 lần sôi nổi.
+    * Cột Hoạt động của Trẻ phải có phản ứng sinh động theo từng nhóm (+ Nhóm 1: ..., + Nhóm 2: ..., + Nhóm 3: ...), reo hò, tham gia chơi 2 - 3 lần.
+  + Mục "5. Chia sẻ – Đánh giá" (hoặc "5. Đánh giá – Điều chỉnh"): Đầy đủ câu hỏi gợi mở cảm xúc của cô ("Hôm nay con cảm thấy thế nào?", "Về nhà con sẽ hát tặng ai?"), lời nhận xét tuyên dương cụ thể và hướng dẫn trẻ cùng cô thu dọn nhạc cụ (xắc xô, phách tre, mũ múa) vào đúng góc quy định.
 - Dùng VĂN PHONG SƯ PHẠM MẦM NON NGỌT NGÀO, DỊU DÀNG, TRÌU MẾN, GIÀU TÍNH NGHỆ THUẬT VÀ CẢM XÚC. Dùng nhiều từ tình cảm, hô đáp gần gũi như "các con ơi", "nhé", "nhỉ", "nào", "à", "ơi", "nào chúng mình cùng...", "thật là hay phải không nào!".
 - Mô tả chi tiết từng lời dẫn giải truyền cảm của cô, lời hát nhẩm, câu hỏi gợi mở, âm thanh luyện giọng (xướng âm "Đồ rê mi...", mô phỏng tiếng kêu vui nhộn...), nhịp điệu gõ đệm (phách tre, xắc xô, gáo dừa...), sắc thái giai điệu (vui tươi, rộn rã, êm dịu), cử chỉ điệu bộ và thái độ hào hứng, tự tin bước lên sân khấu của trẻ.
 
 Tiêu đề giáo án:
 GIÁO ÁN ÂM NHẠC
-Dạy hát "[Tên bài hát trọng tâm]". Tác giả: [Tên tác giả] (TT)
+Hát vận động "[Tên bài hát trọng tâm]". Tác giả: [Tên tác giả] (TT) (hoặc Dạy hát "[Tên bài hát trọng tâm]" nếu là tiết dạy hát)
 Nghe hát "[Tên bài nghe hát]" ([Xuất xứ / Tác giả])
 Trò chơi âm nhạc: "[Tên trò chơi âm nhạc]"
 Lĩnh vực: Lĩnh vực Nghệ thuật (Âm nhạc)
@@ -182,30 +218,46 @@ Cấu trúc chi tiết cột "Hoạt động của Cô":
 - Cô khuyến khích trẻ tản ra không gian lớp học, tự do lắng nghe, nhún nhảy và tự sáng tạo các động tác mô phỏng dáng đi, điệu bộ theo giai điệu.
 - Cô mở giai điệu có lời nhẹ nhàng. Trẻ tự do ngân nga hát theo lời ca mà trẻ biết.
 - Cô để trẻ tự tìm đến khay nhạc cụ (xắc xô, phách tre, gáo dừa, trống lắc) chọn món mình thích và tự gõ đệm theo cách cảm nhận nhịp điệu của riêng trẻ.
-- Cô quan sát cách trẻ cảm nhịp, hòa giọng, không uốn nắn hay dạy hát ngay lúc này.
+- Cô quan sát cách trẻ cảm nhịp, hòa giọng, không uốn nắn hay dạy kỹ thuật ngay lúc này.
 3. Chia sẻ – Thảo luận
-a. Dạy hát "[Tên bài hát trọng tâm]" (TT)
+* Nếu tiết dạy là Hát vận động (Vận động theo nhạc / Vỗ tay theo nhịp / Vỗ tay theo tiết tấu / Múa):
+a. Hát vận động "[Tên bài hát trọng tâm]" (TT)
 - Cô mời trẻ về ngồi quây quần trên các thảm xốp quanh sân khấu âm nhạc.
-- Cô trò chuyện hỏi khơi gợi dịu dàng: "Các con ơi! Chúng mình vừa được nghe và nhún nhảy theo bài hát gì nào? Bài hát nhắc đến những ai nhỉ? Giai điệu bài hát nghe thế nào các con?"
-- Cô chốt và giải thích nội dung bài hát bằng chất giọng truyền cảm.
-- Cô hướng dẫn trẻ luyện giọng khởi động (mô phỏng âm thanh vui nhộn, xướng âm cao thấp "o ó o", "meo meo", "gâu gâu"...).
-- Cô hát mẫu truyền cảm kết hợp cử chỉ điệu bộ và ánh mắt trìu mến.
-- Cô hướng dẫn cả lớp hát 1 – 2 lần toàn bài (nhắc trẻ thể hiện đúng sắc thái cảm xúc, vui tươi ở lời ca nghịch ngợm, rộn rã ở câu hát cuối).
-- Tổ chức cho trẻ luyện tập theo tổ, nhóm, cá nhân bằng nhiều hình thức sôi nổi: Hát nối tiếp, hát đối đáp, hát kết hợp gõ đệm bằng nhạc cụ tự tạo (phách tre, xắc xô).
-b. Nghe hát "[Tên bài nghe hát]"
+- Cho cả lớp hát lại bài hát 1 - 2 lần để trẻ nhớ lại giai điệu và lời ca.
+- Cô giới thiệu và thực hiện vận động mẫu:
+  + Lần 1: Làm mẫu toàn phần kết hợp hát và vận động nhịp nhàng, biểu cảm từ đầu đến hết bài.
+  + Lần 2: Làm mẫu kết hợp phân tích kỹ thuật từng động tác vận động minh họa / vỗ tay nhịp nhàng theo câu hát.
+  + Lần 3: Nhấn mạnh các động tác tạo điểm nhấn và tư thế biểu diễn tự tin.
+- Tổ chức cho trẻ thực hành vận động:
+  + Cho cả lớp cùng đứng dậy hát và vận động theo cô (2 - 3 lần).
+  + Cho các tổ, nhóm bạn trai, nhóm bạn gái thi đua hát và vận động luân phiên (kết hợp dụng cụ gõ đệm: phách tre, xắc xô, gáo dừa...).
+  + Mời cá nhân trẻ tự tin lên sân khấu biểu diễn hát vận động. Cô chú ý quan sát, sửa sai và khích lệ trẻ biểu diễn tự nhiên, đúng nhịp.
+b. Nghe hát "[Tên bài nghe hát]" (Tác giả: ...)
 - Cô tạo không gian thư thái, giới thiệu bài nghe hát tràn đầy cảm xúc.
-- Cô hát tặng trẻ với chất giọng vui tươi, nhộn nhịp, kết hợp giao lưu ánh mắt, cử chỉ điệu bộ với trẻ.
-- Cô mời trẻ đứng dậy hưởng ứng nhún nhảy cùng cô như những chú gà con, chú mèo con tung tăng trong sân.
+- Cô hát tặng trẻ lần 1 với chất giọng vui tươi, nhộn nhịp hoặc truyền cảm tha thiết, kết hợp giao lưu ánh mắt, cử chỉ điệu bộ với trẻ.
+- Giảng giải nội dung, ý nghĩa bài hát, giáo dục tình cảm cho trẻ.
+- Cô hát tặng trẻ lần 2: Kết hợp múa minh họa mềm mại, mời trẻ đứng dậy hưởng ứng nhún nhảy cùng cô.
+
+* Nếu tiết dạy là Dạy hát:
+a. Dạy hát "[Tên bài hát trọng tâm]" (TT)
+- Cô hát mẫu lần 1: Rõ lời, đúng giai điệu và tính chất bài hát.
+- Cô hát mẫu lần 2: Kết hợp cử chỉ, điệu bộ minh họa và giảng giải nội dung bài hát.
+- Dạy trẻ hát: Cả lớp hát 2 - 3 lần -> Tổ, nhóm, cá nhân luân phiên.
+b. Nghe hát "[Tên bài nghe hát]" (Tác giả: ...)
+- Cô hát tặng trẻ nghe và giảng giải nội dung bài hát.
+
 4. Vận dụng – Mở rộng
-- Cô giới thiệu trò chơi âm nhạc "[Tên trò chơi âm nhạc]":
-- Phổ biến luật chơi rõ ràng: Trẻ nhún nhảy quanh các nốt nhạc vui, khi nhạc dừng nhanh chân nhảy vào nốt nhạc may mắn và thực hiện thử thách âm nhạc cùng nhóm bạn.
-- Cô tổ chức cho trẻ chơi hết mình.
-- Cô quan sát, khích lệ tinh thần hợp tác của các nhóm trẻ khi giải quyết thử thách âm nhạc.
-- Cô đội mũ múa cho các nhóm trẻ và mời tất cả bước lên sân khấu cùng tạo nên "Dàn hợp xướng sắc màu" biểu diễn lại bài hát rộn rã.
-5. Đánh giá – Điều chỉnh
-- Giáo viên hỏi: “Hôm nay con học được điều gì?”, “Con thích hoạt động nào nhất?”, “Con sẽ làm gì để thể hiện tình yêu với gia đình?”. Khuyến khích trẻ tự nhận xét và nhận xét bạn.
+- Cô tổ chức hoạt động giao lưu âm nhạc và trò chơi củng cố:
+- Cô đội mũ múa cho các nhóm trẻ và mời tất cả bước lên sân khấu cùng tạo nên "Dàn hợp xướng sắc màu" biểu diễn lại bài hát rộn rã kết hợp gõ đệm phách tre, xắc xô.
+- Cô bao quát, cổ vũ và khen ngợi sự hợp tác của các nhóm.
++ Trò chơi âm nhạc: "[Tên trò chơi âm nhạc, ví dụ: Tai ai thính / Ai nhanh nhất]"
+- Cách chơi: [Mô tả chi tiết cách chơi]
+- Luật chơi: Bạn nào đoán sai hoặc về sai nhóm sẽ phải nhảy lò cò 1 vòng.
+- Tổ chức cho trẻ chơi 2 - 3 lần sôi nổi.
+5. Đánh giá – Điều chỉnh (hoặc 5. Chia sẻ – Đánh giá)
+- Giáo viên hỏi gợi mở: “Hôm nay con học được điều gì?”, “Con thích hoạt động nào nhất?”, “Về nhà con sẽ hát tặng ai bài hát này?”. Khuyến khích trẻ tự nhận xét và nhận xét bạn.
 - Cô nhận xét chung: Tuyên dương sự tự tin, khả năng cảm thụ âm nhạc và tinh thần sáng tạo của cả lớp.
-- Nhắc nhở trẻ cùng cô thu dọn nhạc cụ, mũ múa cất gọn gàng vào góc âm nhạc.
+- Nhắc nhở trẻ cùng cô thu dọn nhạc cụ (phách tre, xắc xô), mũ múa cất gọn gàng vào góc âm nhạc.
 
 Cấu trúc chi tiết cột "Hoạt động của Trẻ":
 - Trẻ chăm chú lắng nghe âm thanh và hào hứng đoán tên con vật / nguồn âm thanh.
@@ -299,25 +351,41 @@ III. Tiến trình hoạt động (Kẻ 1 bảng 2 cột: Hoạt động của C
 
 4. Vận dụng – Mở rộng:
 - Hoạt động của Cô:
-  - Cô tổ chức thử thách trò chơi "Vũ hội sắc màu": Mỗi nhóm nhận một bức tranh phong cảnh thiên nhiên chưa tô điểm và các miếng dán/con dấu màu.
-  - Nhiệm vụ: Các nhóm thảo luận chọn màu sắc phù hợp để trang trí bức tranh (mặt trời màu đỏ/vàng, lá cây màu xanh, hoa màu sặc sỡ).
-  - Cô bao quát, cổ vũ tinh thần hợp tác của các nhóm.
+  - Hướng dẫn, dẫn dắt sư phạm trước khi vào trò chơi:
+    + Cô tổ chức hoạt động trải nghiệm mở rộng đóng vai "Nhà khoa học nhí" / thực hành ứng dụng khoa học vào thực tế quanh lớp học.
+    + Mời đại diện 1 - 2 nhóm trẻ giới thiệu về phát hiện khoa học, hiện tượng biến đổi hoặc các vật dụng mà nhóm vừa khám phá.
+    + Cô đàm thoại gợi mở ứng dụng thực tế: "Trong cuộc sống hằng ngày, các con thấy điều kỳ diệu này xuất hiện ở những đâu?".
+    + Cô bao quát, cổ vũ và khen ngợi tinh thần say mê tìm tòi, hợp tác tích cực của các nhóm trước khi bước vào phần trò chơi củng cố.
+  - Tổ chức Trò chơi củng cố:
+    + Trò chơi: “Ai nhanh hơn – Đội nào giỏi nhất” (hoặc trò chơi khoa học tương ứng với đề tài)
+    - Mục tiêu: Củng cố kiến thức khoa học cốt lõi trẻ vừa khám phá (nhận biết đặc điểm, phân loại đúng đối tượng/hiện tượng khoa học); rèn luyện kỹ năng quan sát, thao tác nhanh nhẹn, tinh thần đồng đội, tính kỷ luật và phản xạ tự tin cho trẻ mầm non.
+    - Chuẩn bị: Vạch xuất phát, các vòng thể dục bật nhảy tiếp sức, rổ đựng tranh ảnh/vật thật khoa học theo yêu cầu, bảng từ gắn kết quả của các đội, nhạc nền sôi động.
+    - Cách chơi: Cô chia lớp mình thành 2 đội chơi xuất sắc có số lượng bạn bằng nhau, đứng xếp thành 2 hàng dọc ngay ngắn trước vạch xuất phát nhé! Phía trước mỗi đội là con đường vòng thể dục và một rổ đựng thẻ tranh/vật thật khoa học. Khi bản nhạc sôi động vang lên và có hiệu lệnh xuất phát của cô, bạn đầu hàng của mỗi đội sẽ bật liên tục qua các vòng thể dục, nhanh chân chạy lên bàn chọn đúng 1 thẻ hình ảnh/vật thật theo yêu cầu khoa học gắn lên bảng của đội mình. Sau đó, các con nhanh chân chạy về cuối hàng đập nhẹ vào tay bạn tiếp theo để bạn tiếp tục lên chơi nhé! Trò chơi sẽ kết thúc khi bản nhạc dừng lại!
+    - Luật chơi: Mỗi lượt lên chơi, mỗi bạn chỉ được chọn đúng 1 thẻ tranh/vật thật. Bạn nào chọn sai hoặc dẫm chân vào viền vòng thể dục thì lượt đó sẽ không được tính điểm. Đội nào chọn đúng và gắn được nhiều thẻ nhất sẽ là đội chiến thắng. Đội về sau sẽ cùng nhau làm động tác mô phỏng chú ếch nhảy / chú chim bay vui nhộn để chúc mừng đội bạn.
+    - Tổ chức cho trẻ chơi 2 – 3 lần sôi nổi (Cô bao quát, cổ vũ tinh thần các đội, đổi tranh ảnh/nhiệm vụ phân loại có độ khó tăng dần ở lượt chơi sau).
 - Hoạt động của Trẻ:
-  - Các nhóm chụm đầu thảo luận rôm rả, phân công bạn chọn màu, bạn in dấu.
-  - Trẻ phối hợp nhịp nhàng, khéo léo hoàn thiện bức tranh của nhóm mình.
-  - Cả nhóm vui sướng ngắm nhìn tác phẩm đầy màu sắc.
+  - Trẻ tự tin đóng vai nhà khoa học nhí, hào hứng phát biểu rôm rả theo từng nhóm:
+    + Nhóm 1: "Thưa cô, nhóm con phát hiện ra khi pha màu đỏ với màu vàng sẽ tạo thành màu cam rất đẹp ạ!".
+    + Nhóm 2: "Nhóm con thấy khi chiếu ánh sáng qua kính lọc thì đồ vật đổi màu kỳ diệu lắm ạ!".
+    + Nhóm 3: "Chúng con tìm thấy rất nhiều đồ chơi có màu sắc tương ứng trong góc xây dựng ạ!".
+  - Trẻ tự do đặt câu hỏi và tự tin trả lời các câu hỏi liên hệ thực tế của cô giáo.
+  - Trẻ chăm chú lắng nghe cô phổ biến mục tiêu, cách chơi và luật chơi của trò chơi “Ai nhanh hơn – Đội nào giỏi nhất”.
+  - Trẻ tích cực tham gia chơi 2 – 3 lần, bật nhảy khéo léo qua các vòng thể dục, phối hợp tiếp sức nhịp nhàng và reo hò cổ vũ bạn cùng đội.
+  - Trẻ chấp hành nghiêm túc luật chơi và vui vẻ chúc mừng đội chiến thắng.
 
-5. Chia sẻ - Đánh giá:
+5. Chia sẻ – Đánh giá:
 - Hoạt động của Cô:
-  - Cô cho các nhóm trưng bày tranh lên giá triển lãm.
-  - Cô hỏi cảm nhận của trẻ: "Hôm nay con thích nhất trải nghiệm nào? Con thấy màu sắc giúp cuộc sống chúng mình như thế nào?".
-  - Cô khen ngợi sự sáng tạo, tinh thần tự giác và đoàn kết của cả lớp.
-  - Cô nhắc nhở trẻ cùng cô thu dọn đồ dùng học liệu gọn gàng vào các góc.
+  - Cô tập trung trẻ lại, trò chuyện hỏi cảm nhận gợi mở của trẻ:
+    + "Hôm nay các con cảm thấy thế nào khi được làm những nhà khoa học nhí khám phá thế giới xung quanh?"
+    + "Qua buổi học hôm nay, con thích nhất trải nghiệm hay trò chơi khoa học nào?"
+    + "Về nhà con sẽ làm gì để giữ gìn môi trường và ứng dụng điều kỳ diệu này cùng bố mẹ?"
+  - Cô nhận xét, tuyên dương sự cố gắng, tinh thần say mê tìm tòi và ý thức tự giác, hợp tác của trẻ trong suốt buổi học.
+  - Cô hướng dẫn trẻ cùng cô thu dọn đồ dùng thí nghiệm, phân loại học liệu vào đúng góc quy định, củng cố nề nếp vệ sinh sạch sẽ, ngăn nắp lớp học.
 - Hoạt động của Trẻ:
-  - Trẻ cùng bạn mang tranh lên trưng bày ngay ngắn.
-  - Trẻ hồn nhiên chia sẻ niềm vui và cảm xúc sau buổi học.
-  - Trẻ lắng nghe cô nhận xét với nụ cười rạng rỡ.
-  - Trẻ tự giác thu dọn khay màu, khăn lau, đồ dùng cất về đúng nơi quy định.
+  - Trẻ hào hứng chia sẻ cảm xúc, niềm vui khi được khám phá khoa học: "Con thấy rất vui và thích làm thí nghiệm cùng các bạn ạ!".
+  - Trẻ tích cực trả lời các câu hỏi liên hệ thực tế của cô giáo.
+  - Trẻ tươi cười lắng nghe cô nhận xét và tự hào đón nhận lời khen ngợi của cô.
+  - Trẻ tự giác cùng cô và các bạn thu dọn đồ dùng, học liệu thí nghiệm cất ngăn nắp vào đúng nơi quy định.
 
 C. LĨNH VỰC PHÁT TRIỂN TÌNH CẢM - XÃ HỘI (GIÁO ÁN TÌNH CẢM - XÃ HỘI):
 Tiêu đề giáo án:
@@ -363,23 +431,41 @@ Thời gian: [Thời gian, ví dụ: 30 - 35 phút]
 
 4. Vận dụng – Mở rộng:
 - Hoạt động của Cô: 
-  + Tình huống giải quyết vấn đề (Ví dụ: "Bé chúc Tết lễ phép", "Bé ứng xử văn minh", "Bé giúp đỡ người thân"): Cô đưa ra tình huống đóng vai thực tế để trẻ rèn luyện kỹ năng ứng xử lễ phép (đứng khoanh tay, chúc lời hay ý đẹp, nhận quà bằng 2 tay và nói câu cảm ơn).
-  + Trò chơi vận động tập thể (Ví dụ: "Chợ Tết quê em", "Tiếp sức chuyển quà"): Chia đội vượt chướng ngại vật mang sản phẩm về trang trí gian hàng. Kiểm tra, đếm số sản phẩm đúng.
-  + Mở rộng: Cho tất cả trẻ mặc áo dài/trang phục đẹp, cùng nắm tay nhau thành vòng tròn lớn, hát và múa bài ca tập thể gắn kết.
+  - Hướng dẫn, dẫn dắt sư phạm cụ thể trước khi vào trò chơi:
+    + Cô tổ chức trò chơi trải nghiệm “Hướng dẫn viên nhí”: Cô đóng vai khách tham quan, mời các nhóm trẻ đóng vai hướng dẫn viên giới thiệu về các khu vực, góc chơi trong lớp và trong trường mầm non.
+    + Mời 1 - 2 trẻ tự tin kể tên cô giáo chủ nhiệm của mình và kể tên một số bạn thân trong lớp.
+    + Cô giới thiệu thêm cho trẻ biết trong trường/điểm trường còn có các cô giáo khác, hỏi trẻ tên trường mầm non nơi trẻ đang học và cô giới thiệu thêm tên cô hiệu trưởng, cô hiệu phó của trường mầm non.
+    + Cô bao quát, cổ vũ và khen ngợi sự tự tin, tinh thần hợp tác của các nhóm trước khi vào trò chơi củng cố.
+  - Tổ chức Trò chơi củng cố:
+    + Trò chơi: “Ai nhanh, bạn trai hay bạn gái” (hoặc trò chơi vận động xã hội tương ứng)
+    - Mục tiêu: Củng cố sự hiểu biết về bản thân, bạn bè, giới tính và tinh thần đoàn kết tập thể; rèn luyện khả năng quan sát, phản xạ nhanh nhẹn theo hiệu lệnh, tính kỷ luật và niềm vui gắn kết cho trẻ mầm non.
+    - Chuẩn bị: Sân lớp rộng rãi, các ô hình tròn (dành cho bạn trai) và ô hình vuông (dành cho bạn gái) được bố trí rõ ràng trên sàn, nhạc bài hát "Ngày vui của bé".
+    - Cách chơi: Cô và các con cùng nắm tay nhau đi vòng tròn, vừa đi vừa hát vang bài hát "Ngày vui của bé". Các con chú ý lắng tai nghe thật kỹ hiệu lệnh của cô nhé! Khi cô hô to hiệu lệnh "Tạo nhóm! Tạo nhóm!", các bạn trai sẽ nhanh chân chạy về ô hình tròn, còn các bạn gái sẽ nhanh chân chạy về ô hình vuông (hoặc ngược lại). Sau khi đã về đúng nhóm của mình, các con hãy cùng gọi tên các bạn trong nhóm và bắt tay chào nhau thật vui vẻ nhé!
+    - Luật chơi: Bạn nào về sai nhóm hoặc không về được đúng nhóm theo hiệu lệnh của cô sẽ phải nhảy lò cò 1 vòng quanh nhóm để tìm về đúng bạn của mình. Nhóm nào về nhanh, đúng và đoàn kết nhất sẽ được cô và cả lớp vỗ tay hoan hô khen ngợi.
+    - Tổ chức cho trẻ chơi 2 – 3 lần sôi nổi (Cô bao quát, khích lệ trẻ, có thể đổi hiệu lệnh nhóm bạn mặc áo màu đỏ/màu vàng, hoặc đổi vị trí hình để rèn phản xạ linh hoạt cho trẻ).
 - Hoạt động của Trẻ:
-  + Trẻ tham gia xử lý tình huống lễ phép: đi nhẹ nhàng, đứng khoanh tay, nói lời chúc yêu thương, nhận quà bằng 2 tay và cảm ơn.
-  + Trẻ tham gia trò chơi vận động đồng đội sôi nổi.
-  + Trẻ rạng rỡ nắm tay nhau hát múa, hòa mình vào không khí tràn ngập niềm vui.
+  - Trẻ tự tin đóng vai hướng dẫn viên nhí, hào hứng giới thiệu về trường lớp với khách tham quan (cô giáo) theo từng nhóm:
+    + Nhóm 1: "Ôi sân trường rộng quá, có nhiều cây xanh và bồn hoa đẹp lắm ạ!".
+    + Nhóm 2: "Đây là góc sách, còn kia là góc xây dựng của chúng con với nhiều khối gỗ đẹp ạ!".
+    + Nhóm 3: "Đây là khu nhà bóng, bên kia là khu vực cầu trượt chúng con rất thích chơi ạ!".
+  - Trẻ tự do đặt câu hỏi cho cô và bạn, tự tin kể tên cô giáo chủ nhiệm, cô hiệu trưởng và các bạn trong lớp.
+  - Trẻ chăm chú lắng nghe cô phổ biến mục tiêu, cách chơi và luật chơi của trò chơi “Ai nhanh, bạn trai hay bạn gái”.
+  - Trẻ hào hứng tham gia chơi 2 – 3 lần sôi nổi: Vừa đi vòng tròn vừa hát vang bài hát, khi có hiệu lệnh trẻ nhanh nhẹn chạy về đúng nhóm của mình và gọi tên bạn thân trong nhóm.
+  - Trẻ chấp hành nghiêm túc luật chơi, vui vẻ nhảy lò cò khi phạm quy và nhiệt tình cổ vũ đồng đội.
 
-5. Đánh giá – Điều chỉnh:
+5. Chia sẻ – Đánh giá (hoặc 5. Đánh giá – Điều chỉnh):
 - Hoạt động của Cô: 
-  + Giáo viên trò chuyện: “Hôm nay con thích hoạt động nào nhất?”, “Con đã học được điều gì?”, “Cảm thấy như thế nào?”.
-  + Quan sát, ghi nhận sự tham gia của trẻ, khuyến khích trẻ tự đánh giá và nhận xét bạn; động viên trẻ tiếp tục thực hiện những hành vi yêu thương, lễ phép trong cuộc sống.
-  + Nhắc nhở trẻ tự giác thu dọn đồ dùng các trạm chơi ngăn nắp, cất gọn gàng vào đúng góc quy định.
+  - Cô tập trung trẻ lại, trò chuyện hỏi cảm xúc gợi mở của trẻ:
+    + "Hôm nay các con cảm thấy thế nào sau buổi học?"
+    + "Con thích nhất hoạt động nào hay góc chơi nào trong ngày hôm nay?"
+    + "Con sẽ làm gì để trường Mầm non của chúng mình luôn sạch đẹp, lớp học luôn chan hòa tình yêu thương?"
+  - Cô nhận xét, tuyên dương sự cố gắng, tinh thần tự giác, tự tin và sự đoàn kết giúp đỡ bạn bè của trẻ trong suốt buổi học.
+  - Cô hướng dẫn trẻ cùng cô thu dọn giáo cụ, phân loại đồ dùng đồ chơi vào đúng góc quy định, củng cố nề nếp vệ sinh sạch sẽ lớp học.
 - Hoạt động của Trẻ:
-  + Trẻ chia sẻ cảm nghĩ và nhận xét bạn.
-  + Trẻ lắng nghe cô khen ngợi với nụ cười rạng rỡ.
-  + Trẻ tự giác cùng cô thu dọn đồ dùng, học liệu cất gọn gàng đúng nơi quy định.
+  - Trẻ tự tin chia sẻ cảm xúc, niềm vui khi được khám phá về trường lớp và bạn bè: "Con rất vui và yêu quý trường lớp, cô giáo và các bạn ạ!".
+  - Trẻ tích cực trả lời các câu hỏi liên hệ thực tế: "Con sẽ cùng các bạn giữ gìn trường lớp sạch đẹp, không vứt rác bừa bãi và luôn vâng lời cô giáo ạ!".
+  - Trẻ tươi cười đón nhận lời khen ngợi của cô và vỗ tay chúc mừng cả lớp.
+  - Trẻ tự giác cùng cô và các bạn thu dọn đồ dùng, học liệu, xếp ngăn nắp vào đúng góc quy định.
 
 D. LĨNH VỰC NGÔN NGỮ (THƠ):
 1. Khởi động – Tạo tình huống: Không gian yên tĩnh, nhẹ nhàng. Trò chơi cảm giác (vẫy quạt mát, hít thở hương hoa...), dẫn dắt vào chủ đề bài thơ.
@@ -397,12 +483,93 @@ E. LĨNH VỰC NGÔN NGỮ (TRUYỆN):
 4. Vận dụng – Mở rộng: Thử thách nhóm (Sắp xếp Vòng tuần hoàn/Sơ đồ câu chuyện); Tình huống giải quyết vấn đề thực tế; Mở rộng đóng kịch ngắn múa hát.
 5. Đánh giá – Điều chỉnh: Trẻ chia sẻ cảm xúc. Cô nhận xét khen ngợi tinh thần hợp tác tự tin.
 
-F. LĨNH VỰC NHẬN THỨC (TOÁN):
-1. Khởi động – Tạo tình huống: Vận động nhẹ theo nhạc; Tình huống du hành Vương quốc Số học; Thử thách tìm nhanh quanh lớp các nhóm đồ dùng có số lượng cho trước, gắn thẻ số.
-2. Khám phá – Trải nghiệm: Phát rổ đồ dùng cho từng trẻ, giao quyền tự do trải nghiệm (Xếp tất cả đối tượng 1 thành hàng ngang từ trái sang phải; Xếp đối tượng 2 tương ứng 1-1; Trẻ tự đếm và tự nhận xét mối quan hệ giữa 2 nhóm; Trẻ tự thử nghiệm thêm/bớt).
-3. Chia sẻ – Thảo luận: Trẻ đại diện chia sẻ thao tác; Cô đặt câu hỏi khơi gợi bản chất toán học ("X thêm Y là bao nhiêu?"), cả lớp đếm lại; Cô khẳng định quy tắc toán; Giới thiệu chữ số mới & phân tích cấu tạo nét; Cho trẻ chọn thẻ số gắn vào nhóm.
-4. Vận dụng – Mở rộng: Trạm thử thách áp dụng (Trạm 1: Tìm bạn cho số; Trạm 2: Tạo hình số từ đất nặn/sỏi/dây thừng; Trạm 3: Vẽ/dán bổ sung cho đủ số lượng); Tạo hình số khổng lồ bằng cơ thể.
-5. Đánh giá – Điều chỉnh: Hỏi điều học được. Cô nhận xét tuyên dương sự tham gia tích cực.
+F. LĨNH VỰC NHẬN THỨC (TOÁN - LÀM QUEN VỚI TOÁN):
+Tiêu đề giáo án:
+GIÁO ÁN LÀM QUEN VỚI TOÁN
+Đề tài: [Tên bài toán, ví dụ: Đếm đến 5, nhận biết nhóm có 5 đối tượng, nhận biết chữ số 5 / Nhận biết phân biệt hình vuông, hình tròn / So sánh chiều dài 2 đối tượng]
+Lĩnh vực: Lĩnh vực Phát triển nhận thức (Làm quen với toán)
+Độ tuổi: [Độ tuổi, ví dụ: Mẫu giáo lớn (5 – 6 tuổi)]
+Thời gian: [Thời gian, ví dụ: 30 - 35 phút]
+
+1. Khởi động – Tạo tình huống và giao nhiệm vụ:
+- Hoạt động của Cô:
+  + Cô cùng cả lớp hát và vận động theo giai điệu bài hát toán học vui nhộn (ví dụ: "Tập đếm", "Năm ngón tay ngoan"...).
+  + Cô tạo tình huống bất ngờ đưa trẻ vào "Vương quốc Toán học kỳ thú" hoặc xuất hiện "Hộp quà bí mật của bác gấu".
+  + Cô đàm thoại gợi mở, tổ chức trò chơi nhỏ ôn luyện số lượng/hình khối đã học trong phạm vi trước.
+  + Cô dẫn dắt nhẹ nhàng giới thiệu bài học toán mới và giao nhiệm vụ học tập cho trẻ.
+- Hoạt động của Trẻ:
+  + Trẻ hào hứng hát và nhún nhảy theo giai điệu bài hát vui nhộn cùng cô.
+  + Trẻ quây quần bên cô, chăm chú lắng nghe và hào hứng giải câu đố, gọi tên số lượng ôn luyện.
+  + Trẻ sẵn sàng tâm thế bước vào bài học toán mới.
+
+2. Khám phá – Trải nghiệm:
+- Hoạt động của Cô:
+  + Cô phát cho mỗi trẻ một rổ đồ dùng học tập trực quan (các con giống, bông hoa, quả cam, thẻ số...).
+  + Hướng dẫn trẻ tự tay lấy các đối tượng trong rổ ra xếp thành hàng ngang ngay ngắn từ trái sang phải theo hiệu lệnh.
+  + Hướng dẫn trẻ xếp nhóm đối tượng thứ hai tương ứng 1 - 1 với nhóm đối tượng thứ nhất.
+  + Cô gợi mở để trẻ tự quan sát, đếm nhẩm số lượng của từng nhóm và tự so sánh xem 2 nhóm như thế nào với nhau (nhiều hơn, ít hơn hay bằng nhau).
+  + Cho trẻ tự trải nghiệm thêm vào hoặc bớt đi 1 đối tượng để tạo sự bằng nhau.
+  + Cô đi lại bao quát từng trẻ, mỉm cười khích lệ trẻ thao tác khéo léo (không làm thay trẻ).
+- Hoạt động của Trẻ:
+  + Trẻ vui vẻ đón nhận rổ đồ dùng và đặt ngay ngắn trước mặt.
+  + Trẻ tự tay xếp các đối tượng thành hàng ngang thẳng tắp từ trái qua phải.
+  + Trẻ xếp đối tượng thứ 2 tương ứng 1 - 1 ngay phía dưới đối tượng thứ nhất.
+  + Trẻ chăm chú đếm nhẩm và tự nhận xét: "Nhóm hoa nhiều hơn nhóm quả ạ!", "Nhóm quả ít hơn nhóm hoa ạ!".
+  + Trẻ thử nghiệm thêm 1 quả và reo vui: "Bây giờ 2 nhóm bằng nhau rồi ạ!".
+
+3. Chia sẻ – Thảo luận:
+- Hoạt động của Cô:
+  + Cô mời đại diện một số trẻ đứng lên chia sẻ thao tác xếp và kết quả đếm, so sánh của mình.
+  + Cô thao tác chuẩn hóa trên bảng từ lớn: Xếp mẫu, chỉ tay từ trái sang phải và đếm to rõ ràng cùng cả lớp.
+  + Cô khẳng định quy tắc toán học: Số lượng mới tạo thành (ví dụ: 4 thêm 1 là 5).
+  + Cô giới thiệu chữ số mới: Cho trẻ quan sát thẻ số, phân tích cấu tạo nét của chữ số một cách trực quan, gần gũi.
+  + Cho cả lớp, từng tổ, nhóm bạn trai, bạn gái và cá nhân trẻ phát âm chữ số mới.
+  + Cho trẻ tìm thẻ số mới trong rổ và gắn tương ứng vào nhóm đồ dùng của mình.
+- Hoạt động của Trẻ:
+  + Trẻ tự tin đứng lên phát biểu và chia sẻ cách đếm của mình với cô và các bạn.
+  + Trẻ chú ý quan sát cô thao tác trên bảng từ và cùng đếm đồng thanh to, rõ ràng từ 1 đến hết.
+  + Trẻ chăm chú quan sát thẻ số mới, nhắc lại cấu tạo nét theo hướng dẫn của cô.
+  + Cả lớp, tổ, cá nhân trẻ phát âm chuẩn xác tên chữ số.
+  + Trẻ nhanh nhẹn tìm đúng thẻ số trong rổ và gắn ngay ngắn vào bên phải nhóm đồ dùng.
+
+4. Vận dụng – Mở rộng:
+- Hoạt động của Cô:
+  - Hướng dẫn, dẫn dắt sư phạm cụ thể trước khi vào trò chơi:
+    + Cô cùng trẻ đàm thoại, tổ chức hoạt động trải nghiệm toán học thực tế quanh lớp học: "Các con ơi! Xung quanh lớp mình có rất nhiều góc chơi với những đồ dùng, đồ chơi mang số lượng/hình khối như bài học hôm nay đấy!".
+    + Cô mời các nhóm trẻ quan sát nhanh và tìm các nhóm đồ vật quanh lớp có số lượng tương ứng với bài học (ví dụ: 5 bông hoa ở góc thiên nhiên, 5 khối gỗ ở góc xây dựng, 5 quyển truyện ở góc sách...).
+    + Mời đại diện 1 - 2 trẻ lên chỉ vào các nhóm đồ vật vừa tìm thấy, cả lớp cùng đếm kiểm tra lại và mời trẻ chọn thẻ số tương ứng gắn vào.
+    + Cô bao quát, cổ vũ và khen ngợi tinh thần nhanh mắt, khéo léo của các nhóm trẻ trước khi bước vào trò chơi củng cố.
+  - Tổ chức Trò chơi củng cố:
+    + Trò chơi: “Về đúng nhà” (hoặc trò chơi toán học: “Ai nhanh hơn – Tìm đúng số lượng”)
+    - Mục tiêu: Củng cố biểu tượng toán học (nhận biết chữ số, đếm đúng số lượng và phân biệt hình khối nhanh nhạy); rèn luyện khả năng quan sát, phản xạ nhanh nhẹn theo hiệu lệnh, tinh thần đồng đội và tính kỷ luật cho trẻ mầm non.
+    - Chuẩn bị: 3 - 4 ngôi nhà mang các thẻ số/chữ số tương ứng được bố trí ở các góc lớp, mỗi trẻ cầm 1 thẻ số trên tay, nhạc bài hát "Ngày vui của bé".
+    - Cách chơi: Cô phát cho mỗi bạn một thẻ số bất kỳ. Các con cầm thẻ số trên tay và cùng nắm tay nhau đi vòng tròn theo điệu nhạc bài hát "Ngày vui của bé". Khi bản nhạc dừng lại hoặc cô hô to hiệu lệnh "Tìm nhà! Tìm nhà!", các con hãy quan sát thật nhanh xem thẻ số trên tay mình là số mấy rồi chạy thật nhanh về đúng ngôi nhà mang chữ số tương ứng nhé! Về đến nhà, các con hãy giơ cao thẻ số của mình lên và đọc to số của mình cùng các bạn trong nhà nhé!
+    - Luật chơi: Bạn nào về sai nhà hoặc không về được đúng nhà theo hiệu lệnh của cô sẽ phải nhảy lò cò 1 vòng quanh lớp để tìm về đúng ngôi nhà của mình. Đội nào/bạn nào về nhanh, đúng nhà và giơ đúng thẻ số sẽ được cô và cả lớp vỗ tay khen ngợi thật to!
+    - Tổ chức cho trẻ chơi 2 – 3 lần sôi nổi (Cô hướng dẫn trẻ đổi thẻ số cho bạn bên cạnh sau mỗi lần chơi, cô bao quát, khích lệ động viên trẻ còn nhút nhát và tạo không khí vui tươi, hào hứng).
+- Hoạt động của Trẻ:
+  - Trẻ tự tin quan sát xung quanh lớp học và hào hứng phát biểu rôm rả theo từng nhóm:
+    + Nhóm 1: "Thưa cô, chúng con tìm thấy 5 bông hoa cúc vàng rất đẹp ở góc thiên nhiên ạ!".
+    + Nhóm 2: "Nhóm con tìm thấy 5 chiếc ô tô đồ chơi ở góc xây dựng và đã gắn đúng thẻ số 5 rồi ạ!".
+    + Nhóm 3: "Góc học tập của chúng con có 5 bạn gấu bông ngồi ngay ngắn ạ!".
+  - Cả lớp cùng đếm to kiểm tra lại số lượng bạn vừa tìm và vỗ tay chúc mừng.
+  - Trẻ chăm chú lắng nghe cô phổ biến mục tiêu, cách chơi và luật chơi của trò chơi “Về đúng nhà”.
+  - Trẻ hào hứng tham gia chơi 2 – 3 lần sôi nổi: Vừa đi vừa hát vui tươi, khi nghe hiệu lệnh nhanh chân chạy về đúng ngôi nhà mang chữ số của mình, tươi cười giơ cao thẻ số đọc vang.
+  - Trẻ vui vẻ đổi thẻ cho bạn sau mỗi lượt chơi, chấp hành nghiêm túc luật chơi và vui vẻ nhảy lò cò khi về nhầm nhà.
+
+5. Chia sẻ – Đánh giá:
+- Hoạt động của Cô:
+  - Cô tập trung trẻ lại, trò chuyện hỏi cảm nhận gợi mở của trẻ:
+    + "Hôm nay các con đã được học bài học toán gì thú vị?"
+    + "Chúng mình đã được làm quen với chữ số mấy và chơi những trò chơi nào?"
+    + "Các con cảm thấy buổi học hôm nay như thế nào? Về nhà các con sẽ đếm những đồ dùng gì giúp ông bà, bố mẹ?"
+  - Cô nhận xét, tuyên dương sự nỗ lực, kỹ năng đếm thành thạo, xếp tương ứng chuẩn xác và tinh thần học tập chăm chỉ, tự giác của trẻ trong suốt buổi học.
+  - Cô giáo dục trẻ biết giữ gìn đồ dùng học tập, đoàn kết giúp đỡ bạn bè trong lớp.
+  - Hướng dẫn trẻ cùng cô thu dọn rổ đồ dùng, xếp thẻ số gọn gàng và cất vào đúng góc học tập, củng cố nề nếp ngăn nắp của lớp.
+- Hoạt động của Trẻ:
+  - Trẻ lắng nghe và hào hứng chia sẻ cảm xúc: "Hôm nay chúng con học đếm và nhận biết chữ số rất vui và thích thú ạ!".
+  - Trẻ tích cực trả lời: "Về nhà con sẽ đếm bát đũa giúp mẹ trong bữa cơm ạ!".
+  - Trẻ tươi cười đón nhận lời khen ngợi của cô và vỗ tay chúc mừng cả lớp.
+  - Trẻ tự giác cùng cô và các bạn thu dọn rổ đồ dùng, xếp thẻ số ngay ngắn và cất vào góc học tập.
 
 G. LĨNH VỰC NGÔN NGỮ (CHỮ CÁI):
 1. Khởi động – Tạo tình huống: Vận động Vũ điệu chữ cái; Tạo tình huống "Hộp quà bí mật", mở hộp lấy tranh kèm câu văn trọn vẹn; Đọc câu trọn vẹn và phát hiện chữ cái nổi bật màu đỏ.
@@ -681,15 +848,49 @@ Bước 5: Chia sẻ – Đánh giá – Kết thúc
   - Trẻ tự giác xếp gọn bút chì, vở vào ngăn/kệ lớp học.
   - Trẻ vận động xoay cổ tay thư giãn theo cô và chuẩn bị chuyển hoạt động.
 
-Q. HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI:
+Q. HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI (TRONG 8 HOẠT ĐỘNG MỚI THEO QUYẾT ĐỊNH 388/QĐ-BGDĐT):
 - Cấu trúc mục tiêu: Gắn mã chỉ báo QĐ 388 (NN 5.1, NN 5.2, NT 1.1, NN 2.2, TC 1.2, TX 4.4...).
 - Mục tích hợp: NLS (Mục 5 nếu chọn), AI (Mục 6 nếu chọn).
-- Tiến trình 5 bước:
-  1. Khởi động – Gợi cảm xúc và Nhắc nhớ chữ cái: Hát/vận động bài hát vui nhộn về chữ cái; Đố vui tìm chữ cái đã học trong bảng chữ cái tạo không khí phấn khởi.
-  2. Trò chơi 1: Nhận diện chữ cái nhanh ("Ai tinh mắt", "Tìm chữ theo phát âm/nét chữ"): Cô phát âm chữ cái hoặc nêu đặc điểm nét chữ, trẻ nhanh tay tìm đúng thẻ chữ cái giơ lên và phát âm to, rõ ràng.
-  3. Trò chơi 2: Vận động tiếp sức chữ cái ("Bật qua vòng tìm chữ", "Chuyển bóng về đúng nhà chữ cái"): Chia lớp thành các đội thi đua; Trẻ kết hợp vận động bật nhảy khéo léo với nhận diện chữ cái gắn lên bảng đội mình.
-  4. Trò chơi 3: Sáng tạo chữ cái ("Tạo dáng chữ bằng cơ thể", "Xếp chữ bằng hột hạt/dây nơ/đất nặn"): Trẻ về nhóm sử dụng nguyên vật liệu mở hoặc phối hợp các bạn tạo thành chữ cái sinh động; Từng nhóm thuyết minh về chữ cái của mình.
-  5. Đánh giá – Trao hoa thưởng và Kết thúc: Cô nhận xét tinh thần đoàn kết, sự nhanh nhạy của các đội; Tuyên dương và tặng hoa thưởng; Cả lớp cùng cất dọn đồ chơi chữ cái.
+- BẮT BUỘC SOẠN ĐỦ CHUỖI 5 TRÒ CHƠI CHỮ CÁI (TỪ TRÒ CHƠI 1 ĐẾN TRÒ CHƠI 5), TUYỆT ĐỐI KHÔNG ĐƯỢC THIẾU HOẶC CHỈ SOẠN 3 TRÒ CHƠI.
+- Cấu trúc tiến trình 5 bước chuẩn mực:
+  1. Bước 1: Gợi hứng thú – hình thành và lựa chọn ý tưởng chơi:
+     + Hát, vận động vui nhộn theo bài hát ngắn có chứa chữ cái trọng tâm bài học.
+     + Đưa chữ cái ra gợi mở, đố vui nhận diện mặt chữ và hỏi trẻ muốn tham gia những trò chơi gì với chữ cái.
+     + Giới thiệu chuỗi 5 trò chơi chữ cái hấp dẫn (Ai tìm chữ nhanh, Về đúng nhà, Chuyền chữ tiếp sức, Ghép chữ tạo từ, Săn tìm chữ cái sáng tạo) và cho trẻ lựa chọn.
+  2. Bước 2: Thỏa thuận – Lập kế hoạch chơi:
+     + Chia lớp thành các nhóm/đội chơi (ví dụ: Đội Chữ O, Đội Chữ Ô, Đội Chữ Ơ...).
+     + Thống nhất luật chơi văn minh: Chơi trung thực, không tranh giành, biết chờ lượt, đoàn kết và giúp đỡ bạn bè.
+     + Chuẩn bị đầy đủ học liệu cho cả 5 trò chơi (thẻ chữ cái, rổ đựng, vòng bật nhảy, tranh từ, ngôi nhà chữ cái...).
+  3. Bước 3: Thực hiện chuỗi 5 trò chơi chữ cái trọng tâm (BẮT BUỘC CÓ ĐỦ CẢ 5 TRÒ CHƠI VỚI ĐẦY ĐỦ CÁCH CHƠI, LUẬT CHƠI VÀ MỤC TIÊU):
+     * Trò chơi 1: "AI TÌM CHỮ NHANH?" (hoặc "AI TINH MẮT / VÒNG QUAY CHỮ CÁI")
+       - Mục tiêu: Nhận biết mặt chữ, phát âm chuẩn xác và rèn phản xạ nhanh với chữ cái.
+       - Cách chơi: Cô đặt nhiều thẻ chữ cái lẫn nhau. Khi cô phát âm hoặc nêu đặc điểm nét (ví dụ: "Tìm cho cô chữ ô có dấu mũ!"), trẻ nhanh tay tìm đúng thẻ chữ trong rổ và giơ lên thật nhanh.
+       - Luật chơi: Chọn đúng chữ và phát âm to, rõ ràng mới được tính điểm/nhận hoa thưởng.
+     * Trò chơi 2: "VỀ ĐÚNG NHÀ" (hoặc "BẬT QUA VÒNG TÌM CHỮ CÁI")
+       - Mục tiêu: Củng cố phân biệt các chữ cái đã học, kết hợp rèn luyện thể lực và phản xạ định hướng không gian.
+       - Cách chơi: Đặt các ngôi nhà mang ký hiệu chữ cái ở các góc. Mỗi trẻ cầm một thẻ chữ cái vừa đi vừa hát theo nhạc. Khi có hiệu lệnh nhạc dừng / "Trời mưa", trẻ nhanh chân chạy về đúng ngôi nhà mang chữ cái giống thẻ trên tay mình.
+       - Luật chơi: Về đúng nhà và đọc to tên chữ cái của ngôi nhà; ai về nhầm nhà phải nhảy lò cò về đúng nhà.
+     * Trò chơi 3: "CHUYỀN CHỮ TIẾP SỨC" (hoặc "CHUYỀN BÓNG CHỮ CÁI THEO NHẠC")
+       - Mục tiêu: Rèn tinh thần hợp tác đồng đội, phối hợp nhịp nhàng và trách nhiệm với tập thể.
+       - Cách chơi: Chia các đội xếp hàng dọc. Phía trước mỗi đội có rổ chứa nhiều thẻ chữ. Khi có hiệu lệnh còi, từng bạn đầu hàng chạy lên chọn đúng chữ cái của đội mình mang về rổ đội, rồi chạy về đập tay bạn tiếp theo.
+       - Luật chơi: Mỗi lượt chơi chỉ được lấy 1 thẻ chữ; đội nào chọn đúng và nhiều thẻ chữ nhất trong thời gian 1 bản nhạc là đội chiến thắng.
+     * Trò chơi 4: "GHÉP CHỮ TẠO TỪ" (hoặc "THỬ TÀI GHÉP NÉT TẠO CHỮ")
+       - Mục tiêu: Khắc sâu cấu tạo nét của chữ cái và bước đầu nhận diện chữ cái trong từ hoàn chỉnh gắn với hình ảnh.
+       - Cách chơi: Cô phát tranh có hình ảnh và từ bên dưới (ví dụ: tranh "con ong", "ô tô", "cái nơ"...). Trẻ quan sát tranh, tìm các thẻ chữ cái còn thiếu ghép vào đúng vị trí để hoàn thiện từ có nghĩa.
+       - Luật chơi: Ghép đúng vị trí chữ cái và phát âm to từ hoàn chỉnh.
+     * Trò chơi 5: "SĂN TÌM CHỮ CÁI" (hoặc "TẠO DÁNG CHỮ CÁI SÁNG TẠO BẰNG CƠ THỂ / HỘT HẠT")
+       - Mục tiêu: Phát huy tư duy sáng tạo, khả năng quan sát không gian và vận dụng nghệ thuật tạo hình chữ cái.
+       - Cách chơi: Nhóm thì đi săn tìm các thẻ chữ cái ẩn giấu quanh lớp học theo nhiệm vụ; nhóm thì phối hợp 2-3 bạn uốn mình tạo dáng chữ cái; nhóm dùng hột hạt, sỏi màu xếp thành chữ cái sinh động.
+       - Luật chơi: Tìm đúng số lượng chữ theo yêu cầu, không tranh giành thẻ của bạn, thuyết minh về chữ cái sáng tạo của nhóm mình.
+  4. Bước 4: Mở rộng và phát triển:
+     + Tăng độ khó: Tìm chữ cái vừa học trong các từ trên bảng tuyên truyền, góc sách truyện quanh lớp học.
+     + Đàm thoại phân tích sâu: So sánh điểm giống và khác nhau về cấu tạo nét giữa các chữ cái đã học.
+     + Cho trẻ tự nghĩ thêm các từ ngữ quen thuộc trong cuộc sống có chứa chữ cái vừa học.
+  5. Bước 5: Chia sẻ – Đánh giá – Kết thúc chơi:
+     + Đàm thoại củng cố: Hỏi cảm nhận của trẻ về 5 trò chơi hôm nay, trẻ thích nhất trò chơi nào và học được những chữ cái gì.
+     + Cả lớp đồng thanh phát âm lại rõ ràng, chuẩn xác các chữ cái.
+     + Cô nhận xét tuyên dương tinh thần đoàn kết, sự nhanh nhẹn, trung thực của các đội và trao cờ/hoa thưởng.
+     + Cho trẻ cùng cô thu dọn đồ dùng thẻ chữ vào rổ gọn gàng, ngăn nắp.
 `;
 
 

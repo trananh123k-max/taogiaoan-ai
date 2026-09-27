@@ -236,14 +236,14 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
                 <div>
                   <div className="font-bold text-slate-900">Ưu tiên 1 (Mặc định): Tốc độ siêu tốc</div>
-                  <div className="text-slate-600 text-[10.5px]"><code>gemini-3.1-flash-lite</code> & <code>gemini-flash-lite-latest</code> (2 - 3s/hoạt động).</div>
+                  <div className="text-slate-600 text-[10.5px]"><code>gemini-3.1-flash-lite</code> (2 - 3s/hoạt động).</div>
                 </div>
               </div>
               <div className="bg-white/80 border border-blue-100 rounded-lg p-2 flex items-start gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
                 <div>
                   <div className="font-bold text-slate-900">Ưu tiên 2 (Tự động chuyển tiếp - Failover)</div>
-                  <div className="text-slate-600 text-[10.5px]">Tự động chuyển <code>gemini-3-flash-preview</code> khi 503/429, giữ chuẩn khung bảng.</div>
+                  <div className="text-slate-600 text-[10.5px]">Tự động chuyển <code>gemini-3.5-flash-lite</code> khi 503/429, giữ chuẩn khung bảng.</div>
                 </div>
               </div>
             </div>
@@ -272,7 +272,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                 rows={3}
                 value={apiKeyInput}
                 onChange={(e) => handleInputChange(e.target.value)}
-                placeholder="Dán 1 hoặc nhiều API Key tại đây (mỗi key 1 dòng hoặc cách nhau bởi dấu phẩy, dấu chấm phẩy)&#10;Ví dụ:&#10;AIzaSyA123456789...&#10;AQ.Ab8RN6J3Y..."
+                placeholder="Dán 1 hoặc nhiều API Key tại đây (mỗi key 1 dòng hoặc cách nhau bởi dấu phẩy, dấu chấm phẩy)&#10;Ví dụ:&#10;AIzaSyD9876543210abcdef...&#10;AIzaSyB1234567890ghijkl..."
                 className={`w-full bg-white border border-slate-300 rounded-lg p-3 font-mono text-xs text-slate-900 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 shadow-2xs resize-y min-h-[85px] leading-relaxed ${
                   !showKey ? 'filter-none' : ''
                 }`}
@@ -305,7 +305,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                 )}
               </div>
               <div className="text-[10px] text-slate-500 italic">
-                Phân cách: Xuống dòng (Enter), dấu phẩy (,), hoặc dấu chấm phẩy (;)
+                Hỗ trợ cả khóa Google AI Studio mới (<strong className="text-amber-800">AQ...</strong>) và truyền thống (<strong className="text-amber-800">AIzaSy...</strong>)
               </div>
             </div>
 
@@ -315,7 +315,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                 {parsedKeys.map((k, idx) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1 bg-amber-100/70 border border-amber-300 text-amber-950 font-mono text-[10px] px-2 py-0.5 rounded-md"
+                    className="inline-flex items-center gap-1 border bg-amber-100/70 border-amber-300 text-amber-950 font-mono text-[10px] px-2 py-0.5 rounded-md"
                   >
                     <Key className="w-2.5 h-2.5 text-amber-700" />
                     <span>

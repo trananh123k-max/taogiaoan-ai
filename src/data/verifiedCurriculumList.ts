@@ -212,6 +212,42 @@ export const VERIFIED_KNTT_CURRICULUM: Record<string, CurriculumItem> = {
     ]
   },
 
+  // === HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI (CHUẨN 8 HOẠT ĐỘNG MỚI QĐ 388) ===
+  'HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI_Mẫu giáo lớn (5-6 tuổi)': {
+    themes: ['Chương trình Mầm non - Chuỗi 5 trò chơi chữ cái'],
+    lessons: [
+      'Chơi với chữ cái o, ô, ơ',
+      'Chơi với chữ cái a, ă, â',
+      'Chơi với chữ cái e, ê',
+      'Chơi với chữ cái u, ư',
+      'Chơi với chữ cái i, t, c',
+      'Chơi với chữ cái b, d, đ',
+      'Chơi với chữ cái l, m, n',
+      'Chơi với chữ cái h, k',
+      'Chơi với chữ cái p, q',
+      'Chơi với chữ cái g, y',
+      'Chơi với chữ cái s, x',
+      'Chơi với 29 chữ cái tiếng Việt tổng hợp'
+    ]
+  },
+  'HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI_Mẫu giáo nhỡ (4-5 tuổi)': {
+    themes: ['Chương trình Mầm non - Chuỗi 5 trò chơi chữ cái'],
+    lessons: [
+      'Chơi với chữ cái o, ô, ơ',
+      'Chơi với chữ cái a, ă, â',
+      'Chơi với chữ cái e, ê',
+      'Chơi với chữ cái u, ư',
+      'Chơi với chữ cái i, t, c'
+    ]
+  },
+  'HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI_Mẫu giáo bé (3-4 tuổi)': {
+    themes: ['Chương trình Mầm non - Làm quen và chơi với chữ cái'],
+    lessons: [
+      'Chơi với chữ cái o, ô, ơ',
+      'Chơi với chữ cái a, ă, â'
+    ]
+  },
+
 
 
 

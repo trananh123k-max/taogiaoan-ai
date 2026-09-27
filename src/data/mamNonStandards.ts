@@ -62,4 +62,18 @@ export const MAM_NON_STANDARDS: Record<string, string> = {
   // Nghệ thuật MG Lớn
   'Hát ngẫu hứng, sáng tạo lời ca mới theo bài quen thuộc': 'Sáng tạo âm nhạc, múa ngẫu hứng bộc lộ ý tưởng.',
   'Đóng kịch phân vai theo cốt truyện sáng tạo của nhóm': 'Biểu cảm diễn xuất, tự chủ đạo cụ và lời thoại vai kịch.',
+
+  // Hoạt động trò chơi chữ cái (Chuẩn 8 hoạt động mới QĐ 388)
+  'Chơi với chữ cái o, ô, ơ': 'Nhận biết cấu tạo nét và phát âm đúng o, ô, ơ; tham gia hào hứng chuỗi 5 trò chơi chữ cái.',
+  'Chơi với chữ cái a, ă, â': 'Nhận biết cấu tạo nét và phát âm đúng a, ă, â; phối hợp nhóm chơi chuỗi 5 trò chơi chữ cái.',
+  'Chơi với chữ cái e, ê': 'Nhận biết cấu tạo nét và phát âm đúng e, ê; phản xạ nhanh trong chuỗi 5 trò chơi chữ cái.',
+  'Chơi với chữ cái u, ư': 'Nhận biết cấu tạo nét và phát âm đúng u, ư; phối hợp tiếp sức chuỗi 5 trò chơi chữ cái.',
+  'Chơi với chữ cái i, t, c': 'Nhận biết phân biệt i, t, c; ghép chữ tạo từ và tham gia chuỗi 5 trò chơi chữ cái.',
+  'Chơi với chữ cái b, d, đ': 'Nhận biết phân biệt b, d, đ; chơi tiếp sức và săn tìm chữ cái sáng tạo.',
+  'Chơi với chữ cái l, m, n': 'Nhận biết phân biệt l, m, n; phát âm chuẩn xác trong chuỗi 5 trò chơi chữ cái.',
+  'Chơi với chữ cái h, k': 'Nhận biết phân biệt h, k; tạo dáng chữ và tham gia chuỗi 5 trò chơi chữ cái.',
+  'Chơi với chữ cái p, q': 'Nhận biết phân biệt p, q; rèn phản xạ và tinh thần đồng đội qua 5 trò chơi chữ cái.',
+  'Chơi với chữ cái g, y': 'Nhận biết phân biệt g, y; ghép từ và tham gia chuỗi 5 trò chơi chữ cái.',
+  'Chơi với chữ cái s, x': 'Nhận biết phân biệt s, x; phát âm chuẩn xác qua 5 trò chơi chữ cái.',
+  'Chơi với 29 chữ cái tiếng Việt tổng hợp': 'Củng cố nhận diện 29 chữ cái tiếng Việt qua chuỗi 5 trò chơi chữ cái hấp dẫn.',
 };

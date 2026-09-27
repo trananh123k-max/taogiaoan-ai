@@ -29,17 +29,21 @@ export function sanitizeApiKeyInput(inputStr?: string): string {
 /**
  * Parses individual Gemini API Key tokens from any input string format.
  * Filters out common UI copy artifacts like 'content_copy', 'content_cop', 'copy', etc.
+ * Supports both modern "AQ." Authentication Keys and classic "AIzaSy..." format.
  */
 export function parseKeysFromInput(inputStr?: string): string[] {
   if (!inputStr || typeof inputStr !== 'string') return [];
 
   // 1. Normalize zero-width spaces, invisible unicode, and non-breaking spaces
-  const normalized = inputStr
+  let normalized = inputStr
     .replace(/[\u200B-\u200D\uFEFF\u00A0]/g, ' ')
     // Remove known copy artifact labels case-insensitively
     .replace(/\b(content_copy|content_cop|copied|copy|api_key|apikey|key)\b/gi, ' ');
 
-  // 2. Split by comma, semicolon, newline, or whitespace
+  // 2. Fix Google AI Studio new "AQ." key copy format (e.g. "AQ. " -> "AQ.")
+  normalized = normalized.replace(/\bAQ\.\s+/g, 'AQ.');
+
+  // 3. Split by comma, semicolon, newline, or whitespace
   const rawTokens = normalized.split(/[,;\n\r\s]+/);
 
   const validKeys: string[] = [];
@@ -55,10 +59,11 @@ export function parseKeysFromInput(inputStr?: string): string[] {
       continue;
     }
 
-    // Google Gemini API keys are base64url-like alphanumeric with underscores, dashes, dots
-    // Typically ~39 chars (AIzaSy...) or 40-55 chars (AQ....)
-    // Filter to retain only valid tokens with length >= 15
-    const match = token.match(/([A-Za-z0-9_\-\.]{15,})/);
+    // Google Gemini API keys:
+    // 1. New Google AI Studio Auth Keys: "AQ.Ab8..." (starts with AQ.)
+    // 2. Classic Google API Keys: "AIzaSy..." (starts with AIza)
+    // 3. Length >= 15 characters
+    const match = token.match(/((?:AQ\.)?[A-Za-z0-9_\-\.]{15,})/);
     if (match && match[1]) {
       const candidate = match[1];
       if (!/^(content_copy|content_cop)$/i.test(candidate)) {

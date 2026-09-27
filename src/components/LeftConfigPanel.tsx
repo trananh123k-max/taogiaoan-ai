@@ -256,7 +256,6 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
         updates.targetPeriodDetail = matchedPPCTLesson.periodDetail;
       }
       if (matchedPPCTLesson.hasStemIntegration) {
-        updates.enableSTEM = true;
         updates.hasStemFromPPCT = true;
         if (matchedPPCTLesson.stemTopic && !config.stemTopic) {
           updates.stemTopic = matchedPPCTLesson.stemTopic;
@@ -695,7 +694,8 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                       subject: newSubject,
                       lessonTitle: '',
                       enableNLS: false,
-                      enableAI: true,
+                      enableAI: false,
+                      enableSTEM: false,
                     });
                   } else {
                     setIsCustomGrade(false);
@@ -706,7 +706,7 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                     
                     const activeList = newLevel === 'Tiểu học' ? TIEU_HOC_SUBJECTS_LIST : newLevel === 'THCS' ? THCS_SUBJECTS_LIST : THPT_SUBJECTS_LIST;
                     if (!activeList.includes(newSubject || '')) {
-                      newSubject = activeList[0];
+                       newSubject = activeList[0];
                     }
                     
                     onChangeConfig({
@@ -714,8 +714,9 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                       grade: newGrade,
                       subject: newSubject,
                       lessonTitle: '',
-                      enableNLS: true,
-                      enableAI: true,
+                      enableNLS: false,
+                      enableAI: false,
+                      enableSTEM: false,
                     });
                   }
                 }}
