@@ -75,11 +75,11 @@ export default function App() {
     enableNLS: false,
     nlsMode: 'ppct',
     customNLS: '',
-    selectedNLSDomains: ['nls_info', 'nls_creation', 'nls_problem_solving'],
+    selectedNLSDomains: [],
     enableAI: false,
     aiMode: 'ppct',
     customAI: '',
-    selectedAIDomains: ['ai_prompting', 'ai_critical_thinking', 'ai_creativity'],
+    selectedAIDomains: [],
     enableSTEM: false,
     oldPlanContent: '',
     imageSlots: [],
@@ -1038,6 +1038,9 @@ export default function App() {
               try {
                 localStorage.setItem('khbd_current_user', JSON.stringify(freshCurrent));
               } catch {}
+            } else if (currentUser.role !== 'admin') {
+              // Current logged in account was deleted - immediately log out and revoke
+              handleLogout();
             }
           }
           showToast('Đã cập nhật danh sách tài khoản người dùng!', 'success');

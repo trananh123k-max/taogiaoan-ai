@@ -95,6 +95,7 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
   const [isCustomGrade, setIsCustomGrade] = useState(false);
   const [customGradeText, setCustomGradeText] = useState('');
   const [isCustomLessonInput, setIsCustomLessonInput] = useState(false);
+  const [isCustomMainTheme, setIsCustomMainTheme] = useState(false);
 
   // State for DOCX Sample Upload
   const [isParsingDocx, setIsParsingDocx] = useState(false);
@@ -902,7 +903,7 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      const defaultTheme = config.preschoolMainTheme || MAM_NON_MAIN_THEMES[0];
+                      const defaultTheme = config.preschoolMainTheme || '';
                       const defaultSubject = MAM_NON_TRADITIONAL_DOMAINS.includes(config.subject) ? config.subject : MAM_NON_TRADITIONAL_DOMAINS[0];
                       onChangeConfig({
                         preschoolCategoryMode: 'theme',
@@ -952,30 +953,67 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
               if (currentPreschoolMode === 'theme') {
                 return (
                   <div className="space-y-3 pt-1">
-                    {/* Dòng 1: Dropdown Chủ đề lớn */}
-                    <div className="space-y-1">
-                      <label className="text-[11.5px] font-bold text-slate-800 flex items-center justify-between">
-                        <span className="flex items-center gap-1">
-                          <span>🌸 Chủ đề lớn:</span>
+                    {/* Dòng 1: Input trực tiếp Tên chủ đề lớn */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[11.5px] font-bold text-slate-800 flex items-center gap-1">
+                          <span>🌸 Tên chủ đề lớn:</span>
                           <span className="text-rose-500">*</span>
+                        </label>
+                        <span className="text-[10.5px] text-amber-800 font-semibold italic">
+                          (Cô tự do nhập tên chủ đề lớn)
                         </span>
-                        <span className="text-[10.5px] text-amber-800 font-medium">9 chủ đề chuẩn mầm non</span>
-                      </label>
+                      </div>
+
                       <div className="relative">
-                        <select
-                          value={config.preschoolMainTheme || MAM_NON_MAIN_THEMES[0]}
+                        <input
+                          type="text"
+                          list="preschool-main-theme-suggestions"
+                          value={config.preschoolMainTheme || ''}
                           onChange={(e) => {
                             onChangeConfig({ preschoolMainTheme: e.target.value });
                           }}
-                          className="w-full bg-white border border-amber-300 rounded-lg px-3 py-2 text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs cursor-pointer appearance-none"
-                        >
+                          placeholder="Nhập tên chủ đề lớn (ví dụ: Trường mầm non, Bản thân, Gia đình, Thế giới thực vật...)"
+                          className="w-full bg-white border border-amber-400 rounded-lg px-3 py-2 text-xs font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
+                        />
+                        <datalist id="preschool-main-theme-suggestions">
                           {MAM_NON_MAIN_THEMES.map((theme) => (
-                            <option key={theme} value={theme}>
-                              {theme}
-                            </option>
+                            <option key={theme} value={theme} />
                           ))}
-                        </select>
-                        <ChevronDown className="w-4 h-4 text-slate-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </datalist>
+                      </div>
+
+                      {/* Gợi ý chọn nhanh 9 chủ đề mẫu */}
+                      <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                        <span className="text-[10px] text-slate-500 font-bold shrink-0">Gợi ý nhanh:</span>
+                        {MAM_NON_MAIN_THEMES.slice(0, 5).map((theme) => (
+                          <button
+                            key={theme}
+                            type="button"
+                            onClick={() => onChangeConfig({ preschoolMainTheme: theme })}
+                            className={`px-2 py-0.5 text-[10px] rounded-md border transition-all cursor-pointer ${
+                              config.preschoolMainTheme === theme
+                                ? 'bg-amber-600 text-white border-amber-600 font-bold shadow-2xs'
+                                : 'bg-slate-50 hover:bg-amber-50 text-slate-700 border-slate-200'
+                            }`}
+                          >
+                            {theme}
+                          </button>
+                        ))}
+                        <div className="relative inline-block">
+                          <select
+                            value=""
+                            onChange={(e) => {
+                              if (e.target.value) onChangeConfig({ preschoolMainTheme: e.target.value });
+                            }}
+                            className="px-1.5 py-0.5 text-[10px] rounded-md border border-slate-200 bg-slate-50 hover:bg-amber-50 text-slate-700 cursor-pointer"
+                          >
+                            <option value="">+ Xem thêm 4 chủ đề mẫu</option>
+                            {MAM_NON_MAIN_THEMES.slice(5).map((t) => (
+                              <option key={t} value={t}>{t}</option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                     </div>
 
@@ -1045,13 +1083,32 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
               };
 
               return (
-                <div className="relative">
-                  <CustomSubjectSelect
-                    value={config.subject}
-                    onChange={handleSubjectChange}
-                    subjects={activeList}
-                    schoolLevel={config.schoolLevel}
-                  />
+                <div className="space-y-2">
+                  <div className="relative">
+                    <CustomSubjectSelect
+                      value={config.subject}
+                      onChange={handleSubjectChange}
+                      subjects={activeList}
+                      schoolLevel={config.schoolLevel}
+                    />
+                  </div>
+                  {/* Tùy chọn nhập chủ đề lớn */}
+                  <div className="pt-1.5 space-y-1.5 border-t border-slate-100">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                        <span>🌸 Tên chủ đề lớn (nếu có):</span>
+                      </label>
+                      <span className="text-[10px] text-slate-400 italic">Tùy chọn</span>
+                    </div>
+                    <input
+                      type="text"
+                      list="preschool-main-theme-suggestions"
+                      value={config.preschoolMainTheme || ''}
+                      onChange={(e) => onChangeConfig({ preschoolMainTheme: e.target.value })}
+                      placeholder="Nhập tên chủ đề lớn (ví dụ: Trường mầm non, Bản thân, Gia đình...)"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-amber-500 shadow-2xs"
+                    />
+                  </div>
                 </div>
               );
             })()}

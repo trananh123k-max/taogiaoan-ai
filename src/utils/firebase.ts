@@ -382,6 +382,29 @@ export function parseDateToTimestamp(val?: string): number {
   return isNaN(parsed) ? 0 : parsed;
 }
 
+// Helper: Safely compare 2 expiration strings and pick the freshest / furthest active expiration
+export function getFreshestExpiresAt(dateA?: string, dateB?: string): string {
+  const cleanA = (dateA || '').trim();
+  const cleanB = (dateB || '').trim();
+
+  if (cleanA.toLowerCase() === 'vĩnh viễn' || cleanB.toLowerCase() === 'vĩnh viễn') {
+    return 'Vĩnh viễn';
+  }
+
+  const isA = isExplicitGrantedDate(cleanA);
+  const isB = isExplicitGrantedDate(cleanB);
+
+  if (isA && !isB) return cleanA;
+  if (!isA && isB) return cleanB;
+  if (!isA && !isB) return cleanA || cleanB || 'Chưa cấp';
+
+  // Both are explicit dates (e.g. DD/MM/YYYY)
+  const tsA = parseDateToTimestamp(cleanA);
+  const tsB = parseDateToTimestamp(cleanB);
+
+  return tsA >= tsB ? cleanA : cleanB;
+}
+
 // Helper: Merge 2 account records cleanly, prioritizing newest timestamp or active granted permissions
 export function mergeTwoAccounts(existing: ManagedUserAccount, incoming: ManagedUserAccount): ManagedUserAccount {
   if (!existing) return incoming;
@@ -399,36 +422,13 @@ export function mergeTwoAccounts(existing: ManagedUserAccount, incoming: Managed
     base = { ...existing, ...incoming };
   }
 
-  // Preserve granted expiration date if one has a valid active date / permanent expiration
-  const isExistingGrantedDate = isExplicitGrantedDate(existing.expiresAt);
-  const isIncomingGrantedDate = isExplicitGrantedDate(incoming.expiresAt);
-
-  if (isExistingGrantedDate && !isIncomingGrantedDate) {
-    base.expiresAt = existing.expiresAt;
-    base.maxTrialGenerations = Math.max(existing.maxTrialGenerations ?? 9999, 9999);
-    if (existing.status === 'active' && base.status === 'new') {
+  // Preserve freshest granted expiration date without ever losing extended subscription periods
+  const freshestExpiry = getFreshestExpiresAt(existing.expiresAt, incoming.expiresAt);
+  if (freshestExpiry && freshestExpiry !== 'Chưa cấp') {
+    base.expiresAt = freshestExpiry;
+    base.maxTrialGenerations = Math.max(existing.maxTrialGenerations ?? 9999, incoming.maxTrialGenerations ?? 9999, 9999);
+    if (base.status === 'new') {
       base.status = 'active';
-    }
-  } else if (isIncomingGrantedDate && !isExistingGrantedDate) {
-    base.expiresAt = incoming.expiresAt;
-    base.maxTrialGenerations = Math.max(incoming.maxTrialGenerations ?? 9999, 9999);
-    if (incoming.status === 'active' && base.status === 'new') {
-      base.status = 'active';
-    }
-  } else if (isExistingGrantedDate && isIncomingGrantedDate) {
-    if (existing.expiresAt === 'Vĩnh viễn' || incoming.expiresAt === 'Vĩnh viễn') {
-      base.expiresAt = 'Vĩnh viễn';
-      base.maxTrialGenerations = 9999;
-    } else {
-      const tE = parseDateToTimestamp(existing.expiresAt);
-      const tI = parseDateToTimestamp(incoming.expiresAt);
-      // Keep whichever date is later to prevent losing extended subscription periods
-      if (tI >= tE) {
-        base.expiresAt = incoming.expiresAt;
-      } else {
-        base.expiresAt = existing.expiresAt;
-      }
-      base.maxTrialGenerations = 9999;
     }
   }
 
@@ -529,6 +529,22 @@ export function subscribeToUserAccounts(callback: (accounts: ManagedUserAccount[
         const data = snap.data();
         if (Array.isArray(data?.keys) && data.keys.length > 0) {
           registerDeletedUserKeys(data.keys);
+          // Check if active session was deleted
+          try {
+            const curSaved = localStorage.getItem('khbd_current_user');
+            if (curSaved) {
+              const cur = JSON.parse(curSaved);
+              const delSet = new Set(data.keys.map((k: string) => String(k).trim().toLowerCase()));
+              const cId = (cur.id || '').trim().toLowerCase();
+              const cUsername = (cur.username || '').trim().toLowerCase();
+              const cEmail = (cur.email || '').trim().toLowerCase();
+              if (delSet.has(cId) || delSet.has(cUsername) || (cEmail && delSet.has(cEmail))) {
+                localStorage.removeItem('khbd_current_user');
+                localStorage.setItem('khbd_is_logged_in', 'false');
+                window.location.reload();
+              }
+            }
+          } catch {}
         }
       }
     }, () => {});
@@ -710,6 +726,12 @@ export async function importAccountsFromJSON(jsonText: string): Promise<{ succes
 // Save or Update a user account
 
 export async function updateUserActivityInFirestore(accountId: string, activityData: Partial<ManagedUserAccount>): Promise<boolean> {
+  const normId = (accountId || '').trim().toLowerCase();
+  const deletedKeys = getDeletedUserKeys();
+  if (deletedKeys.has(normId)) {
+    return false;
+  }
+
   try {
     const userRef = doc(db, 'user_accounts', accountId);
     await safeFirestoreSetDoc(userRef, {
@@ -730,6 +752,24 @@ export async function saveUserAccountToFirestore(
 
   let safeAccount = { ...account };
 
+  const normId = (account.id || '').trim().toLowerCase();
+  const normUsername = (account.username || '').trim().toLowerCase();
+  const normEmail = (account.email || '').trim().toLowerCase();
+  const deletedKeys = getDeletedUserKeys();
+
+  // Guard: If an account is in the deleted blacklist, NEVER save or resurrect it
+  // unless this is an EXPLICIT action from the Admin (creating new or re-granting)
+  if (!isExplicitAdminAction) {
+    if (
+      (normId && deletedKeys.has(normId)) ||
+      (normUsername && deletedKeys.has(normUsername)) ||
+      (normEmail && deletedKeys.has(normEmail))
+    ) {
+      console.warn(`[Firebase] Rejected auto-save for deleted user account: ${account.username || account.id}`);
+      return false;
+    }
+  }
+
   // Guard against accidental downgrades:
   // If not an explicit admin operation (e.g. heartbeat, device login, client state save),
   // NEVER downgrade an existing granted expiration date to 'Chưa cấp' or trial!
@@ -741,9 +781,10 @@ export async function saveUserAccountToFirestore(
         (a.username && account.username && a.username.toLowerCase() === account.username.toLowerCase())
     );
     if (existing) {
-      if (isExplicitGrantedDate(existing.expiresAt) && !isExplicitGrantedDate(account.expiresAt)) {
-        safeAccount.expiresAt = existing.expiresAt;
-        safeAccount.maxTrialGenerations = Math.max(existing.maxTrialGenerations ?? 9999, 9999);
+      const freshestExpiry = getFreshestExpiresAt(existing.expiresAt, account.expiresAt);
+      if (freshestExpiry && freshestExpiry !== 'Chưa cấp') {
+        safeAccount.expiresAt = freshestExpiry;
+        safeAccount.maxTrialGenerations = Math.max(existing.maxTrialGenerations ?? 9999, account.maxTrialGenerations ?? 9999, 9999);
         if (existing.status === 'active' && safeAccount.status === 'new') {
           safeAccount.status = 'active';
         }
@@ -769,14 +810,15 @@ export async function saveUserAccountToFirestore(
     updatedAt: nowIso,
   };
 
-  const keysToUnban = [account.id, account.username, account.email || ''].filter(Boolean);
-
-  // 0. Unban the keys so this user is not accidentally filtered out if it was previously deleted
-  unregisterDeletedUserKeys(keysToUnban);
-  try {
-    const metaRef = doc(db, 'system_metadata', 'deleted_accounts');
-    await safeFirestoreSetDoc(metaRef, { keys: arrayRemove(...keysToUnban), updatedAt: new Date().toISOString() }, { merge: true });
-  } catch {}
+  // Only unban if this was an EXPLICIT admin action in the management console
+  if (isExplicitAdminAction) {
+    const keysToUnban = [account.id, account.username, account.email || ''].filter(Boolean);
+    unregisterDeletedUserKeys(keysToUnban);
+    try {
+      const metaRef = doc(db, 'system_metadata', 'deleted_accounts');
+      await safeFirestoreSetDoc(metaRef, { keys: arrayRemove(...keysToUnban), updatedAt: new Date().toISOString() }, { merge: true });
+    } catch {}
+  }
 
   // 1. Immediately update Local Storage synchronously so it is instantly persisted
   try {
@@ -790,7 +832,7 @@ export async function saveUserAccountToFirestore(
   } catch {}
 
   // 2. Sync to Server API repository immediately
-  postServerSync('/api/repository/save-user', accountWithTimestamp);
+  postServerSync('/api/repository/save-user', { ...accountWithTimestamp, isExplicitAdminAction });
 
   // 3. Sync to Firestore async
   try {
@@ -822,13 +864,10 @@ export async function checkAndAuthorizeDevice(
       (a.id && account.id && a.id.toLowerCase() === account.id.toLowerCase()) ||
       (a.username && account.username && a.username.toLowerCase() === account.username.toLowerCase())
   );
-  const effectiveExpiresAt =
-    existingCached && isExplicitGrantedDate(existingCached.expiresAt) && !isExplicitGrantedDate(account.expiresAt)
-      ? existingCached.expiresAt
-      : account.expiresAt;
+  const effectiveExpiresAt = getFreshestExpiresAt(existingCached?.expiresAt, account.expiresAt);
   const effectiveMaxTrials =
-    existingCached && isExplicitGrantedDate(existingCached.expiresAt)
-      ? Math.max(existingCached.maxTrialGenerations ?? 9999, 9999)
+    (existingCached && isExplicitGrantedDate(existingCached.expiresAt)) || isExplicitGrantedDate(account.expiresAt)
+      ? Math.max(existingCached?.maxTrialGenerations ?? 9999, account.maxTrialGenerations ?? 9999, 9999)
       : account.maxTrialGenerations;
   const effectiveStatus =
     existingCached && existingCached.status === 'active' && account.status === 'new'
@@ -1038,6 +1077,20 @@ export function formatActiveTime(secondsOrMinutes?: number): string {
 export async function recordUserHeartbeat(account: ManagedUserAccount, addSeconds: number = 0): Promise<ManagedUserAccount> {
   if (!account || !account.id) return account;
 
+  const deletedKeys = getDeletedUserKeys();
+  const normId = (account.id || '').trim().toLowerCase();
+  const normUsername = (account.username || '').trim().toLowerCase();
+  const normEmail = (account.email || '').trim().toLowerCase();
+
+  // If account was deleted, abort heartbeat immediately so it is never re-saved
+  if (
+    (normId && deletedKeys.has(normId)) ||
+    (normUsername && deletedKeys.has(normUsername)) ||
+    (normEmail && deletedKeys.has(normEmail))
+  ) {
+    return account;
+  }
+
   const now = Date.now();
   const nowStr = new Date().toLocaleString('vi-VN');
   const todayDateStr = new Date().toLocaleDateString('vi-VN');
@@ -1078,13 +1131,10 @@ export async function recordUserHeartbeat(account: ManagedUserAccount, addSecond
       (a.id && account.id && a.id.toLowerCase() === account.id.toLowerCase()) ||
       (a.username && account.username && a.username.toLowerCase() === account.username.toLowerCase())
   );
-  const effectiveExpiresAt =
-    existingCached && isExplicitGrantedDate(existingCached.expiresAt) && !isExplicitGrantedDate(account.expiresAt)
-      ? existingCached.expiresAt
-      : account.expiresAt;
+  const effectiveExpiresAt = getFreshestExpiresAt(existingCached?.expiresAt, account.expiresAt);
   const effectiveMaxTrials =
-    existingCached && isExplicitGrantedDate(existingCached.expiresAt)
-      ? Math.max(existingCached.maxTrialGenerations ?? 9999, 9999)
+    (existingCached && isExplicitGrantedDate(existingCached.expiresAt)) || isExplicitGrantedDate(account.expiresAt)
+      ? Math.max(existingCached?.maxTrialGenerations ?? 9999, account.maxTrialGenerations ?? 9999, 9999)
       : account.maxTrialGenerations;
   const effectiveStatus =
     existingCached && existingCached.status === 'active' && account.status === 'new'
@@ -1310,6 +1360,21 @@ export async function deleteUserAccountFromFirestore(
         );
       });
       localStorage.setItem('khbd_managed_user_accounts', JSON.stringify(updated));
+    }
+  } catch {}
+
+  // 6. If currently logged in user is this deleted account, revoke session immediately
+  try {
+    const curSaved = localStorage.getItem('khbd_current_user');
+    if (curSaved) {
+      const cur = JSON.parse(curSaved);
+      const cId = (cur.id || '').trim().toLowerCase();
+      const cUsername = (cur.username || '').trim().toLowerCase();
+      const cEmail = (cur.email || '').trim().toLowerCase();
+      if (keysToDeleteSet.has(cId) || keysToDeleteSet.has(cUsername) || (cEmail && keysToDeleteSet.has(cEmail))) {
+        localStorage.removeItem('khbd_current_user');
+        localStorage.setItem('khbd_is_logged_in', 'false');
+      }
     }
   } catch {}
 

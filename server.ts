@@ -803,6 +803,47 @@ app.get('/api/health', (req, res) => {
 const REPO_FILE = path.join(process.cwd(), 'data_repository.json');
 const SEED_REPO_FILE = path.join(process.cwd(), 'data_repository.seed.json');
 
+function parseDateToTimestampServer(val?: string): number {
+  if (!val || typeof val !== 'string') return 0;
+  const clean = val.trim();
+  if (clean.toLowerCase() === 'vĩnh viễn') return 9999999999999;
+  const parts = clean.split(/[-/]/);
+  if (parts.length === 3) {
+    if (parts[0].length === 4) {
+      const y = Number(parts[0]);
+      const m = Number(parts[1]) - 1;
+      const d = Number(parts[2]);
+      if (!isNaN(y) && !isNaN(m) && !isNaN(d)) return new Date(y, m, d, 23, 59, 59).getTime();
+    } else {
+      const d = Number(parts[0]);
+      const m = Number(parts[1]) - 1;
+      const y = Number(parts[2]);
+      if (!isNaN(y) && !isNaN(m) && !isNaN(d)) return new Date(y, m, d, 23, 59, 59).getTime();
+    }
+  }
+  const parsed = new Date(clean).getTime();
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+function getFreshestExpiresAtServer(dateA?: string, dateB?: string): string {
+  const cleanA = (dateA || '').trim();
+  const cleanB = (dateB || '').trim();
+
+  if (cleanA.toLowerCase() === 'vĩnh viễn' || cleanB.toLowerCase() === 'vĩnh viễn') return 'Vĩnh viễn';
+
+  const isGranted = (d?: string) => d && d !== 'Chưa cấp' && !String(d).toLowerCase().includes('dùng thử') && !String(d).toLowerCase().includes('tạm khóa') && !String(d).toLowerCase().includes('hết hạn');
+  const isA = isGranted(cleanA);
+  const isB = isGranted(cleanB);
+
+  if (isA && !isB) return cleanA;
+  if (!isA && isB) return cleanB;
+  if (!isA && !isB) return cleanA || cleanB || 'Chưa cấp';
+
+  const tsA = parseDateToTimestampServer(cleanA);
+  const tsB = parseDateToTimestampServer(cleanB);
+  return tsA >= tsB ? cleanA : cleanB;
+}
+
 function getStoredRepository(): { books: any[]; ppcts: any[]; userAccounts: any[]; deletedUserIds: string[] } {
   try {
     let sourceFile = REPO_FILE;
@@ -896,12 +937,8 @@ function saveStoredRepository(data: { books?: any[]; ppcts?: any[]; userAccounts
 
         // Preserve API key
         const apiKey = nu.apiKey || nu.customApiKey || cu.apiKey || cu.customApiKey;
-        // Preserve granted expiresAt
-        const isGranted = (d?: string) => d && d !== 'Chưa cấp' && !String(d).toLowerCase().includes('dùng thử');
-        let expiresAt = nu.expiresAt;
-        if (!isGranted(expiresAt) && isGranted(cu.expiresAt)) {
-          expiresAt = cu.expiresAt;
-        }
+        // Keep freshest granted expiresAt so renewals are never lost
+        const expiresAt = getFreshestExpiresAtServer(cu.expiresAt, nu.expiresAt);
 
         // Merge login history logs
         const cLogs = Array.isArray(cu.loginLogs) ? cu.loginLogs : [];
@@ -1063,6 +1100,18 @@ app.post('/api/repository/save-user', (req, res) => {
       return res.status(400).json({ success: false, error: 'Thiếu thông tin tài khoản' });
     }
     const repo = getStoredRepository();
+    const deletedSet = new Set((repo.deletedUserIds || []).map((k: string) => String(k).trim().toLowerCase()));
+    const normId = (account.id || '').trim().toLowerCase();
+    const normUsername = (account.username || '').trim().toLowerCase();
+    const normEmail = (account.email || '').trim().toLowerCase();
+
+    // Guard against auto-resurrecting deleted users from background heartbeats or syncs
+    if (!account.isExplicitAdminAction) {
+      if (deletedSet.has(normId) || deletedSet.has(normUsername) || (normEmail && deletedSet.has(normEmail))) {
+        return res.status(403).json({ success: false, error: 'Tài khoản đã bị xóa vĩnh viễn' });
+      }
+    }
+
     const existing = repo.userAccounts.find(
       (u) =>
         u.id === account.id ||
@@ -1072,11 +1121,10 @@ app.post('/api/repository/save-user', (req, res) => {
     let finalAccount = account;
     if (existing) {
       const apiKey = account.apiKey || account.customApiKey || existing.apiKey || existing.customApiKey;
-      const isGranted = (d?: string) => d && d !== 'Chưa cấp' && !String(d).toLowerCase().includes('dùng thử');
-      let expiresAt = account.expiresAt;
-      if (!isGranted(expiresAt) && isGranted(existing.expiresAt)) {
-        expiresAt = existing.expiresAt;
-      }
+      const expiresAt = account.isExplicitAdminAction
+        ? (account.expiresAt || existing.expiresAt)
+        : getFreshestExpiresAtServer(existing.expiresAt, account.expiresAt);
+
       const cLogs = Array.isArray(existing.loginLogs) ? existing.loginLogs : [];
       const nLogs = Array.isArray(account.loginLogs) ? account.loginLogs : [];
       const combinedLogs = [...nLogs, ...cLogs];
@@ -1094,7 +1142,7 @@ app.post('/api/repository/save-user', (req, res) => {
       finalAccount = {
         ...existing,
         ...account,
-        expiresAt: expiresAt || existing.expiresAt,
+        expiresAt,
         apiKey,
         customApiKey: apiKey,
         loginLogs: mergedLogs.slice(0, 50),
@@ -1111,8 +1159,12 @@ app.post('/api/repository/save-user', (req, res) => {
       ),
     ];
     
-    const toUnban = [account.id, account.username, account.email].filter(Boolean).map(k => String(k).trim().toLowerCase());
-    const updatedDeletedIds = (repo.deletedUserIds || []).filter(id => !toUnban.includes(String(id).trim().toLowerCase()));
+    // Only unban if this was an EXPLICIT admin action
+    let updatedDeletedIds = repo.deletedUserIds || [];
+    if (account.isExplicitAdminAction) {
+      const toUnban = [account.id, account.username, account.email].filter(Boolean).map(k => String(k).trim().toLowerCase());
+      updatedDeletedIds = (repo.deletedUserIds || []).filter(id => !toUnban.includes(String(id).trim().toLowerCase()));
+    }
     
     saveStoredRepository({ userAccounts: updatedUsers, deletedUserIds: updatedDeletedIds });
     res.json({ success: true, count: updatedUsers.length });
@@ -2488,7 +2540,7 @@ MỤC ĐÍCH DUY NHẤT: BẢO TỒN NGUYÊN VẸN NỘI DUNG, HÌNH ẢNH, BÀI
       : (matchingPPCTConfig?.integratedAI || []);
   }
 
-  const hasStem = (Boolean(config.enableSTEM) || Boolean(matchingPPCTConfig?.hasStemIntegration)) && !isHDTN;
+  const hasStem = Boolean(config.enableSTEM) && !isHDTN;
   const stemTopic = (config.stemTopic && config.stemTopic.trim().length > 0)
     ? config.stemTopic.trim()
     : (matchingPPCTConfig?.stemTopic || (lessonTitle.toLowerCase().includes('stem') ? lessonTitle : 'Ứng dụng & Sản phẩm giải pháp STEM liên môn'));
