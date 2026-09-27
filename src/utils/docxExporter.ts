@@ -514,7 +514,6 @@ export async function exportLessonPlanToDocx(
 
 function createSectionHeading(text: string, fontName: string, colorHex: string): Paragraph {
   return new Paragraph({
-    heading: HeadingLevel.HEADING_1,
     spacing: { before: 100, after: 30 },
     children: [
       new TextRun({
@@ -575,7 +574,6 @@ function buildActivitiesSection(
       if (act.index === 1) {
         elements.push(
           new Paragraph({
-            heading: HeadingLevel.HEADING_2,
             spacing: { before: 140, after: 60 },
             children: [
               new TextRun({
@@ -591,7 +589,6 @@ function buildActivitiesSection(
       } else if (act.index === 3) {
         elements.push(
           new Paragraph({
-            heading: HeadingLevel.HEADING_2,
             spacing: { before: 180, after: 60 },
             children: [
               new TextRun({
@@ -611,7 +608,6 @@ function buildActivitiesSection(
     const actNameDisplay = act.name.replace(/\[TIẾT\s*\d+\]\s*/i, '');
     elements.push(
       new Paragraph({
-        heading: HeadingLevel.HEADING_2,
         spacing: { before: 80, after: 25 },
         children: [
           new TextRun({
@@ -3146,7 +3142,7 @@ function buildPreschoolDocxElements(
 
   const preschoolInfo = getPreschoolHeaderInfo(plan);
 
-  // 1. Header Banner (CĂN GIỮA, KHUNG XANH LÁ #00FF00 IN ĐẬM)
+  // 1. Header Banner (CĂN GIỮA, IN ĐẬM, KHÔNG DÙNG VIỀN/SHADING ẨN)
   elements.push(
     new Paragraph({
       alignment: AlignmentType.CENTER,
@@ -3157,9 +3153,7 @@ function buildPreschoolDocxElements(
           bold: true,
           size: 28, // 14pt
           font: fontName,
-          shading: {
-            fill: "00FF00", // Green highlight box matching user image
-          },
+          color: '000000',
         }),
       ],
     })
@@ -3227,7 +3221,10 @@ function buildPreschoolDocxElements(
   elements.push(createSectionHeading('I. Mục đích - yêu cầu', fontName, primaryColor));
   
   const isNew8 = isPreschoolNew8Activity(plan.subject, plan.lessonTitle);
-  const cleanPreschoolText = (t: string) => (!isNew8 ? stripPreschoolCodes(t) : t);
+  const cleanPreschoolText = (t: string) => {
+    let s = !isNew8 ? stripPreschoolCodes(t) : t;
+    return s.replace(/[\\\{\}\[\]]/g, '').trim();
+  };
 
   elements.push(createSubHeading('1. Kiến thức:', fontName));
   plan.objectives.knowledge.forEach(k => elements.push(createDashListItem(cleanPreschoolText(k), fontName)));

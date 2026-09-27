@@ -424,18 +424,24 @@ export function mergeTwoAccounts(existing: ManagedUserAccount, incoming: Managed
 
   // Preserve freshest granted expiration date without ever losing extended subscription periods
   const freshestExpiry = getFreshestExpiresAt(existing.expiresAt, incoming.expiresAt);
-  if (freshestExpiry && freshestExpiry !== 'Chưa cấp') {
+  if (freshestExpiry && isExplicitGrantedDate(freshestExpiry)) {
     base.expiresAt = freshestExpiry;
-    base.maxTrialGenerations = Math.max(existing.maxTrialGenerations ?? 9999, incoming.maxTrialGenerations ?? 9999, 9999);
+    base.maxTrialGenerations = 9999;
     if (base.status === 'new') {
       base.status = 'active';
     }
+  } else {
+    base.expiresAt = freshestExpiry || 'Chưa cấp';
+    const maxTrials = incoming.maxTrialGenerations !== undefined
+      ? incoming.maxTrialGenerations
+      : (existing.maxTrialGenerations !== undefined ? existing.maxTrialGenerations : 5);
+    base.maxTrialGenerations = maxTrials;
   }
 
-  // Preserve higher maxTrialGenerations if user was granted 9999 or upgraded turns
+  // Preserve higher maxTrialGenerations if user was explicitly granted upgraded turns
   const maxTrials = Math.max(existing.maxTrialGenerations ?? 0, incoming.maxTrialGenerations ?? 0);
-  if (maxTrials > 0) {
-    base.maxTrialGenerations = maxTrials;
+  if (maxTrials > 0 && !isExplicitGrantedDate(base.expiresAt)) {
+    base.maxTrialGenerations = incoming.maxTrialGenerations !== undefined ? incoming.maxTrialGenerations : (existing.maxTrialGenerations ?? 5);
   }
 
   // Preserve API Key: Keep granted or saved API Key, never overwrite with empty
@@ -782,12 +788,17 @@ export async function saveUserAccountToFirestore(
     );
     if (existing) {
       const freshestExpiry = getFreshestExpiresAt(existing.expiresAt, account.expiresAt);
-      if (freshestExpiry && freshestExpiry !== 'Chưa cấp') {
+      if (freshestExpiry && isExplicitGrantedDate(freshestExpiry)) {
         safeAccount.expiresAt = freshestExpiry;
-        safeAccount.maxTrialGenerations = Math.max(existing.maxTrialGenerations ?? 9999, account.maxTrialGenerations ?? 9999, 9999);
+        safeAccount.maxTrialGenerations = 9999;
         if (existing.status === 'active' && safeAccount.status === 'new') {
           safeAccount.status = 'active';
         }
+      } else {
+        safeAccount.expiresAt = freshestExpiry || account.expiresAt || 'Chưa cấp';
+        safeAccount.maxTrialGenerations = account.maxTrialGenerations !== undefined
+          ? account.maxTrialGenerations
+          : (existing.maxTrialGenerations !== undefined ? existing.maxTrialGenerations : 5);
       }
       // Preserve API key if safeAccount didn't specify one
       if (!safeAccount.apiKey && !safeAccount.customApiKey && (existing.apiKey || existing.customApiKey)) {
@@ -867,8 +878,8 @@ export async function checkAndAuthorizeDevice(
   const effectiveExpiresAt = getFreshestExpiresAt(existingCached?.expiresAt, account.expiresAt);
   const effectiveMaxTrials =
     (existingCached && isExplicitGrantedDate(existingCached.expiresAt)) || isExplicitGrantedDate(account.expiresAt)
-      ? Math.max(existingCached?.maxTrialGenerations ?? 9999, account.maxTrialGenerations ?? 9999, 9999)
-      : account.maxTrialGenerations;
+      ? 9999
+      : (account.maxTrialGenerations !== undefined ? account.maxTrialGenerations : (existingCached?.maxTrialGenerations ?? 5));
   const effectiveStatus =
     existingCached && existingCached.status === 'active' && account.status === 'new'
       ? 'active'
@@ -1134,8 +1145,8 @@ export async function recordUserHeartbeat(account: ManagedUserAccount, addSecond
   const effectiveExpiresAt = getFreshestExpiresAt(existingCached?.expiresAt, account.expiresAt);
   const effectiveMaxTrials =
     (existingCached && isExplicitGrantedDate(existingCached.expiresAt)) || isExplicitGrantedDate(account.expiresAt)
-      ? Math.max(existingCached?.maxTrialGenerations ?? 9999, account.maxTrialGenerations ?? 9999, 9999)
-      : account.maxTrialGenerations;
+      ? 9999
+      : (account.maxTrialGenerations !== undefined ? account.maxTrialGenerations : (existingCached?.maxTrialGenerations ?? 5));
   const effectiveStatus =
     existingCached && existingCached.status === 'active' && account.status === 'new'
       ? 'active'

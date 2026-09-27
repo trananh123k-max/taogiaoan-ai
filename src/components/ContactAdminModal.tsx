@@ -130,7 +130,7 @@ export const ContactAdminModal: React.FC<ContactAdminModalProps> = ({
             {/* Author / Admin Name */}
             <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/80 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-amber-600 text-white flex items-center justify-center font-black text-xs">
+                <div className="w-8 h-8 rounded-lg bg-amber-600 text-white flex items-center justify-center font-black text-xs shrink-0">
                   AD
                 </div>
                 <div>
@@ -143,39 +143,67 @@ export const ContactAdminModal: React.FC<ContactAdminModalProps> = ({
               </span>
             </div>
 
-            {/* Zalo Direct Contact */}
+            {/* Zalo Tác giả Direct Contact */}
             <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center">
-                  <MessageCircle className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-lg bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                  ZL
                 </div>
                 <div>
-                  <div className="text-[11px] text-blue-700 font-medium">Zalo tư vấn & Cấp quyền</div>
-                  <div className="font-extrabold text-sm text-blue-950">{adminZalo}</div>
+                  <div className="text-[11px] text-blue-700 font-medium"><strong className="font-extrabold text-blue-600">Zalo</strong> Tác giả tư vấn & cấp quyền</div>
+                  <div className="font-extrabold text-xs sm:text-sm text-blue-950">{adminZalo}</div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   type="button"
                   onClick={() => handleCopy(adminZalo.replace(/\./g, ''), 'zalo')}
-                  className="px-2.5 py-1.5 rounded-lg bg-white border border-blue-300 hover:bg-blue-100 text-blue-800 text-xs font-bold flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+                  className="px-2 py-1.5 rounded-lg bg-white border border-blue-300 hover:bg-blue-100 text-blue-800 text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
                   title="Sao chép số Zalo"
                 >
                   {copiedType === 'zalo' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copiedType === 'zalo' ? 'Đã chép' : 'Sao chép'}</span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={handleOpenZalo}
-                  className="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
-                  title="Mở Zalo ngay"
+                <a
+                  href="https://zalo.me/0978468986"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+                  title="Mở Zalo Tác giả ngay"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   <span>Mở Zalo</span>
-                </button>
+                </a>
               </div>
+            </div>
+
+            {/* Zalo Group Link */}
+            <div className="p-3 rounded-xl bg-emerald-50/90 border border-emerald-300 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                  <Sparkles className="w-4 h-4 text-amber-200" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[11px] text-emerald-800 font-bold flex items-center gap-1">
+                    <span>Nhóm <strong className="font-extrabold text-blue-600">Zalo</strong> Hỗ Trợ Giáo Án</span>
+                    <span className="px-1 py-0.2 rounded bg-amber-200 text-amber-900 text-[9px] font-black uppercase">Mới</span>
+                  </div>
+                  <div className="text-[10.5px] text-slate-600 truncate">Hỏi đáp & hỗ trợ trực tiếp giáo viên</div>
+                </div>
+              </div>
+
+              <a
+                href="https://zalo.me/g/64bmhsdrjtoalgugxnzj"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs shrink-0"
+                title="Gia nhập Nhóm Zalo hỗ trợ"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Thâm Nhóm Zalo</span>
+              </a>
             </div>
 
             {/* Hotline Phone Contact */}

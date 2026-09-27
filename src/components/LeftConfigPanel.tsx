@@ -96,6 +96,20 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
   const [customGradeText, setCustomGradeText] = useState('');
   const [isCustomLessonInput, setIsCustomLessonInput] = useState(false);
   const [isCustomMainTheme, setIsCustomMainTheme] = useState(false);
+  const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false);
+  const themeDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (themeDropdownRef.current && !themeDropdownRef.current.contains(event.target as Node)) {
+        setIsThemeDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // State for DOCX Sample Upload
   const [isParsingDocx, setIsParsingDocx] = useState(false);
@@ -953,67 +967,67 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
               if (currentPreschoolMode === 'theme') {
                 return (
                   <div className="space-y-3 pt-1">
-                    {/* Dòng 1: Input trực tiếp Tên chủ đề lớn */}
-                    <div className="space-y-1.5">
+                    {/* Dòng 1: Input trực tiếp Tên chủ đề lớn kèm mũi tên chọn chủ đề mẫu có sẵn */}
+                    <div className="space-y-1.5" ref={themeDropdownRef}>
                       <div className="flex items-center justify-between">
                         <label className="text-[11.5px] font-bold text-slate-800 flex items-center gap-1">
                           <span>🌸 Tên chủ đề lớn:</span>
                           <span className="text-rose-500">*</span>
                         </label>
                         <span className="text-[10.5px] text-amber-800 font-semibold italic">
-                          (Cô tự do nhập tên chủ đề lớn)
+                          (Chọn trong danh sách hoặc gõ tự do)
                         </span>
                       </div>
 
                       <div className="relative">
                         <input
                           type="text"
-                          list="preschool-main-theme-suggestions"
                           value={config.preschoolMainTheme || ''}
                           onChange={(e) => {
                             onChangeConfig({ preschoolMainTheme: e.target.value });
                           }}
-                          placeholder="Nhập tên chủ đề lớn (ví dụ: Trường mầm non, Bản thân, Gia đình, Thế giới thực vật...)"
-                          className="w-full bg-white border border-amber-400 rounded-lg px-3 py-2 text-xs font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
+                          placeholder="Nhập hoặc chọn chủ đề lớn (ví dụ: Trường mầm non, Bản thân, Gia đình...)"
+                          className="w-full bg-white border border-amber-400 rounded-lg pl-3 pr-9 py-2 text-xs font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
                         />
-                        <datalist id="preschool-main-theme-suggestions">
-                          {MAM_NON_MAIN_THEMES.map((theme) => (
-                            <option key={theme} value={theme} />
-                          ))}
-                        </datalist>
-                      </div>
+                        <button
+                          type="button"
+                          onClick={() => setIsThemeDropdownOpen((prev) => !prev)}
+                          className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-amber-100/80 text-amber-800 transition-colors cursor-pointer"
+                          title="Bấm để chọn chủ đề mẫu có sẵn"
+                        >
+                          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isThemeDropdownOpen ? 'rotate-180 text-amber-900' : ''}`} />
+                        </button>
 
-                      {/* Gợi ý chọn nhanh 9 chủ đề mẫu */}
-                      <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                        <span className="text-[10px] text-slate-500 font-bold shrink-0">Gợi ý nhanh:</span>
-                        {MAM_NON_MAIN_THEMES.slice(0, 5).map((theme) => (
-                          <button
-                            key={theme}
-                            type="button"
-                            onClick={() => onChangeConfig({ preschoolMainTheme: theme })}
-                            className={`px-2 py-0.5 text-[10px] rounded-md border transition-all cursor-pointer ${
-                              config.preschoolMainTheme === theme
-                                ? 'bg-amber-600 text-white border-amber-600 font-bold shadow-2xs'
-                                : 'bg-slate-50 hover:bg-amber-50 text-slate-700 border-slate-200'
-                            }`}
-                          >
-                            {theme}
-                          </button>
-                        ))}
-                        <div className="relative inline-block">
-                          <select
-                            value=""
-                            onChange={(e) => {
-                              if (e.target.value) onChangeConfig({ preschoolMainTheme: e.target.value });
-                            }}
-                            className="px-1.5 py-0.5 text-[10px] rounded-md border border-slate-200 bg-slate-50 hover:bg-amber-50 text-slate-700 cursor-pointer"
-                          >
-                            <option value="">+ Xem thêm 4 chủ đề mẫu</option>
-                            {MAM_NON_MAIN_THEMES.slice(5).map((t) => (
-                              <option key={t} value={t}>{t}</option>
-                            ))}
-                          </select>
-                        </div>
+                        {/* Menu danh sách các chủ đề mẫu có sẵn */}
+                        {isThemeDropdownOpen && (
+                          <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-amber-300 rounded-xl shadow-xl z-30 max-h-60 overflow-y-auto py-1 animate-in fade-in zoom-in-95 duration-100">
+                            <div className="px-3 py-1.5 text-[10.5px] font-bold text-amber-900/80 bg-amber-50/80 border-b border-amber-100 flex items-center justify-between">
+                              <span>CHỦ ĐỀ MẪU CÓ SẴN:</span>
+                              <span className="text-[9.5px] font-normal text-slate-500">(Bấm chọn nhanh)</span>
+                            </div>
+                            {MAM_NON_MAIN_THEMES.map((theme) => {
+                              const isSelected = config.preschoolMainTheme === theme;
+                              return (
+                                <button
+                                  key={theme}
+                                  type="button"
+                                  onClick={() => {
+                                    onChangeConfig({ preschoolMainTheme: theme });
+                                    setIsThemeDropdownOpen(false);
+                                  }}
+                                  className={`w-full text-left px-3 py-2 text-xs transition-colors flex items-center justify-between cursor-pointer ${
+                                    isSelected
+                                      ? 'bg-amber-100 text-amber-950 font-bold'
+                                      : 'text-slate-700 hover:bg-amber-50 font-medium'
+                                  }`}
+                                >
+                                  <span>{theme}</span>
+                                  {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-amber-700 shrink-0" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -1090,23 +1104,6 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                       onChange={handleSubjectChange}
                       subjects={activeList}
                       schoolLevel={config.schoolLevel}
-                    />
-                  </div>
-                  {/* Tùy chọn nhập chủ đề lớn */}
-                  <div className="pt-1.5 space-y-1.5 border-t border-slate-100">
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                        <span>🌸 Tên chủ đề lớn (nếu có):</span>
-                      </label>
-                      <span className="text-[10px] text-slate-400 italic">Tùy chọn</span>
-                    </div>
-                    <input
-                      type="text"
-                      list="preschool-main-theme-suggestions"
-                      value={config.preschoolMainTheme || ''}
-                      onChange={(e) => onChangeConfig({ preschoolMainTheme: e.target.value })}
-                      placeholder="Nhập tên chủ đề lớn (ví dụ: Trường mầm non, Bản thân, Gia đình...)"
-                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-amber-500 shadow-2xs"
                     />
                   </div>
                 </div>

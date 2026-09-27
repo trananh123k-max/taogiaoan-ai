@@ -969,14 +969,42 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-amber-900/60 bg-gradient-to-r from-[#7c2d12] via-[#9a3412] to-[#78350f] py-3 mt-auto shadow-sm relative z-10 shrink-0">
-        <div className="max-w-[1700px] mx-auto px-4 flex flex-col items-center justify-center gap-2">
-          <div className="font-medium text-[11px] sm:text-xs text-amber-400 flex items-center justify-center gap-3 sm:gap-4 flex-wrap tracking-wide">
-            <span className="flex items-center gap-1.5 hover:text-amber-300 transition-colors cursor-default"><User className="w-3.5 h-3.5 text-emerald-400" /> Tác giả: Hoàng Văn Đình Khoa</span>
-            <span className="hidden sm:inline text-amber-700/60">|</span>
-            <span className="flex items-center gap-1.5 hover:text-amber-300 transition-colors cursor-default"><MessageCircle className="w-3.5 h-3.5 text-emerald-400" /> Zalo: 0978.468.986</span>
-            <span className="hidden sm:inline text-amber-700/60">|</span>
-            <span className="flex items-center gap-1.5 hover:text-amber-300 transition-colors cursor-default"><Phone className="w-3.5 h-3.5 text-emerald-400" /> Số phone: 0989.982.818</span>
+      <footer className="border-t border-amber-900/60 bg-gradient-to-r from-[#7c2d12] via-[#9a3412] to-[#78350f] py-1.5 mt-auto shadow-sm relative z-10 shrink-0">
+        <div className="max-w-[1700px] mx-auto px-3 flex items-center justify-center">
+          <div className="font-medium text-[10px] sm:text-[11px] text-amber-300 flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
+            <span className="flex items-center gap-1 hover:text-white transition-colors cursor-default">
+              <User className="w-3 h-3 text-amber-300" /> Tác giả: <strong>Hoàng Văn Đình Khoa</strong>
+            </span>
+
+            <span className="hidden sm:inline text-amber-700/60">•</span>
+
+            <a
+              href="https://zalo.me/0978468986"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-slate-100 hover:text-white bg-blue-950/40 hover:bg-blue-900/60 border border-blue-400/30 px-2 py-0.5 rounded-full transition-all cursor-pointer font-medium"
+              title="Mở Zalo Tác giả (0978.468.986)"
+            >
+              <span><strong className="font-black text-blue-400">Zalo</strong> Tác giả: 0978.468.986</span>
+            </a>
+
+            <span className="hidden sm:inline text-amber-700/60">•</span>
+
+            <a
+              href="https://zalo.me/g/64bmhsdrjtoalgugxnzj"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-slate-100 hover:text-white bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-400/30 px-2 py-0.5 rounded-full transition-all cursor-pointer font-medium"
+              title="Gia nhập Nhóm Zalo Hỗ trợ Giáo án"
+            >
+              <span>Nhóm <strong className="font-black text-blue-400">Zalo</strong> Hỗ Trợ</span>
+            </a>
+
+            <span className="hidden sm:inline text-amber-700/60">•</span>
+
+            <span className="flex items-center gap-1 hover:text-white transition-colors cursor-default">
+              <Phone className="w-3 h-3 text-emerald-400" /> Phone: 0989.982.818
+            </span>
           </div>
         </div>
       </footer>

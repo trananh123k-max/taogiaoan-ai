@@ -425,11 +425,11 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
     setFormSchoolName('');
     setFormPhone('');
     setFormRole('teacher');
-    setFormAccessMode('date');
-    setFormExpiresAt(getDefaultFutureDate(12));
+    setFormAccessMode('trial');
+    setFormExpiresAt('Chưa cấp');
     setFormMaxDevices(2);
     setFormTrialGenerations(0);
-    setFormMaxTrialGenerations(9999);
+    setFormMaxTrialGenerations(5);
     setFormNotes('');
     setFormStatus('active');
     setShowFormPassword(false);
