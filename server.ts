@@ -2977,23 +2977,24 @@ Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động củ
   + Bước 4 BẮT BUỘC là "4. Thực hành – Vận dụng": Trẻ lần lượt thực hành theo hàng/nhóm từ dễ đến khó (cá nhân -> nhóm -> thi đua giữa các tổ); Cô bao quát sửa sai; Tổ chức trò chơi vận động củng cố hào hứng.
   + Bước 5 BẮT BUỘC là "5. Chia sẻ – Đánh giá và Hồi tĩnh": Trao đổi cảm nhận của trẻ sau buổi tập, cô nhận xét tuyên dương; Hồi tĩnh: Cho trẻ đi nhẹ nhàng 1 - 2 vòng quanh sân/phòng tập theo nhạc êm dịu, làm động tác chim bay thả lỏng cơ thể, hít thở sâu.
 - RIÊNG ĐỐI VỚI HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG GÓC):
-  BẮT BUỘC tuân thủ đúng 3 BƯỚC TIẾN TRÌNH CHUẨN MỰC sau (Mục I. Mục tiêu và Mục II. Chuẩn bị giữ nguyên chuẩn QĐ 388):
-  + Bước 1: "1. Thỏa thuận trước khi chơi": Hát/đọc thơ tạo cảm xúc; Cô giới thiệu các góc chơi hôm nay (Góc Nghệ thuật, Góc học tập - khám phá khoa học, Góc Phân vai...); Trẻ thỏa thuận vai chơi, tự chọn góc chơi và cam kết nội quy chơi văn minh, đoàn kết.
-  + Bước 2: "2. Theo dõi quá trình chơi": Phân chia chi tiết và đầy đủ cả 3 góc chơi:
-    * Góc Nghệ thuật: Cô hướng dẫn nguyên vật liệu mở (giấy màu, đất nặn, sáp màu...); Trẻ khéo léo tạo hình sản phẩm hoặc biểu diễn văn nghệ theo chủ đề.
-    * Góc học tập - khám phá khoa học: Cô gợi ý bài tập phân loại, so sánh, đếm, ghép tranh, xem sách truyện, làm thí nghiệm; Trẻ say sưa trải nghiệm khám phá.
-    * Góc Phân vai: Cô quan sát, nhập vai mở rộng tình huống giao tiếp, kết nối liên góc; Trẻ thể hiện đúng vai diễn (mẹ chăm sóc con, bác sĩ khám bệnh, người bán hàng niềm nở).
-  + Bước 3: "3. Nhận xét sau khi chơi": Báo hiệu hết giờ; Cô cùng trẻ tham quan các góc chơi nổi bật; Đại diện góc tự tin giới thiệu công trình/sản phẩm; Cô nhận xét tuyên dương tinh thần đoàn kết, sáng tạo và cùng trẻ thu dọn đồ chơi ngăn nắp vào đúng nơi quy định.
+  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP (BẢN CŨ / TRUYỀN THỐNG 5 BƯỚC): Áp dụng 5 bước chuẩn mực: "1. Ổn định tổ chức và trò chuyện chủ đề", "2. Thỏa thuận trước khi chơi", "3. Quá trình chơi / Trải nghiệm tại các góc chơi", "4. Nhận xét sau khi chơi", "5. Kết thúc và thu dọn đồ chơi".
+  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP 1 (MẪU MỚI 3 BƯỚC): BẮT BUỘC tuân thủ đúng 3 BƯỚC TIẾN TRÌNH CHUẨN MỰC sau (Mục I. Mục tiêu và Mục II. Chuẩn bị giữ nguyên chuẩn QĐ 388):
+    + Bước 1: "1. Thỏa thuận trước khi chơi": Hát/đọc thơ tạo cảm xúc; Cô giới thiệu các góc chơi hôm nay (Góc Nghệ thuật, Góc học tập - khám phá khoa học, Góc Phân vai...); Trẻ thỏa thuận vai chơi, tự chọn góc chơi và cam kết nội quy chơi văn minh, đoàn kết.
+    + Bước 2: "2. Theo dõi quá trình chơi": Phân chia chi tiết và đầy đủ cả 3 góc chơi:
+      * Góc Nghệ thuật: Cô hướng dẫn nguyên vật liệu mở (giấy màu, đất nặn, sáp màu...); Trẻ khéo léo tạo hình sản phẩm hoặc biểu diễn văn nghệ theo chủ đề.
+      * Góc học tập - khám phá khoa học: Cô gợi ý bài tập phân loại, so sánh, đếm, ghép tranh, xem sách truyện, làm thí nghiệm; Trẻ say sưa trải nghiệm khám phá.
+      * Góc Phân vai: Cô quan sát, nhập vai mở rộng tình huống giao tiếp, kết nối liên góc; Trẻ thể hiện đúng vai diễn (mẹ chăm sóc con, bác sĩ khám bệnh, người bán hàng niềm nở).
+    + Bước 3: "3. Nhận xét sau khi chơi": Báo hiệu hết giờ; Cô cùng trẻ tham quan các góc chơi nổi bật; Đại diện góc tự tin giới thiệu công trình/sản phẩm; Cô nhận xét tuyên dương tinh thần đoàn kết, sáng tạo và cùng trẻ thu dọn đồ chơi ngăn nắp vào đúng nơi quy định.
 - RIÊNG ĐỐI VỚI HOẠT ĐỘNG NGOÀI TRỜI:
-  BẮT BUỘC áp dụng đúng 3 BƯỚC TIẾN TRÌNH theo 1 trong 2 MẪU CHUẨN sau (Mục I. Mục tiêu và Mục II. Chuẩn bị giữ nguyên chuẩn QĐ 388):
-  * MẪU 1: HOẠT ĐỘNG NGOÀI TRỜI CÓ NỘI DUNG QUAN SÁT (ví dụ: Quan sát cây xanh / vườn hoa / bầu trời...):
+  + Nếu là HOẠT ĐỘNG NGOÀI TRỜI (BẢN CŨ / TRUYỀN THỐNG 5 BƯỚC): Áp dụng 5 bước: "1. Ổn định tổ chức và chuẩn bị", "2. Hoạt động có mục đích (Quan sát / Trải nghiệm có chủ đích)", "3. Trò chơi vận động", "4. Chơi tự do", "5. Kết thúc và nhận xét - vệ sinh".
+  + Nếu là HOẠT ĐỘNG NGOÀI TRỜI 1 (QUAN SÁT) (MẪU MỚI 3 BƯỚC):
     + Bước 1: "1. Trước khi quan sát": Kiểm tra sĩ số, trang phục gọn gàng; Nhắc nhở quy định an toàn khi ra sân; Dẫn dắt tạo hứng thú ra sân quan sát.
     + Bước 2: "2. Trong khi quan sát": BẮT BUỘC có đủ 3 nội dung:
       * Quan sát [đối tượng, ví dụ: Quan sát cây xanh]: Cho trẻ dùng các giác quan quan sát, đàm thoại về đặc điểm, bộ phận, ích lợi và giáo dục bảo vệ thiên nhiên.
       * TCVĐ: [Tên trò chơi vận động, ví dụ: Bỏ dẻ / Mèo đuổi chuột...]: Giới thiệu trò chơi, nêu cách chơi và luật chơi, tổ chức chơi 2-3 lần sôi nổi, nhận xét tuyên dương.
       * Chơi tự do: Giới thiệu khu vực chơi tự do (đồ chơi ngoài trời, vẽ phấn, nhặt lá xếp hình); Cô bao quát đảm bảo an toàn tuyệt đối.
     + Bước 3: "3. Sau khi quan sát": Tập trung trẻ, điểm danh sĩ số; Trẻ chia sẻ cảm xúc, cô nhận xét tuyên dương; Hướng dẫn trẻ rửa tay bằng xà phòng sạch sẽ và xếp hàng vào lớp.
-  * MẪU 2: HOẠT ĐỘNG NGOÀI TRỜI TRỌNG TÂM TRÒ CHƠI VẬN ĐỘNG & CHƠI ĐỒ CHƠI NGOÀI TRỜI:
+  + Nếu là HOẠT ĐỘNG NGOÀI TRỜI 2 (TRÒ CHƠI) (MẪU MỚI 3 BƯỚC):
     + Bước 1: "1. Trước khi chơi" (hoặc "1. Trước khi ra sân"): Kiểm tra trang phục, phổ biến nội dung và dặn dò an toàn ngoài trời.
     + Bước 2: "2. Trong khi chơi": BẮT BUỘC có đủ 2 nội dung:
       * Trò chơi vận động: [Tên trò chơi vận động]
@@ -4631,23 +4632,24 @@ Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động củ
 - YÊU CẦU ĐẶC BIỆT CHO PHẦN "2. Khám phá - Trải nghiệm": BẮT BUỘC thiết kế theo hướng trải nghiệm. Giáo viên cho trẻ trải nghiệm/thực hiện thử nhiệm vụ trước -> Đặt câu hỏi gợi mở để trẻ tự suy nghĩ và nêu lên cách thực hiện -> SAU ĐÓ giáo viên mới thực hiện làm mẫu và chuẩn hóa lại kỹ năng. Tuyệt đối KHÔNG làm mẫu hoặc giải thích cách làm trước khi trẻ được trải nghiệm.
 - TRÌNH BÀY RÕ RÀNG VÀ CHI TIẾT: Các hoạt động 1, 2, 3, 4, 5 (Tiến trình hoạt động) PHẢI SOẠN RẤT CHI TIẾT, ĐẦY ĐỦ VÀ SÂU SẮC. Bắt buộc mô tả cụ thể từng lời nói, câu lệnh, câu hỏi gợi mở của giáo viên và hành động, lời đáp, thái độ dự kiến của trẻ. Không viết chung chung sơ sài.
 - RIÊNG ĐỐI VỚI HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG GÓC):
-  BẮT BUỘC tuân thủ đúng 3 BƯỚC TIẾN TRÌNH CHUẨN MỰC sau (Mục I. Mục tiêu và Mục II. Chuẩn bị giữ nguyên chuẩn QĐ 388):
-  + Bước 1: "1. Thỏa thuận trước khi chơi": Hát/đọc thơ tạo cảm xúc; Cô giới thiệu các góc chơi hôm nay (Góc Nghệ thuật, Góc học tập - khám phá khoa học, Góc Phân vai...); Trẻ thỏa thuận vai chơi, tự chọn góc chơi và cam kết nội quy chơi văn minh, đoàn kết.
-  + Bước 2: "2. Theo dõi quá trình chơi": Phân chia chi tiết và đầy đủ cả 3 góc chơi:
-    * Góc Nghệ thuật: Cô hướng dẫn nguyên vật liệu mở (giấy màu, đất nặn, sáp màu...); Trẻ khéo léo tạo hình sản phẩm hoặc biểu diễn văn nghệ theo chủ đề.
-    * Góc học tập - khám phá khoa học: Cô gợi ý bài tập phân loại, so sánh, đếm, ghép tranh, xem sách truyện, làm thí nghiệm; Trẻ say sưa trải nghiệm khám phá.
-    * Góc Phân vai: Cô quan sát, nhập vai mở rộng tình huống giao tiếp, kết nối liên góc; Trẻ thể hiện đúng vai diễn (mẹ chăm sóc con, bác sĩ khám bệnh, người bán hàng niềm nở).
-  + Bước 3: "3. Nhận xét sau khi chơi": Báo hiệu hết giờ; Cô cùng trẻ tham quan các góc chơi nổi bật; Đại diện góc tự tin giới thiệu công trình/sản phẩm; Cô nhận xét tuyên dương tinh thần đoàn kết, sáng tạo và cùng trẻ thu dọn đồ chơi ngăn nắp vào đúng nơi quy định.
+  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP (BẢN CŨ / TRUYỀN THỐNG 5 BƯỚC): Áp dụng 5 bước chuẩn mực: "1. Ổn định tổ chức và trò chuyện chủ đề", "2. Thỏa thuận trước khi chơi", "3. Quá trình chơi / Trải nghiệm tại các góc chơi", "4. Nhận xét sau khi chơi", "5. Kết thúc và thu dọn đồ chơi".
+  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP 1 (MẪU MỚI 3 BƯỚC): BẮT BUỘC tuân thủ đúng 3 BƯỚC TIẾN TRÌNH CHUẨN MỰC sau (Mục I. Mục tiêu và Mục II. Chuẩn bị giữ nguyên chuẩn QĐ 388):
+    + Bước 1: "1. Thỏa thuận trước khi chơi": Hát/đọc thơ tạo cảm xúc; Cô giới thiệu các góc chơi hôm nay (Góc Nghệ thuật, Góc học tập - khám phá khoa học, Góc Phân vai...); Trẻ thỏa thuận vai chơi, tự chọn góc chơi và cam kết nội quy chơi văn minh, đoàn kết.
+    + Bước 2: "2. Theo dõi quá trình chơi": Phân chia chi tiết và đầy đủ cả 3 góc chơi:
+      * Góc Nghệ thuật: Cô hướng dẫn nguyên vật liệu mở (giấy màu, đất nặn, sáp màu...); Trẻ khéo léo tạo hình sản phẩm hoặc biểu diễn văn nghệ theo chủ đề.
+      * Góc học tập - khám phá khoa học: Cô gợi ý bài tập phân loại, so sánh, đếm, ghép tranh, xem sách truyện, làm thí nghiệm; Trẻ say sưa trải nghiệm khám phá.
+      * Góc Phân vai: Cô quan sát, nhập vai mở rộng tình huống giao tiếp, kết nối liên góc; Trẻ thể hiện đúng vai diễn (mẹ chăm sóc con, bác sĩ khám bệnh, người bán hàng niềm nở).
+    + Bước 3: "3. Nhận xét sau khi chơi": Báo hiệu hết giờ; Cô cùng trẻ tham quan các góc chơi nổi bật; Đại diện góc tự tin giới thiệu công trình/sản phẩm; Cô nhận xét tuyên dương tinh thần đoàn kết, sáng tạo và cùng trẻ thu dọn đồ chơi ngăn nắp vào đúng nơi quy định.
 - RIÊNG ĐỐI VỚI HOẠT ĐỘNG NGOÀI TRỜI:
-  BẮT BUỘC áp dụng đúng 3 BƯỚC TIẾN TRÌNH theo 1 trong 2 MẪU CHUẨN sau (Mục I. Mục tiêu và Mục II. Chuẩn bị giữ nguyên chuẩn QĐ 388):
-  * MẪU 1: HOẠT ĐỘNG NGOÀI TRỜI CÓ NỘI DUNG QUAN SÁT (ví dụ: Quan sát cây xanh / vườn hoa / bầu trời...):
+  + Nếu là HOẠT ĐỘNG NGOÀI TRỜI (BẢN CŨ / TRUYỀN THỐNG 5 BƯỚC): Áp dụng 5 bước: "1. Ổn định tổ chức và chuẩn bị", "2. Hoạt động có mục đích (Quan sát / Trải nghiệm có chủ đích)", "3. Trò chơi vận động", "4. Chơi tự do", "5. Kết thúc và nhận xét - vệ sinh".
+  + Nếu là HOẠT ĐỘNG NGOÀI TRỜI 1 (QUAN SÁT) (MẪU MỚI 3 BƯỚC):
     + Bước 1: "1. Trước khi quan sát": Kiểm tra sĩ số, trang phục gọn gàng; Nhắc nhở quy định an toàn khi ra sân; Dẫn dắt tạo hứng thú ra sân quan sát.
     + Bước 2: "2. Trong khi quan sát": BẮT BUỘC có đủ 3 nội dung:
       * Quan sát [đối tượng, ví dụ: Quan sát cây xanh]: Cho trẻ dùng các giác quan quan sát, đàm thoại về đặc điểm, bộ phận, ích lợi và giáo dục bảo vệ thiên nhiên.
       * TCVĐ: [Tên trò chơi vận động, ví dụ: Bỏ dẻ / Mèo đuổi chuột...]: Giới thiệu trò chơi, nêu cách chơi và luật chơi, tổ chức chơi 2-3 lần sôi nổi, nhận xét tuyên dương.
       * Chơi tự do: Giới thiệu khu vực chơi tự do (đồ chơi ngoài trời, vẽ phấn, nhặt lá xếp hình); Cô bao quát đảm bảo an toàn tuyệt đối.
     + Bước 3: "3. Sau khi quan sát": Tập trung trẻ, điểm danh sĩ số; Trẻ chia sẻ cảm xúc, cô nhận xét tuyên dương; Hướng dẫn trẻ rửa tay bằng xà phòng sạch sẽ và xếp hàng vào lớp.
-  * MẪU 2: HOẠT ĐỘNG NGOÀI TRỜI TRỌNG TÂM TRÒ CHƠI VẬN ĐỘNG & CHƠI ĐỒ CHƠI NGOÀI TRỜI:
+  + Nếu là HOẠT ĐỘNG NGOÀI TRỜI 2 (TRÒ CHƠI) (MẪU MỚI 3 BƯỚC):
     + Bước 1: "1. Trước khi chơi" (hoặc "1. Trước khi ra sân"): Kiểm tra trang phục, phổ biến nội dung và dặn dò an toàn ngoài trời.
     + Bước 2: "2. Trong khi chơi": BẮT BUỘC có đủ 2 nội dung:
       * Trò chơi vận động: [Tên trò chơi vận động]

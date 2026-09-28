@@ -185,13 +185,13 @@ export const CustomSubjectSelect: React.FC<CustomSubjectSelectProps> = ({
                 }`}
               >
                 <Sparkles className="w-3 h-3" />
-                <span>8 Hoạt động mới (QĐ 388)</span>
+                <span>Hoạt động mới (QĐ 388)</span>
               </button>
             </div>
           )}
 
           {/* Scrollable list container */}
-          <div className="max-h-48 sm:max-h-56 overflow-y-auto scrollbar-thin p-1.5 space-y-2">
+          <div className="max-h-56 sm:max-h-64 overflow-y-auto scrollbar-thin p-1.5 space-y-2">
             {schoolLevel === 'Mầm non' ? (
               <>
                 {/* 1. Traditional Preschool Domains */}
@@ -229,11 +229,13 @@ export const CustomSubjectSelect: React.FC<CustomSubjectSelectProps> = ({
                   <div>
                     <div className="px-2 py-1 text-[11px] font-bold text-blue-800 uppercase tracking-wider bg-blue-50 rounded-md flex items-center gap-1.5 mb-1 mt-1 border border-blue-100">
                       <Sparkles className="w-3 h-3 text-blue-600" />
-                      <span>8 Hoạt động phát triển mới (Theo QĐ 388)</span>
+                      <span>Hoạt động phát triển (Theo QĐ 388)</span>
                     </div>
                     <div className="space-y-0.5">
                       {newPreschool.map((subj) => {
                         const isSelected = value === subj;
+                        const isOldVer = subj.includes('Bản cũ');
+                        const isNew1Ver = subj.includes(' 1') || subj.includes(' 2');
                         return (
                           <button
                             key={subj}
@@ -245,7 +247,15 @@ export const CustomSubjectSelect: React.FC<CustomSubjectSelectProps> = ({
                                 : 'text-blue-900 hover:bg-blue-50/80'
                             }`}
                           >
-                            <span className="truncate">{subj}</span>
+                            <span className="truncate flex items-center gap-1.5">
+                              <span>{subj}</span>
+                              {isOldVer && (
+                                <span className="text-[9.5px] px-1 py-0.2 rounded bg-amber-100 text-amber-800 font-bold">5 bước</span>
+                              )}
+                              {isNew1Ver && (
+                                <span className="text-[9.5px] px-1 py-0.2 rounded bg-indigo-100 text-indigo-800 font-bold">3 bước</span>
+                              )}
+                            </span>
                             {isSelected && <Check className="w-3.5 h-3.5 text-blue-700 shrink-0" />}
                           </button>
                         );

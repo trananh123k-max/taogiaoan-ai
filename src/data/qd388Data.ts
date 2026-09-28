@@ -227,7 +227,29 @@ export const QD388_DEFAULT_CODES_BY_ACTIVITY: Record<string, {
       qualities: 'TX 4.4, TX 8.1',
       competencies: 'Tự lực lựa chọn góc chơi, Hợp tác nhóm'
     },
-    note: 'Chuẩn Hoạt động góc / Vui chơi trong lớp: Lắp ghép, thỏa thuận vai chơi, giao tiếp thân thiện, thu dọn ngăn nắp.'
+    note: 'Chuẩn Hoạt động góc / Vui chơi trong lớp (Bản truyền thống 5 bước): 1. Ổn định tổ chức & trò chuyện chủ đề, 2. Thỏa thuận trước khi chơi, 3. Quá trình chơi tại các góc, 4. Nhận xét sau khi chơi, 5. Kết thúc và thu dọn đồ chơi.'
+  },
+  'HOẠT ĐỘNG VUI CHƠI TRONG LỚP (Bản cũ)': {
+    summary: 'NT 3.1, TX 3.2, TX 4.3, TX 4.4, NN 2.2, TX 8.1',
+    codes: ['NT 3.1', 'TX 3.2', 'TX 4.3', 'TX 4.4', 'NN 2.2', 'TX 8.1'],
+    bySection: {
+      knowledge: 'NT 3.1, TX 3.2, TX 4.3',
+      skills: 'TX 4.4, NN 2.2',
+      qualities: 'TX 4.4, TX 8.1',
+      competencies: 'Tự lực lựa chọn góc chơi, Hợp tác nhóm'
+    },
+    note: 'Chuẩn Hoạt động vui chơi trong lớp (Bản cũ 5 bước): 1. Ổn định tổ chức & trò chuyện chủ đề, 2. Thỏa thuận trước khi chơi, 3. Quá trình chơi tại các góc, 4. Nhận xét sau khi chơi, 5. Kết thúc và thu dọn đồ chơi.'
+  },
+  'HOẠT ĐỘNG VUI CHƠI TRONG LỚP 1': {
+    summary: 'NT 3.1, TX 3.2, TX 4.3, TX 4.4, NN 2.2, TX 8.1',
+    codes: ['NT 3.1', 'TX 3.2', 'TX 4.3', 'TX 4.4', 'NN 2.2', 'TX 8.1'],
+    bySection: {
+      knowledge: 'NT 3.1, TX 3.2, TX 4.3',
+      skills: 'TX 4.4, NN 2.2',
+      qualities: 'TX 4.4, TX 8.1',
+      competencies: 'Tự lực lựa chọn góc chơi, Hợp tác nhóm'
+    },
+    note: 'Mẫu mới 3 bước chuẩn: 1. Thỏa thuận trước khi chơi, 2. Theo dõi quá trình chơi (Góc Nghệ thuật, Góc học tập - khám phá, Góc Phân vai...), 3. Nhận xét sau khi chơi.'
   },
   'HOẠT ĐỘNG NGOÀI TRỜI': {
     summary: 'NT 1.1, NT 1.2, NT 3.1, TC 1.1, TC 1.2, TC 3.1, TC 3.3, NN 2.2, TX 4.4',
@@ -238,7 +260,40 @@ export const QD388_DEFAULT_CODES_BY_ACTIVITY: Record<string, {
       qualities: 'TX 4.4, TX 8.3 (Yêu thiên nhiên, đoàn kết)',
       competencies: 'Thích ứng môi trường tự nhiên, Tự lực bảo vệ an toàn'
     },
-    note: 'Quan sát đối tượng tự nhiên, chơi trò chơi vận động/dân gian, giao lưu tiếp xúc không gian thoáng ngoài trời.'
+    note: 'Tiến trình truyền thống 5 bước: 1. Ổn định tổ chức & chuẩn bị, 2. Hoạt động có mục đích (Quan sát), 3. Trò chơi vận động, 4. Chơi tự do, 5. Kết thúc, nhận xét, vệ sinh.'
+  },
+  'HOẠT ĐỘNG NGOÀI TRỜI (Bản cũ)': {
+    summary: 'NT 1.1, NT 1.2, NT 3.1, TC 1.1, TC 1.2, TC 3.1, TC 3.3, NN 2.2, TX 4.4',
+    codes: ['NT 1.1', 'NT 1.2', 'NT 3.1', 'TC 1.1', 'TC 1.2', 'TC 3.1', 'TC 3.3', 'NN 2.2', 'TX 4.4'],
+    bySection: {
+      knowledge: 'NT 1.1, NT 1.2, NT 3.1, TC 1.1, TC 3.3',
+      skills: 'NN 2.2, NT 1.2, TC 1.2, TC 3.1',
+      qualities: 'TX 4.4, TX 8.3 (Yêu thiên nhiên, đoàn kết)',
+      competencies: 'Thích ứng môi trường tự nhiên, Tự lực bảo vệ an toàn'
+    },
+    note: 'Tiến trình truyền thống 5 bước: 1. Ổn định tổ chức & chuẩn bị, 2. Hoạt động có mục đích (Quan sát), 3. Trò chơi vận động, 4. Chơi tự do, 5. Kết thúc, nhận xét, vệ sinh.'
+  },
+  'HOẠT ĐỘNG NGOÀI TRỜI 1 (Quan sát)': {
+    summary: 'NT 1.1, NT 1.2, NT 3.1, TC 1.1, TC 1.2, TC 3.1, TC 3.3, NN 2.2, TX 4.4, TX 8.3',
+    codes: ['NT 1.1', 'NT 1.2', 'NT 3.1', 'TC 1.1', 'TC 1.2', 'TC 3.1', 'TC 3.3', 'NN 2.2', 'TX 4.4', 'TX 8.3'],
+    bySection: {
+      knowledge: 'NT 1.1, NT 1.2, NT 3.1',
+      skills: 'NT 1.2, NN 2.2, TC 3.1',
+      qualities: 'TX 8.3 (Yêu thiên nhiên, bảo vệ môi trường)',
+      competencies: 'Khám phá thế giới xung quanh, Tự lực đảm bảo an toàn ngoài trời'
+    },
+    note: 'Mẫu mới 3 bước: 1. Trước khi quan sát, 2. Trong khi quan sát (Quan sát đối tượng + TCVĐ + Chơi tự do), 3. Sau khi quan sát.'
+  },
+  'HOẠT ĐỘNG NGOÀI TRỜI 2 (Trò chơi)': {
+    summary: 'TC 1.1, TC 1.2, TC 1.3, TC 3.1, TC 3.3, TX 4.4, TC 7.2',
+    codes: ['TC 1.1', 'TC 1.2', 'TC 1.3', 'TC 3.1', 'TC 3.3', 'TX 4.4', 'TC 7.2'],
+    bySection: {
+      knowledge: 'TC 1.1, TC 3.3, TC 7.2',
+      skills: 'TC 1.2, TC 1.3, TC 3.1',
+      qualities: 'TX 4.4, TX 2.4 (Đoàn kết, trung thực, tuân thủ luật chơi)',
+      competencies: 'Vận động thể lực ngoài trời, Thích ứng và phối hợp đồng đội'
+    },
+    note: 'Mẫu mới 3 bước: 1. Trước khi chơi, 2. Trong khi chơi (Trò chơi vận động: Cách chơi, Luật chơi, Tổ chức chơi + Chơi với đồ chơi ngoài trời), 3. Sau khi chơi.'
   },
   'TRÒ CHƠI VẬN ĐỘNG': {
     summary: 'TC 1.1, TC 1.2, TC 1.3, TC 3.1, TC 3.3, TX 4.4',

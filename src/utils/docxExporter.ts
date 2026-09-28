@@ -3005,8 +3005,12 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
       }
     } else if (
       domainInfo.domainType === 'PLAY_INDOOR' ||
+      domainInfo.domainType === 'PLAY_INDOOR_NEW' ||
       domainInfo.domainType === 'OUTDOOR' ||
+      domainInfo.domainType === 'OUTDOOR_OBSERVE' ||
+      domainInfo.domainType === 'OUTDOOR_GAME' ||
       domainInfo.domainType === 'PHYSICAL_GAME' ||
+      domainInfo.domainType === 'LEARNING_GAME' ||
       domainInfo.domainType === 'SKILL_EDU' ||
       domainInfo.domainType === 'FOLK_GAME' ||
       domainInfo.domainType === 'VIETNAMESE_ENHANCE' ||

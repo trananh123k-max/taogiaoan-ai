@@ -1089,7 +1089,85 @@ export function generateDefaultPreschoolActivities(
   }
 
   if (domain.domainType === 'PLAY_INDOOR') {
-    // HOẠT ĐỘNG VUI CHƠI TRONG LỚP (3 BƯỚC CHUẨN)
+    const isOld5Step = (subject || '').includes('Bản cũ') || (subject || '').trim() === 'HOẠT ĐỘNG VUI CHƠI TRONG LỚP' || (title || '').toLowerCase().includes('bản cũ') || (title || '').toLowerCase().includes('truyền thống') || (title || '').toLowerCase().includes('5 bước');
+    
+    if (isOld5Step) {
+      // HOẠT ĐỘNG VUI CHƠI TRONG LỚP (BẢN CŨ / TRUYỀN THỐNG 5 BƯỚC)
+      return [
+        {
+          id: 'act-1',
+          index: 1,
+          name: '1. Ổn định tổ chức và trò chuyện chủ đề',
+          duration: '3 - 5 phút',
+          objective: 'Trẻ hào hứng, tập trung và chuẩn bị tâm thế bước vào giờ hoạt động góc',
+          step1: {
+            title: '1. Ổn định tổ chức và trò chuyện chủ đề',
+            teacherAction: `- Cô cùng trẻ hát và vận động theo bài hát chủ đề (ví dụ "Trường chúng cháu là trường mầm non" / "Đố bạn").\n- Trò chuyện dẫn dắt gợi mở cảm xúc về chủ đề: "${title}".\n- Giới thiệu các góc chơi sẽ mở trong buổi chơi hôm nay.`,
+            studentAction: `- Trẻ vui tươi hát và vận động theo giai điệu bài hát cùng cô.\n- Trẻ hào hứng trả lời câu hỏi và đón chờ giờ chơi.`,
+            productExpected: '',
+            digitalOrAiTool: '',
+          },
+        },
+        {
+          id: 'act-2',
+          index: 2,
+          name: '2. Thỏa thuận trước khi chơi',
+          duration: '5 - 7 phút',
+          objective: 'Trẻ tự chọn góc chơi, nhận vai chơi và thống nhất nội quy chơi',
+          step1: {
+            title: '2. Thỏa thuận trước khi chơi',
+            teacherAction: `- Hướng dẫn trẻ thỏa thuận nội dung chơi tại các góc: Góc Phân vai, Góc Xây dựng, Góc Nghệ thuật, Góc Học tập - Khám phá.\n- Cho trẻ tự nguyện nhận vai chơi và chọn góc chơi yêu thích.\n- Nhắc nhở quy tắc chơi văn minh: Đoàn kết, nhường nhịn, không ném đồ chơi, nói năng nhẹ nhàng.\n- Cho trẻ nhẹ nhàng di chuyển về góc chơi đã nhận.`,
+            studentAction: `- Trẻ tự tin giơ tay lựa chọn góc chơi và nhận vai diễn yêu thích.\n- Trẻ ghi nhớ và nhắc lại quy tắc chơi văn minh cùng cô.\n- Trẻ nhẹ nhàng di chuyển về các góc chơi.`,
+            productExpected: '',
+            digitalOrAiTool: '',
+          },
+        },
+        {
+          id: 'act-3',
+          index: 3,
+          name: '3. Quá trình chơi / Trải nghiệm tại các góc chơi',
+          duration: '18 - 22 phút',
+          objective: 'Trẻ tích cực thể hiện vai chơi, sáng tạo sản phẩm và giao lưu liên góc',
+          step1: {
+            title: '3. Quá trình chơi / Trải nghiệm tại các góc chơi',
+            teacherAction: `- Cô bao quát toàn lớp, hỗ trợ các góc chơi và đóng vai người chơi gợi mở liên kết giữa các góc:\n  + Góc Nghệ thuật: Hướng dẫn trẻ vẽ, xé dán, nặn, biểu diễn văn nghệ theo chủ đề.\n  + Góc Học tập: Hướng dẫn trẻ phân loại đồ vật, ghép tranh, xem truyện tranh.\n  + Góc Phân vai: Hướng dẫn mẹ bế con, bác sĩ khám bệnh, người bán hàng niềm nở.\n  + Góc Xây dựng: Gợi ý các bác thợ xây lắp ghép công trình vững chắc, đẹp mắt.`,
+            studentAction: `- Trẻ say sưa thực hiện nhiệm vụ ở từng góc chơi, trao đổi rôm rả với bạn.\n- Trẻ nhập vai tự nhiên, cử chỉ ân cần, giao tiếp lễ phép và liên kết sôi nổi giữa các góc.`,
+            productExpected: '',
+            digitalOrAiTool: '',
+          },
+        },
+        {
+          id: 'act-4',
+          index: 4,
+          name: '4. Nhận xét sau khi chơi',
+          duration: '4 - 6 phút',
+          objective: 'Trẻ tham quan góc chơi nổi bật, chia sẻ sản phẩm và lắng nghe nhận xét',
+          step1: {
+            title: '4. Nhận xét sau khi chơi',
+            teacherAction: `- Cô báo hiệu hết giờ chơi, tập trung trẻ lại.\n- Dẫn cả lớp đến tham quan 1 - 2 góc chơi nổi bật trong ngày.\n- Mời đại diện góc tự tin giới thiệu công trình/sản phẩm; các bạn góc khác nhận xét.\n- Cô nhận xét chung, khen ngợi tinh thần đoàn kết, sáng tạo và ý thức giữ gìn đồ chơi.`,
+            studentAction: `- Trẻ dừng tay khi nghe hiệu lệnh hết giờ và tập trung quanh cô.\n- Đại diện góc tự tin thuyết minh về công trình của mình.\n- Trẻ chăm chú lắng nghe, vỗ tay tuyên dương bạn.`,
+            productExpected: '',
+            digitalOrAiTool: '',
+          },
+        },
+        {
+          id: 'act-5',
+          index: 5,
+          name: '5. Kết thúc và thu dọn đồ chơi',
+          duration: '3 - 5 phút',
+          objective: 'Trẻ tự giác thu dọn, phân loại đồ chơi ngăn nắp vào đúng nơi quy định',
+          step1: {
+            title: '5. Kết thúc và thu dọn đồ chơi',
+            teacherAction: `- Hướng dẫn và cùng trẻ thu dọn đồ dùng đồ chơi về đúng các góc.\n- Kiểm tra và tuyên dương nề nếp gọn gàng, sạch sẽ của cả lớp.`,
+            studentAction: `- Trẻ nhanh nhẹn, tự giác phân loại và cất đồ chơi gọn gàng lên giá kệ.\n- Trẻ vui vẻ xếp hàng chuyển sang hoạt động tiếp theo.`,
+            productExpected: '',
+            digitalOrAiTool: '',
+          },
+        },
+      ];
+    }
+
+    // HOẠT ĐỘNG VUI CHƠI TRONG LỚP 1 (3 BƯỚC MẪU MỚI CHUẨN)
     return [
       {
         id: 'act-1',
@@ -1137,10 +1215,87 @@ export function generateDefaultPreschoolActivities(
   }
 
   if (domain.domainType === 'OUTDOOR') {
-    // HOẠT ĐỘNG NGOÀI TRỜI (3 BƯỚC CHUẨN)
-    const isGameFocus = title.toLowerCase().includes('trò chơi') || title.toLowerCase().includes('chuyền bóng') || title.toLowerCase().includes('kéo co') || title.toLowerCase().includes('vận động');
+    const isOld5Step = (subject || '').includes('Bản cũ') || (subject || '').trim() === 'HOẠT ĐỘNG NGOÀI TRỜI' || (title || '').toLowerCase().includes('bản cũ') || (title || '').toLowerCase().includes('truyền thống') || (title || '').toLowerCase().includes('5 bước');
+    
+    if (isOld5Step) {
+      // HOẠT ĐỘNG NGOÀI TRỜI (BẢN CŨ / TRUYỀN THỐNG 5 BƯỚC)
+      return [
+        {
+          id: 'act-1',
+          index: 1,
+          name: '1. Ổn định tổ chức và chuẩn bị',
+          duration: '3 - 5 phút',
+          objective: 'Kiểm tra sĩ số, trang phục, dặn dò an toàn khi ra sân',
+          step1: {
+            title: '1. Ổn định tổ chức và chuẩn bị',
+            teacherAction: `- Cô tập trung trẻ, kiểm tra sĩ số, trang phục, giày dép, mũ nón đảm bảo gọn gàng, phù hợp thời tiết.\n- Dặn dò quy định an toàn khi ra sân: Đi theo hàng, không xô đẩy, lắng nghe hiệu lệnh của cô.\n- Dẫn dắt tạo hứng thú, cho trẻ xếp hàng nhẹ nhàng ra sân trường.`,
+            studentAction: `- Trẻ tập trung chỉnh tề trang phục, lắng nghe cô dặn dò an toàn và vui vẻ xếp hàng ra sân.`,
+            productExpected: '',
+            digitalOrAiTool: '',
+          },
+        },
+        {
+          id: 'act-2',
+          index: 2,
+          name: '2. Hoạt động có mục đích (Quan sát / Khám phá có chủ đích)',
+          duration: '10 - 15 phút',
+          objective: 'Trẻ dùng đa giác quan quan sát, tìm hiểu đối tượng ngoài trời',
+          step1: {
+            title: '2. Hoạt động có mục đích (Quan sát / Khám phá có chủ đích)',
+            teacherAction: `- Cho trẻ quây quần quanh đối tượng quan sát (${title}).\n- Đặt câu hỏi gợi mở về đặc điểm, hình dáng, màu sắc, công dụng, ích lợi.\n- Cho trẻ đến gần sờ, ngửi, cảm nhận và nêu nhận xét.\n- Cô chuẩn hóa kiến thức, giáo dục trẻ yêu quý và bảo vệ thiên nhiên/môi trường.`,
+            studentAction: `- Trẻ chăm chú quan sát, tự tin trả lời các câu hỏi gợi mở của cô.\n- Trẻ sờ, cảm nhận và trao đổi rôm rả với bạn về đối tượng quan sát.`,
+            productExpected: '',
+            digitalOrAiTool: '',
+          },
+        },
+        {
+          id: 'act-3',
+          index: 3,
+          name: '3. Trò chơi vận động',
+          duration: '6 - 8 phút',
+          objective: 'Trẻ rèn luyện thể lực, phản xạ nhanh nhẹn và tinh thần đồng đội',
+          step1: {
+            title: '3. Trò chơi vận động',
+            teacherAction: `- Giới thiệu tên trò chơi vận động phù hợp chủ đề.\n- Phổ biến cách chơi và luật chơi rõ ràng.\n- Tổ chức cho trẻ chơi 2 – 3 lần sôi nổi, bao quát cổ vũ động viên trẻ.`,
+            studentAction: `- Trẻ lắng nghe luật chơi và hào hứng tham gia chơi 2 – 3 lần sôi nổi, reo vui cổ vũ bạn.`,
+            productExpected: '',
+            digitalOrAiTool: '',
+          },
+        },
+        {
+          id: 'act-4',
+          index: 4,
+          name: '4. Chơi tự do',
+          duration: '8 - 10 phút',
+          objective: 'Trẻ thỏa sức chơi với đồ chơi ngoài trời hoặc trò chơi dân gian yêu thích an toàn',
+          step1: {
+            title: '4. Chơi tự do',
+            teacherAction: `- Giới thiệu khu vực chơi tự do (cầu trượt, xích đu, vẽ phấn trên sân, nhặt lá xếp hình).\n- Dặn dò chơi an toàn, nhường nhịn bạn bè; cô theo sát bao quát toàn sân.`,
+            studentAction: `- Trẻ tự chọn khu vực chơi yêu thích, chơi đoàn kết, chia sẻ đồ chơi cùng bạn.`,
+            productExpected: '',
+            digitalOrAiTool: '',
+          },
+        },
+        {
+          id: 'act-5',
+          index: 5,
+          name: '5. Kết thúc, nhận xét, vệ sinh',
+          duration: '3 - 5 phút',
+          objective: 'Hồi tĩnh, điểm danh, nhận xét tuyên dương và rửa tay sạch sẽ',
+          step1: {
+            title: '5. Kết thúc, nhận xét, vệ sinh',
+            teacherAction: `- Tập trung trẻ, điểm danh sĩ số.\n- Cho trẻ đi lại nhẹ nhàng hít thở sâu thả lỏng cơ thể.\n- Nhận xét buổi chơi, tuyên dương tinh thần sôi nổi, tự giác của cả lớp.\n- Hướng dẫn trẻ xếp hàng rửa tay bằng xà phòng sạch sẽ và vào lớp.`,
+            studentAction: `- Trẻ tập trung quanh cô, thực hiện động tác hồi tĩnh nhẹ nhàng.\n- Trẻ chú ý nghe nhận xét và tự giác xếp hàng rửa tay sạch sẽ trước khi vào lớp.`,
+            productExpected: '',
+            digitalOrAiTool: '',
+          },
+        },
+      ];
+    }
+
+    const isGameFocus = (subject || '').includes('2') || title.toLowerCase().includes('trò chơi') || title.toLowerCase().includes('chuyền bóng') || title.toLowerCase().includes('kéo co') || title.toLowerCase().includes('vận động');
     if (isGameFocus) {
-      // MẪU 2: TRỌNG TÂM TRÒ CHƠI VẬN ĐỘNG & CHƠI ĐỒ CHƠI NGOÀI TRỜI
+      // MẪU 2: HOẠT ĐỘNG NGOÀI TRỜI 2 (TRÒ CHƠI) - 3 BƯỚC MẪU MỚI
       return [
         {
           id: 'act-1',
@@ -1186,7 +1341,7 @@ export function generateDefaultPreschoolActivities(
         },
       ];
     } else {
-      // MẪU 1: HOẠT ĐỘNG NGOÀI TRỜI CÓ NỘI DUNG QUAN SÁT
+      // MẪU 1: HOẠT ĐỘNG NGOÀI TRỜI 1 (QUAN SÁT) - 3 BƯỚC MẪU MỚI
       return [
         {
           id: 'act-1',

@@ -616,11 +616,13 @@ I. LĨNH VỰC PHÁT TRIỂN THẨM MỸ (TẠO HÌNH):
 4. Vận dụng – Mở rộng: Gợi mở tình huống vận dụng mới ở nhà; Hướng dẫn lồng bức ảnh kỷ niệm vào khung/sản phẩm vừa làm để tặng cô/người thân.
 5. Đánh giá – Điều chỉnh: Hỏi cảm nhận điều thích nhất; Cô nhận xét chung ghi nhận phản hồi tích cực.
 
-J. HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG CHƠI Ở CÁC GÓC):
-- QUY ĐỊNH CẤU TRÚC:
+J. HOẠT ĐỘNG VUI CHƠI TRONG LỚP (GỒM BẢN TRUYỀN THỐNG VÀ MẪU MỚI 1):
+- QUY ĐỊNH CẤU TRÚC CHUNG:
   + Mục I. Mục tiêu / Mục đích - yêu cầu: GIỮ NGUYÊN cấu trúc chuẩn QĐ 388 (1. Kiến thức có mã, 2. Kỹ năng có mã, 3. Phẩm chất: Yêu thương, Tôn trọng..., 4. Năng lực: Tự lực, Thích ứng...). Tích hợp NLS (mục 5) và AI (mục 6) nếu được chọn.
   + Mục II. Chuẩn bị: GIỮ NGUYÊN (1. Chuẩn bị của cô, 2. Chuẩn bị của trẻ, 3. Phối hợp với phụ huynh).
-  + Mục III. Tiến trình hoạt động: Trình bày trong 1 bảng 2 cột ("Hoạt động của cô" | "Hoạt động của trẻ") BẮT BUỘC theo đúng 3 BƯỚC CHUẨN sau:
+  + Mục III. Tiến trình hoạt động: Trình bày trong 1 bảng 2 cột ("Hoạt động của cô" | "Hoạt động của trẻ"):
+
+  * MẪU MỚI 1: HOẠT ĐỘNG VUI CHƠI TRONG LỚP 1 (3 BƯỚC TIẾN TRÌNH):
     1. Thỏa thuận trước khi chơi:
        - Ổn định tổ chức: Cô cùng trẻ hát/đọc thơ/trò chuyện theo chủ đề để tạo cảm xúc, hứng thú.
        - Trò chuyện dẫn dắt giới thiệu các góc chơi hôm nay (Góc Nghệ thuật, Góc học tập - khám phá khoa học, Góc Phân vai...).
@@ -637,19 +639,26 @@ J. HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG CHƠI Ở CÁC GÓC):
        - Cô nhận xét chung, tuyên dương tinh thần đoàn kết, sự khéo léo, sáng tạo và ý thức giữ gìn đồ chơi của trẻ; nhắc nhở nhẹ nhàng nếu có điểm cần rút kinh nghiệm.
        - Hướng dẫn và cùng trẻ thu dọn đồ chơi gọn gàng, phân loại ngăn nắp vào đúng nơi quy định.
 
-K. HOẠT ĐỘNG NGOÀI TRỜI (2 MẪU CHUẨN):
+  * BẢN TRUYỀN THỐNG: HOẠT ĐỘNG VUI CHƠI TRONG LỚP (5 BƯỚC CHUẨN):
+    1. Ổn định tổ chức – Thỏa thuận trước khi chơi
+    2. Quá trình chơi – Trẻ về các góc thực hiện
+    3. Quan sát, gợi mở và hỗ trợ trẻ trong quá trình chơi
+    4. Nhận xét sau khi chơi tại các góc trọng tâm
+    5. Thu dọn đồ dùng đồ chơi – Kết thúc buổi chơi
+
+K. HOẠT ĐỘNG NGOÀI TRỜI (GỒM BẢN TRUYỀN THỐNG VÀ 2 MẪU MỚI):
 - QUY ĐỊNH CẤU TRÚC:
   + Mục I. Mục tiêu / Mục đích - yêu cầu: GIỮ NGUYÊN cấu trúc chuẩn QĐ 388 (1. Kiến thức có mã, 2. Kỹ năng có mã, 3. Phẩm chất, 4. Năng lực...).
   + Mục II. Chuẩn bị: GIỮ NGUYÊN (1. Chuẩn bị của cô, 2. Chuẩn bị của trẻ, 3. Phối hợp phụ huynh).
-  + Mục III. Tiến trình hoạt động: Bảng 2 cột ("Hoạt động của cô" | "Hoạt động của trẻ") BẮT BUỘC theo đúng 3 BƯỚC của 1 trong 2 MẪU sau:
+  + Mục III. Tiến trình hoạt động: Bảng 2 cột ("Hoạt động của cô" | "Hoạt động của trẻ"):
 
-  * MẪU 1: HOẠT ĐỘNG NGOÀI TRỜI CÓ NỘI DUNG QUAN SÁT (Ví dụ: Quan sát cây xanh / vườn hoa / thời tiết...):
+  * MẪU MỚI 1: HOẠT ĐỘNG NGOÀI TRỜI 1 (QUAN SÁT - 3 BƯỚC):
     1. Trước khi quan sát:
        - Kiểm tra sĩ số, trang phục, giày dép của trẻ gọn gàng, phù hợp thời tiết.
        - Nhắc nhở quy định an toàn khi ra sân: đi theo hàng, không chen lấn xô đẩy, lắng nghe hiệu lệnh của cô, không tự ý rời khỏi khu vực chơi, không ngắt hoa bẻ cành.
        - Tạo hứng thú dẫn dắt trẻ ra sân quan sát (hát bài hát, đọc thơ hoặc giải câu đố về đối tượng quan sát).
     2. Trong khi quan sát:
-       * Quan sát [đối tượng quan sát, ví dụ: Quan sát cây xanh]:
+       * Quan sát [đối tượng quan sát, ví dụ: Quan sát cây xanh / vườn hoa / thời tiết...]:
          - Cho trẻ đứng vị trí thuận lợi, gợi hỏi để trẻ dùng các giác quan quan sát (nhìn, sờ, ngửi...); đàm thoại về đặc điểm, bộ phận, ích lợi; giáo dục trẻ yêu quý thiên nhiên và bảo vệ môi trường.
        * TCVĐ: [Tên trò chơi vận động, ví dụ: Bỏ dẻ / Mèo đuổi chuột / Cáo và thỏ...]:
          - Cô giới thiệu tên trò chơi, phổ biến cách chơi, luật chơi rõ ràng; tổ chức cho trẻ chơi 2 – 3 lần sôi nổi, bao quát đảm bảo an toàn; nhận xét khen ngợi trẻ.
@@ -658,23 +667,30 @@ K. HOẠT ĐỘNG NGOÀI TRỜI (2 MẪU CHUẨN):
     3. Sau khi quan sát:
        - Tập trung trẻ bằng hiệu lệnh (tiếng còi/xắc xô), điểm danh sĩ số.
        - Cho trẻ nêu cảm xúc sau buổi chơi, cô nhận xét tuyên dương sự tích cực của cả lớp.
-       - Hướng dẫn trẻ rửa tay sạch sẽ bằng xà phòng, chỉnh trang trang phục và xếp hàng vào lớp.
+       - Hướng dẫn trẻ xếp hàng lần lượt đi rửa tay bằng xà phòng sạch sẽ, lau khô tay và chỉnh trang trang phục bước vào lớp học.
 
-  * MẪU 2: HOẠT ĐỘNG NGOÀI TRỜI CÓ TRÒ CHƠI VẬN ĐỘNG & CHƠI ĐỒ CHƠI NGOÀI TRỜI:
-    1. Trước khi chơi (hoặc Trước khi quan sát / Trước khi ra sân):
-       - Kiểm tra trang phục, giày dép gọn gàng, thuận tiện vận động.
-       - Thông báo nội dung buổi chơi ngoài trời và dặn dò các quy định an toàn khi tham gia hoạt động ngoài sân trường.
+  * MẪU MỚI 2: HOẠT ĐỘNG NGOÀI TRỜI 2 (TRÒ CHƠI VẬN ĐỘNG & ĐỒ CHƠI NGOÀI TRỜI - 3 BƯỚC):
+    1. Trước khi chơi:
+       - Kiểm tra sĩ số, trang phục, giày dép thuận tiện cho vận động chạy nhảy.
+       - Phổ biến nội dung hoạt động và nhắc nhở các quy định an toàn ngoài trời.
     2. Trong khi chơi:
-       * Trò chơi vận động: [Tên trò chơi vận động]
-         Cách chơi: [Mô tả chi tiết cách chơi: cách chia đội, hiệu lệnh, thao tác vận động tiếp sức...]
-         Luật chơi: [Mô tả chi tiết luật chơi: điều được làm, điều phạm quy, phần thưởng/hình thức phạt nhảy lò cò vui vẻ...]
-         - Cô giới thiệu trò chơi, hướng dẫn cách chơi và luật chơi cụ thể; tổ chức cho trẻ chơi 2 – 3 lần hào hứng; cô bao quát cổ vũ động viên trẻ.
+       * Trò chơi vận động: [Tên trò chơi, ví dụ: Bịt mắt bắt dê / Kéo co / Nhảy bao bố / Chuyền bóng tiếp sức...]
+         - Cách chơi: [Chia đội, hiệu lệnh, thao tác vận động tiếp sức rõ ràng, chi tiết...]
+         - Luật chơi: [Quy định thắng thua, điều phạm quy, phần thưởng...]
+         - Tổ chức cho trẻ chơi 2 - 3 lần sôi nổi, bao quát cổ vũ động viên trẻ.
        * Chơi với đồ chơi ngoài trời:
-         - Cô hướng dẫn trẻ đến các khu vực đồ chơi ngoài trời liên hoàn (cầu trượt, bập bênh, xích đu, thú nhún...); nhắc nhở quy tắc chơi an toàn, nhường nhịn nhau, không chen lấn xô đẩy; cô luôn theo sát bao quát đảm bảo an toàn tuyệt đối.
+         - Hướng dẫn trẻ đến các khu vực đồ chơi liên hoàn (cầu trượt, bập bênh, xích đu, thú nhún), nhắc nhở quy tắc an toàn, nhường nhịn nhau, cô theo sát bao quát đảm bảo an toàn tuyệt đối.
     3. Sau khi chơi:
-       - Tập trung trẻ bằng hiệu lệnh, điểm danh kiểm tra sĩ số.
-       - Hồi tĩnh: Cho trẻ thả lỏng cơ thể, đi lại nhẹ nhàng hít thở sâu.
-       - Nhận xét, tuyên dương tinh thần tham gia của trẻ; hướng dẫn trẻ rửa tay sạch sẽ và xếp hàng vào lớp.
+       - Tập trung trẻ, điểm danh sĩ số; thực hiện hồi tĩnh thả lỏng cơ thể.
+       - Nhận xét tuyên dương tinh thần thi đua của các đội; cùng cô thu dọn đồ dùng, rửa tay bằng xà phòng và vào lớp.
+
+  * BẢN TRUYỀN THỐNG: HOẠT ĐỘNG NGOÀI TRỜI (5 BƯỚC CHUẨN):
+    1. Ổn định tổ chức – Gây hứng thú
+    2. Quan sát có mục đích
+    3. Trò chơi vận động
+    4. Chơi tự do
+    5. Hồi tĩnh – Nhận xét – Đánh giá
+       - Hướng dẫn trẻ rửa tay sạch sẽ bằng xà phòng, chỉnh trang trang phục và xếp hàng vào lớp.
 
 L. TRÒ CHƠI VẬN ĐỘNG:
 - Cấu trúc mục tiêu: Gắn mã chỉ báo QĐ 388 (TC 1.1, TC 1.2, TC 1.3, TC 3.1, TC 3.3, TX 4.4...).

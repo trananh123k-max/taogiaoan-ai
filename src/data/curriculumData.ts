@@ -60,8 +60,13 @@ export const SUBJECTS_LIST = Array.from(new Set([
 ]));
 
 export const MAM_NON_NEW_ACTIVITIES = [
-  'HOẠT ĐỘNG VUI CHƠI TRONG LỚP',
+  'HOẠT ĐỘNG NGOÀI TRỜI (Bản cũ)',
+  'HOẠT ĐỘNG NGOÀI TRỜI 1 (Quan sát)',
+  'HOẠT ĐỘNG NGOÀI TRỜI 2 (Trò chơi)',
+  'HOẠT ĐỘNG VUI CHƠI TRONG LỚP (Bản cũ)',
+  'HOẠT ĐỘNG VUI CHƠI TRONG LỚP 1',
   'HOẠT ĐỘNG NGOÀI TRỜI',
+  'HOẠT ĐỘNG VUI CHƠI TRONG LỚP',
   'TRÒ CHƠI VẬN ĐỘNG',
   'TRÒ CHƠI HỌC TẬP',
   'HOẠT ĐỘNG GIÁO DỤC KỸ NĂNG',
