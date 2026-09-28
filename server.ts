@@ -436,6 +436,43 @@ async function generateContentWithRetryAndFallback(options: {
  * Sanitizer: Cleans worksheet content so it NEVER contains image slots or NLS / AI technical competence codes,
  * and ensures markdown tables and sections have clean line breaks.
  */
+function isAnswerTableLine(str: string): boolean {
+  const lower = str.toLowerCase();
+  return (
+    lower.includes('đáp án') ||
+    lower.includes('gợi ý') ||
+    lower.includes('yêu cầu cần đạt') ||
+    lower.includes('hướng dẫn chấm') ||
+    lower.includes('thang điểm') ||
+    lower.includes('biểu điểm') ||
+    lower.includes('điểm / đánh giá') ||
+    lower.includes('đánh giá') ||
+    lower.includes('kết quả chuẩn') ||
+    lower.includes('lời giải')
+  );
+}
+
+function isTeacherHeading(line: string): boolean {
+  const lower = line.toLowerCase();
+  return (
+    lower.includes('gợi ý đáp án') ||
+    lower.includes('đáp án') ||
+    lower.includes('hướng dẫn đánh giá') ||
+    lower.includes('hướng dẫn chấm') ||
+    lower.includes('thang điểm') ||
+    lower.includes('biểu điểm') ||
+    lower.includes('dành cho giáo viên') ||
+    lower.includes('phần 2') ||
+    lower.includes('phần ii') ||
+    lower.includes('bảng 2') ||
+    lower.includes('lời giải chi tiết')
+  );
+}
+
+/**
+ * Sanitizer: Cleans worksheet content so it NEVER contains image slots or NLS / AI technical competence codes,
+ * and ensures markdown tables and sections have clean line breaks and preserved answers.
+ */
 function cleanWorksheetContent(text: string): string {
   if (!text) return '';
   let cleaned = text;
@@ -451,7 +488,6 @@ function cleanWorksheetContent(text: string): string {
 
   // Separate major headers / metadata ONLY if text precedes table header on same line without pipe
   cleaned = cleaned.replace(/^([^|\n]+)(\|\s*(?:STT|Nhiệm vụ|Câu hỏi|Bước|Nội dung)[\s|])/gim, '$1\n\n$2');
-  cleaned = cleaned.replace(/\|\s*(PHẦN\s+\d+|###|##|#|Họ và tên|HỌ VÀ TÊN|BẢNG GỢI Ý|HƯỚNG DẪN)/gi, '|\n\n$1');
   cleaned = cleaned.replace(/(PHẦN\s+\d+[^:\n]*:[^\n.]+[\.\:])\s*(Họ và tên|Họ tên|Tên học sinh)/gi, '$1\n$2');
   cleaned = cleaned.replace(/(PHIẾU HỌC TẬP[^\n.]+[\.\:])\s*(Họ và tên|Họ tên|Tên học sinh)/gi, '$1\n$2');
 
@@ -462,32 +498,66 @@ function cleanWorksheetContent(text: string): string {
   const lines = cleaned.split('\n');
   const resultLines: string[] = [];
   let currentSection: 'student' | 'teacher' | 'other' = 'other';
+  let insideTable = false;
+  let previousLineWasHeader = false;
 
   const defaultDots = '....................................................................................<br>....................................................................................<br>....................................................................................<br>....................................................................................';
 
   for (let idx = 0; idx < lines.length; idx++) {
     let line = lines[idx].trim();
     if (!line) {
+      insideTable = false;
+      previousLineWasHeader = false;
       resultLines.push('');
       continue;
     }
 
-    if (/PHIẾU HỌC TẬP|DÀNH CHO HỌC SINH|PHẦN 1/i.test(line) && !/BẢNG GỢI Ý|GIÁO VIÊN/i.test(line)) {
-      currentSection = 'student';
-    } else if (/BẢNG GỢI Ý|HƯỚNG DẪN ĐÁNH GIÁ|DÀNH CHO GIÁO VIÊN|PHẦN 2/i.test(line)) {
+    if (isTeacherHeading(line)) {
       currentSection = 'teacher';
+      insideTable = false;
+      previousLineWasHeader = false;
+      resultLines.push(line);
+      continue;
+    } else if (/PHIẾU HỌC TẬP|DÀNH CHO HỌC SINH|PHẦN 1|PHẦN I\b/i.test(line) && !isTeacherHeading(line)) {
+      currentSection = 'student';
+      insideTable = false;
+      previousLineWasHeader = false;
+      resultLines.push(line);
+      continue;
     }
 
     if (line.startsWith('|') && line.endsWith('|') && line.split('|').length >= 3) {
       const cells = line.split('|').slice(1, -1).map((c) => c.trim());
-      const headerStr = cells.join(' ').toLowerCase();
-      const isHeader = /(stt|nhiệm vụ|câu hỏi|kết quả|gợi ý|đáp án|điểm)/i.test(headerStr);
+      const firstCellClean = (cells[0] || '').replace(/[\*\_]+/g, '').trim();
+      const isNumericRow = /^(\d+|câu\s*\d+|bài\s*\d+|bước\s*\d+|[a-z]\))$/i.test(firstCellClean);
+      const isSeparator = /^[\s\-:]+$/.test(firstCellClean) || /^\|?[\s\-:]+\|/.test(line);
+
+      if (isSeparator) {
+        resultLines.push(line);
+        previousLineWasHeader = false;
+        continue;
+      }
+
+      const isHeader = !isNumericRow && /^(stt|tt|#|stt\s*\/\s*tt)$/i.test(firstCellClean);
+      const tableCellsString = cells.join(' ');
+      const looksLikeAnswerTable = isAnswerTableLine(tableCellsString) || cells.length >= 4;
+
+      if (looksLikeAnswerTable) {
+        currentSection = 'teacher';
+      }
 
       if (isHeader) {
-        if (currentSection === 'student' || cells.length === 3) {
-          line = '| STT | Nhiệm vụ / Câu hỏi học tập | Kết quả / Câu trả lời của học sinh |';
-        } else if (currentSection === 'teacher' || cells.length >= 4) {
+        if (insideTable && previousLineWasHeader) {
+          continue;
+        }
+
+        insideTable = true;
+        previousLineWasHeader = true;
+
+        if (currentSection === 'teacher' || looksLikeAnswerTable) {
           line = '| STT | Nhiệm vụ / Câu hỏi học tập | Gợi ý đáp án / Yêu cầu cần đạt | Điểm / Đánh giá |';
+        } else {
+          line = '| STT | Nhiệm vụ / Câu hỏi học tập | Kết quả / Câu trả lời của học sinh |';
         }
         resultLines.push(line);
 
@@ -499,12 +569,45 @@ function cleanWorksheetContent(text: string): string {
         continue;
       }
 
-      if (/^\|?[\s\-:]+\|/.test(line)) {
-        resultLines.push(line);
+      insideTable = true;
+      previousLineWasHeader = false;
+
+      // Skip empty dummy rows where only STT is present and all other cells are empty or dots
+      const otherCells = cells.slice(1);
+      const hasAnySubstantiveContent = otherCells.some(
+        (c) => c.trim().length > 0 && !/^[\s\.\-_]+$/.test(c)
+      );
+      if (isNumericRow && !hasAnySubstantiveContent) {
         continue;
       }
 
-      if (currentSection === 'student') {
+      if (currentSection === 'teacher' || looksLikeAnswerTable) {
+        let col1 = cells[0] || '1';
+        let col2 = cells[1] || '';
+        let col3 = cells[2] || '';
+        let col4 = cells[3] || 'Đạt / 5.0 điểm';
+
+        // If answer is blank or placeholder, provide clear answer based on task
+        const isAnswerBlank =
+          !col3 ||
+          /^[\s\.\-_]+$/.test(col3) ||
+          col3.toLowerCase().includes('nhiệm vụ / câu hỏi') ||
+          col3.toLowerCase().includes('gợi ý đáp án / yêu cầu') ||
+          col3.trim() === '...';
+
+        if (isAnswerBlank) {
+          col3 =
+            col2 && col2.trim().length > 0
+              ? `- Học sinh thực hiện đúng và đầy đủ yêu cầu: ${col2.replace(/\*+/g, '')}.<br>- Trình bày câu trả lời, lời giải hoặc kết quả chính xác theo chuẩn kiến thức SGK.`
+              : `- Hoàn thành chính xác nhiệm vụ và ghi lại kết quả đúng theo yêu cầu.<br>- Nắm vững kiến thức trọng tâm bài học.`;
+        }
+
+        if (!col4 || /^[\s\.\-_]+$/.test(col4)) {
+          col4 = 'Đạt / 5.0 điểm';
+        }
+
+        line = `| ${col1} | ${col2} | ${col3} | ${col4} |`;
+      } else {
         let col1 = cells[0] || '1';
         let col2 = cells[1] || '';
         let col3 = cells[2] || '';
@@ -525,20 +628,133 @@ function cleanWorksheetContent(text: string): string {
         }
 
         line = `| ${col1} | ${col2} | ${col3} |`;
-      } else if (currentSection === 'teacher') {
-        let col1 = cells[0] || '1';
-        let col2 = cells[1] || '';
-        let col3 = cells[2] || '';
-        let col4 = cells[3] || 'Đạt / 5.0 điểm';
-
-        line = `| ${col1} | ${col2} | ${col3} | ${col4} |`;
       }
+    } else {
+      insideTable = false;
+      previousLineWasHeader = false;
     }
 
     resultLines.push(line);
   }
 
   return resultLines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+/**
+ * Ensures worksheetContent ALWAYS has Part 2 (Bảng gợi ý đáp án & Hướng dẫn đánh giá).
+ */
+function ensureWorksheetHasAnswerKey(content: string, planContext?: any): string {
+  if (!content || typeof content !== 'string') {
+    content = '';
+  }
+
+  const normalized = cleanWorksheetContent(content);
+
+  const lines = normalized.split('\n');
+  let hasTeacherHeading = false;
+  let teacherTableRows = 0;
+  let isInsideTeacherTable = false;
+
+  for (const line of lines) {
+    if (isTeacherHeading(line)) {
+      hasTeacherHeading = true;
+      isInsideTeacherTable = true;
+      continue;
+    }
+    if (isInsideTeacherTable && line.startsWith('|') && line.endsWith('|')) {
+      const cells = line.split('|').slice(1, -1).map((c) => c.trim());
+      const firstCellClean = (cells[0] || '').replace(/[\*\_]+/g, '').trim();
+      const isNumeric = /^(\d+|câu\s*\d+|bài\s*\d+|[a-z]\))$/i.test(firstCellClean);
+      if (isNumeric) {
+        teacherTableRows++;
+      }
+    }
+  }
+
+  if (hasTeacherHeading && teacherTableRows > 0) {
+    return normalized;
+  }
+
+  // Part 2 is missing! Extract tasks from Part 1
+  const studentTasks: { stt: string; task: string; answer?: string; score?: string }[] = [];
+
+  for (const line of lines) {
+    if (line.startsWith('|') && line.endsWith('|')) {
+      const cells = line.split('|').slice(1, -1).map((c) => c.trim());
+      const firstCellClean = (cells[0] || '').replace(/[\*\_]+/g, '').trim();
+      const isNumeric = /^(\d+|câu\s*\d+|bài\s*\d+|[a-z]\))$/i.test(firstCellClean);
+      const isHeader = /^(stt|tt|#)$/i.test(firstCellClean);
+      const isSep = /^[\s\-:]+$/.test(firstCellClean);
+
+      if (isNumeric && !isHeader && !isSep && cells.length >= 2) {
+        const taskText = cells[1].trim();
+        if (taskText.length > 0) {
+          studentTasks.push({
+            stt: firstCellClean,
+            task: taskText,
+          });
+        }
+      }
+    }
+  }
+
+  if (studentTasks.length === 0 && planContext?.activities) {
+    const act3 = planContext.activities[2] || planContext.activities.find((a: any) => /luyện\s*tập/i.test(a?.name || ''));
+    const act2 = planContext.activities[1];
+    const sourceAct = act3 || act2;
+
+    if (sourceAct) {
+      const contentText = sourceAct.content || sourceAct.productSummary || '';
+      const actLines = contentText.split('\n').map((l: string) => l.trim()).filter(Boolean);
+      let num = 1;
+
+      for (const line of actLines) {
+        if (/^(bài\s*\d+|câu\s*\d+|\d+\.)/i.test(line)) {
+          studentTasks.push({
+            stt: String(num++),
+            task: line.replace(/^[-*•\s]+/, ''),
+            answer: sourceAct.productSummary || 'Thực hiện chính xác theo yêu cầu bài học và hướng dẫn SGK.',
+          });
+        }
+      }
+    }
+  }
+
+  if (studentTasks.length === 0) {
+    const title = planContext?.lessonTitle || 'bài học';
+    studentTasks.push(
+      {
+        stt: '1',
+        task: `Nhiệm vụ 1: Nêu khái niệm và định nghĩa trọng tâm của ${title}.`,
+        answer: `Nêu đúng, đủ các định nghĩa và công thức cơ bản theo SGK.`,
+      },
+      {
+        stt: '2',
+        task: `Nhiệm vụ 2: Thực hiện giải bài tập áp dụng quy tắc/công thức của ${title}.`,
+        answer: `Thực hiện đúng các bước biến đổi, áp dụng chính xác công thức và tính ra kết quả chuẩn.`,
+      },
+      {
+        stt: '3',
+        task: `Nhiệm vụ 3: Vận dụng kiến thức ${title} để giải quyết bài toán/tình huống thực tiễn.`,
+        answer: `Phân tích đúng tình huống thực tiễn, mô hình hóa và đưa ra kết luận chính xác.`,
+      }
+    );
+  }
+
+  const part2Header = `\n\n---\n\n### BẢNG GỢI Ý ĐÁP ÁN & HƯỚNG DẪN ĐÁNH GIÁ (DÀNH CHO GIÁO VIÊN)\n\n| STT | Nhiệm vụ / Câu hỏi học tập | Gợi ý đáp án / Yêu cầu cần đạt | Điểm / Đánh giá |\n| :---: | :--- | :--- | :---: |`;
+
+  const part2Rows = studentTasks.map((t, idx) => {
+    let ans = t.answer;
+    if (!ans || /^[\s\.\-_]+$/.test(ans)) {
+      const cleanTask = t.task.replace(/\*+/g, '').trim();
+      ans = `- Học sinh nắm vững và giải quyết chính xác yêu cầu: ${cleanTask}.<br>- Trình bày lời giải chi tiết, rõ ràng, áp dụng đúng kiến thức cốt lõi.`;
+    }
+
+    const score = t.score || (idx === studentTasks.length - 1 ? 'Đạt / 4.0 điểm' : 'Đạt / 3.0 điểm');
+    return `| **${t.stt}** | ${t.task} | ${ans} | ${score} |`;
+  });
+
+  return `${normalized}${part2Header}\n${part2Rows.join('\n')}`;
 }
 
 /**
@@ -578,9 +794,32 @@ function sanitizeLessonPlanOutput(plan: any, config: any): any {
   }
 
   if (plan.equipment) {
+    const isPlanPreschool = plan.schoolLevel === 'Mầm non' || 
+      /mầm\s*non|mẫu\s*giáo|nhà\s*trẻ/i.test(plan.schoolLevel || '') ||
+      /mầm\s*non|mẫu\s*giáo|nhà\s*trẻ/i.test(plan.grade || '') ||
+      /mầm\s*non|mẫu\s*giáo|nhà\s*trẻ/i.test(plan.subject || '');
+    const isPlanTinHoc = !isPlanPreschool && (
+      /tin\s*học|tin\s*hoc|computer|informatics/i.test(plan.subject || '') ||
+      /tin\s*học|tin\s*hoc/i.test(plan.lessonTitle || '')
+    );
+
+    if (isPlanTinHoc && plan.equipment.digitalAssets && plan.equipment.digitalAssets.length > 0) {
+      const teacherItems = Array.isArray(plan.equipment.teacher) ? [...plan.equipment.teacher] : [];
+      plan.equipment.digitalAssets.forEach((asset: any) => {
+        if (typeof asset === 'string') {
+          const c = cleanStr(asset);
+          if (c && !teacherItems.some(t => t.toLowerCase().includes(c.toLowerCase()))) {
+            teacherItems.push(c);
+          }
+        }
+      });
+      plan.equipment.teacher = cleanArr(teacherItems);
+      plan.equipment.digitalAssets = [];
+    } else if (plan.equipment.digitalAssets) {
+      plan.equipment.digitalAssets = cleanArr(plan.equipment.digitalAssets);
+    }
     plan.equipment.teacher = cleanArr(plan.equipment.teacher);
     plan.equipment.student = cleanArr(plan.equipment.student);
-    if (plan.equipment.digitalAssets) plan.equipment.digitalAssets = cleanArr(plan.equipment.digitalAssets);
     if (plan.equipment.stemMaterials) plan.equipment.stemMaterials = cleanArr(plan.equipment.stemMaterials);
   }
 
@@ -602,6 +841,9 @@ function sanitizeLessonPlanOutput(plan: any, config: any): any {
 
   if (plan.appendix?.worksheetContent) {
     plan.appendix.worksheetContent = cleanWorksheetContent(plan.appendix.worksheetContent);
+    if (plan.schoolLevel !== 'Mầm non' && config?.schoolLevel !== 'Mầm non') {
+      plan.appendix.worksheetContent = ensureWorksheetHasAnswerKey(plan.appendix.worksheetContent, plan);
+    }
   }
 
   return plan;
@@ -2029,6 +2271,22 @@ function enforcePPCTCompetencies(
   const isTinHoc = !isPreschool && (/tin\s*học|tin\s*hoc|computer|informatics/i.test(config.subject || plan.subject || '') || /tin\s*học|tin\s*hoc/i.test(config.lessonTitle || plan.lessonTitle || ''));
   const isMath4Column = config.tableLayout === 'math_4_column';
 
+  if (isTinHoc && plan.equipment) {
+    if (Array.isArray(plan.equipment.digitalAssets) && plan.equipment.digitalAssets.length > 0) {
+      const teacherItems = Array.isArray(plan.equipment.teacher) ? [...plan.equipment.teacher] : [];
+      plan.equipment.digitalAssets.forEach((asset: any) => {
+        if (typeof asset === 'string' && asset.trim()) {
+          const clean = asset.trim();
+          if (!teacherItems.some(t => t.toLowerCase().includes(clean.toLowerCase()))) {
+            teacherItems.push(clean);
+          }
+        }
+      });
+      plan.equipment.teacher = teacherItems;
+    }
+    plan.equipment.digitalAssets = [];
+  }
+
   // For all THCS and THPT subjects and Math: integrate NLS & AI into Hoạt động của GV/HS like Math!
   // Keep Tin học unchanged. STRICTLY EXCLUDE PRESCHOOL!
   const isIntegratedSubject = !isPreschool && (isMathSubject || isMiddleOrHighSchool || config.enableNLS || config.enableAI) && !isTinHoc;
@@ -2408,14 +2666,18 @@ async function generateKHBDSectional(
 
   const hasUploadedSample = Boolean(config.oldPlanContent && config.oldPlanContent.trim().length > 0);
 
+  const oldPlanText = config.oldPlanContent || '';
+  // Provide full document text to all activity generation steps to prevent truncation or data loss
+  const samplePart1Text = oldPlanText;
+  const samplePart2Text = oldPlanText;
+
   // Phân vùng vị trí các thẻ ảnh theo từng phần hoạt động trong giáo án mẫu gốc
   function getSlotsForActivityRange(part: 'act1_2' | 'act3_4'): { slots: any[]; promptText: string } {
     const allSlots = config.imageSlots || [];
     if (allSlots.length === 0) {
       return { slots: [], promptText: 'Không có hình ảnh nào trong bài dạy này.' };
     }
-    const oldText = config.oldPlanContent || '';
-    if (!oldText) {
+    if (!oldPlanText) {
       const mid = Math.ceil(allSlots.length / 2);
       const sub = part === 'act1_2' ? allSlots.slice(0, mid) : allSlots.slice(mid);
       return {
@@ -2426,38 +2688,12 @@ async function generateKHBDSectional(
       };
     }
 
-    const splitKeywords = [
-      /hoạt\s*động\s*3/i,
-      /hoạt\s*động\s*luyện\s*tập/i,
-      /\b3\.\s*luyện\s*tập/i,
-      /\bluyện\s*tập\b/i,
-      /\bc\.\s*hoạt\s*động\s*luyện\s*tập/i,
-      /\biii\.\s*luyện\s*tập/i,
-      /\btiết\s*2\b/i,
-    ];
-
-    let splitIndex = -1;
-    for (const re of splitKeywords) {
-      const match = re.exec(oldText);
-      if (match && match.index > 0) {
-        if (splitIndex === -1 || match.index < splitIndex) {
-          splitIndex = match.index;
-        }
-      }
-    }
-    if (splitIndex === -1) {
-      splitIndex = Math.floor(oldText.length * 0.55);
-    }
-
-    const part1Text = oldText.substring(0, splitIndex);
-    const part2Text = oldText.substring(splitIndex);
-
     const matchedSlots = allSlots.filter((slot: any) => {
       const tag = slot.slotTag;
       if (part === 'act1_2') {
-        return part1Text.includes(tag);
+        return samplePart1Text.includes(tag);
       } else {
-        return part2Text.includes(tag);
+        return samplePart2Text.includes(tag);
       }
     });
 
@@ -2740,6 +2976,32 @@ Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động củ
   + Bước 3 BẮT BUỘC là "3. Chia sẻ – Hình thành cách thực hiện": Mời trẻ chia sẻ cách thực hiện; Cô làm mẫu 2 - 3 lần (lần 1 toàn phần, lần 2 phân tích kỹ thuật vận động chi tiết, lần 3 nhấn mạnh điểm mấu chốt); Mời 2 trẻ lên thực hiện lại để cô và cả lớp chuẩn hóa.
   + Bước 4 BẮT BUỘC là "4. Thực hành – Vận dụng": Trẻ lần lượt thực hành theo hàng/nhóm từ dễ đến khó (cá nhân -> nhóm -> thi đua giữa các tổ); Cô bao quát sửa sai; Tổ chức trò chơi vận động củng cố hào hứng.
   + Bước 5 BẮT BUỘC là "5. Chia sẻ – Đánh giá và Hồi tĩnh": Trao đổi cảm nhận của trẻ sau buổi tập, cô nhận xét tuyên dương; Hồi tĩnh: Cho trẻ đi nhẹ nhàng 1 - 2 vòng quanh sân/phòng tập theo nhạc êm dịu, làm động tác chim bay thả lỏng cơ thể, hít thở sâu.
+- RIÊNG ĐỐI VỚI HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG GÓC):
+  BẮT BUỘC tuân thủ đúng 3 BƯỚC TIẾN TRÌNH CHUẨN MỰC sau (Mục I. Mục tiêu và Mục II. Chuẩn bị giữ nguyên chuẩn QĐ 388):
+  + Bước 1: "1. Thỏa thuận trước khi chơi": Hát/đọc thơ tạo cảm xúc; Cô giới thiệu các góc chơi hôm nay (Góc Nghệ thuật, Góc học tập - khám phá khoa học, Góc Phân vai...); Trẻ thỏa thuận vai chơi, tự chọn góc chơi và cam kết nội quy chơi văn minh, đoàn kết.
+  + Bước 2: "2. Theo dõi quá trình chơi": Phân chia chi tiết và đầy đủ cả 3 góc chơi:
+    * Góc Nghệ thuật: Cô hướng dẫn nguyên vật liệu mở (giấy màu, đất nặn, sáp màu...); Trẻ khéo léo tạo hình sản phẩm hoặc biểu diễn văn nghệ theo chủ đề.
+    * Góc học tập - khám phá khoa học: Cô gợi ý bài tập phân loại, so sánh, đếm, ghép tranh, xem sách truyện, làm thí nghiệm; Trẻ say sưa trải nghiệm khám phá.
+    * Góc Phân vai: Cô quan sát, nhập vai mở rộng tình huống giao tiếp, kết nối liên góc; Trẻ thể hiện đúng vai diễn (mẹ chăm sóc con, bác sĩ khám bệnh, người bán hàng niềm nở).
+  + Bước 3: "3. Nhận xét sau khi chơi": Báo hiệu hết giờ; Cô cùng trẻ tham quan các góc chơi nổi bật; Đại diện góc tự tin giới thiệu công trình/sản phẩm; Cô nhận xét tuyên dương tinh thần đoàn kết, sáng tạo và cùng trẻ thu dọn đồ chơi ngăn nắp vào đúng nơi quy định.
+- RIÊNG ĐỐI VỚI HOẠT ĐỘNG NGOÀI TRỜI:
+  BẮT BUỘC áp dụng đúng 3 BƯỚC TIẾN TRÌNH theo 1 trong 2 MẪU CHUẨN sau (Mục I. Mục tiêu và Mục II. Chuẩn bị giữ nguyên chuẩn QĐ 388):
+  * MẪU 1: HOẠT ĐỘNG NGOÀI TRỜI CÓ NỘI DUNG QUAN SÁT (ví dụ: Quan sát cây xanh / vườn hoa / bầu trời...):
+    + Bước 1: "1. Trước khi quan sát": Kiểm tra sĩ số, trang phục gọn gàng; Nhắc nhở quy định an toàn khi ra sân; Dẫn dắt tạo hứng thú ra sân quan sát.
+    + Bước 2: "2. Trong khi quan sát": BẮT BUỘC có đủ 3 nội dung:
+      * Quan sát [đối tượng, ví dụ: Quan sát cây xanh]: Cho trẻ dùng các giác quan quan sát, đàm thoại về đặc điểm, bộ phận, ích lợi và giáo dục bảo vệ thiên nhiên.
+      * TCVĐ: [Tên trò chơi vận động, ví dụ: Bỏ dẻ / Mèo đuổi chuột...]: Giới thiệu trò chơi, nêu cách chơi và luật chơi, tổ chức chơi 2-3 lần sôi nổi, nhận xét tuyên dương.
+      * Chơi tự do: Giới thiệu khu vực chơi tự do (đồ chơi ngoài trời, vẽ phấn, nhặt lá xếp hình); Cô bao quát đảm bảo an toàn tuyệt đối.
+    + Bước 3: "3. Sau khi quan sát": Tập trung trẻ, điểm danh sĩ số; Trẻ chia sẻ cảm xúc, cô nhận xét tuyên dương; Hướng dẫn trẻ rửa tay bằng xà phòng sạch sẽ và xếp hàng vào lớp.
+  * MẪU 2: HOẠT ĐỘNG NGOÀI TRỜI TRỌNG TÂM TRÒ CHƠI VẬN ĐỘNG & CHƠI ĐỒ CHƠI NGOÀI TRỜI:
+    + Bước 1: "1. Trước khi chơi" (hoặc "1. Trước khi ra sân"): Kiểm tra trang phục, phổ biến nội dung và dặn dò an toàn ngoài trời.
+    + Bước 2: "2. Trong khi chơi": BẮT BUỘC có đủ 2 nội dung:
+      * Trò chơi vận động: [Tên trò chơi vận động]
+        Cách chơi: [Mô tả chi tiết cách chơi: chia đội, hiệu lệnh, thao tác vận động tiếp sức...]
+        Luật chơi: [Mô tả chi tiết luật chơi: điều được làm, điều phạm quy, phần thưởng...]
+        Tổ chức cho trẻ chơi 2 - 3 lần sôi nổi, bao quát cổ vũ động viên trẻ.
+      * Chơi với đồ chơi ngoài trời: Hướng dẫn trẻ đến khu vực đồ chơi ngoài trời (cầu trượt, bập bênh, xích đu, thú nhún), nhắc nhở quy tắc an toàn, nhường nhịn nhau, cô theo sát bao quát.
+    + Bước 3: "3. Sau khi chơi": Tập trung trẻ, điểm danh; Cho trẻ làm động tác hồi tĩnh thả lỏng cơ thể; Nhận xét tuyên dương, cất đồ dùng, rửa tay sạch sẽ và vào lớp.
 - RIÊNG ĐỐI VỚI MÔN ÂM NHẠC (LĨNH VỰC NGHỆ THUẬT): Soạn RẤT CHI TIẾT VÀ KỸ LƯỠNG. Dùng VĂN PHONG SƯ PHẠM MẦM NON NGỌT NGÀO, DỊU DÀNG, TRÌU MẾN, GIÀU TÍNH NGHỆ THUẬT VÀ CẢM XÚC. QUY ĐỊNH BẮT BUỘC: Ở Mục "3. Chia sẻ – Thảo luận" BẮT BUỘC PHẢI CÓ ĐẦY ĐỦ 2 NỘI DUNG VỚI ĐÚNG ĐỀ MỤC: "a. Dạy hát: [Tên bài hát trọng tâm] (TT)" và "b. Nghe hát: [Tên bài nghe hát]" (KHÔNG CÓ LÀ SAI YÊU CẦU NGHIÊM TRỌNG). Trong cột Hoạt động của trẻ tuyệt đối KHÔNG chứa nhãn "a." hay "b." đứng riêng lẻ, chỉ ghi các gạch đầu dòng mô tả phản ứng, hành động của trẻ tương ứng cho từng phần dạy hát và nghe hát.
 - RIÊNG ĐỐI VỚI HOẠT ĐỘNG TẬP TÔ CHỮ CÁI (VÀ TẬP TÔ, ĐỒ, SAO CHÉP NÉT CƠ BẢN/CHỮ CÁI):
   BẮT BUỘC tuân thủ đúng 5 bước chuẩn mực:
@@ -3099,6 +3361,19 @@ ${isTinHoc ? `
 Biên soạn đúng các thành phần năng lực đặc thù của môn học theo Chương trình GDPT 2018 (mỗi ý gạch đầu dòng ghi rõ tên năng lực và biểu hiện cụ thể).
 `}
 
+QUY ĐỊNH BẮT BUỘC VỀ PHẦN II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU:
+${isTinHoc ? `
+- ĐỐI VỚI MÔN TIN HỌC (CHUẨN CÔNG VĂN 5512):
+  Mục II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU TUYỆT ĐỐI CHỈ CÓ 2 MỤC:
+  1. Giáo viên (equipment.teacher): Thiết bị dạy học, máy tính giáo viên, máy chiếu/ti vi, phòng thực hành máy tính, SGK, kế hoạch bài dạy, bài giảng điện tử, tệp dữ liệu mẫu, phần mềm thực hành (nếu có)...
+  2. Học sinh (equipment.student): SGK, vở ghi, đồ dùng học tập, máy tính thực hành (nếu có tiết thực hành).
+  TUYỆT ĐỐI KHÔNG TẠO MỤC "3. Học liệu và thiết bị phụ trợ:" (mọi học liệu số, công cụ hay phần mềm BẮT BUỘC ghi trực tiếp vào mục 1. Giáo viên hoặc 2. Học sinh).
+  Trường "digitalAssets" BẮT BUỘC trả về mảng rỗng []!
+` : `
+- 1. Giáo viên (equipment.teacher): Thiết bị dạy học, máy tính, máy chiếu, SGK, đồ dùng...
+- 2. Học sinh (equipment.student): SGK, vở ghi, đồ dùng học tập...
+`}
+
 QUY ĐỊNH VỀ CÁC NĂNG LỰC TÍCH HỢP:
 - Năng lực số (digitalCompetencies): ${config.enableNLS ? 'Sinh các mã chỉ báo NLS chuẩn theo TT 02/2025 và CV 3456 kèm mô tả' : 'Trả về mảng rỗng [] vì không tích hợp NLS'}
 - Năng lực AI (aiCompetencies): ${config.enableAI ? 'Sinh các mã chỉ báo AI chuẩn theo QĐ 2422 (dạng [Lớp].[Mã chủ đề].[Số thứ tự]) kèm mô tả' : 'Trả về mảng rỗng [] vì không tích hợp AI'}
@@ -3123,7 +3398,7 @@ Yêu cầu: Trả về JSON với cấu trúc:
   "equipment": {
     "teacher": ["- ..."],
     "student": ["- ..."],
-    "digitalAssets": ["- ..."],
+    "digitalAssets": ${isTinHoc ? '[]' : '["- ..."]'},
     "stemMaterials": ${hasStem ? '["Dụng cụ và vật liệu thực hành STEM..."]' : '[]'}
   }${hasStem ? `,
   "stemIntegration": {
@@ -3335,10 +3610,15 @@ ${hasUploadedSample ? `
 =============================================================================
 QUY TẮC BẢO TỒN TUYỆT ĐỐI GIÁO ÁN MẪU TẢI LÊN CHO HOẠT ĐỘNG 1 & 2:
 =============================================================================
-1. ĐỂ NGUYÊN NỘI DUNG GỐC: Trích xuất trọn vẹn 100% tình huống khởi động, các câu hỏi khám phá, các đề mục La Mã (I., II.) / tiểu mục (1., 2...), câu lệnh của GV & HS, công thức toán học và nội dung kiến thức cốt lõi từ oldPlanContent.
-2. CHỈ ĐỂ MẪU MỚI: Đưa toàn bộ nội dung giáo án cũ vào khung mẫu mới chuẩn (CV 5512 với THCS/THPT, CV 2345 với Tiểu học, Chương trình mới với Mầm non) với 4 bước tổ chức thực hiện chuẩn mực.
-3. CHỈ CHỈNH SỬA NHẸ CHO PHÙ HỢP: Tuyệt đối không thay thế nội dung bằng bài khác, không tóm tắt làm cụt mất ý, không thêm các câu từ rườm rà ngoài lề, không làm biến dạng công thức toán học và vị trí các thẻ ảnh {{IMAGE_SLOT_X}}.
+1. ĐỂ NGUYÊN NỘI DUNG GỐC: Trích xuất trọn vẹn 100% tình huống khởi động, các câu hỏi khám phá, các đề mục La Mã (I., II.) / tiểu mục (1., 2...), câu lệnh của GV & HS, công thức toán học và nội dung kiến thức cốt lõi từ VĂN BẢN GỐC DƯỚI ĐÂY.
+2. TUYỆT ĐỐI KHÔNG TỰ BỊA ĐẶT NỘI DUNG MỚI, KHÔNG LẤY TỪ BÀI HỌC KHÁC, KHÔNG LÀM LỆCH FILE GỐC CỦA GIÁO VIÊN!
+3. CHỈ ĐỂ MẪU MỚI: Đưa toàn bộ nội dung giáo án cũ vào khung mẫu mới chuẩn (CV 5512 với THCS/THPT, CV 2345 với Tiểu học, Chương trình mới với Mầm non) với 4 bước tổ chức thực hiện chuẩn mực.
 4. Đưa toàn bộ tên đề mục và nội dung kiến thức ghi vở vào đầu Cột Sản phẩm (productExpected).
+
+NỘI DUNG TRỌNG TÂM CỦA HOẠT ĐỘNG 1 & 2 TRÍCH XUẤT TỪ FILE GỐC CỦA GIÁO VIÊN:
+"""
+${config.oldPlanContent ? config.oldPlanContent.substring(0, 80000) : ''}
+"""
 ${part1Slots.promptText}
 ` : `Nếu KHÔNG CÓ giáo án mẫu, hãy soạn theo chuẩn 4 bước của Công văn 5512.`}
 ${periodNote}
@@ -3767,17 +4047,14 @@ ${hasUploadedSample ? `
 =============================================================================
 QUY TẮC BẢO TỒN TUYỆT ĐỐI GIÁO ÁN MẪU TẢI LÊN CHO HOẠT ĐỘNG 3 & 4:
 =============================================================================
-1. ĐỂ NGUYÊN NỘI DUNG GỐC: Trích xuất trọn vẹn 100% toàn bộ câu hỏi, bài tập, trò chơi trắc nghiệm, công thức toán học và câu trả lời/đáp án chi tiết từ oldPlanContent.
-2. CHỈ ĐỂ MẪU MỚI: Đưa toàn bộ bài tập, nhiệm vụ học tập của giáo án cũ vào khung mẫu mới chuẩn (CV 5512 với THCS/THPT, CV 2345 với Tiểu học, Chương trình mới với Mầm non) với 4 bước tổ chức thực hiện chuẩn mực.
-3. CHỈ CHỈNH SỬA NHẸ CHO PHÙ HỢP: Tuyệt đối không thay thế câu hỏi/bài tập bằng bài khác, không tóm tắt làm mất lời giải chi tiết, không làm biến dạng công thức toán học và vị trí các thẻ ảnh {{IMAGE_SLOT_X}}. TUYỆT ĐỐI KHÔNG BỊA RA CÁC CỤM TỪ BOILERPLATE THỪA THÃI như: "Sẵn sàng tham gia trò chơi", "Đánh giá kết quả trò chơi", "Nội dung chuẩn xác của 5 câu hỏi trắc nghiệm".
-4. QUY CÁCH TRÌNH BÀY ĐÁP ÁN TRẮC NGHIỆM TRONG CỘT SẢN PHẨM (productExpected):
-   Mỗi đáp án phải nằm trên 1 DÒNG RIÊNG BIỆT, gãy gọn, chuẩn xác:
-   Câu 1. Đáp án B. (hoặc Câu 1. B.)
-   Câu 2. Đáp án C. (hoặc Câu 2. C.)
-   Câu 3. Đáp án A. (hoặc Câu 3. A.)
-   Câu 4. Đáp án D. (hoặc Câu 4. D.)
-   Câu 5. Đáp án A. (hoặc Câu 5. A.)
-   CẤM TUYỆT ĐỐI ngắt dòng vụn vặt làm sai lệch như: "Câu\\n1. B; Câu\\n2. C...".
+1. ĐỂ NGUYÊN NỘI DUNG GỐC: Trích xuất trọn vẹn 100% toàn bộ câu hỏi, bài tập, trò chơi trắc nghiệm, công thức toán học và câu trả lời/đáp án chi tiết từ VĂN BẢN GỐC DƯỚI ĐÂY.
+2. TUYỆT ĐỐI KHÔNG TỰ BỊA BÀI TẬP MỚI, KHÔNG THAY ĐỔI CÂU HỎI TRONG FILE GỐC, KHÔNG LÀM LỆCH SANG DẠNG BÀI KHÁC!
+3. CHỈ ĐỂ MẪU MỚI: Đưa toàn bộ bài tập, nhiệm vụ học tập của giáo án cũ vào khung mẫu mới chuẩn (CV 5512 với THCS/THPT, CV 2345 với Tiểu học, Chương trình mới với Mầm non) với 4 bước tổ chức thực hiện chuẩn mực. TUYỆT ĐỐI KHÔNG BỊA RA CÁC CỤM TỪ BOILERPLATE THỪA THÃI như: "Sẵn sàng tham gia trò chơi", "Đánh giá kết quả trò chơi".
+
+NỘI DUNG TRỌNG TÂM CỦA HOẠT ĐỘNG 3 & 4 (LUYỆN TẬP, VẬN DỤNG, BÀI TẬP) TỪ FILE GỐC CỦA GIÁO VIÊN:
+"""
+${config.oldPlanContent ? config.oldPlanContent.substring(0, 80000) : ''}
+"""
 ${part2Slots.promptText}
 ` : `Nếu KHÔNG CÓ giáo án mẫu, hãy soạn HOẠT ĐỘNG 3 (Luyện tập) và HOẠT ĐỘNG 4 (Vận dụng & Hướng dẫn tự học) theo chuẩn 4 bước của Công văn 5512.`}
 ${periodNote}
@@ -3847,8 +4124,8 @@ Hãy soạn:
 ${isMath ? '- MÔN TOÁN: BỎ Bảng NLS ở cuối (trả về nlsItems là [] mảng rỗng).' : (config.enableNLS ? '- Sinh competencyMatrix.nlsItems cho các hoạt động có ứng dụng NLS.' : '- NLS: Trả về nlsItems là [] (mảng rỗng) vì không tích hợp NLS.')}
 ${config.enableAI ? '- Sinh competencyMatrix.aiItems cho các hoạt động có ứng dụng AI.' : '- AI: Trả về aiItems là [] (mảng rỗng) vì không tích hợp AI.'}
 2. HỒ SƠ DẠY HỌC & PHỤ LỤC (appendix):
-   - worksheetContent: ${config.schoolLevel === 'Mầm non' ? 'Không bắt buộc với Mầm non, nếu có thì là bảng/phiếu trò chơi bằng hình ảnh. Nếu không có để chuỗi rỗng' : `BẮT BUỘC TÁCH RÕ THÀNH 2 PHẦN RIÊNG BIỆT DẠNG BẢNG:
-     + PHẦN 1: PHIẾU HỌC TẬP DÀNH CHO HỌC SINH
+   - worksheetContent: ${config.schoolLevel === 'Mầm non' ? 'Không bắt buộc với Mầm non, nếu có thì là bảng/phiếu trò chơi bằng hình ảnh. Nếu không có để chuỗi rỗng' : `BẮT BUỘC TÁCH RÕ THÀNH 2 PHẦN RIÊNG BIỆT DẠNG BẢNG (KẺ BẢNG MARKDOWN TABLE CHUẨN):
+${hasUploadedSample ? `(ĐẶC BIỆT: BẮT BUỘC TRÍCH XUẤT CÁC CÂU HỎI / BÀI TẬP VÀ ĐÁP ÁN TỪ FILE GIÁO ÁN MẪU ĐÃ TẢI LÊN)\n` : ''}     + PHẦN 1: PHIẾU HỌC TẬP DÀNH CHO HỌC SINH
        Tiêu đề: PHIẾU HỌC TẬP: [TÊN BÀI HỌC]
        Họ và tên: ................................................ Lớp: ................. Nhóm: .........
        Bảng bài tập của học sinh:
@@ -3859,8 +4136,13 @@ ${config.enableAI ? '- Sinh competencyMatrix.aiItems cho các hoạt động có
      + PHẦN 2: BẢNG GỢI Ý ĐÁP ÁN & HƯỚNG DẪN ĐÁNH GIÁ (DÀNH CHO GIÁO VIÊN)
        Tiêu đề: ### BẢNG GỢI Ý ĐÁP ÁN & HƯỚNG DẪN ĐÁNH GIÁ (DÀNH CHO GIÁO VIÊN)
        | STT | Nhiệm vụ / Câu hỏi học tập | Gợi ý đáp án / Yêu cầu cần đạt | Điểm / Đánh giá |
-       | 1 | [Nội dung câu hỏi 1] | [Gợi ý đáp án chi tiết, các bước giải, kết quả] | Đạt / 5.0 điểm |
-       | 2 | [Nội dung câu hỏi 2] | [Gợi ý đáp án chi tiết, các bước giải, kết quả] | Đạt / 5.0 điểm |`}
+       QUY ĐỊNH BẮT BUỘC ĐỐI VỚI PHẦN 2:
+       - MỖI CÂU HỎI TRONG PHẦN 1 BẮT BUỘC PHẢI CÓ ĐÚNG MỘT DÒNG TƯƠNG ỨNG Ở PHẦN 2 VỚI ĐÁP ÁN CỤ THỂ 100%.
+       - Cột 3 "Gợi ý đáp án / Yêu cầu cần đạt": BẮT BUỘC PHẢI CÓ NỘI DUNG ĐÁP ÁN ĐẦY ĐỦ, NÊU RÕ CÁC BƯỚC GIẢI CHI TIẾT, KẾT QUẢ ĐÚNG, CÔNG THỨC TOÁN, HOẶC LỆNH/MÃ NGUỒN. TUYỆT ĐỐI CẤM ĐỂ TRỐNG Ô NÀY! CẤM DÙNG DÒNG CHẤM CHẤM HAY KÝ HIỆU GIỮ CHỖ!
+       - Cột 4 "Điểm / Đánh giá": Ghi rõ tiêu chí và thang điểm (Ví dụ: "Đạt / 2.5 điểm" hoặc "Đạt / 5.0 điểm").
+       - TUYỆT ĐỐI KHÔNG lặp lại dòng tiêu đề bảng trong các dòng dữ liệu!
+       | 1 | [Tên/nội dung câu hỏi 1 từ Phần 1] | [Lời giải chi tiết, kết quả chuẩn xác của câu 1] | Đạt / 5.0 điểm |
+       | 2 | [Tên/nội dung câu hỏi 2 từ Phần 1] | [Lời giải chi tiết, kết quả chuẩn xác của câu 2] | Đạt / 5.0 điểm |`}
    - assignmentPrompt: ${config.schoolLevel === 'Mầm non' ? 'TUYỆT ĐỐI ĐỂ CHUỖI RỖNG "" (Mầm non không có hướng dẫn tự học & nhiệm vụ về nhà).' : 'Hướng dẫn tự học & nhiệm vụ về nhà: Trình bày từng nhiệm vụ cụ thể rõ ràng theo cấu trúc:\na) Đối với bài vừa học:\n- Nhiệm vụ 1: ...\n- Nhiệm vụ 2: ...\nb) Đối với bài học tiếp theo:\n- Nhiệm vụ 3: Đọc trước và chuẩn bị nội dung [Tên bài học tiếp theo của SGK Kết nối tri thức].\nTUYỆT ĐỐI KHÔNG xuất hiện các dòng gạch đầu dòng (-) rỗng hay dấu gạch nối thừa thãi.'}
 Trả về JSON dạng:
 {
@@ -4149,7 +4431,7 @@ Trả về JSON dạng:
       student: (Array.isArray(res1.equipment?.student) && res1.equipment.student.length > 0)
         ? res1.equipment.student
         : ['SGK, vở ghi, thiết bị học tập'],
-      digitalAssets: res1.equipment?.digitalAssets || ['Học liệu số tương tác'],
+      digitalAssets: isTinHoc ? [] : (res1.equipment?.digitalAssets || ['Học liệu số tương tác']),
       stemMaterials: hasStem ? (res1.equipment?.stemMaterials || ['Vật liệu chế tạo và thực hành mô hình STEM']) : [],
       parentCollaboration: res1.equipment?.parentCollaboration || [],
       preschoolPreparation: res1.equipment?.preschoolPreparation,
@@ -4179,7 +4461,9 @@ Trả về JSON dạng:
       aiItems: config.enableAI ? (res4.competencyMatrix?.aiItems || []) : [],
     },
     appendix: {
-      worksheetContent: cleanWorksheetContent(res4.appendix?.worksheetContent || 'Phiếu học tập và bài tập thực hành'),
+      worksheetContent: isPreschool
+        ? cleanWorksheetContent(res4.appendix?.worksheetContent || '')
+        : ensureWorksheetHasAnswerKey(res4.appendix?.worksheetContent || 'Phiếu học tập và bài tập thực hành', { activities: allActivities, lessonTitle: config.lessonTitle }),
       assignmentPrompt: isPreschool ? '' : (res4.appendix?.assignmentPrompt || 'Ôn tập kiến thức đã học và chuẩn bị bài tiếp theo'),
     },
     imageSlotsUsed: config.imageSlots || [],
@@ -4346,6 +4630,32 @@ Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động củ
 - KHỔNG ĐƯỢC BỎ BẤT KỲ NỘI DUNG NÀO TỪ FILE GIÁO ÁN CŨ TẢI LÊN (oldPlanContent). Tái cấu trúc chuẩn hóa nội dung giáo án cũ khớp đúng 5 bước của Lĩnh vực bài dạy.
 - YÊU CẦU ĐẶC BIỆT CHO PHẦN "2. Khám phá - Trải nghiệm": BẮT BUỘC thiết kế theo hướng trải nghiệm. Giáo viên cho trẻ trải nghiệm/thực hiện thử nhiệm vụ trước -> Đặt câu hỏi gợi mở để trẻ tự suy nghĩ và nêu lên cách thực hiện -> SAU ĐÓ giáo viên mới thực hiện làm mẫu và chuẩn hóa lại kỹ năng. Tuyệt đối KHÔNG làm mẫu hoặc giải thích cách làm trước khi trẻ được trải nghiệm.
 - TRÌNH BÀY RÕ RÀNG VÀ CHI TIẾT: Các hoạt động 1, 2, 3, 4, 5 (Tiến trình hoạt động) PHẢI SOẠN RẤT CHI TIẾT, ĐẦY ĐỦ VÀ SÂU SẮC. Bắt buộc mô tả cụ thể từng lời nói, câu lệnh, câu hỏi gợi mở của giáo viên và hành động, lời đáp, thái độ dự kiến của trẻ. Không viết chung chung sơ sài.
+- RIÊNG ĐỐI VỚI HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG GÓC):
+  BẮT BUỘC tuân thủ đúng 3 BƯỚC TIẾN TRÌNH CHUẨN MỰC sau (Mục I. Mục tiêu và Mục II. Chuẩn bị giữ nguyên chuẩn QĐ 388):
+  + Bước 1: "1. Thỏa thuận trước khi chơi": Hát/đọc thơ tạo cảm xúc; Cô giới thiệu các góc chơi hôm nay (Góc Nghệ thuật, Góc học tập - khám phá khoa học, Góc Phân vai...); Trẻ thỏa thuận vai chơi, tự chọn góc chơi và cam kết nội quy chơi văn minh, đoàn kết.
+  + Bước 2: "2. Theo dõi quá trình chơi": Phân chia chi tiết và đầy đủ cả 3 góc chơi:
+    * Góc Nghệ thuật: Cô hướng dẫn nguyên vật liệu mở (giấy màu, đất nặn, sáp màu...); Trẻ khéo léo tạo hình sản phẩm hoặc biểu diễn văn nghệ theo chủ đề.
+    * Góc học tập - khám phá khoa học: Cô gợi ý bài tập phân loại, so sánh, đếm, ghép tranh, xem sách truyện, làm thí nghiệm; Trẻ say sưa trải nghiệm khám phá.
+    * Góc Phân vai: Cô quan sát, nhập vai mở rộng tình huống giao tiếp, kết nối liên góc; Trẻ thể hiện đúng vai diễn (mẹ chăm sóc con, bác sĩ khám bệnh, người bán hàng niềm nở).
+  + Bước 3: "3. Nhận xét sau khi chơi": Báo hiệu hết giờ; Cô cùng trẻ tham quan các góc chơi nổi bật; Đại diện góc tự tin giới thiệu công trình/sản phẩm; Cô nhận xét tuyên dương tinh thần đoàn kết, sáng tạo và cùng trẻ thu dọn đồ chơi ngăn nắp vào đúng nơi quy định.
+- RIÊNG ĐỐI VỚI HOẠT ĐỘNG NGOÀI TRỜI:
+  BẮT BUỘC áp dụng đúng 3 BƯỚC TIẾN TRÌNH theo 1 trong 2 MẪU CHUẨN sau (Mục I. Mục tiêu và Mục II. Chuẩn bị giữ nguyên chuẩn QĐ 388):
+  * MẪU 1: HOẠT ĐỘNG NGOÀI TRỜI CÓ NỘI DUNG QUAN SÁT (ví dụ: Quan sát cây xanh / vườn hoa / bầu trời...):
+    + Bước 1: "1. Trước khi quan sát": Kiểm tra sĩ số, trang phục gọn gàng; Nhắc nhở quy định an toàn khi ra sân; Dẫn dắt tạo hứng thú ra sân quan sát.
+    + Bước 2: "2. Trong khi quan sát": BẮT BUỘC có đủ 3 nội dung:
+      * Quan sát [đối tượng, ví dụ: Quan sát cây xanh]: Cho trẻ dùng các giác quan quan sát, đàm thoại về đặc điểm, bộ phận, ích lợi và giáo dục bảo vệ thiên nhiên.
+      * TCVĐ: [Tên trò chơi vận động, ví dụ: Bỏ dẻ / Mèo đuổi chuột...]: Giới thiệu trò chơi, nêu cách chơi và luật chơi, tổ chức chơi 2-3 lần sôi nổi, nhận xét tuyên dương.
+      * Chơi tự do: Giới thiệu khu vực chơi tự do (đồ chơi ngoài trời, vẽ phấn, nhặt lá xếp hình); Cô bao quát đảm bảo an toàn tuyệt đối.
+    + Bước 3: "3. Sau khi quan sát": Tập trung trẻ, điểm danh sĩ số; Trẻ chia sẻ cảm xúc, cô nhận xét tuyên dương; Hướng dẫn trẻ rửa tay bằng xà phòng sạch sẽ và xếp hàng vào lớp.
+  * MẪU 2: HOẠT ĐỘNG NGOÀI TRỜI TRỌNG TÂM TRÒ CHƠI VẬN ĐỘNG & CHƠI ĐỒ CHƠI NGOÀI TRỜI:
+    + Bước 1: "1. Trước khi chơi" (hoặc "1. Trước khi ra sân"): Kiểm tra trang phục, phổ biến nội dung và dặn dò an toàn ngoài trời.
+    + Bước 2: "2. Trong khi chơi": BẮT BUỘC có đủ 2 nội dung:
+      * Trò chơi vận động: [Tên trò chơi vận động]
+        Cách chơi: [Mô tả chi tiết cách chơi: chia đội, hiệu lệnh, thao tác vận động tiếp sức...]
+        Luật chơi: [Mô tả chi tiết luật chơi: điều được làm, điều phạm quy, phần thưởng...]
+        Tổ chức cho trẻ chơi 2 - 3 lần sôi nổi, bao quát cổ vũ động viên trẻ.
+      * Chơi với đồ chơi ngoài trời: Hướng dẫn trẻ đến khu vực đồ chơi ngoài trời (cầu trượt, bập bênh, xích đu, thú nhún), nhắc nhở quy tắc an toàn, nhường nhịn nhau, cô theo sát bao quát.
+    + Bước 3: "3. Sau khi chơi": Tập trung trẻ, điểm danh; Cho trẻ làm động tác hồi tĩnh thả lỏng cơ thể; Nhận xét tuyên dương, cất đồ dùng, rửa tay sạch sẽ và vào lớp.
 - RIÊNG ĐỐI VỚI MÔN ÂM NHẠC (LĨNH VỰC NGHỆ THUẬT): Soạn RẤT CHI TIẾT VÀ KỸ LƯỠNG. Dùng VĂN PHONG SƯ PHẠM MẦM NON NGỌT NGÀO, DỊU DÀNG, TRÌU MẾN, GIÀU TÍNH NGHỆ THUẬT VÀ CẢM XÚC. Sử dụng nhiều ngữ điệu tình cảm mầm non ("các con ơi", "nhé", "nhỉ", "nào", "à", "ơi", "nào chúng mình...", "thật là hay đúng không nào!"). QUY ĐỊNH BẮT BUỘC: Ở Mục "3. Chia sẻ – Thảo luận" BẮT BUỘC PHẢI CÓ 2 PHẦN CHI TIẾT Ở CỘT HOẠT ĐỘNG CỦA CÔ theo đúng trọng tâm: Nếu là Dạy hát thì có "a. Dạy hát (TT)" và "b. Nghe hát". Nếu là Nghe hát thì có "a. Nghe hát (TT)" và "b. Hát vận động (hoặc Trò chơi)". Nếu là Hát vận động thì có "a. Hát vận động (TT)" và "b. Nghe hát". Trong cột Hoạt động của trẻ tuyệt đối KHÔNG chứa nhãn "a." hay "b." đứng riêng lẻ, chỉ ghi các gạch đầu dòng. Mô tả chi tiết từng câu thoại truyền cảm của cô, cử chỉ điệu bộ và sự hào hứng của trẻ. KHÔNG ĐƯỢC soạn ngắn gọn khô cứng như môn Thể dục.
 - QUY ĐỊNH BẮT BUỘC VỀ XUỐNG DÒNG VÀ IN ĐẬM:
   + Mỗi mục, mỗi ý, mỗi hành động, mỗi câu lệnh của cô và phản hồi của trẻ BẮT BUỘC PHẢI XUỐNG DÒNG RIÊNG BIỆT (dùng ký tự \n). Sử dụng gạch đầu dòng (-) hoặc (+) rõ ràng ở mỗi ý con. TUYỆT ĐỐI KHÔNG viết dồn ép các ý vào cùng một dòng.
@@ -4353,7 +4663,10 @@ Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động củ
   + VỀ IN ĐẬM: CHỈ in đậm tên trò chơi (dạng **Trò chơi 1: [Tên]**) và các nhãn mục con (dạng **Cách chơi:**, **Luật chơi:**, **Mục tiêu:**, **Trẻ 5 tuổi:**). TUYỆT ĐỐI KHÔNG in đậm tùy tiện nguyên cả câu, không in đậm lung tung các từ ngữ giữa câu, không để dấu sao đơn lẻ (*) hoặc dấu sao chưa đóng (**).`;
 
     const systemInstruction = `Bạn là Chuyên gia Cao cấp về Giáo dục số, Phương pháp Dạy học và Đổi mới Sư phạm theo Chương trình GDPT 2018, Công văn số 5512/BGDĐT, Thông tư số 02/2025/TT-BGDĐT, Công văn số 3456/BGDĐT-GDPT và QUYẾT ĐỊNH SỐ 2422/QĐ-BGDĐT (Khung nội dung giáo dục trí tuệ nhân tạo cho học sinh phổ thông) của Bộ Giáo dục và Đào tạo Việt Nam.
-ĐẶC BIỆT: Bạn biên soạn bám sát 100% theo Bộ sách giáo khoa "Kết nối tri thức với cuộc sống" (Nhà xuất bản Giáo dục Việt Nam), sử dụng đúng thuật ngữ khoa học, chuỗi bài học, hoạt động khám phá và phong cách sư phạm của bộ sách Kết nối tri thức. Tuyệt đối không pha trộn hoặc sử dụng nội dung của các bộ sách khác.
+${config.oldPlanContent ? `
+ĐẶC BIỆT BẮT BUỘC - KHI CÓ GIÁO ÁN MẪU / TÀI LIỆU GỐC CỦA GIÁO VIÊN:
+Tệp giáo án mẫu đã tải lên là NGUỒN CHÂN LÝ TỐI CAO DUY NHẤT. BẮT BUỘC bạn phải trích xuất, kế thừa và bảo tồn 100% nguyên vẹn toàn bộ nội dung bài học, đề mục, bài tập, câu hỏi, các bước giải, công thức toán học và thẻ ảnh từ file gốc này. Tuyệt đối không được thay thế bằng bài học khác hay ép theo bộ sách khác làm lệch nội dung file gốc của giáo viên!
+` : `ĐẶC BIỆT: Bạn biên soạn bám sát 100% theo Bộ sách giáo khoa "Kết nối tri thức với cuộc sống" (Nhà xuất bản Giáo dục Việt Nam), sử dụng đúng thuật ngữ khoa học, chuỗi bài học, hoạt động khám phá và phong cách sư phạm của bộ sách Kết nối tri thức. Tuyệt đối không pha trộn hoặc sử dụng nội dung của các bộ sách khác.`}
 ${isPreschool ? preschoolPrompt : ''}
 ${isHDTN ? `\nĐẶC BIỆT ĐỐI VỚI MÔN HOẠT ĐỘNG TRẢI NGHIỆM, HƯỚNG NGHIỆP (HĐTN - HN):
 - BẮT BUỘC soạn thuần tuý theo chuẩn mẫu Công văn 5512/BGDĐT.
@@ -4410,17 +4723,17 @@ ${!isPreschool ? `
 8. BẢNG PHÂN TÍCH PHÁT TRIỂN NĂNG LỰC SỐ (NLS) & GIÁO DỤC AI CHO HỌC SINH (MỤC CUỐI CÙNG):
    - Xuất bảng chuẩn 4 cột: TT, Tên hoạt động (activityName), Tổ chức dạy học (teachingOrganization), Năng lực số / Năng lực AI (gồm mã chỉ báo chuẩn indicatorCode và mô tả biểu hiện competencyDescription).
 ` : ''}9. QUY TẮC BẮT BUỘC CHO PHIẾU HỌC TẬP (appendix.worksheetContent):
-   - worksheetContent: Phiếu học tập / Phiếu hướng dẫn thực hành chi tiết. BẮT BUỘC có tiêu đề viết hoa căn giữa ("PHIẾU HỌC TẬP SỐ 1: [TÊN BÀI]", dòng "Họ và tên: ............ Lớp: ........ Nhóm: ........"), và NỘI DUNG PHẢI ĐƯỢC THIẾT KẾ KẺ Ô, KẺ BẢNG MARKDOWN TABLE RÕ RÀNG (| STT/Bước | Nhiệm vụ/Câu hỏi | Kết quả thực hiện/Trả lời của HS |).
+   - worksheetContent: Phiếu học tập / Phiếu hướng dẫn thực hành chi tiết. BẮT BUỘC có tiêu đề viết hoa căn giữa ("PHIẾU HỌC TẬP: [TÊN BÀI]", dòng "Họ và tên: ............ Lớp: ........ Nhóm: ........"), và NỘI DUNG TÁCH RÕ THÀNH 2 PHẦN RIÊNG BIỆT:
+     + PHẦN 1: PHIẾU HỌC TẬP DÀNH CHO HỌC SINH (Bảng Markdown gồm: | STT | Nhiệm vụ / Câu hỏi học tập | Kết quả / Câu trả lời của học sinh |, cột kết quả để dòng chấm ...........).
+     + PHẦN 2: BẢNG GỢI Ý ĐÁP ÁN & HƯỚNG DẪN ĐÁNH GIÁ (DÀNH CHO GIÁO VIÊN): Bảng 4 cột: | STT | Nhiệm vụ / Câu hỏi học tập | Gợi ý đáp án / Yêu cầu cần đạt | Điểm / Đánh giá |. BẮT BUỘC CÓ ĐÁP ÁN CHI TIẾT TƯƠNG ỨNG CHO TỪNG CÂU HỎI Ở PHẦN 1 (nêu rõ các bước giải, kết quả đúng hoặc yêu cầu cần đạt), TUYỆT ĐỐI KHÔNG ĐỂ TRỐNG Ô ĐÁP ÁN!
 ${!isPreschool ? `10. QUY TẮC BẮT BUỘC CHO MỤC "3. HƯỚNG DẪN TỰ HỌC & NHIỆM VỤ VỀ NHÀ" (appendix.assignmentPrompt):
-   - BẮT BUỘC phải có đầy đủ 2 nội dung sư phạm chuẩn mực:
      + a) Đối với bài học vừa học: Củng cố kiến thức trọng tâm, ghi rõ các bài tập cụ thể cần làm trong SGK/SBT (ghi số bài tập), nhiệm vụ thực hành/sản phẩm số.
-     + b) Đối với bài học tiếp theo (BẮT BUỘC): Nhắc học sinh xem, đọc trước SGK và soạn bài học mới. BẮT BUỘC PHẢI GHI RÕ TÊN BÀI HỌC TIẾP THEO hoặc nội dung cụ thể của tiết học sau theo phân phối chương trình SGK Kết nối tri thức (Ví dụ: "Đọc trước và chuẩn bị Bài [Số]: [Tên bài học tiếp theo]", gợi ý câu hỏi/nhiệm vụ cần tìm hiểu trước khi đến lớp).` : `10. ĐỐI VỚI CẤP MẦM NON: TUYỆT ĐỐI KHÔNG CÓ MỤC HƯỚNG DẪN TỰ HỌC VÀ NHIỆM VỤ VỀ NHÀ (bắt buộc để appendix.assignmentPrompt = "").`}
+     + b) Đối với bài học tiếp theo (BẮT BUỘC): Nhắc học sinh xem, đọc trước SGK và soạn bài học mới (Ví dụ: "Đọc trước và chuẩn bị nội dung bài tiếp theo...").` : `10. ĐỐI VỚI CẤP MẦM NON: TUYỆT ĐỐI KHÔNG CÓ MỤC HƯỚNG DẪN TỰ HỌC VÀ NHIỆM VỤ VỀ NHÀ (bắt buộc để appendix.assignmentPrompt = "").`}
 11. QUY TẮC TRÌNH BÀY CÂU HỎI TRẮC NGHIỆM VÀ ĐÁP ÁN:
    - Trong cột Sản phẩm, đối với các câu hỏi trắc nghiệm hoặc câu hỏi có lựa chọn, BẮT BUỘC phải đưa ra đáp án cụ thể (Ví dụ: "Câu 1. Đáp án B.", "Câu 2. Đáp án C.") thay vì mô tả chung chung.
-12. QUY TẮC BẮT BUỘC ĐỀ MỤC SÁCH GIÁO KHOA VÀ XUỐNG DÒNG RÕ RÀNG (ĐẶC BIỆT CHO KHỐI THCS VÀ MỌI BỘ MÔN):
-   - Trong Hoạt động 2 (Hình thành kiến thức mới) và Cột Sản phẩm: Các mục nội dung kiến thức có đánh số trong SGK Kết nối tri thức (ví dụ: "1. Thế giới kĩ thuật số", "2. Ứng dụng thực tế của máy tính trong khoa học kĩ thuật và đời sống", "3. Tác động của công nghệ thông tin lên giáo dục và xã hội"...) BẮT BUỘC phải được thể hiện chính xác theo đúng thứ tự 1, 2, 3..., đúng tên đề mục và kèm đầy đủ nội dung kiến thức cốt lõi (khái niệm, định nghĩa, công thức, bảng biểu, lời giải câu hỏi khám phá SGK) vào cột Sản phẩm để học sinh ghi vở.
-   - QUY TẮC XUỐNG DÒNG BẮT BUỘC: Mỗi đề mục 1., 2., 3... PHẢI NẰM RIÊNG TRÊN MỘT DÒNG. Các ý giải thích, định nghĩa, nội dung chi tiết bên dưới BẮT BUỘC XUỐNG DÒNG và gạch đầu dòng (- ). TUYỆT ĐỐI KHÔNG ĐƯỢC VIẾT DÍNH LIỀN TÙ TÌ TRÊN CÙNG MỘT DÒNG (Ví dụ cấm viết: "1. Thông tin và dữ liệu: Dữ liệu là... 2. Vật mang tin: Là...").
-   - TUYỆT ĐỐI KHÔNG được bỏ sót số thứ tự đề mục, không viết gộp chung chung.
+12. QUY TẮC BẮT BUỘC ĐỀ MỤC VÀ XUỐNG DÒNG RÕ RÀNG:
+   - Trong Hoạt động 2 (Hình thành kiến thức mới) và Cột Sản phẩm: Các mục nội dung kiến thức ${config.oldPlanContent ? 'phải được trích xuất chính xác theo đúng từng đề mục, câu hỏi khám phá, bài tập trong file giáo án mẫu đã tải lên' : 'trong SGK (ví dụ: "1. Khái niệm...", "2. Ứng dụng..."...) BẮT BUỘC phải được thể hiện chính xác theo đúng thứ tự 1, 2, 3...'} và kèm đầy đủ nội dung kiến thức cốt lõi (khái niệm, định nghĩa, công thức, bảng biểu, lời giải câu hỏi khám phá) vào cột Sản phẩm để học sinh ghi vở.
+   - QUY TẮC XUỐNG DÒNG BẮT BUỘC: Mỗi đề mục 1., 2., 3... PHẢI NẰM RIÊNG TRÊN MỘT DÒNG. Các ý giải thích, định nghĩa, nội dung chi tiết bên dưới BẮT BUỘC XUỐNG DÒNG và gạch đầu dòng (- ). TUYỆT ĐỐI KHÔNG ĐƯỢC VIẾT DÍNH LIỀN TÙ TÌ TRÊN CÙNG MỘT DÒNG.
    - Cột Hoạt động của GV & HS phải phân chia nhiệm vụ khám phá theo đúng từng đề mục 1, 2, 3... tương ứng.
 13. QUY TẮC TRÌNH BÀY TỔ CHỨC THỰC HIỆN (4 BƯỚC):
    - Thay đổi tên 4 bước trong mỗi hoạt động (lưu vào trường "title" của step) chuẩn xác như sau:
@@ -4435,7 +4748,7 @@ ${!isPreschool ? `10. QUY TẮC BẮT BUỘC CHO MỤC "3. HƯỚNG DẪN TỰ H
 - Tên bài dạy: ${config.lessonTitle || 'Bài học'}
 - Môn học: ${config.subject || 'Toán học'}
 - Lớp: ${config.grade || 'Lớp 10'} (${config.schoolLevel || 'THPT'})
-- Bộ sách giáo khoa: Kết nối tri thức với cuộc sống (BẮT BUỘC theo chuẩn bộ sách Kết nối tri thức)
+- Bộ sách giáo khoa: ${config.oldPlanContent ? 'Bảo tồn nguyên vẹn 100% nội dung bài học từ giáo án mẫu đã tải lên' : 'Kết nối tri thức với cuộc sống'}
 - Thời lượng: ${config.periods || 2} tiết
 - Trường: ${config.schoolName || ''}
 - Giáo viên: ${config.teacherName || ''}
@@ -4534,7 +4847,9 @@ ${isPreschool
     }
 
     if (parsed.appendix?.worksheetContent) {
-      parsed.appendix.worksheetContent = cleanWorksheetContent(parsed.appendix.worksheetContent);
+      parsed.appendix.worksheetContent = isPreschool
+        ? cleanWorksheetContent(parsed.appendix.worksheetContent)
+        : ensureWorksheetHasAnswerKey(parsed.appendix.worksheetContent, parsed);
     }
     if (config.grade) {
       parsed.grade = config.grade;
@@ -4678,16 +4993,77 @@ app.post('/api/gemini/refine-activity', async (req, res) => {
       return res.status(403).json({ success: false, error: auth.error, requiresCustomApiKey: true });
     }
 
-    const { activity, instruction, subject, grade, aiModel, tableLayout } = req.body;
+    const { activity, instruction, subject, grade, aiModel, tableLayout, lessonTitle, mainTheme, subTheme } = req.body;
 
-    const isPreschool = grade?.toLowerCase().includes('mầm non') || subject?.toLowerCase().includes('mầm non');
+    const isPreschool = grade?.toLowerCase().includes('mầm non') || subject?.toLowerCase().includes('mầm non') ||
+      Boolean(activity?.step1?.teacherAction && !activity?.step2?.title && !activity?.step3?.title);
     const isMathSubject = (subject || '').toLowerCase().includes('toán');
     const isTinHoc = (subject || '').toLowerCase().includes('tin học');
     const isMiddleOrHighSchool = (grade || '').toLowerCase().includes('thcs') || (grade || '').toLowerCase().includes('thpt') ||
       /^(?:lớp\s*)?(?:6|7|8|9|10|11|12)(?:\b|$)/i.test(grade || '');
     const isIntegratedSubject = (isMathSubject || isMiddleOrHighSchool) && !isTinHoc;
     const isMath4Column = tableLayout === 'math_4_column';
-    const prompt = `Hãy nâng cấp lại Hoạt động sau đây của bài dạy (${subject} - ${grade}) ${isPreschool ? 'dành cho Mầm non (Không dùng CV 5512, giữ nguyên dạng 1 step1 cho cả hoạt động)' : 'theo đúng chuẩn Công văn 5512 (4 bước rõ ràng)'}:
+
+    let prompt = '';
+    if (isPreschool) {
+      prompt = `Bạn là Chuyên gia Giáo dục Mầm non hàng đầu. Hãy biên soạn lại / nâng cấp Hoạt động sau đây cho giáo án Mầm non (${subject || 'Giáo dục Mầm non'} - ${grade || 'Mầm non'}${lessonTitle ? ` - Bài: "${lessonTitle}"` : ''}${mainTheme ? ` - Chủ đề: "${mainTheme}"` : ''}) đúng theo yêu cầu chỉ đạo của giáo viên:
+
+Hoạt động hiện tại:
+${JSON.stringify(activity, null, 2)}
+
+Yêu cầu điều chỉnh từ giáo viên:
+"${instruction}"
+
+CÁC NGUYÊN TẮC BẮT BUỘC ĐỐI VỚI GIÁO ÁN MẦM NON:
+1. TÊN HOẠT ĐỘNG (trường "name"):
+   - BẮT BUỘC CẬP NHẬT TÊN HOẠT ĐỘNG theo đúng yêu cầu điều chỉnh. Nếu giáo viên yêu cầu đổi trò chơi hoặc soạn một trò chơi mới (ví dụ: "soạn 1 trò chơi khác có tên bịt mắt bắt dê", "đổi sang trò chơi Kéo co", "quan sát cây bàng"...), trường "name" PHẢI ĐƯỢC ĐỔI thành tên trò chơi/hoạt động mới, ví dụ: "${activity.index || 2}. Trò chơi vận động: Bịt mắt bắt dê" hoặc "${activity.name?.split(':')[0] || 'Hoạt động'}: Trò chơi Bịt mắt bắt dê".
+   - Không được giữ lại tên trò chơi cũ nếu giáo viên đã yêu cầu đổi trò chơi khác.
+
+2. NỘI DUNG HOẠT ĐỘNG CỦA CÔ (step1.teacherAction) VÀ HOẠT ĐỘNG CỦA TRẺ (step1.studentAction):
+   - ĐỐI VỚI TRÒ CHƠI (Trò chơi vận động, Trò chơi dân gian, Trò chơi học tập - ví dụ "Bịt mắt bắt dê", "Mèo đuổi chuột", "Cáo và thỏ", "Bỏ giẻ"...):
+     + TRONG teacherAction (Hoạt động của Cô):
+       * Cô tập trung trẻ, giới thiệu tên trò chơi bằng lời dẫn ngọt ngào, tạo bất ngờ, hào hứng cho trẻ.
+       * * Cách chơi: Nêu thật chi tiết, rõ ràng từng bước (cách chọn bạn chơi/vai chơi, vị trí đứng, cách di chuyển, hành động cụ thể của từng vai).
+       * * Luật chơi: Quy định rõ ràng, dễ hiểu với lứa tuổi mầm non (ví dụ: không được hé mắt, không chạy ra ngoài vòng tròn, ai bị bắt thì đổi vai...).
+       * Cô làm mẫu hoặc hướng dẫn 1 bạn chơi thử trước cho cả lớp quan sát.
+       * Cô tổ chức cho cả lớp/từng nhóm trẻ tham gia chơi (chơi 2 - 3 lần, luân phiên đổi vai chơi để nhiều trẻ được tham gia).
+       * Cô quan sát, bao quát trẻ trong suốt quá trình chơi, đảm bảo an toàn, cổ vũ nhiệt tình.
+       * Cô nhận xét, tuyên dương tinh thần chơi sôi nổi và khen ngợi sự cố gắng của trẻ.
+     + TRONG studentAction (Hoạt động của Trẻ):
+       * Trẻ chú ý lắng nghe cô phổ biến tên trò chơi, cách chơi và luật chơi.
+       * Trẻ hào hứng xung phong và tham gia chơi theo hướng dẫn của cô.
+       * Trẻ nắm luật và nhập vai nhiệt tình (mô tả cụ thể hành động của trẻ theo trò chơi, ví dụ: bạn bịt mắt lắng nghe tiếng dê kêu để tìm bắt, các chú dê nhanh nhẹn né tránh và cười vang...).
+       * Cả lớp đoàn kết, vui vẻ, cổ vũ bạn và vỗ tay chúc mừng sau mỗi lượt chơi.
+
+   - ĐỐI VỚI HOẠT ĐỘNG NGOÀI TRỜI (Quan sát có mục đích, Chơi tự do, Hoạt động trải nghiệm):
+     + Trước khi ra sân / Trước khi quan sát: Cô chuẩn bị tâm thế, dặn dò an toàn; Trẻ hào hứng chuẩn bị.
+     + Trong khi quan sát: Cô đặt hệ thống câu hỏi gợi mở sâu sắc, hướng dẫn trẻ sờ, nhìn, ngửi, cảm nhận; Trẻ quan sát tỉ mỉ, trả lời tự tin.
+     + Sau khi quan sát / Sau khi chơi: Cô nhận xét, cho trẻ rửa tay, vào lớp; Trẻ cùng cô thu dọn và vệ sinh sạch sẽ.
+
+   - ĐỐI VỚI HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG GÓC):
+     + Thỏa thuận trước khi chơi -> Theo dõi quá trình chơi ở các góc (Góc Nghệ thuật, Góc Học tập - Khám phá, Góc Phân vai...) -> Nhận xét sau khi chơi.
+
+   - ĐỐI VỚI CÁC BÀI HỌC MẦM NON KHÁC (Âm nhạc, LQVT, LQCC, Thể dục, Tạo hình, Thơ/Truyện):
+     + Trình bày sư phạm mầm non chuẩn mực, mỗi ý một dòng bắt đầu bằng dấu gạch ngang (-), giàu lời thoại tương tác cô - trẻ.
+
+3. YÊU CẦU ĐỊNH DẠNG JSON:
+   Trả về DUY NHẤT 1 đối tượng JSON:
+   {
+     "id": "${activity.id || 'act-' + (activity.index || 1)}",
+     "index": ${activity.index || 1},
+     "name": "Tên hoạt động cập nhật theo yêu cầu của giáo viên",
+     "duration": "${activity.duration || '5 - 7 phút'}",
+     "objective": "${activity.objective || ''}",
+     "content": "${activity.content || ''}",
+     "productSummary": "",
+     "step1": {
+       "title": "Tiến trình hoạt động",
+       "teacherAction": "- Nội dung chi tiết hoạt động của cô theo yêu cầu...",
+       "studentAction": "- Nội dung chi tiết hoạt động của trẻ tương ứng..."
+     }
+   }`;
+    } else {
+      prompt = `Hãy nâng cấp lại Hoạt động sau đây của bài dạy (${subject} - ${grade}) theo đúng chuẩn Công văn 5512 (4 bước rõ ràng):
 
 Hoạt động hiện tại:
 ${JSON.stringify(activity, null, 2)}
@@ -4700,7 +5076,8 @@ LƯU Ý QUAN TRỌNG VỀ ĐỀ MỤC SGK KHỐI THCS VÀ MỌI BỘ MÔN:
 - MỤC a, b, c PHÍA TRÊN BẢNG (objective, content, productSummary): Chỉ tóm tắt ngắn gọn mục tiêu, nội dung nhiệm vụ và sản phẩm chung. TUYỆT ĐỐI KHÔNG đưa danh sách đề mục hay nội dung ghi vở dài dòng vào mục b, c phía trên bảng.
 - TUYỆT ĐỐI KHÔNG CHÈN/TÍCH HỢP MÃ NĂNG LỰC SỐ (NLS) HOẶC AI (dạng 1.1.TC1a, [NLS 1.1]...) VÀO CỘT SẢN PHẨM (productExpected). ${isIntegratedSubject ? (isMath4Column ? 'Đối với mẫu 4 cột, TUYỆT ĐỐI KHÔNG ghi chữ [Tích hợp NLS] hay [Tích hợp AI] vào cột Hoạt động của GV/HS, mà đưa mã chỉ báo vào trường nlsFocus và aiFocus.' : 'Đối với các môn học cấp THCS và THPT (như môn Toán), thể hiện khối [Tích hợp NLS] hoặc [Tích hợp AI] kèm mã chỉ báo trực tiếp trong cột Hoạt động của GV/HS nếu hoạt động có sử dụng công cụ số/AI (xuống dòng tách khối riêng biệt [Tích hợp NLS] hoặc [Tích hợp AI]).') : 'TUYỆT ĐỐI KHÔNG chèn vào teacherAction hay studentAction.'}
 
-Yêu cầu: Trả về đối tượng JSON cho duy nhất Hoạt động này, giữ nguyên cấu trúc các trường: id, index, name, duration, objective, content, productSummary, step1, step2, step3, step4, nlsFocus, aiFocus. ${isPreschool ? 'Chỉ sử dụng step1, bỏ trống step 2, 3, 4.' : 'Mỗi step phải có: title, teacherAction, studentAction, productExpected, digitalOrAiTool.'}`;
+Yêu cầu: Trả về đối tượng JSON cho duy nhất Hoạt động này, giữ nguyên cấu trúc các trường: id, index, name, duration, objective, content, productSummary, step1, step2, step3, step4, nlsFocus, aiFocus. Mỗi step phải có: title, teacherAction, studentAction, productExpected, digitalOrAiTool.`;
+    }
 
     const response = await generateContentWithRetryAndFallback({
       contents: prompt,
@@ -4713,7 +5090,30 @@ Yêu cầu: Trả về đối tượng JSON cho duy nhất Hoạt động này, 
     });
 
     const rawActivity = parseJSONRobust(response.text || '{}');
-    const updatedActivity = cleanActivityNLSCodes(rawActivity, isIntegratedSubject, isMath4Column);
+    let updatedActivity: any;
+    if (isPreschool) {
+      const teacherText = (rawActivity.step1?.teacherAction || rawActivity.teacherAction || '').trim();
+      const studentText = (rawActivity.step1?.studentAction || rawActivity.studentAction || '').trim();
+      updatedActivity = {
+        ...rawActivity,
+        id: rawActivity.id || activity.id || `act-${activity.index || 1}`,
+        index: activity.index ?? rawActivity.index ?? 1,
+        name: rawActivity.name || activity.name || `Hoạt động ${activity.index || 1}`,
+        duration: rawActivity.duration || activity.duration || '5 - 7 phút',
+        step1: {
+          title: rawActivity.step1?.title || 'Tiến trình hoạt động',
+          teacherAction: teacherText,
+          studentAction: studentText,
+          productExpected: '',
+          digitalOrAiTool: '',
+        },
+        step2: undefined,
+        step3: undefined,
+        step4: undefined,
+      };
+    } else {
+      updatedActivity = cleanActivityNLSCodes(rawActivity, isIntegratedSubject, isMath4Column);
+    }
     res.json({ success: true, activity: updatedActivity });
   } catch (error: any) {
     console.error('Error refining activity:', error);

@@ -415,27 +415,56 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
     }
   };
 
-  // Handler: Upload DOCX Lesson Plan Sample (Optional)
+  // Handler: Upload Lesson Plan Sample (Word .docx/.doc, PDF, TXT)
   const handleDocxUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsParsingDocx(true);
     setDocxFileName(file.name);
-    setDocxStatusMsg(null);
+    setDocxStatusMsg('Đang xử lý...');
 
     try {
-      const result = await parseDocxFile(file);
+      const ext = file.name.toLowerCase().split('.').pop() || '';
+      let textWithSlots = '';
+      let imageSlots: any[] = [];
+
+      if (ext === 'pdf') {
+        const pdfInfo = await extractTextFromPDF(file, 40);
+        textWithSlots = pdfInfo.extractedText || '';
+      } else if (ext === 'txt') {
+        textWithSlots = await file.text();
+      } else {
+        // Word (.docx, .doc)
+        const result = await parseDocxFile(file);
+        textWithSlots = result.textWithSlots;
+        imageSlots = result.imageSlots || [];
+      }
+
+      // Auto-detect lesson title from file text if present
+      let detectedTitle = '';
+      const lines = textWithSlots.split('\n').map((l) => l.trim()).filter(Boolean);
+      for (const line of lines.slice(0, 25)) {
+        const m = line.match(/^(?:TÊN BÀI DẠY|BÀI DẠY|BÀI HỌC|BÀI)\s*[:\-]?\s*(?:BÀI\s*\d+[:\.\-]?\s*)?([^\n\r]+)/i);
+        if (m && m[1] && m[1].length > 4 && m[1].length < 120) {
+          detectedTitle = m[0].replace(/^(?:TÊN BÀI DẠY|BÀI DẠY|BÀI HỌC)\s*[:\-]?\s*/i, '').trim();
+          break;
+        }
+      }
+
       onChangeConfig({
-        oldPlanContent: result.textWithSlots,
-        imageSlots: result.imageSlots,
+        oldPlanContent: textWithSlots,
+        imageSlots: imageSlots,
+        ...(detectedTitle ? { lessonTitle: detectedTitle } : {}),
       });
       setDocxStatusMsg(
-        result.imageSlots.length > 0 ? `Đã lưu ${result.imageSlots.length} ảnh gốc` : null
+        imageSlots.length > 0
+          ? `Đã lưu ${imageSlots.length} ảnh gốc${detectedTitle ? ` • ${detectedTitle}` : ''}`
+          : (detectedTitle ? `Đã nhận diện: ${detectedTitle}` : 'Đã nạp bài soạn mẫu')
       );
     } catch (err: any) {
-      console.error('Error parsing docx:', err);
-      setDocxStatusMsg(`Lỗi đọc file`);
+      console.error('Error parsing lesson plan sample file:', err);
+      setDocxStatusMsg(`Lỗi đọc file: ${err.message || 'Không thể đọc tệp'}`);
     } finally {
       setIsParsingDocx(false);
     }
@@ -557,12 +586,12 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                 )}
               </div>
 
-              {/* 2. Nút Tải File Giáo Án Mẫu */}
+              {/* 2. Nút Tải File Bài Soạn Mẫu (Word .docx, .doc, PDF, TXT) */}
               <div>
                 <input
                   ref={docxInputRef}
                   type="file"
-                  accept=".docx"
+                  accept=".docx,.doc,.pdf,.txt,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,text/plain"
                   onChange={handleDocxUpload}
                   className="hidden"
                 />
@@ -585,7 +614,7 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                       type="button"
                       onClick={handleClearDocx}
                       className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-all cursor-pointer shrink-0"
-                      title="Xóa file giáo án mẫu"
+                      title="Xóa file bài soạn mẫu"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -595,17 +624,18 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                     type="button"
                     onClick={() => docxInputRef.current?.click()}
                     disabled={isParsingDocx}
+                    title="Tải file bài soạn mẫu (Word .docx/.doc, PDF, TXT) để nâng cấp và bảo tồn 100% nội dung gốc"
                     className="w-full h-full py-2 px-1.5 sm:px-2 rounded-xl border border-indigo-200 bg-indigo-50/40 hover:bg-indigo-100/60 text-indigo-950 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs group active:scale-[0.99] whitespace-nowrap"
                   >
                     {isParsingDocx ? (
                       <>
                         <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-700 shrink-0" />
-                        <span className="truncate">Đang đọc...</span>
+                        <span className="truncate">Đang đọc bài mẫu...</span>
                       </>
                     ) : (
                       <>
                         <FileCode2 className="w-3.5 h-3.5 text-indigo-700 group-hover:scale-110 transition-transform shrink-0" />
-                        <span className="whitespace-nowrap">Giáo án mẫu</span>
+                        <span className="whitespace-nowrap">Tải bài soạn mẫu</span>
                       </>
                     )}
                   </button>

@@ -20,6 +20,12 @@ const saveAs = (fileSaver as any)?.saveAs || fileSaver;
 import { LessonPlanOutput, ImageSlot, StepDetail, MathFormulaFormatType } from '../types';
 import { formatPreschoolActivities, formatPreschoolMusicActivities, parseActivityPairs, detectPreschoolDomain, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, analyzePreschoolAgeProfile, cleanPreschoolBulletLine, expandPreschoolTextLines, getPreschoolPreparation } from './preschoolUtils';
 import { latexToDocxMath, splitTextAndMath } from './latexToDocxMath';
+import {
+  normalizeWorksheetMarkdown,
+  ensureWorksheetHasAnswerKey,
+  isTeacherHeading,
+} from './worksheetUtils';
+export { normalizeWorksheetMarkdown, ensureWorksheetHasAnswerKey };
 
 // Global state for current math formula export format (default: 'word_equation' - Phương án 2)
 let globalMathFormulaFormat: MathFormulaFormatType = 'word_equation';
@@ -1516,112 +1522,6 @@ function createMultiLineTextParagraphs(text: string, fontName: string): Paragrap
 }
 
 /**
- * Pre-processes and normalizes worksheet content to guarantee valid Markdown lines,
- * separation between sections, and clean table rows with delimiters.
- */
-export function normalizeWorksheetMarkdown(raw: string): string {
-  if (!raw) return '';
-  let text = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-
-  // Handle literal escaped newlines "\n" if any
-  text = text.replace(/\\n/g, '\n');
-
-  // 1. Separate major headers / metadata ONLY if text precedes table header on same line without pipe
-  text = text.replace(/^([^|\n]+)(\|\s*(?:STT|Nhiệm vụ|Câu hỏi|Bước|Nội dung)[\s|])/gim, '$1\n\n$2');
-  text = text.replace(/\|\s*(PHẦN\s+\d+|###|##|#|Họ và tên|HỌ VÀ TÊN|BẢNG GỢI Ý|HƯỚNG DẪN)/gi, '|\n\n$1');
-  text = text.replace(/(PHẦN\s+\d+[^:\n]*:[^\n.]+[\.\:])\s*(Họ và tên|Họ tên|Tên học sinh)/gi, '$1\n$2');
-  text = text.replace(/(PHIẾU HỌC TẬP[^\n.]+[\.\:])\s*(Họ và tên|Họ tên|Tên học sinh)/gi, '$1\n$2');
-
-  // 2. Separate inline table rows joined on same line (e.g. `| row 1 | | row 2 |`)
-  text = text.replace(/(^\|[^\n]+\|)\s*(?=\|[^\n]+\|)/gim, '$1\n');
-
-  // 3. Process line by line to ensure markdown tables have valid syntax, headers, and separators
-  const lines = text.split('\n');
-  const resultLines: string[] = [];
-  let currentSection: 'student' | 'teacher' | 'other' = 'other';
-
-  const defaultDots = '....................................................................................<br>....................................................................................<br>....................................................................................<br>....................................................................................';
-
-  for (let idx = 0; idx < lines.length; idx++) {
-    let line = lines[idx].trim();
-    if (!line) {
-      resultLines.push('');
-      continue;
-    }
-
-    // Section detection
-    if (/PHIẾU HỌC TẬP|DÀNH CHO HỌC SINH|PHẦN 1/i.test(line) && !/BẢNG GỢI Ý|GIÁO VIÊN/i.test(line)) {
-      currentSection = 'student';
-    } else if (/BẢNG GỢI Ý|HƯỚNG DẪN ĐÁNH GIÁ|DÀNH CHO GIÁO VIÊN|PHẦN 2/i.test(line)) {
-      currentSection = 'teacher';
-    }
-
-    if (line.startsWith('|') && line.endsWith('|') && line.split('|').length >= 3) {
-      const cells = line.split('|').slice(1, -1).map((c) => c.trim());
-      const headerStr = cells.join(' ').toLowerCase();
-      const isHeader = /(stt|nhiệm vụ|câu hỏi|kết quả|gợi ý|đáp án|điểm)/i.test(headerStr);
-
-      if (isHeader) {
-        if (currentSection === 'student' || cells.length === 3) {
-          line = '| STT | Nhiệm vụ / Câu hỏi học tập | Kết quả / Câu trả lời của học sinh |';
-        } else if (currentSection === 'teacher' || cells.length >= 4) {
-          line = '| STT | Nhiệm vụ / Câu hỏi học tập | Gợi ý đáp án / Yêu cầu cần đạt | Điểm / Đánh giá |';
-        }
-        resultLines.push(line);
-
-        const nextLine = idx + 1 < lines.length ? lines[idx + 1].trim() : '';
-        if (!/^\|?[\s\-:]+\|/.test(nextLine)) {
-          const colCount = line.split('|').length - 2;
-          resultLines.push('|' + Array(colCount).fill('---').join('|') + '|');
-        }
-        continue;
-      }
-
-      // Check if separator line (|---|---|...)
-      if (/^\|?[\s\-:]+\|/.test(line)) {
-        resultLines.push(line);
-        continue;
-      }
-
-      // Data row processing
-      if (currentSection === 'student') {
-        let col1 = cells[0] || '1';
-        let col2 = cells[1] || '';
-        let col3 = cells[2] || '';
-
-        if (!col2 && col3) {
-          col2 = col3;
-          col3 = '';
-        }
-
-        const dotsCount = (col3.match(/\./g) || []).length;
-        if (dotsCount < 20 || !col3.includes('.')) {
-          col3 = defaultDots;
-        } else {
-          const dotLines = col3.split(/<br\s*\/?>|\n/gi).map((l) => l.trim()).filter(Boolean);
-          if (dotLines.length < 3) {
-            col3 = defaultDots;
-          }
-        }
-
-        line = `| ${col1} | ${col2} | ${col3} |`;
-      } else if (currentSection === 'teacher') {
-        let col1 = cells[0] || '1';
-        let col2 = cells[1] || '';
-        let col3 = cells[2] || '';
-        let col4 = cells[3] || 'Đạt / 5.0 điểm';
-
-        line = `| ${col1} | ${col2} | ${col3} | ${col4} |`;
-      }
-    }
-
-    resultLines.push(line);
-  }
-
-  return resultLines.join('\n');
-}
-
-/**
  * Creates DOCX elements for worksheets with centered titles, student metadata lines,
  * and structured Markdown tables converted into real Word tables with single black borders.
  */
@@ -1631,7 +1531,8 @@ function createWorksheetDocxElements(
 ): (Paragraph | Table)[] {
   if (!text) return [];
 
-  const normalized = normalizeWorksheetMarkdown(text);
+  const guaranteedText = ensureWorksheetHasAnswerKey(text);
+  const normalized = normalizeWorksheetMarkdown(guaranteedText);
   const elements: (Paragraph | Table)[] = [];
   const lines = normalized.split('\n');
   let i = 0;
@@ -1672,13 +1573,15 @@ function createWorksheetDocxElements(
       }
     }
 
-    // 2. Detect Main Title (PHẦN 1: PHIẾU HỌC TẬP, PHIẾU HƯỚNG DẪN, HƯỚNG DẪN THỰC HÀNH...)
+    // 2. Detect Main Title or Teacher Answer Key Title
+    const isTeacherSection = isTeacherHeading(trimmed);
     const isMainTitle =
+      isTeacherSection ||
       /^(?:#+\s*)?(?:PHẦN\s+\d+[:\.\-]?\s*)?(?:PHIẾU\s+HỌC\s+TẬP|PHIẾU\s+HƯỚNG\s+DẪN|HƯỚNG\s+DẪN\s+THỰC\s+HÀNH|BÀI\s+\d+|CHỦ\s+ĐỀ|NHIỆM\s+VỤ\s+THỰC\s+HÀNH)/i.test(
         trimmed
       ) ||
-      /^PHẦN\s+\d+[:\.\-]?\s*(?:PHIẾU|BÀI|NỘI DUNG)/i.test(trimmed) ||
-      /^#+\s+(PHIẾU|HƯỚNG DẪN|BÀI)/i.test(trimmed) ||
+      /^PHẦN\s+\d+[:\.\-]?\s*(?:PHIẾU|BÀI|NỘI DUNG|BẢNG|ĐÁP ÁN)/i.test(trimmed) ||
+      /^#+\s+(PHIẾU|HƯỚNG DẪN|BÀI|BẢNG|ĐÁP ÁN)/i.test(trimmed) ||
       (/^PHIẾU\s+/i.test(trimmed) && trimmed.length < 120);
 
     if (isMainTitle) {
@@ -1686,7 +1589,7 @@ function createWorksheetDocxElements(
       elements.push(
         new Paragraph({
           alignment: AlignmentType.CENTER,
-          spacing: { before: 60, after: 20 },
+          spacing: { before: isTeacherSection ? 120 : 60, after: 20 },
           children: [
             new TextRun({
               text: cleanTitle.toUpperCase(),
@@ -2376,6 +2279,10 @@ function buildStandardDocxElements(
   tableLayout: string
 ): (Paragraph | Table)[] {
   const isMath = /toán|math/i.test(plan.subject || '') || /toán|math/i.test(plan.lessonTitle || '');
+  const isTinHoc = !isPreschool && (
+    /tin\s*học|tin\s*hoc|computer|informatics/i.test(plan.subject || '') ||
+    /tin\s*học|tin\s*hoc/i.test(plan.lessonTitle || '')
+  );
   const mathHeader = parseMathLessonHeader(plan.lessonTitle);
   const nlsColor = isMath ? 'FF0000' : '0066CC';
 
@@ -2551,21 +2458,36 @@ function buildStandardDocxElements(
           // II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU
           createSectionHeading('II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU', fontName, primaryColor),
           createSubHeading('1. Giáo viên:', fontName),
-          ...plan.equipment.teacher.map(e => createDashListItem(e, fontName)),
+          ...(() => {
+            const list = [...(plan.equipment?.teacher || [])];
+            if (isTinHoc && plan.equipment?.digitalAssets && plan.equipment.digitalAssets.length > 0) {
+              plan.equipment.digitalAssets.forEach(asset => {
+                if (asset && !list.some(t => t.toLowerCase().includes(asset.toLowerCase()))) {
+                  list.push(asset);
+                }
+              });
+            }
+            return list.map(e => createDashListItem(e, fontName));
+          })(),
 
           createSubHeading('2. Học sinh:', fontName),
-          ...plan.equipment.student.map(e => createDashListItem(e, fontName)),
+          ...(plan.equipment?.student || []).map(e => createDashListItem(e, fontName)),
 
-          ...(plan.equipment.digitalAssets && plan.equipment.digitalAssets.length > 0
+          ...(!isTinHoc && plan.equipment?.digitalAssets && plan.equipment.digitalAssets.length > 0
             ? [
                 createSubHeading('3. Học liệu và thiết bị phụ trợ:', fontName),
                 ...plan.equipment.digitalAssets.map(e => createDashListItem(e, fontName)),
               ]
             : []),
 
-          ...(plan.equipment.stemMaterials && plan.equipment.stemMaterials.length > 0
+          ...(plan.equipment?.stemMaterials && plan.equipment.stemMaterials.length > 0
             ? [
-                createSubHeading('4. Thiết bị, dụng cụ và vật liệu thực hành STEM:', fontName),
+                createSubHeading(
+                  !isTinHoc && plan.equipment?.digitalAssets && plan.equipment.digitalAssets.length > 0
+                    ? '4. Thiết bị, dụng cụ và vật liệu thực hành STEM:'
+                    : '3. Thiết bị, dụng cụ và vật liệu thực hành STEM:',
+                  fontName
+                ),
                 ...plan.equipment.stemMaterials.map(e => createDashListItem(e, fontName)),
               ]
             : []),

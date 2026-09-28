@@ -80,10 +80,12 @@ export const PreschoolSingleTable: React.FC<PreschoolSingleTableProps> = ({
   };
 
   const refineSuggestions = [
-    'Thêm trò chơi vận động gây hứng thú',
-    'Tăng câu hỏi tương tác và gợi mở cho trẻ',
-    'Bổ sung tình huống thực tế sinh động',
+    'Soạn trò chơi vận động Bịt mắt bắt dê',
+    'Thêm trò chơi vận động sôi nổi có Cách chơi & Luật chơi',
+    'Tăng câu hỏi đàm thoại và gợi mở cho trẻ',
+    'Bổ sung tình huống thực tế, trải nghiệm sinh động',
     'Tích hợp âm nhạc, vỗ tay và nhún nhảy',
+    'Bổ sung lời động viên, tuyên dương ngọt ngào của cô',
   ];
 
   return (

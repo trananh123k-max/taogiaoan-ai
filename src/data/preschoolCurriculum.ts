@@ -616,26 +616,65 @@ I. LĨNH VỰC PHÁT TRIỂN THẨM MỸ (TẠO HÌNH):
 4. Vận dụng – Mở rộng: Gợi mở tình huống vận dụng mới ở nhà; Hướng dẫn lồng bức ảnh kỷ niệm vào khung/sản phẩm vừa làm để tặng cô/người thân.
 5. Đánh giá – Điều chỉnh: Hỏi cảm nhận điều thích nhất; Cô nhận xét chung ghi nhận phản hồi tích cực.
 
-J. HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG GÓC):
-- Cấu trúc mục tiêu: Bắt buộc gắn mã chỉ báo QĐ 388 (NT 3.1, TX 3.2, TX 4.3, TX 4.4, TX 8.1...).
-- Mục tích hợp: Nếu người dùng chọn NLS -> Mục 5 Tích hợp Năng lực số (NLS); Nếu chọn AI -> Mục 6 Tích hợp Trí tuệ nhân tạo (AI).
-- Tiến trình 5 bước:
-  1. Ổn định và Thỏa thuận trước khi chơi: Hát bài hát hoặc trò chuyện tạo cảm xúc; Cô giới thiệu các góc chơi (Góc xây dựng, Góc phân vai, Góc tạo hình/nghệ thuật, Góc học tập - sách, Góc khám phá thiên nhiên); Trẻ tự nhận vai chơi, thảo luận ý tưởng công trình/vai diễn và nhắc lại quy tắc chơi an toàn, đoàn kết.
-  2. Về góc chơi và Bắt đầu chơi: Trẻ nhẹ nhàng về các góc đã chọn, phân công nhiệm vụ; Cô quan sát bao quát, gợi ý bổ sung đồ dùng khi cần.
-  3. Quá trình chơi – Trải nghiệm và Tương tác: Trẻ say sưa thực hiện vai chơi và công trình (bác thợ xây dựng công viên/trường học, bác sĩ khám bệnh, người bán hàng giao tiếp với khách, gia đình nấu ăn...); Cô nhập vai chơi cùng trẻ để gợi mở liên kết giữa các góc, xử lý tình huống phát sinh một cách sư phạm.
-  4. Nhận xét từng góc chơi: Cô cùng trẻ đến thăm quan từng góc; Đại diện từng góc giới thiệu công trình/hoạt động của mình; Trẻ góc khác nhận xét, đóng góp ý kiến; Cô động viên, khen ngợi tinh thần hợp tác.
-  5. Đánh giá chung và Thu dọn đồ chơi: Cô tổng kết buổi chơi, biểu dương sự sáng tạo và đoàn kết của cả lớp; Hướng dẫn và cùng trẻ thu dọn đồ dùng, đồ chơi ngăn nắp vào đúng nơi quy định.
+J. HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG CHƠI Ở CÁC GÓC):
+- QUY ĐỊNH CẤU TRÚC:
+  + Mục I. Mục tiêu / Mục đích - yêu cầu: GIỮ NGUYÊN cấu trúc chuẩn QĐ 388 (1. Kiến thức có mã, 2. Kỹ năng có mã, 3. Phẩm chất: Yêu thương, Tôn trọng..., 4. Năng lực: Tự lực, Thích ứng...). Tích hợp NLS (mục 5) và AI (mục 6) nếu được chọn.
+  + Mục II. Chuẩn bị: GIỮ NGUYÊN (1. Chuẩn bị của cô, 2. Chuẩn bị của trẻ, 3. Phối hợp với phụ huynh).
+  + Mục III. Tiến trình hoạt động: Trình bày trong 1 bảng 2 cột ("Hoạt động của cô" | "Hoạt động của trẻ") BẮT BUỘC theo đúng 3 BƯỚC CHUẨN sau:
+    1. Thỏa thuận trước khi chơi:
+       - Ổn định tổ chức: Cô cùng trẻ hát/đọc thơ/trò chuyện theo chủ đề để tạo cảm xúc, hứng thú.
+       - Trò chuyện dẫn dắt giới thiệu các góc chơi hôm nay (Góc Nghệ thuật, Góc học tập - khám phá khoa học, Góc Phân vai...).
+       - Hướng dẫn trẻ thỏa thuận nội dung chơi, tự nguyện lựa chọn góc chơi và nhận vai chơi mình yêu thích.
+       - Thống nhất quy tắc chơi văn minh: Chơi đoàn kết, nói năng nhẹ nhàng, không tranh giành đồ chơi, biết nhường nhịn và hợp tác cùng bạn bè, chơi xong cất dọn đồ chơi đúng nơi quy định.
+    2. Theo dõi quá trình chơi:
+       (Phân chia chi tiết theo từng góc chơi, cô bao quát, quan sát hỗ trợ gợi mở tình huống; trẻ say sưa nhập vai và trải nghiệm sáng tạo):
+       * Góc Nghệ thuật: (Tạo hình, âm nhạc...) Cô hướng dẫn gợi ý nguyên vật liệu mở (giấy màu, đất nặn, bút màu, lá cây, nhạc cụ...); trẻ khéo léo tạo sản phẩm hoặc biểu diễn văn nghệ theo chủ đề.
+       * Góc học tập - khám phá khoa học: Cô gợi ý các nhiệm vụ phân loại, đếm, ghép hình, xem sách tranh, làm thí nghiệm đơn giản; trẻ say sưa trải nghiệm, tìm tòi và chia sẻ khám phá.
+       * Góc Phân vai: Cô quan sát sự tương tác giữa các vai (Gia đình, Bác sĩ, Bán hàng...), nhập vai chơi khi cần để mở rộng tình huống giao tiếp, kết nối liên góc; trẻ thể hiện đúng hành động của vai diễn, giao tiếp lễ phép, thân thiện.
+    3. Nhận xét sau khi chơi:
+       - Báo hiệu kết thúc giờ chơi (tiếng nhạc nhẹ/xắc xô).
+       - Cô cùng trẻ đến tham quan góc chơi tiêu biểu/nổi bật; đại diện góc tự tin giới thiệu công trình/sản phẩm của nhóm mình; trẻ góc khác nhận xét, đóng góp ý kiến.
+       - Cô nhận xét chung, tuyên dương tinh thần đoàn kết, sự khéo léo, sáng tạo và ý thức giữ gìn đồ chơi của trẻ; nhắc nhở nhẹ nhàng nếu có điểm cần rút kinh nghiệm.
+       - Hướng dẫn và cùng trẻ thu dọn đồ chơi gọn gàng, phân loại ngăn nắp vào đúng nơi quy định.
 
-K. HOẠT ĐỘNG NGOÀI TRỜI:
-- Cấu trúc mục tiêu: Gắn mã chỉ báo QĐ 388 (NT 1.1, NT 1.2, NT 3.1, TC 1.1, TC 1.2, TC 3.3, TX 4.4...).
-- Mục tích hợp: Nếu chọn NLS -> Mục 5 Tích hợp Năng lực số (NLS); Nếu chọn AI -> Mục 6 Tích hợp Trí tuệ nhân tạo (AI).
-- Nội dung bao gồm 3 phần chính: Quan sát có mục đích (HĐCMĐ), Trò chơi vận động (TCVĐ), Chơi tự do ngoài trời.
-- Tiến trình 5 bước:
-  1. Chuẩn bị trước khi ra sân – Gợi cảm xúc: Kiểm tra sĩ số, trang phục, giày dép, mũ nón; Phổ biến mục đích ra sân và dặn dò quy tắc an toàn ngoài trời.
-  2. Hoạt động có mục đích (Quan sát - Khám phá): Cho trẻ đứng vị trí thuận lợi, gợi hỏi để trẻ dùng các giác quan quan sát đối tượng (vườn hoa, cây bóng mát, bầu trời, góc thiên nhiên...); Trẻ thảo luận, phát biểu cảm nhận; Cô chuẩn hóa kiến thức khoa học đơn giản, giáo dục tình yêu thiên nhiên.
-  3. Trò chơi vận động củng cố: Cô giới thiệu trò chơi vận động/dân gian phù hợp chủ đề, nêu luật chơi, cách chơi; Tổ chức cho trẻ chơi hào hứng 2 - 3 lần; Khen ngợi tinh thần nhanh nhẹn.
-  4. Chơi tự do có sự quản lý của cô: Trẻ tự chọn đồ chơi ngoài trời (cầu trượt, bập bênh, đu quay, vẽ phấn, chơi với lá cây...); Cô bao quát mọi khu vực đảm bảo an toàn tuyệt đối cho trẻ.
-  5. Tập trung – Đánh giá và Hồi tĩnh: Cô thổi còi/vỗ xắc xô tập hợp trẻ, điểm danh sĩ số; Cho trẻ chia sẻ cảm xúc sau buổi chơi ngoài trời; Nhắc nhở vệ sinh tay chân sạch sẽ và xếp hàng nhẹ nhàng về lớp.
+K. HOẠT ĐỘNG NGOÀI TRỜI (2 MẪU CHUẨN):
+- QUY ĐỊNH CẤU TRÚC:
+  + Mục I. Mục tiêu / Mục đích - yêu cầu: GIỮ NGUYÊN cấu trúc chuẩn QĐ 388 (1. Kiến thức có mã, 2. Kỹ năng có mã, 3. Phẩm chất, 4. Năng lực...).
+  + Mục II. Chuẩn bị: GIỮ NGUYÊN (1. Chuẩn bị của cô, 2. Chuẩn bị của trẻ, 3. Phối hợp phụ huynh).
+  + Mục III. Tiến trình hoạt động: Bảng 2 cột ("Hoạt động của cô" | "Hoạt động của trẻ") BẮT BUỘC theo đúng 3 BƯỚC của 1 trong 2 MẪU sau:
+
+  * MẪU 1: HOẠT ĐỘNG NGOÀI TRỜI CÓ NỘI DUNG QUAN SÁT (Ví dụ: Quan sát cây xanh / vườn hoa / thời tiết...):
+    1. Trước khi quan sát:
+       - Kiểm tra sĩ số, trang phục, giày dép của trẻ gọn gàng, phù hợp thời tiết.
+       - Nhắc nhở quy định an toàn khi ra sân: đi theo hàng, không chen lấn xô đẩy, lắng nghe hiệu lệnh của cô, không tự ý rời khỏi khu vực chơi, không ngắt hoa bẻ cành.
+       - Tạo hứng thú dẫn dắt trẻ ra sân quan sát (hát bài hát, đọc thơ hoặc giải câu đố về đối tượng quan sát).
+    2. Trong khi quan sát:
+       * Quan sát [đối tượng quan sát, ví dụ: Quan sát cây xanh]:
+         - Cho trẻ đứng vị trí thuận lợi, gợi hỏi để trẻ dùng các giác quan quan sát (nhìn, sờ, ngửi...); đàm thoại về đặc điểm, bộ phận, ích lợi; giáo dục trẻ yêu quý thiên nhiên và bảo vệ môi trường.
+       * TCVĐ: [Tên trò chơi vận động, ví dụ: Bỏ dẻ / Mèo đuổi chuột / Cáo và thỏ...]:
+         - Cô giới thiệu tên trò chơi, phổ biến cách chơi, luật chơi rõ ràng; tổ chức cho trẻ chơi 2 – 3 lần sôi nổi, bao quát đảm bảo an toàn; nhận xét khen ngợi trẻ.
+       * Chơi tự do:
+         - Cô giới thiệu các khu vực chơi tự do (chơi với đồ chơi ngoài trời, vẽ phấn trên sân, nhặt lá xếp hình, chơi với cát nước...); dặn dò an toàn; cô bao quát toàn sân hỗ trợ trẻ trong suốt quá trình chơi.
+    3. Sau khi quan sát:
+       - Tập trung trẻ bằng hiệu lệnh (tiếng còi/xắc xô), điểm danh sĩ số.
+       - Cho trẻ nêu cảm xúc sau buổi chơi, cô nhận xét tuyên dương sự tích cực của cả lớp.
+       - Hướng dẫn trẻ rửa tay sạch sẽ bằng xà phòng, chỉnh trang trang phục và xếp hàng vào lớp.
+
+  * MẪU 2: HOẠT ĐỘNG NGOÀI TRỜI CÓ TRÒ CHƠI VẬN ĐỘNG & CHƠI ĐỒ CHƠI NGOÀI TRỜI:
+    1. Trước khi chơi (hoặc Trước khi quan sát / Trước khi ra sân):
+       - Kiểm tra trang phục, giày dép gọn gàng, thuận tiện vận động.
+       - Thông báo nội dung buổi chơi ngoài trời và dặn dò các quy định an toàn khi tham gia hoạt động ngoài sân trường.
+    2. Trong khi chơi:
+       * Trò chơi vận động: [Tên trò chơi vận động]
+         Cách chơi: [Mô tả chi tiết cách chơi: cách chia đội, hiệu lệnh, thao tác vận động tiếp sức...]
+         Luật chơi: [Mô tả chi tiết luật chơi: điều được làm, điều phạm quy, phần thưởng/hình thức phạt nhảy lò cò vui vẻ...]
+         - Cô giới thiệu trò chơi, hướng dẫn cách chơi và luật chơi cụ thể; tổ chức cho trẻ chơi 2 – 3 lần hào hứng; cô bao quát cổ vũ động viên trẻ.
+       * Chơi với đồ chơi ngoài trời:
+         - Cô hướng dẫn trẻ đến các khu vực đồ chơi ngoài trời liên hoàn (cầu trượt, bập bênh, xích đu, thú nhún...); nhắc nhở quy tắc chơi an toàn, nhường nhịn nhau, không chen lấn xô đẩy; cô luôn theo sát bao quát đảm bảo an toàn tuyệt đối.
+    3. Sau khi chơi:
+       - Tập trung trẻ bằng hiệu lệnh, điểm danh kiểm tra sĩ số.
+       - Hồi tĩnh: Cho trẻ thả lỏng cơ thể, đi lại nhẹ nhàng hít thở sâu.
+       - Nhận xét, tuyên dương tinh thần tham gia của trẻ; hướng dẫn trẻ rửa tay sạch sẽ và xếp hàng vào lớp.
 
 L. TRÒ CHƠI VẬN ĐỘNG:
 - Cấu trúc mục tiêu: Gắn mã chỉ báo QĐ 388 (TC 1.1, TC 1.2, TC 1.3, TC 3.1, TC 3.3, TX 4.4...).
@@ -1181,4 +1220,224 @@ III. TIẾN TRÌNH HOẠT ĐỘNG:
 | **4. Vận dụng và mở rộng (Trò chơi luyện tập phân hóa)**<br>* Trò chơi 1: "Ai tinh mắt nhất"<br>- Cô yêu cầu tìm xung quanh lớp các nhóm đồ dùng, đồ chơi có số lượng là 7:<br>  + Trẻ 5 tuổi: Tìm nhóm đồ vật có số lượng 7 và đặt thẻ số 7 tương ứng.<br>  + Trẻ 4 tuổi: Đếm kiểm tra lại nhóm bạn vừa tìm xem có đúng là 7 hay không.<br>  + Trẻ 3 tuổi: Vỗ tay 7 tiếng hoặc dậm chân 7 cái cùng cô.<br>* Trò chơi 2: "Về đúng nhà"<br>- Cách chơi: Cô có 3 ngôi nhà mang số 5, 6, 7. Mỗi trẻ cầm một thẻ số hoặc chấm tròn. Khi có nhạc, trẻ đi dạo quanh phòng; khi có hiệu lệnh "Về đúng nhà số 7", trẻ cầm thẻ tương ứng chạy nhanh về nhà đó.<br>- Phân hóa: Trẻ 5 tuổi chủ động chạy về nhà và dắt theo 1 em 3 tuổi cùng về nhà số 7. Trẻ 4 tuổi tự tìm nhà số 7.<br>- Cho trẻ đổi thẻ và chơi 2-3 lần.<br>* Trò chơi 3: "Bé khéo tay" (Hoạt động nhóm tại bàn):<br>  + Nhóm 1 (Trẻ 5 tuổi): Dùng đất nặn nặn số 7; xếp hột hạt/que tính tạo thành số 7; làm bài tập nối nhóm có 7 đối tượng với số 7.<br>  + Nhóm 2 (Trẻ 4 tuổi): Tô màu nhóm có 7 con thỏ, dán 7 củ cà rốt.<br>  + Nhóm 3 (Trẻ 3 tuổi): Chọn và dán 7 bông hoa to vào tranh vườn hoa có sẵn chấm mờ. | - Trẻ hào hứng tham gia các trò chơi:<br>  + Trẻ 5 tuổi nhanh mắt tìm thấy 7 cái rổ ở góc xây dựng, gắn thẻ số 7.<br>  + Trẻ 4 tuổi đếm kiểm tra to từ 1 đến 7: "Đúng 7 cái rổ rồi ạ!".<br>  + Trẻ 3 tuổi thích thú vỗ tay to 7 tiếng đếm theo nhịp cùng cô: 1, 2, 3, 4, 5, 6, 7!<br>- Trẻ tham gia trò chơi "Về đúng nhà":<br>  + Trẻ vừa đi vừa hát vui vẻ theo điệu nhạc.<br>  + Khi nghe hiệu lệnh, trẻ 5 tuổi nhanh tay nắm tay bạn 3 tuổi cùng chạy về ngôi nhà số 7.<br>  + Trẻ giơ cao thẻ số reo vui khi về đúng nhà.<br>- Trẻ về các bàn thực hành nhóm:<br>  + Trẻ 5 tuổi khéo léo lăn dài đất nặn uốn thành số 7, xếp que tính thành số 7.<br>  + Trẻ 4 tuổi tập trung tô màu 7 chú thỏ đều nét không chờm ra ngoài.<br>  + Trẻ 3 tuổi bóc dán từng bông hoa vào vị trí cô đã chấm, đếm vui vẻ cùng cô. |
 | **5. Đánh giá và điều chỉnh**<br>- Cô tập trung trẻ lại, hỏi cảm nhận của trẻ:<br>  + "Hôm nay các con đã được làm quen với số mấy?"<br>  + "Chúng mình đã được đếm đến mấy và chơi những trò chơi gì?"<br>- Cô nhận xét giờ học:<br>  + Tuyên dương trẻ 5 tuổi học giỏi, đếm thành thạo, biết yêu thương và hướng dẫn các em nhỏ.<br>  + Tuyên dương trẻ 4 tuổi tích cực, xếp tương ứng 1-1 chuẩn xác.<br>  + Khen ngợi trẻ 3 tuổi ngoan ngoãn, đã đếm to và nhớ được số 7 cùng cô.<br>- Giáo dục trẻ biết giữ gìn đồ dùng học tập, đoàn kết yêu quý bạn bè.<br>- Cho trẻ cùng cô thu dọn học liệu, cất đồ dùng về đúng nơi quy định và chuyển sang hoạt động tiếp theo. | - Trẻ lắng nghe và hào hứng trả lời: "Hôm nay chúng con học đếm đến 7 và nhận biết số 7 ạ!".<br>- Trẻ tươi cười khi được cô khen ngợi.<br>- Trẻ biết yêu thương bạn bè và đoàn kết trong lớp.<br>- Trẻ 5 tuổi, 4 tuổi và 3 tuổi cùng nhau cất dọn rổ đồ dùng, xếp bàn ghế gọn gàng, ngăn nắp. |
 `;
+
+export const SAMPLE_HOAT_DONG_NGOAI_TROI_QUAN_SAT_DOC = `KẾ HOẠCH BÀI DẠY (GIÁO ÁN MẦM NON)
+HOẠT ĐỘNG: HOẠT ĐỘNG NGOÀI TRỜI
+ĐỀ TÀI: QUAN SÁT CÂY XANH TRONG VƯỜN TRƯỜNG
+- HĐCMĐ: Quan sát cây xanh (cây bàng / cây bóng mát)
+- TCVĐ: Bỏ dẻ
+- Chơi tự do: Chơi với đồ chơi ngoài trời (cầu trượt, bập bênh), vẽ phấn trên sân
+Độ tuổi: Mẫu giáo lớn (5-6 tuổi) / Mẫu giáo nhỡ (4-5 tuổi)
+Thời gian: 30 - 35 phút
+
+I. MỤC TIÊU
+1. Kiến thức:
+- Trẻ nhận biết và gọi đúng tên cây xanh (cây bàng), phân biệt được các bộ phận chính của cây: gốc cây, thân cây, cành cây, tán lá, lá cây. (Mã: NT 1.1)
+- Trẻ biết đặc điểm nổi bật của cây xanh: thân cây to có vỏ sần sùi, lá cây màu xanh, tán lá xòe rộng tỏa bóng mát. (Mã: NT 1.2)
+- Trẻ hiểu ích lợi của cây xanh đối với đời sống: cho bóng mát che nắng, làm đẹp cảnh quan trường lớp, thanh lọc không khí trong lành. (Mã: NT 3.1)
+- Trẻ hiểu cách chơi, luật chơi và tích cực tham gia trò chơi vận động "Bỏ dẻ". (Mã: TC 1.1)
+
+2. Kỹ năng:
+- Rèn kỹ năng quan sát, sử dụng các giác quan (mắt nhìn, tay sờ, mũi ngửi) để nhận biết, so sánh và mô tả đặc điểm của cây xanh.
+- Rèn kỹ năng diễn đạt ngôn ngữ mạch lạc, trả lời câu hỏi trọn câu, tự tin chia sẻ cảm xúc và phát hiện của mình.
+- Rèn kỹ năng vận động nhanh nhẹn, khéo léo, phản xạ nhanh theo tín hiệu khi tham gia TCVĐ "Bỏ dẻ". (Mã: TC 1.2)
+- Rèn kỹ năng chơi tự do an toàn, biết chia sẻ đồ chơi và chơi hòa thuận cùng bạn bè ngoài sân trường.
+
+3. Phẩm chất:
+- Yêu thương: Yêu quý cây xanh, yêu thiên nhiên và cảnh quan trường lớp mầm non.
+- Tôn trọng: Lắng nghe cô và bạn, tôn trọng nội quy an toàn khi hoạt động ngoài trời.
+- Trách nhiệm: Có ý thức chăm sóc, bảo vệ cây xanh (tưới nước, không bẻ cành, không ngắt lá, không vứt rác vào gốc cây).
+- Trung thực: Chơi đúng luật, trung thực và vui vẻ trong các trò chơi tập thể.
+
+4. Năng lực:
+- Tự lực: Tự giác xếp hàng, tự chỉnh trang trang phục giày dép, tự chọn đồ chơi yêu thích và tự vệ sinh rửa tay sau khi chơi.
+- Thích ứng: Thích nghi tốt với môi trường thiên nhiên ngoài trời, phản xạ linh hoạt với các tình huống chơi.
+- Giao tiếp và hợp tác: Biết trao đổi, thảo luận cùng bạn trong quá trình quan sát và hợp tác nhịp nhàng khi chơi trò chơi.
+
+II. CHUẨN BỊ
+1. Chuẩn bị của cô:
+- Địa điểm: Sân trường sạch sẽ, thoáng mát, khu vực quan sát cây xanh an toàn, không có chướng ngại vật nguy hiểm.
+- Đồ dùng của cô: Xắc xô, khăn tay/khăn dẻ sạch để chơi trò chơi "Bỏ dẻ", bài hát "Cây trúc xinh" / "Lý cây xanh".
+- Hệ thống câu hỏi gợi mở, đàm thoại về cây xanh.
+2. Chuẩn bị của trẻ:
+- Trang phục gọn gàng, thoải mái, đội mũ mềm, đi dép/giày vừa chân phù hợp thời tiết.
+- Tâm thế vui vẻ, hào hứng tham gia hoạt động ngoài trời.
+- Phấn vẽ sân, một số đồ chơi ngoài trời đã được kiểm tra an toàn.
+3. Phối hợp với phụ huynh:
+- Nhắc nhở phụ huynh chuẩn bị trang phục, mũ nón phù hợp thời tiết cho trẻ khi đến lớp.
+- Khuyến khích phụ huynh cùng con quan sát cây xanh tại gia đình hoặc trên đường đi học, giáo dục trẻ thói quen yêu thiên nhiên.
+
+III. TIẾN TRÌNH HOẠT ĐỘNG
+
+| Hoạt động của cô | Hoạt động của trẻ |
+| :--- | :--- |
+| **1. Trước khi quan sát**<br>- Cô tập trung trẻ, kiểm tra sĩ số, kiểm tra sức khỏe và trang phục, giày dép, mũ nón của trẻ đảm bảo gọn gàng, an toàn, phù hợp thời tiết.<br>- Cô dặn dò các quy định an toàn khi ra sân:<br>  + Đi thành hàng ngay ngắn, không chen lấn xô đẩy bạn.<br>  + Lắng nghe hiệu lệnh của cô, không tự ý chạy ra khỏi khu vực quy định của lớp.<br>  + Không ngắt lá, bẻ cành, không nghịch đất cát văng vào mắt bạn.<br>- Cô dẫn dắt tạo hứng thú: Cho cả lớp cùng đọc bài thơ "Cây bàng lá nõn" hoặc hát bài "Lý cây xanh" và nhẹ nhàng dắt tay nhau ra sân trường đến vị trí quan sát cây xanh. | - Trẻ tập trung quanh cô, kiểm tra lại giày dép, trang phục ngay ngắn.<br>- Trẻ chú ý lắng nghe cô dặn dò các quy định an toàn khi ra sân.<br>- Trẻ đọc thơ/hát vui tươi cùng cô và xếp hàng nhẹ nhàng di chuyển ra sân trường. |
+| **2. Trong khi quan sát**<br>* Quan sát cây xanh (cây bàng):<br>- Cô cho trẻ đứng quây quần xung quanh cây xanh ở vị trí thoáng mát, thuận tiện quan sát.<br>- Cô đặt câu hỏi gợi mở kích thích trẻ quan sát và khám phá:<br>  + "Các con nhìn xem hôm nay cô và chúng mình cùng đến thăm cây gì đây?" (Cây bàng).<br>  + "Cây bàng gồm có những bộ phận nào?" (Gốc cây, thân cây, cành cây, tán lá, lá cây...).<br>  + Cô cho trẻ lại gần sờ vào thân cây: "Con cảm thấy thân cây bàng như thế nào? (Thân cây to, vỏ cây sần sùi, cứng cáp).<br>  + "Lá cây bàng có màu gì? Hình dáng chiếc lá như thế nào?" (Lá cây to, màu xanh biếc, hình bầu dục...).<br>  + "Trồng cây xanh trong sân trường để làm gì các con?" (Cây tỏa bóng mát cho chúng con vui chơi, làm cho sân trường thêm xanh - sạch - đẹp, thanh lọc không khí trong lành...).<br>  + "Muốn cây luôn xanh tốt, chúng mình phải làm gì?" (Tưới nước cho cây, không bẻ cành, không ngắt lá, không vứt rác vào bồn cây).<br>- Cô chuẩn hóa kiến thức, khen ngợi những câu trả lời xuất sắc và giáo dục tình yêu thiên nhiên cho trẻ.<br><br>* TCVĐ: Bỏ dẻ<br>- Cô giới thiệu tên trò chơi vận động: "Bỏ dẻ".<br>- Phổ biến cách chơi và luật chơi:<br>  + Cách chơi: Cho cả lớp ngồi thành vòng tròn, hai tay úp ra phía sau lưng. Một bạn được chọn cầm chiếc khăn dẻ đi vòng quanh phía sau lưng các bạn và hát bài đồng dao. Bạn cầm khăn sẽ bí mật đặt khăn dẻ sau lưng một bạn bất kỳ rồi chạy nhanh một vòng. Bạn có khăn sau lưng khi phát hiện sẽ nhanh chóng nhặt khăn lên và đuổi theo bạn bỏ dẻ. Bạn bỏ dẻ phải chạy thật nhanh về ngồi vào đúng vị trí trống của bạn vừa đứng lên.<br>  + Luật chơi: Nếu bạn bỏ dẻ chạy về ngồi được vào chỗ trống trước mà không bị chạm vào người thì bạn đuổi theo sẽ trở thành người đi bỏ dẻ tiếp theo. Nếu bị bắt trước khi ngồi xuống chỗ trống thì bạn bỏ dẻ phải nhảy lò cò 1 vòng quanh lớp.<br>- Tổ chức cho trẻ chơi 2 – 3 lần sôi nổi, cô bao quát, cổ vũ động viên trẻ tham gia hết mình và đảm bảo an toàn.<br>- Nhận xét, tuyên dương tinh thần nhanh nhẹn của trẻ.<br><br>* Chơi tự do:<br>- Cô giới thiệu các khu vực chơi tự do: chơi với đồ chơi ngoài trời liên hoàn (cầu trượt, bập bênh, đu quay), vẽ phấn trên sân, nhặt lá rụng xếp hình hoa/con vật.<br>- Dặn dò trẻ chơi hòa thuận, không tranh giành đồ chơi, không xô đẩy bạn, biết nhường nhịn và chơi an toàn.<br>- Cô luôn bao quát toàn sân, theo sát hỗ trợ và đảm bảo an toàn tuyệt đối cho trẻ trong suốt quá trình chơi tự do. | - Trẻ đứng quây quần bên cô, chăm chú ngắm nhìn cây xanh.<br>- Trẻ tích cực giơ tay trả lời các câu hỏi gợi mở của cô:<br>  + "Thưa cô, đây là cây bàng ạ!".<br>  + "Cây có gốc, thân, cành và nhiều lá cây ạ!".<br>- Trẻ đến gần dùng tay sờ vào thân cây và cảm nhận: "Vỏ cây sần sùi ạ!".<br>- Trẻ quan sát kỹ lá cây và phát biểu: "Lá to, màu xanh mướt ạ!".<br>- Trẻ hào hứng kể về ích lợi của cây: "Cây cho bóng mát che nắng, cho sân trường sạch đẹp ạ!".<br>- Trẻ nêu ý thức bảo vệ cây: "Chúng con sẽ tưới nước, không bẻ cành ngắt lá ạ!".<br><br>- Trẻ chú ý lắng nghe cô phổ biến cách chơi và luật chơi trò chơi "Bỏ dẻ".<br>- Cả lớp ngồi thành vòng tròn, hào hứng đọc to bài đồng dao và giấu tay ra sau lưng.<br>- Trẻ nhanh tay nhặt khăn đuổi theo bạn trong tiếng hò reo, vỗ tay cổ vũ rộn rã của cả lớp.<br>- Trẻ tuân thủ luật chơi, vui vẻ nhảy lò cò khi phạm quy.<br><br>- Trẻ lựa chọn khu vực chơi tự do theo ý thích: nhóm chơi cầu trượt bập bênh, nhóm khéo léo dùng phấn vẽ hoa lá trên sân trường, nhóm nhặt lá xếp hình chú công, con cá sinh động.<br>- Trẻ chơi vui vẻ, đoàn kết, chia sẻ đồ chơi cùng bạn. |
+| **3. Sau khi quan sát**<br>- Cô rung xắc xô tập trung trẻ lại thành vòng tròn.<br>- Cô điểm danh, kiểm tra lại sĩ số và trang phục của trẻ.<br>- Cô trò chuyện hỏi cảm nhận của trẻ sau buổi hoạt động ngoài trời:<br>  + "Hôm nay các con đã được quan sát cây gì và tham gia những trò chơi nào?"<br>  + "Con cảm thấy buổi chơi ngoài trời hôm nay như thế nào?"<br>- Cô nhận xét chung, biểu dương tinh thần tham gia sôi nổi, tính tự giác và sự đoàn kết của cả lớp; nhắc nhở nhẹ nhàng những trẻ cần chú ý hơn.<br>- Cô hướng dẫn trẻ xếp hàng lần lượt đi rửa tay bằng xà phòng sạch sẽ, lau khô tay và chỉnh trang trang phục bước vào lớp học. | - Trẻ nhanh chóng tập trung quanh cô khi nghe tiếng xắc xô.<br>- Trẻ điểm danh to rõ ràng.<br>- Trẻ tươi cười, tự tin chia sẻ cảm xúc: "Hôm nay chúng con được quan sát cây bàng, chơi trò chơi Bỏ dẻ và chơi cầu trượt rất vui ạ!".<br>- Trẻ chú ý lắng nghe cô nhận xét và đón nhận lời khen ngợi.<br>- Trẻ tự giác xếp hàng ngay ngắn, rửa tay bằng xà phòng sạch sẽ và theo cô bước vào lớp học. |
+`;
+
+export const SAMPLE_HOAT_DONG_NGOAI_TROI_TRO_CHOI_DOC = `KẾ HOẠCH BÀI DẠY (GIÁO ÁN MẦM NON)
+HOẠT ĐỘNG: HOẠT ĐỘNG NGOÀI TRỜI
+ĐỀ TÀI: TRÒ CHƠI VẬN ĐỘNG "CHUYỀN BÓNG TIẾP SỨC" VÀ CHƠI VỚI ĐỒ CHƠI NGOÀI TRỜI
+- Trọng tâm: Trò chơi vận động "Chuyền bóng tiếp sức"
+- Chơi với đồ chơi ngoài trời: Cầu trượt, bập bênh, xích đu, thú nhún
+Độ tuổi: Mẫu giáo lớn (5-6 tuổi) / Mẫu giáo nhỡ (4-5 tuổi)
+Thời gian: 30 - 35 phút
+
+I. MỤC TIÊU
+1. Kiến thức:
+- Trẻ biết tên trò chơi vận động "Chuyền bóng tiếp sức", nắm vững cách chơi và luật chơi của trò chơi. (Mã: TC 1.1)
+- Trẻ biết phối hợp tay và mắt, chuyền bóng khéo léo cho bạn qua đầu / qua chân mà không làm rơi bóng. (Mã: TC 1.2)
+- Trẻ biết cách sử dụng an toàn các thiết bị đồ chơi ngoài trời như cầu trượt, bập bênh, xích đu, thú nhún. (Mã: TC 3.1)
+
+2. Kỹ năng:
+- Phát triển kỹ năng vận động phối hợp tay - mắt - thân mình, rèn luyện sự khéo léo, dẻo dai và phản xạ nhanh nhẹn.
+- Rèn kỹ năng phối hợp đồng đội, tinh thần làm việc nhóm và tính kỷ luật khi tham gia trò chơi tiếp sức. (Mã: TX 4.4)
+- Rèn kỹ năng tự phục vụ, tự kiểm tra trang phục và giữ vệ sinh cá nhân sạch sẽ.
+
+3. Phẩm chất:
+- Yêu thương: Biết quan tâm, cổ vũ và giúp đỡ bạn trong nhóm.
+- Tôn trọng: Tôn trọng luật chơi, lắng nghe hiệu lệnh của cô giáo và nhường nhịn bạn bè khi chơi đồ chơi.
+- Trung thực: Chơi trung thực, không gian lận, không ôm bóng chạy khi chưa đến lượt.
+- Trách nhiệm: Có ý thức bảo quản đồ chơi, cất gọn bóng vào rổ sau khi chơi.
+
+4. Năng lực:
+- Tự lực: Tự tin tham gia các trò chơi vận động, chủ động lựa chọn đồ chơi ngoài trời phù hợp với khả năng.
+- Thích ứng: Linh hoạt thích ứng với các hiệu lệnh chuyển tiếp và không gian vận động ngoài trời.
+- Hợp tác: Phối hợp nhịp nhàng với đồng đội để đưa bóng về đích nhanh nhất.
+
+II. CHUẨN BỊ
+1. Chuẩn bị của cô:
+- Địa điểm: Sân trường bằng phẳng, sạch sẽ, thoáng mát, đảm bảo tuyệt đối an toàn.
+- Đồ dùng của cô: 2 - 3 quả bóng nhựa to vừa tay trẻ, 2 rổ đựng bóng, vạch xuất phát, xắc xô, còi hiệu lệnh.
+- Nhạc bài hát thiếu nhi sôi động: "Bé khỏe bé ngoan", "Đoàn tàu nhỏ xíu".
+2. Chuẩn bị của trẻ:
+- Trang phục gọn gàng, giày vải mềm vừa chân, mũ nón đầy đủ.
+- Tâm thế thoải mái, phấn khởi, sẵn sàng tham gia hoạt động.
+3. Phối hợp phụ huynh:
+- Phối hợp phụ huynh nhắc nhở trẻ mang giày thể thao hoặc dép quai hậu chắc chắn trong các ngày có hoạt động ngoài trời.
+
+III. TIẾN TRÌNH HOẠT ĐỘNG
+
+| Hoạt động của cô | Hoạt động của trẻ |
+| :--- | :--- |
+| **1. Trước khi chơi**<br>- Cô tập trung trẻ thành 2 hàng dọc trên sân trường, kiểm tra sĩ số, trang phục, giày dép của từng trẻ đảm bảo gọn gàng, thuận tiện cho việc chạy nhảy vận động.<br>- Cô thông báo nội dung buổi hoạt động ngoài trời hôm nay: "Hôm nay cô và các con sẽ cùng nhau tham gia trò chơi vận động vô cùng sôi nổi mang tên 'Chuyền bóng tiếp sức' và sau đó chúng mình sẽ được tự do vui chơi với những đồ chơi ngoài trời mà các con yêu thích!".<br>- Cô dặn dò các quy định an toàn khi chơi ngoài sân trường:<br>  + Chú ý lắng nghe hiệu lệnh còi và xắc xô của cô.<br>  + Không xô đẩy bạn, không chạy quá đà va vào chướng ngại vật.<br>  + Chơi trong phạm vi khu vực sân trường đã quy định. | - Trẻ xếp thành 2 hàng dọc ngay ngắn, kiểm tra lại dây giày, trang phục.<br>- Trẻ chăm chú lắng nghe cô giới thiệu nội dung hoạt động và reo hò thích thú.<br>- Trẻ ghi nhớ các quy định an toàn khi chơi ngoài trời. |
+| **2. Trong khi chơi**<br>* Trò chơi vận động: Chuyền bóng tiếp sức<br>- Cách chơi: Cô chia lớp thành 2 (hoặc 3) đội chơi có số lượng bằng nhau, đứng xếp hàng dọc sau vạch xuất phát. Bạn đầu hàng của mỗi đội sẽ cầm một quả bóng bằng hai tay. Khi có hiệu lệnh "Bắt đầu!" cùng tiếng nhạc sôi động vang lên, bạn đầu hàng cầm bóng giơ cao qua đầu và chuyền ra phía sau cho bạn tiếp theo. Bạn thứ hai nhận bóng bằng hai tay rồi tiếp tục chuyền qua đầu cho bạn thứ ba, cứ như vậy chuyền liên tục đến bạn cuối hàng. Bạn cuối hàng nhận được bóng sẽ nhanh chân cầm bóng chạy lên đầu hàng đặt vào rổ của đội mình và giơ cao tay hô "Chiến thắng!".<br>- Luật chơi: Bóng phải được chuyền lần lượt từ bạn này sang bạn khác bằng 2 tay qua đầu, không được ném bóng hoặc chuyền cách quãng. Nếu làm rơi bóng ở bạn nào thì bạn đó phải nhặt bóng lên và tiếp tục chuyền từ vị trí đó. Đội nào chuyền bóng về rổ trước mà không phạm quy sẽ là đội chiến thắng.<br>- Cô mời 1 nhóm 3 bạn lên làm mẫu thao tác chuyền bóng qua đầu để cả lớp quan sát trực quan.<br>- Tổ chức cho trẻ chơi 2 – 3 lần sôi nổi: Lần 1 chơi chuyền bóng qua đầu; Lần 2 tăng độ khó bằng cách chuyền bóng qua chân (cúi người chuyền qua khe chân).<br>- Cô bao quát, cổ vũ, khích lệ tinh thần thi đua hào hứng giữa các đội và đảm bảo an toàn cho trẻ.<br>- Sau mỗi lần chơi, cô cùng cả lớp kiểm tra kết quả, tuyên dương đội chiến thắng và động viên đội về sau.<br><br>* Chơi với đồ chơi ngoài trời:<br>- Cô hướng dẫn trẻ đến các khu vực đồ chơi ngoài trời liên hoàn: cầu trượt, bập bênh, xích đu, thú nhún.<br>- Nhắc nhở quy tắc an toàn khi chơi:<br>  + Chơi cầu trượt: leo bậc thang lần lượt, trượt từ trên xuống ở tư thế ngồi thẳng, không trượt chúi đầu, trượt xong đứng dậy ngay nhường bạn sau.<br>  + Chơi xích đu, bập bênh: hai tay bám chắc vào tay vịn, không đu quá mạnh, không đứng gần khi bạn đang đu.<br>- Trẻ tự chọn đồ chơi mình thích; cô theo sát bao quát toàn sân, luôn quan sát hỗ trợ để đảm bảo an toàn tuyệt đối. | - Trẻ chú ý lắng nghe cô phổ biến chi tiết cách chơi và luật chơi.<br>- Trẻ chăm chú quan sát bạn làm mẫu động tác chuyền bóng.<br>- Trẻ chia thành các đội thi đấu đầy hào hứng:<br>  + Các bạn trong đội tập trung cao độ, dùng 2 tay khéo léo đón bóng và chuyền nhanh qua đầu/qua chân cho bạn sau.<br>  + Cả lớp reo hò, vỗ tay cổ vũ đồng đội: "Cố lên! Cố lên!".<br>  + Bạn cuối hàng nhanh nhẹn ôm bóng chạy lên đặt vào rổ và reo vang niềm vui.<br>- Trẻ chấp hành nghiêm túc luật chơi, đoàn kết và chúc mừng đội bạn.<br><br>- Trẻ di chuyển nhẹ nhàng về các khu vực đồ chơi ngoài trời yêu thích.<br>- Trẻ chơi cầu trượt trật tự, biết xếp hàng chờ đến lượt, bám chắc tay vịn xích đu, ngồi ngay ngắn trên bập bênh và thú nhún.<br>- Trẻ chơi hòa thuận, vui vẻ, không tranh giành đồ chơi. |
+| **3. Sau khi chơi**<br>- Cô thổi còi / gõ xắc xô tập hợp trẻ về vị trí tập trung.<br>- Cô điểm danh, kiểm tra lại sĩ số và trang phục của trẻ.<br>- Hồi tĩnh: Cho trẻ làm động tác chim bay, đi lại nhẹ nhàng 1 - 2 vòng quanh sân trường hít thở sâu để điều hòa nhịp tim và thả lỏng cơ bắp.<br>- Nhận xét buổi chơi: Khen ngợi tinh thần thi đua nhanh nhẹn, khéo léo của các đội trong trò chơi chuyền bóng và ý thức chơi an toàn, đoàn kết của cả lớp.<br>- Hướng dẫn trẻ cùng cô cất bóng vào rổ, xếp hàng trật tự đến khu vực bồn rửa tay, rửa tay bằng xà phòng sạch sẽ và bước vào lớp học. | - Trẻ nhanh chóng tập trung quanh cô khi có hiệu lệnh còi.<br>- Trẻ thực hiện các động tác hồi tĩnh nhẹ nhàng theo cô, hít thở sâu thả lỏng cơ thể.<br>- Trẻ tươi cười lắng nghe cô nhận xét và vỗ tay tuyên dương cả lớp.<br>- Trẻ cùng cô cất bóng vào rổ, xếp hàng rửa tay sạch sẽ bằng xà phòng và vào lớp. |
+`;
+
+export const SAMPLE_HOAT_DONG_VUI_CHOI_TRONG_LOP_DOC_1 = `KẾ HOẠCH BÀI DẠY (GIÁO ÁN MẦM NON)
+HOẠT ĐỘNG: HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG GÓC)
+CHỦ ĐỀ: TRƯỜNG MẦM NON THÂN YÊU CỦA BÉ
+Các góc chơi trọng tâm:
+1. Góc Nghệ thuật (Tạo hình - Âm nhạc): Vẽ, tô màu, nặn đồ chơi trường mầm non; Hát múa các bài hát về trường lớp mầm non.
+2. Góc học tập - khám phá khoa học: Phân loại đồ dùng học tập theo màu sắc, số lượng; Ghép tranh trường mầm non; Xem sách truyện tranh về các hoạt động ở lớp.
+3. Góc Phân vai: Gia đình đưa con đi học; Bác cấp dưỡng nấu ăn cho các bé; Cô giáo và các bạn học sinh.
+(Góc bổ trợ: Góc Xây dựng - Xây dựng trường mầm non của bé).
+Độ tuổi: Mẫu giáo lớn (5-6 tuổi) / Mẫu giáo nhỡ (4-5 tuổi)
+Thời gian: 35 - 40 phút
+
+I. MỤC TIÊU
+1. Kiến thức:
+- Trẻ nhận biết và gọi tên các góc chơi trong lớp học; hiểu được công việc và vai trò của từng nhân vật trong góc chơi (cô giáo, học sinh, bác cấp dưỡng, bác thợ xây...). (Mã: NT 1.1, TX 3.2)
+- Trẻ biết sử dụng các nguyên vật liệu mở (giấy màu, đất nặn, bút màu, khối gỗ...) để tạo ra sản phẩm và công trình mô phỏng trường mầm non. (Mã: NT 3.1)
+- Trẻ hiểu mối quan hệ giao tiếp giữa các góc chơi (bác cấp dưỡng mua thực phẩm từ cửa hàng, mẹ đưa con đến lớp chào cô giáo...). (Mã: TX 4.3)
+
+2. Kỹ năng:
+- Rèn kỹ năng nhập vai, thể hiện hành động, cử chỉ và lời nói phù hợp với vai diễn trong góc Phân vai.
+- Rèn kỹ năng tạo hình khéo léo (vẽ, tô màu, nặn, dán) và kỹ năng ca hát, gõ đệm nhạc cụ tại góc Nghệ thuật.
+- Rèn kỹ năng đếm, phân loại, so sánh, ghép hình tại góc học tập - khám phá khoa học. (Mã: NT 1.2)
+- Rèn kỹ năng giao tiếp lịch sự, biết nói lời cảm ơn, xin lỗi, chào hỏi lễ phép và hợp tác cùng bạn bè. (Mã: TX 4.4, TX 8.1)
+
+3. Phẩm chất:
+- Yêu thương: Yêu quý trường lớp, cô giáo, bạn bè và quý trọng người lao động (bác cấp dưỡng, bác thợ xây...).
+- Tôn trọng: Lắng nghe ý kiến của bạn trong nhóm chơi, không tranh giành đồ chơi, tôn trọng sản phẩm của bạn.
+- Trách nhiệm: Có ý thức bảo quản, giữ gìn đồ chơi ở các góc; tự giác thu dọn, xếp đồ dùng đồ chơi ngăn nắp sau giờ chơi.
+- Trung thực: Chơi đúng vai, không giấu đồ chơi của lớp.
+
+4. Năng lực:
+- Tự lực: Chủ động lựa chọn góc chơi và vai chơi mình yêu thích; tự thao tác thực hiện nhiệm vụ của vai chơi.
+- Thích ứng: Linh hoạt xử lý các tình huống phát sinh trong quá trình chơi và liên kết giữa các góc.
+- Hợp tác: Biết phối hợp nhịp nhàng với các bạn trong góc để hoàn thành mục tiêu chung.
+
+II. CHUẨN BỊ
+1. Chuẩn bị của cô:
+- Không gian lớp học sạch sẽ, các góc chơi được bố trí hợp lý, thuận tiện cho trẻ di chuyển và liên kết giữa các góc.
+- Đồ dùng tại các góc:
+  + Góc Nghệ thuật: Giấy vẽ, bút màu sáp, đất nặn, bảng con, giấy màu, kéo, hồ dán, xắc xô, phách tre, đàn organ đồ chơi, mũ múa.
+  + Góc học tập - khám phá khoa học: Lô tô đồ dùng học tập, thẻ số, bảng gài, tranh ghép hình trường mầm non, sách truyện tranh chủ đề trường mầm non.
+  + Góc Phân vai: Bộ đồ chơi gia đình (búp bê, nôi, quần áo), bộ đồ chơi nấu ăn (bếp, nồi xoong, bát đĩa, rau củ quả mô hình), trang phục cô giáo, bác sĩ, tạp dề bác cấp dưỡng.
+  + Góc Xây dựng: Các khối gỗ, khối nhựa, hàng rào, cây xanh, thảm cỏ, biển tên trường mầm non.
+- Nhạc nhẹ nhàng phục vụ quá trình chơi và tín hiệu xắc xô kết thúc giờ chơi.
+2. Chuẩn bị của trẻ:
+- Trang phục gọn gàng, tâm thế vui tươi, hào hứng.
+- Thẻ ký hiệu góc chơi (nếu có).
+3. Phối hợp phụ huynh:
+- Vận động phụ huynh ủng hộ các nguyên vật liệu mở (vỏ hộp, chai nhựa sạch, lá cây khô, len vụn) để bổ sung vào các góc hoạt động của lớp.
+
+III. TIẾN TRÌNH HOẠT ĐỘNG
+
+| Hoạt động của cô | Hoạt động của trẻ |
+| :--- | :--- |
+| **1. Thỏa thuận trước khi chơi**<br>- Ổn định tổ chức: Cô cùng cả lớp hát vang bài hát "Trường chúng cháu là trường mầm non" với giai điệu rộn ràng.<br>- Trò chuyện dẫn dắt: Cô trò chuyện về chủ đề "Trường mầm non thân yêu", gợi hỏi trẻ về các hoạt động thường ngày ở lớp.<br>- Giới thiệu các góc chơi và hướng dẫn trẻ thỏa thuận nội dung chơi:<br>  + "Hôm nay lớp mình có những góc chơi nào mở cửa đón các con?" (Góc Nghệ thuật, Góc học tập - khám phá khoa học, Góc Phân vai, Góc Xây dựng).<br>  + "Ở Góc Nghệ thuật, các con dự định sẽ làm những sản phẩm gì để trang trí lớp học?" (Vẽ hoa, nặn đồ chơi tặng cô và bạn, hát múa biểu diễn văn nghệ).<br>  + "Ở Góc học tập - khám phá khoa học, các con sẽ khám phá điều gì?" (Phân loại đồ dùng học tập, ghép tranh trường mầm non, đọc sách tranh).<br>  + "Ở Góc Phân vai, bạn nào muốn làm mẹ đưa con đi học? Bạn nào làm bác cấp dưỡng nấu những món ăn ngon cho các bé?".<br>  + "Ở Góc Xây dựng, các bác thợ xây sẽ xây dựng công trình gì hôm nay?" (Xây dựng trường mầm non có sân chơi, vườn hoa, cổng trường).<br>- Cho trẻ tự nguyện lựa chọn góc chơi và nhận vai chơi mình yêu thích.<br>- Thống nhất quy tắc chơi văn minh: Chơi đoàn kết, nói năng nhỏ nhẹ, không tranh giành đồ chơi, biết nhường nhịn và giúp đỡ bạn, chơi xong cất dọn đồ chơi đúng nơi quy định của từng góc.<br>- Cho trẻ nhẹ nhàng di chuyển về góc chơi đã chọn. | - Cả lớp cùng hát và nhún nhảy vui tươi theo giai điệu bài hát "Trường chúng cháu là trường mầm non".<br>- Trẻ hào hứng trò chuyện cùng cô về trường lớp.<br>- Trẻ chú ý quan sát các góc chơi và phát biểu ý tưởng chơi của mình:<br>  + Trẻ thích góc Nghệ thuật: "Con muốn vẽ vườn hoa và nặn bánh ngọt tặng cô ạ!".<br>  + Trẻ thích góc Học tập: "Con muốn ghép bức tranh trường mầm non và đếm đồ dùng học tập ạ!".<br>  + Trẻ thích góc Phân vai: "Con nhận làm bác cấp dưỡng nấu canh rau củ ạ!", "Con làm mẹ bế em bé đi học ạ!".<br>  + Trẻ thích góc Xây dựng: "Chúng con sẽ cùng nhau xây trường mầm non thật đẹp có cả cầu trượt và xích đu ạ!".<br>- Trẻ giơ tay nhận góc chơi và nhận vai chơi.<br>- Trẻ đồng thanh nhắc lại các quy tắc chơi văn minh.<br>- Trẻ nhẹ nhàng đi về các góc chơi đã lựa chọn. |
+| **2. Theo dõi quá trình chơi**<br>Cô bao quát toàn bộ lớp học, quan sát, hỗ trợ và gợi mở tình huống cho từng góc chơi:<br><br>* Góc Nghệ thuật:<br>- Hoạt động của cô:<br>  + Quan sát trẻ lựa chọn vật liệu, gợi ý trẻ phối màu sáp hài hòa khi vẽ tranh, cách chia đất và xoay tròn làm mịn khi nặn đồ chơi.<br>  + Bật nhạc không lời nhẹ nhàng tạo cảm xúc sáng tạo cho trẻ.<br>  + Động viên nhóm âm nhạc đội mũ múa, cầm xắc xô biểu diễn các bài hát về trường mầm non.<br>- Hoạt động của trẻ:<br>  + Trẻ khéo léo dùng bút màu vẽ ngôi trường, bồn hoa; nặn bánh, nặn quả bóng, nặn viên kẹo nhiều màu sắc.<br>  + Nhóm âm nhạc cùng nhau hát múa, gõ phách tre nhịp nhàng, biểu diễn tự tin.<br><br>* Góc học tập - khám phá khoa học:<br>- Hoạt động của cô:<br>  + Gợi ý trẻ phân loại tranh lô tô theo nhóm đồ dùng học tập (bút, vở, kéo) và đồ chơi (búp bê, ô tô).<br>  + Đặt câu hỏi kích thích tư duy: "Nhóm đồ dùng này có bao nhiêu cái? Con hãy tìm thẻ số tương ứng gắn vào nhé!".<br>  + Hướng dẫn trẻ ghép các mảnh ghép để tạo thành bức tranh trường mầm non hoàn chỉnh.<br>- Hoạt động của trẻ:<br>  + Trẻ say sưa chọn thẻ hình, phân loại đồ dùng chính xác và gắn thẻ số tương ứng.<br>  + Trẻ cùng bạn phối hợp xoay các mảnh ghép để hoàn thiện bức tranh lớn.<br>  + Trẻ lật mở từng trang sách truyện tranh, trao đổi rôm rả về hình ảnh cô giáo dạy học.<br><br>* Góc Phân vai:<br>- Hoạt động của cô:<br>  + Quan sát sự nhập vai của trẻ. Cô đóng vai khách đến thăm bếp ăn mầm non hỏi: "Hôm nay bác cấp dưỡng nấu những món gì ngon cho các cháu ăn trưa thế?".<br>  + Gợi ý sự liên kết góc: Nhắc mẹ búp bê đưa con đến phòng y tế khám răng, gợi ý bác cấp dưỡng sang góc xây dựng mời các bác thợ xây dùng bữa trưa.<br>  + Nhắc trẻ giao tiếp lễ phép, niềm nở.<br>- Hoạt động của trẻ:<br>  + Trẻ đóng vai mẹ ân cần dỗ dành búp bê, cho búp bê ăn và đưa đến lớp.<br>  + Bác cấp dưỡng đeo tạp dề khéo léo thái rau củ mô hình, nấu canh, xếp bát đĩa ngay ngắn.<br>  + Trẻ thể hiện lời nói lịch sự: "Xin chào bác!", "Mời bác dùng cơm trưa ạ!", "Cảm ơn bác!".<br><br>*(Góc Xây dựng: Trẻ cùng nhau xếp khối gỗ làm tường bao, dựng cổng trường, lắp xích đu cầu trượt trong sân trường; cô khen ngợi sự phối hợp ăn ý).* | - Trẻ tại Góc Nghệ thuật chăm chú sáng tạo sản phẩm, tự hào khoe với bạn chiếc bánh vừa nặn và bức tranh vừa vẽ.<br>- Nhóm múa hát vỗ tay reo vui sau mỗi tiết mục văn nghệ.<br><br>- Trẻ tại Góc Học tập tập trung đếm số lượng, so sánh nhiều hơn - ít hơn, giơ thẻ số reo vui khi làm đúng bài tập.<br>- Trẻ vui vẻ chỉ vào các chi tiết trong tranh ghép vừa hoàn thành.<br><br>- Trẻ tại Góc Phân vai nhập vai tự nhiên, thể hiện cử chỉ ân cần, giọng nói ngọt ngào, lễ phép.<br>- Các vai chơi liên kết rộn ràng: mẹ búp bê sang chào cô giáo, bác cấp dưỡng mang cơm sang mời các bác thợ xây.<br><br>- Trẻ góc Xây dựng phối hợp nhịp nhàng, chuyển gạch và khối gỗ cho nhau để hoàn thành công trình trường mầm non khang trang. |
+| **3. Nhận xét sau khi chơi**<br>- Cô dùng hiệu lệnh gõ xắc xô nhẹ nhàng báo hiệu giờ chơi đã kết thúc: "Đã hết giờ chơi rồi, cô mời các con cùng dừng tay nào!".<br>- Cô tập trung trẻ lại và dẫn cả lớp đến tham quan góc chơi nổi bật nhất hôm nay (Góc Xây dựng và Góc Nghệ thuật).<br>- Cô mời đại diện góc Xây dựng giới thiệu về công trình trường mầm non của nhóm mình; mời đại diện góc Nghệ thuật trưng bày các sản phẩm tạo hình đẹp mắt.<br>- Cô cho trẻ ở các góc khác nhận xét, đóng góp ý kiến về công trình và sản phẩm của bạn.<br>- Cô nhận xét chung toàn bộ buổi chơi:<br>  + Tuyên dương tinh thần đoàn kết, sự khéo léo, sáng tạo và thái độ giao tiếp thân thiện của các góc chơi.<br>  + Động viên, khích lệ những trẻ còn nhút nhát để lần sau tự tin hơn.<br>- Cô hướng dẫn và cùng trẻ thu dọn đồ dùng đồ chơi: "Bây giờ chúng mình cùng thu dọn đồ chơi về đúng ngôi nhà của từng góc thật ngăn nắp nhé!".<br>- Cả lớp cùng cô phân loại và xếp đồ chơi gọn gàng lên giá kệ. | - Trẻ dừng tay ngay khi nghe tiếng xắc xô báo hiệu hết giờ.<br>- Trẻ cùng cô đến tham quan các góc chơi trọng tâm.<br>- Đại diện góc Xây dựng tự tin thuyết minh về công trình: "Đây là cổng trường mầm non, bên trong có vườn hoa và khu vui chơi chúng con vừa xây xong ạ!".<br>- Đại diện góc Nghệ thuật tự hào giơ sản phẩm tranh vẽ và đồ chơi đất nặn.<br>- Trẻ các góc khác lắng nghe, vỗ tay tán thưởng và khen ngợi bạn.<br>- Trẻ lắng nghe lời nhận xét của cô giáo với nét mặt tươi vui, phấn khởi.<br>- Trẻ tự giác, nhanh nhẹn thu dọn đồ dùng đồ chơi, phân loại và xếp ngay ngắn vào đúng vị trí trên giá kệ của từng góc chơi. |
+`;
+
+export const SAMPLE_HOAT_DONG_VUI_CHOI_TRONG_LOP_DOC_2 = `KẾ HOẠCH BÀI DẠY (GIÁO ÁN MẦM NON)
+HOẠT ĐỘNG: HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG GÓC)
+CHỦ ĐỀ: THẾ GIỚI ĐỘNG VẬT QUANH BÉ
+Các góc chơi trọng tâm:
+1. Góc Nghệ thuật: Nặn các con vật nuôi trong gia đình (con gà, con vịt, con mèo); Vẽ và tô màu con vật yêu thích; Hát múa bài "Gà trống, mèo con và cún con", "Đố bạn".
+2. Góc học tập - khám phá khoa học: Phân loại con vật theo môi trường sống (trên cạn, dưới nước, trên không); Đếm số chân các con vật; Ghép đôi con vật mẹ và con vật con.
+3. Góc Phân vai: Bác sĩ thú y khám chữa bệnh cho thú cưng; Cửa hàng bán thức ăn và phụ kiện cho vật nuôi; Gia đình chăm sóc thú cưng.
+(Góc bổ trợ: Góc Xây dựng - Xây dựng trang trại chăn nuôi / Vườn bách thú).
+Độ tuổi: Mẫu giáo lớn (5-6 tuổi) / Mẫu giáo nhỡ (4-5 tuổi)
+Thời gian: 35 - 40 phút
+
+I. MỤC TIÊU
+1. Kiến thức:
+- Trẻ biết tên gọi, đặc điểm nổi bật, thức ăn và môi trường sống của một số con vật quen thuộc. (Mã: NT 1.1)
+- Trẻ hiểu nhiệm vụ của các vai chơi: Bác sĩ thú y tiêm thuốc, khám bệnh cho thú cưng; Người bán hàng niềm nở giới thiệu thức ăn cho vật nuôi; Bác nông dân xây chuồng trại chăn nuôi. (Mã: TX 3.2)
+- Trẻ biết sử dụng các nguyên vật liệu mở để tạo hình con vật và xây dựng trang trại chăn nuôi. (Mã: NT 3.1)
+
+2. Kỹ năng:
+- Rèn kỹ năng nặn (xoay tròn, lăn dài, ấn dẹt, gắn đính) và tô màu mịn đẹp khi tạo hình con vật ở góc Nghệ thuật.
+- Rèn kỹ năng phân loại, so sánh số lượng, đếm số chân của con vật tại góc Học tập - Khám phá khoa học. (Mã: NT 1.2)
+- Rèn kỹ năng giao tiếp lịch sự, phân vai và phối hợp hành động giữa các vai chơi trong góc Phân vai. (Mã: TX 4.3, TX 4.4)
+- Rèn kỹ năng tự phục vụ, sắp xếp đồ chơi ngăn nắp sau khi chơi.
+
+3. Phẩm chất:
+- Yêu thương: Biết yêu quý, chăm sóc và bảo vệ các con vật nuôi, bảo vệ thế giới động vật.
+- Tôn trọng: Tôn trọng ý kiến của bạn, không tranh giành đồ chơi, biết chia sẻ đồ chơi cùng bạn.
+- Trách nhiệm: Hoàn thành vai chơi của mình, có ý thức giữ gìn đồ chơi sạch đẹp và cất dọn đúng quy định.
+- Trung thực: Chơi trung thực, không mang đồ chơi của lớp về nhà.
+
+4. Năng lực:
+- Tự lực: Tự chọn góc chơi, tự giác nhận vai và hoàn thành sản phẩm/công trình của nhóm.
+- Thích ứng: Linh hoạt tương tác với các tình huống giao lưu giữa các góc chơi.
+- Giao tiếp và hợp tác: Biết trao đổi, trò chuyện mạch lạc và phối hợp ăn ý cùng bạn bè.
+
+II. CHUẨN BỊ
+1. Chuẩn bị của cô:
+- Bố trí các góc chơi rộng rãi, đồ chơi được sắp xếp theo chủ đề Động vật.
+- Đồ dùng tại các góc:
+  + Góc Nghệ thuật: Đất nặn nhiều màu, bảng con, dao cắt đất an toàn, giấy A4, sáp màu, kéo, hồ dán, mũ hình các con vật, xắc xô, trống lắc.
+  + Góc học tập - khám phá khoa học: Thẻ hình các con vật nuôi, động vật sống dưới nước, động vật trong rừng; Thẻ số 1-10; Tranh phân loại môi trường sống; Sách truyện về thế giới động vật.
+  + Góc Phân vai: Bộ đồ chơi khám bệnh thú y (ống nghe, nhiệt kế, kim tiêm đồ chơi, băng gạc), thú nhồi bông (chó, mèo, thỏ), thức ăn mô hình cho thú cưng (xương, cá, cà rốt), tiền đồ chơi, túi xách.
+  + Góc Xây dựng: Gạch nhựa, hàng rào, cây cỏ, mô hình chuồng trại, các con vật mô hình nhỏ.
+2. Chuẩn bị của trẻ:
+- Tâm thế thoải mái, sẵn sàng tham gia hoạt động.
+3. Phối hợp phụ huynh:
+- Khuyến khích phụ huynh cùng trẻ trò chuyện về cách chăm sóc vật nuôi tại gia đình.
+
+III. TIẾN TRÌNH HOẠT ĐỘNG
+
+| Hoạt động của cô | Hoạt động của trẻ |
+| :--- | :--- |
+| **1. Thỏa thuận trước khi chơi**<br>- Ổn định tổ chức: Cô cùng trẻ vận động mô phỏng dáng đi, tiếng kêu của các con vật theo bài hát "Đố bạn".<br>- Trò chuyện tạo cảm xúc: "Các con vừa làm động tác của những con vật nào?", "Hôm nay chúng mình cùng tham gia vào thế giới động vật kỳ diệu ở các góc chơi nhé!".<br>- Giới thiệu và thỏa thuận góc chơi:<br>  + "Ở Góc Nghệ thuật, các nghệ sĩ tí hon sẽ nặn và vẽ những con vật đáng yêu nào?" (Nặn chú mèo lười, con gà con, vẽ đàn cá bơi...).<br>  + "Ở Góc học tập - khám phá khoa học, các nhà khoa học nhí sẽ phân loại những con vật gì?" (Phân loại con vật sống dưới nước, con vật nuôi trong nhà, đếm số chân con vật).<br>  + "Ở Góc Phân vai, hôm nay chúng mình có phòng khám thú y, cửa hàng thức ăn thú cưng và gia đình nuôi thú cưng. Ai sẽ làm bác sĩ thú y chữa bệnh cho các bạn thú cưng nào?".<br>  + "Ở Góc Xây dựng, các bác thợ xây sẽ xây dựng trang trại chăn nuôi thật rộng lớn có chuồng cho từng con vật nhé!".<br>- Cho trẻ tự nhận góc chơi và vai chơi mình thích.<br>- Cùng trẻ nhắc lại nội quy góc chơi: Chơi đoàn kết, nói năng nhẹ nhàng, chia sẻ đồ chơi và cất đồ chơi đúng chỗ sau khi chơi.<br>- Trẻ nhẹ nhàng về góc chơi đã chọn. | - Trẻ hào hứng nhún nhảy, làm động tác chú gấu đi lặc lè, chú thỏ nhảy nhót và kêu tiếng các con vật.<br>- Trẻ trò chuyện sôi nổi cùng cô.<br>- Trẻ giơ tay nhận góc chơi và vai chơi:<br>  + "Con xin vào góc Nghệ thuật nặn chú mèo mướp và chú thỏ trắng ạ!".<br>  + "Con muốn vào góc Học tập đếm chân con vật và tìm thức ăn cho chúng ạ!".<br>  + "Con làm bác sĩ thú y khám bệnh cho cún con ạ!", "Con làm người bán thức ăn thú cưng ạ!".<br>  + "Chúng con sẽ cùng nhau xây dựng trang trại có chuồng bò, chuồng gà thật to ạ!".<br>- Trẻ đồng thanh cam kết chơi đúng luật và đoàn kết.<br>- Trẻ nhẹ nhàng đi về các góc chơi đã nhận. |
+| **2. Theo dõi quá trình chơi**<br>Cô quan sát toàn diện, hỗ trợ trẻ khi gặp khó khăn, khuyến khích sáng tạo và liên kết góc:<br><br>* Góc Nghệ thuật:<br>- Hoạt động của cô:<br>  + Gợi ý trẻ kỹ năng nặn: xoay tròn làm đầu và thân, lăn dài làm đuôi và tai, ấn dẹt làm chân con vật.<br>  + Khen ngợi trẻ biết phối màu đất nặn sinh động (chú gà con lông vàng óng, chú mèo tam thể).<br>  + Cho nhóm âm nhạc đội mũ các con vật biểu diễn bài "Gà trống, mèo con và cún con".<br>- Hoạt động của trẻ:<br>  + Trẻ khéo léo dùng tay xoay tròn, vuốt nhọn tạo hình các con vật ngộ nghĩnh đặt lên bảng con.<br>  + Trẻ tô màu tranh con voi, chú chim rực rỡ, không bị chờm ra ngoài.<br>  + Nhóm múa hát biểu diễn tự tin, hòa giọng rộn rã.<br><br>* Góc học tập - khám phá khoa học:<br>- Hoạt động của cô:<br>  + Hướng dẫn trẻ quan sát và đặt thẻ hình con vật vào đúng môi trường sống: ao hồ (cá, tôm, cua), đồng cỏ (bò, ngựa), rừng xanh (hổ, voi, hươu).<br>  + Gợi ý trẻ đếm số chân con vật: "Con gà có mấy chân? Con chó có mấy chân? 4 chân thì gắn thẻ số mấy?".<br>- Hoạt động của trẻ:<br>  + Trẻ nhanh mắt phân loại chính xác các con vật vào đúng tranh môi trường sống.<br>  + Trẻ đếm to: "1, 2, 3, 4 - Con bò có 4 chân, con gắn thẻ số 4 ạ!".<br>  + Trẻ tìm đúng cặp con vật mẹ và con vật con ghép lại với nhau.<br><br>* Góc Phân vai:<br>- Hoạt động của cô:<br>  + Quan sát trẻ đóng vai. Cô bế thú bông đến hỏi: "Bác sĩ thú y ơi, chú cún con của tôi bị sốt, bác sĩ khám giúp tôi với!".<br>  + Hướng dẫn bác sĩ thú y dùng nhiệt kế kẹp, nghe nhịp tim và kê đơn thuốc.<br>  + Hướng dẫn gia đình mang đơn thuốc sang cửa hàng thú cưng mua thức ăn bổ dưỡng và thuốc cho cún con.<br>- Hoạt động của trẻ:<br>  + Bác sĩ thú y đeo ống nghe khám bệnh nhẹ nhàng, dặn dò chủ nuôi chăm sóc cẩn thận.<br>  + Người bán hàng niềm nở lấy đúng loại thức ăn (cá cho mèo, xương cho chó) và nhận tiền đồ chơi lễ phép.<br>  + Trẻ giao tiếp thân thiện: "Chúc cún con mau khỏe nhé!", "Cảm ơn bác sĩ!".<br><br>*(Góc Xây dựng: Trẻ dùng khối gỗ xếp hàng rào bao quanh, phân chia chuồng lợn, chuồng gà, trồng cỏ nhân tạo cho bò ăn; cô đến thăm và khen ngợi trang trại rất đẹp).* | - Trẻ tại Góc Nghệ thuật say sưa nặn, tự hào khoe với bạn chú mèo và chú vịt vừa hoàn thành.<br>- Nhóm âm nhạc biểu diễn vui nhộn trong tiếng vỗ tay của các bạn.<br><br>- Trẻ tại Góc Học tập hào hứng thực hiện các bài tập phân loại, đếm số chân con vật và tìm tranh ghép đôi.<br>- Trẻ tự tin giải thích vì sao cá sống dưới nước, chim bay trên trời.<br><br>- Trẻ tại Góc Phân vai nhập vai rất đạt, diễn xuất tự nhiên, dùng từ ngữ lễ phép.<br>- Các vai chơi liên kết sinh động: gia đình đưa thú cưng đi khám bệnh, ghé cửa hàng mua thức ăn, sang thăm trang trại chăn nuôi.<br><br>- Trẻ góc Xây dựng xếp các khối gỗ ngay ngắn, đặt từng con vật mô hình vào đúng chuồng trại. |
+| **3. Nhận xét sau khi chơi**<br>- Cô gõ xắc xô báo hiệu hết giờ chơi: "Giờ chơi hôm nay đã kết thúc rồi, cô mời các con cùng tập trung nào!".<br>- Cô đưa cả lớp đến tham quan trang trại chăn nuôi tại góc Xây dựng và khu trưng bày thú cưng tại góc Nghệ thuật.<br>- Mời đại diện góc Xây dựng thuyết minh về trang trại chăn nuôi; mời đại diện góc Nghệ thuật giới thiệu các con vật vừa nặn.<br>- Cho trẻ các góc khác nhận xét, đóng góp ý kiến.<br>- Cô nhận xét tổng kết:<br>  + Biểu dương tinh thần hợp tác, kỹ năng nặn khéo léo và khả năng nhập vai rất tự nhiên của các bé.<br>  + Khen ngợi ý thức bảo vệ và yêu thương loài vật.<br>- Hướng dẫn trẻ cùng cô thu dọn đồ chơi: "Chúng mình hãy đưa các con vật và đồ chơi về đúng vị trí nhé!".<br>- Cô và trẻ cùng phân loại, cất đồ chơi gọn gàng, sạch sẽ vào các ngăn kệ. | - Trẻ dừng chơi ngay khi nghe hiệu lệnh xắc xô.<br>- Cả lớp cùng cô di chuyển đến tham quan góc Xây dựng và góc Nghệ thuật.<br>- Đại diện góc Xây dựng tự tin giới thiệu công trình: "Đây là trang trại của chúng con, có chuồng gà, chuồng bò và ao cá ạ!".<br>- Trẻ góc Nghệ thuật vui vẻ chỉ vào những con vật đất nặn ngộ nghĩnh của mình.<br>- Trẻ chú ý lắng nghe cô nhận xét và nở nụ cười rạng rỡ khi được khen ngợi.<br>- Trẻ nhanh tay, tự giác cùng bạn thu dọn đồ chơi, phân loại và xếp ngăn nắp vào đúng nơi quy định của từng góc. |
+`;
+
 

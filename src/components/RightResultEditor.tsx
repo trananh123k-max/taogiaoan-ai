@@ -31,6 +31,7 @@ import { formatPreschoolActivities, formatPreschoolMusicActivities, isPreschoolP
 import { MAM_NON_NEW_ACTIVITIES } from '../data/curriculumData';
 import { MathRenderer } from './MathRenderer';
 import { WorksheetRenderer } from './WorksheetRenderer';
+import { ensureWorksheetHasAnswerKey } from '../utils/worksheetUtils';
 import { StepProgress } from '../App';
 
 interface RightResultEditorProps {
@@ -866,87 +867,109 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                   </div>
                 );
               })()
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[13pt]">
-                  <div className="space-y-1 bg-white p-3.5 rounded-lg border border-slate-200">
-                    <h4 className="font-bold text-slate-900">
-                      1. Giáo viên:
-                    </h4>
-                    <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
-                      {(plan.equipment?.teacher || []).map((e, i) => (
-                        <div key={i} className="text-justify leading-relaxed">
-                          <span className="font-bold text-slate-900">- </span>
-                          <MathRenderer text={cleanItem(e)} />
-                        </div>
-                      ))}
+            ) : (() => {
+              const isTinHoc = /tin\s*học|tin\s*hoc|computer|informatics/i.test(plan?.subject || config?.subject || '') ||
+                               /tin\s*học|tin\s*hoc/i.test(plan?.lessonTitle || config?.lessonTitle || '');
+              
+              const teacherList = (() => {
+                const base = plan.equipment?.teacher || [];
+                if (isTinHoc && plan.equipment?.digitalAssets && plan.equipment.digitalAssets.length > 0) {
+                  const merged = [...base];
+                  plan.equipment.digitalAssets.forEach(asset => {
+                    if (asset && !merged.some(m => m.toLowerCase().includes(asset.toLowerCase()))) {
+                      merged.push(asset);
+                    }
+                  });
+                  return merged;
+                }
+                return base;
+              })();
+
+              return (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[13pt]">
+                    <div className="space-y-1 bg-white p-3.5 rounded-lg border border-slate-200">
+                      <h4 className="font-bold text-slate-900">
+                        1. Giáo viên:
+                      </h4>
+                      <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
+                        {teacherList.map((e, i) => (
+                          <div key={i} className="text-justify leading-relaxed">
+                            <span className="font-bold text-slate-900">- </span>
+                            <MathRenderer text={cleanItem(e)} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 bg-white p-3.5 rounded-lg border border-slate-200">
+                      <h4 className="font-bold text-slate-900">
+                        2. Học sinh:
+                      </h4>
+                      <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
+                        {(plan.equipment?.student || []).map((e, i) => (
+                          <div key={i} className="text-justify leading-relaxed">
+                            <span className="font-bold text-slate-900">- </span>
+                            <MathRenderer text={cleanItem(e)} />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-1 bg-white p-3.5 rounded-lg border border-slate-200">
-                    <h4 className="font-bold text-slate-900">
-                      2. Học sinh:
-                    </h4>
-                    <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
-                      {(plan.equipment?.student || []).map((e, i) => (
-                        <div key={i} className="text-justify leading-relaxed">
-                          <span className="font-bold text-slate-900">- </span>
-                          <MathRenderer text={cleanItem(e)} />
-                        </div>
-                      ))}
+                  {((plan.equipment as any)?.space && (plan.equipment as any).space.length > 0) && (
+                    <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">
+                      <h4 className="font-bold text-slate-900 mb-1">
+                        3. Không gian:
+                      </h4>
+                      <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
+                        {((plan.equipment as any).space || []).map((spaceItem: string, i: number) => (
+                          <div key={i} className="text-justify leading-relaxed">
+                            <span className="font-bold text-slate-900">- </span>
+                            <MathRenderer text={cleanItem(spaceItem)} />
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  )}
 
-                {((plan.equipment as any)?.space && (plan.equipment as any).space.length > 0) && (
-                  <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">
-                    <h4 className="font-bold text-slate-900 mb-1">
-                      3. Không gian:
-                    </h4>
-                    <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
-                      {((plan.equipment as any).space || []).map((spaceItem: string, i: number) => (
-                        <div key={i} className="text-justify leading-relaxed">
-                          <span className="font-bold text-slate-900">- </span>
-                          <MathRenderer text={cleanItem(spaceItem)} />
-                        </div>
-                      ))}
+                  {/* 3. Học liệu và thiết bị phụ trợ: Môn Tin học TUYỆT ĐỐI KHÔNG CÓ mục này (chuẩn CV 5512 chỉ có 1. Giáo viên và 2. Học sinh) */}
+                  {!isTinHoc && plan.equipment?.digitalAssets && plan.equipment.digitalAssets.length > 0 && (
+                    <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">
+                      <h4 className="font-bold text-slate-900 mb-1">
+                        3. Học liệu và thiết bị phụ trợ:
+                      </h4>
+                      <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
+                        {(plan.equipment.digitalAssets || []).map((asset, i) => (
+                          <div key={i} className="text-justify leading-relaxed">
+                            <span className="font-bold text-slate-900">- </span>
+                            <MathRenderer text={cleanItem(asset)} />
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {plan.equipment?.digitalAssets && plan.equipment.digitalAssets.length > 0 && (
-                  <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">
-                    <h4 className="font-bold text-slate-900 mb-1">
-                      3. Học liệu và thiết bị phụ trợ:
-                    </h4>
-                    <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
-                      {(plan.equipment.digitalAssets || []).map((asset, i) => (
-                        <div key={i} className="text-justify leading-relaxed">
-                          <span className="font-bold text-slate-900">- </span>
-                          <MathRenderer text={cleanItem(asset)} />
-                        </div>
-                      ))}
+                  {plan.equipment?.stemMaterials && plan.equipment.stemMaterials.length > 0 && (
+                    <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">
+                      <h4 className="font-bold text-slate-900 mb-1">
+                        {(!isTinHoc && plan.equipment?.digitalAssets && plan.equipment.digitalAssets.length > 0)
+                          ? '4. Thiết bị, dụng cụ và vật liệu thực hành STEM:'
+                          : '3. Thiết bị, dụng cụ và vật liệu thực hành STEM:'}
+                      </h4>
+                      <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
+                        {(plan.equipment.stemMaterials || []).map((mat, i) => (
+                          <div key={i} className="text-justify leading-relaxed">
+                            <span className="font-bold text-slate-900">- </span>
+                            <MathRenderer text={cleanItem(mat)} />
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-
-                {plan.equipment?.stemMaterials && plan.equipment.stemMaterials.length > 0 && (
-                  <div className="p-3 bg-white border border-slate-200 rounded-lg text-[13pt]">
-                    <h4 className="font-bold text-slate-900 mb-1">
-                      4. Thiết bị, dụng cụ và vật liệu thực hành STEM:
-                    </h4>
-                    <div className="space-y-1 text-slate-800 text-justify leading-relaxed">
-                      {(plan.equipment.stemMaterials || []).map((mat, i) => (
-                        <div key={i} className="text-justify leading-relaxed">
-                          <span className="font-bold text-slate-900">- </span>
-                          <MathRenderer text={cleanItem(mat)} />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
+                  )}
+                </>
+              );
+            })()}
           </section>
 
           {/* DEDICATED SECTION: TÍCH HỢP NỘI DUNG GIÁO DỤC STEM */}
@@ -1096,13 +1119,23 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
               </div>
               <div className="bg-white border border-slate-300 rounded-xl p-6 shadow-xs space-y-6">
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-1.5 border-b border-slate-200 pb-2">
-                    <FileText className="w-4 h-4 text-slate-700" />
-                    <span>1. Phiếu học tập / Hướng dẫn thực hành</span>
+                  <h4 className="text-sm font-bold text-slate-900 mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
+                    <div className="flex items-center gap-1.5">
+                      <FileText className="w-4 h-4 text-indigo-700" />
+                      <span>1. Phiếu học tập & Bảng gợi ý đáp án, hướng dẫn đánh giá</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs font-semibold">
+                      <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                        Phiếu học sinh
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Bảng đáp án GV
+                      </span>
+                    </div>
                   </h4>
                   <div className="bg-slate-50/40 p-4 sm:p-5 rounded-xl border border-slate-300 shadow-2xs">
                     <WorksheetRenderer
-                      content={plan.appendix.worksheetContent}
+                      content={ensureWorksheetHasAnswerKey(plan.appendix.worksheetContent, plan)}
                       type="worksheet"
                     />
                   </div>

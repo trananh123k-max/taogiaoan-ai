@@ -14,7 +14,65 @@ export interface ParseDocxResult {
 }
 
 /**
- * Parses a Word .docx file, extracts images, and substitutes image positions
+ * Extracts printable text from legacy binary Word (.doc - Word 97-2003 / OLE2) format
+ */
+export function extractTextFromBinaryDoc(arrayBuffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(arrayBuffer);
+  if (!bytes || bytes.length === 0) return '';
+
+  const results: string[] = [];
+
+  // Try UTF-16LE decoding (MS Word stores Unicode text as UTF-16LE)
+  try {
+    const utf16Decoder = new TextDecoder('utf-16le', { fatal: false });
+    const rawUtf16 = utf16Decoder.decode(bytes);
+
+    const blocks = rawUtf16
+      .split(/[\r\n\x00-\x08\x0b\x0c\x0e-\x1f\x7f]+/)
+      .map((b) => b.trim())
+      .filter((b) => b.length >= 8 && /[a-zA-Z0-9à-ỹÀ-Ỹ]/.test(b));
+
+    const filtered = blocks.filter((b) => {
+      const normalChars = (b.match(/[a-zA-Z0-9à-ỹÀ-Ỹ\s.,;:\-?!()[\]{}"'\/]/g) || []).length;
+      return normalChars / b.length > 0.75;
+    });
+
+    if (filtered.length >= 4) {
+      results.push(...filtered);
+    }
+  } catch (e) {
+    console.warn('UTF-16LE doc extraction error:', e);
+  }
+
+  // Fallback to UTF-8 / ASCII if UTF-16 didn't yield enough
+  if (results.length < 5) {
+    try {
+      const utf8Decoder = new TextDecoder('utf-8', { fatal: false });
+      const rawUtf8 = utf8Decoder.decode(bytes);
+      const blocks = rawUtf8
+        .split(/[\r\n\x00-\x08\x0b\x0c\x0e-\x1f\x7f]+/)
+        .map((b) => b.trim())
+        .filter((b) => b.length >= 8 && /[a-zA-Z0-9à-ỹÀ-Ỹ]/.test(b));
+
+      const filtered = blocks.filter((b) => {
+        const normalChars = (b.match(/[a-zA-Z0-9à-ỹÀ-Ỹ\s.,;:\-?!()[\]{}"'\/]/g) || []).length;
+        return normalChars / b.length > 0.75;
+      });
+
+      if (filtered.length > results.length) {
+        results.length = 0;
+        results.push(...filtered);
+      }
+    } catch (e) {
+      console.warn('UTF-8 doc extraction error:', e);
+    }
+  }
+
+  return results.join('\n\n');
+}
+
+/**
+ * Parses a Word .docx or .doc file, extracts images, and substitutes image positions
  * with template tags {{IMAGE_SLOT_1}}, {{IMAGE_SLOT_2}}...
  */
 export async function parseDocxFile(fileOrBuffer: File | ArrayBuffer): Promise<ParseDocxResult> {
@@ -22,7 +80,30 @@ export async function parseDocxFile(fileOrBuffer: File | ArrayBuffer): Promise<P
     ? await fileOrBuffer.arrayBuffer() 
     : fileOrBuffer;
 
-  const zip = await JSZip.loadAsync(arrayBuffer);
+  let zip: JSZip | null = null;
+  try {
+    zip = await JSZip.loadAsync(arrayBuffer);
+  } catch (zipErr) {
+    console.warn('JSZip failed to load file, attempting binary .doc text extraction...', zipErr);
+  }
+
+  if (!zip) {
+    const docText = extractTextFromBinaryDoc(arrayBuffer);
+    if (docText && docText.trim().length > 30) {
+      return {
+        textWithSlots: docText,
+        imageSlots: [],
+        htmlPreview: '<div class="space-y-2">' + docText.split('\n\n').map(p => `<p>${p}</p>`).join('') + '</div>',
+        summary: {
+          wordCount: docText.split(/\s+/).length,
+          imageCount: 0,
+          paragraphsCount: docText.split('\n\n').length,
+        },
+      };
+    }
+    throw new Error('Không thể giải nén hoặc đọc nội dung tệp Word này. Vui lòng kiểm tra lại định dạng tệp .docx hoặc .doc');
+  }
+
   const imageSlots: ImageSlot[] = [];
   let htmlPreview = '';
   let textWithSlots = '';
@@ -340,6 +421,9 @@ function extractCleanTextAndSlotsFromDocXml(xmlDoc: Document, rIdToSlotMap: Reco
         }
       } else if (tag === 'tbl') {
         processTable(child);
+      } else if (child.children && child.children.length > 0) {
+        // Handle nested elements like sdt, sdtcontent, proofErr, ins, del, etc.
+        processContainer(child);
       }
     }
   }
