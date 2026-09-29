@@ -1,5 +1,5 @@
-import { PRESCHOOL_CURRICULUM_MATRIX, PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE } from './src/data/preschoolCurriculum.js';
-import { formatPreschoolMusicActivities, formatPreschoolLetterGameActivities, formatPreschoolActivities, isPreschoolMusicPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, stripPreschoolAICodes, sanitizePreschoolObjectives, analyzePreschoolAgeProfile, detectPreschoolDomain, generateDefaultPreschoolActivities, generatePreschoolParentCollaboration, isGenericPreschoolParentCollab } from './src/utils/preschoolUtils.js';
+import { PRESCHOOL_CURRICULUM_MATRIX, PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE } from './src/data/preschoolCurriculum';
+import { formatPreschoolMusicActivities, formatPreschoolLetterGameActivities, formatPreschoolActivities, isPreschoolMusicPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, stripPreschoolAICodes, stripPreschoolAICodesOnly, sanitizePreschoolObjectives, analyzePreschoolAgeProfile, detectPreschoolDomain, generateDefaultPreschoolActivities, generatePreschoolParentCollaboration, isGenericPreschoolParentCollab } from './src/utils/preschoolUtils';
 import { NLS_DICTIONARY } from './src/data/nlsDictionary';
 import { getVerifiedLessons } from './src/data/verifiedCurriculumList';
 import { getTextbookLessonStructure } from './src/data/textbookStructureDictionary';
@@ -14,7 +14,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
@@ -248,7 +248,7 @@ const UTILITY_MODELS = [
 ];
 
 function normalizeModelName(mName?: string): string {
-  if (!mName) return 'gemini-3.1-flash-lite';
+  if (!mName || mName === 'auto') return 'gemini-3.1-flash-lite';
   const lower = mName.toLowerCase().trim();
   if (lower.includes('3.5')) return 'gemini-3.5-flash-lite';
   return 'gemini-3.1-flash-lite';
@@ -316,8 +316,8 @@ async function generateContentWithRetryAndFallback(options: {
     for (let kIdx = 0; kIdx < keysToTry.length; kIdx++) {
       const currentKey = keysToTry[kIdx];
 
-      // Retry at most 2 attempts for transient spike before switching key/model
-      for (let attempt = 0; attempt < 2; attempt++) {
+      // Retry at most 3 attempts for transient spike before switching key/model
+      for (let attempt = 0; attempt < 3; attempt++) {
         try {
           const client = getGeminiClient(currentKey);
           const response = await client.models.generateContent({
@@ -345,15 +345,15 @@ async function generateContentWithRetryAndFallback(options: {
           const isDailyQuota = errMsgLower.includes('generaterequestsperday') || errMsgLower.includes('free_tier_requests') || errMsgLower.includes('exceeded your current quota');
           const isRateLimit = !isDailyQuota && (errMsgLower.includes('rate') || errMsgLower.includes('429') || errMsgLower.includes('resource_exhausted') || errMsgLower.includes('too many requests'));
 
-          // 1. Brief retry for 503 spike before switching model
-          if (is503 && attempt === 0) {
-            await new Promise((resolve) => setTimeout(resolve, 300));
+          // 1. Transient 503 spike retry with progressive backoff before failing over
+          if (is503 && attempt < 3) {
+            await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
             continue;
           }
 
           // 2. If 503 High Demand or 404 Model Not Found on Google servers:
           if ((is503 || is404) && mIdx < models.length - 1) {
-            console.warn(
+            console.log(
               `[Auto-Failover 503/404] Model "${currentModel}" ${is503 ? 'bị nghẽn tải cao (503 High Demand)' : 'không khả dụng (404)'}. Lập tức chuyển sang "${models[mIdx + 1]}"...`
             );
             modelUnavailable = true;
@@ -362,7 +362,7 @@ async function generateContentWithRetryAndFallback(options: {
 
           // 3. If 401 Auth error on a specific key or preview model:
           if (is401) {
-            console.warn(`[Auto-Failover 401] Key [${kIdx + 1}/${keysToTry.length}] không hợp lệ hoặc không có quyền trên model "${currentModel}".`);
+            console.log(`[Auto-Failover 401] Key [${kIdx + 1}/${keysToTry.length}] không hợp lệ hoặc không có quyền trên model "${currentModel}".`);
             keysToTry.splice(kIdx, 1);
             kIdx--;
             break; // break attempt loop to try next candidate key
@@ -376,7 +376,7 @@ async function generateContentWithRetryAndFallback(options: {
           // 3. If single key rate-limit/quota with other models available:
           // Immediately try next model in hierarchy!
           if (keysToTry.length === 1 && (isRateLimit || isDailyQuota) && mIdx < models.length - 1) {
-            console.warn(
+            console.log(
               `[Auto-Failover 429 Quota] Model "${currentModel}" chạm hạn ngạch. Lập tức chuyển sang "${models[mIdx + 1]}" (0ms)...`
             );
             modelUnavailable = true;
@@ -394,8 +394,8 @@ async function generateContentWithRetryAndFallback(options: {
               ? `${currentKey.substring(0, 5)}...${currentKey.substring(currentKey.length - 4)}`
               : 'Key';
 
-          console.warn(
-            `[Auto-Failover] Key [${kIdx + 1}/${keysToTry.length} - ${keyPreview}] gặp lỗi trên model "${currentModel}": ${rawErrMsg.substring(0, 100)}`
+          console.log(
+            `[Auto-Failover] Key [${kIdx + 1}/${keysToTry.length} - ${keyPreview}] gặp thông báo trên model "${currentModel}": ${rawErrMsg.substring(0, 100)}`
           );
 
           if (kIdx < keysToTry.length - 1) {
@@ -2296,35 +2296,54 @@ function enforcePPCTCompetencies(
   if (Array.isArray(plan.activities) && plan.activities.length > 0) {
     plan.activities = plan.activities.map((act: any) => cleanActivityNLSCodes(act, isIntegratedSubject, isMath4Column));
 
-    // For Preschool: strictly strip ALL [Tích hợp AI], [Tích hợp NLS], and related codes from everywhere!
+    // For Preschool:
     if (isPreschool) {
       plan.activities = plan.activities.map((act: any) => {
         const cleaned = { ...act };
         cleaned.aiFocus = '';
         cleaned.nlsFocus = '';
         cleaned.digitalOrAiTool = '';
-        if (cleaned.objective) cleaned.objective = stripPreschoolAICodes(cleaned.objective);
-        if (cleaned.content) cleaned.content = stripPreschoolAICodes(cleaned.content);
-        if (cleaned.productSummary) cleaned.productSummary = stripPreschoolAICodes(cleaned.productSummary);
+        if (cleaned.objective) cleaned.objective = config.enableAI ? stripPreschoolAICodesOnly(cleaned.objective) : stripPreschoolAICodes(cleaned.objective);
+        if (cleaned.content) cleaned.content = config.enableAI ? stripPreschoolAICodesOnly(cleaned.content) : stripPreschoolAICodes(cleaned.content);
+        if (cleaned.productSummary) cleaned.productSummary = config.enableAI ? stripPreschoolAICodesOnly(cleaned.productSummary) : stripPreschoolAICodes(cleaned.productSummary);
         ['step1', 'step2', 'step3', 'step4'].forEach((sk) => {
           if (cleaned[sk]) {
             cleaned[sk] = {
               ...cleaned[sk],
-              teacherAction: stripPreschoolAICodes(cleaned[sk].teacherAction || ''),
-              studentAction: stripPreschoolAICodes(cleaned[sk].studentAction || ''),
-              productExpected: stripPreschoolAICodes(cleaned[sk].productExpected || ''),
+              teacherAction: config.enableAI ? stripPreschoolAICodesOnly(cleaned[sk].teacherAction || '') : stripPreschoolAICodes(cleaned[sk].teacherAction || ''),
+              studentAction: config.enableAI ? stripPreschoolAICodesOnly(cleaned[sk].studentAction || '') : stripPreschoolAICodes(cleaned[sk].studentAction || ''),
+              productExpected: config.enableAI ? stripPreschoolAICodesOnly(cleaned[sk].productExpected || '') : stripPreschoolAICodes(cleaned[sk].productExpected || ''),
               digitalOrAiTool: '',
             };
           }
         });
         return cleaned;
       });
-      if (plan.objectives) {
-        plan.objectives.aiCompetencies = [];
-        plan.objectives.digitalCompetencies = [];
-      }
+
       if (plan.competencyMatrix) {
         plan.competencyMatrix = { nlsItems: [], aiItems: [] };
+      }
+    }
+
+    // Ensure Preschool lesson with AI enabled has [Tích hợp AI] block in teacher action
+    if (isPreschool && config.enableAI && plan.activities.length > 0) {
+      const hasAiTag = plan.activities.some((act: any) =>
+        ['step1', 'step2', 'step3', 'step4'].some((sk) =>
+          act[sk] && (
+            /\[Tích hợp [^\]]*AI[^\]]*\]/i.test(act[sk].teacherAction || '') ||
+            /\[Tích hợp [^\]]*Trí tuệ nhân tạo[^\]]*\]/i.test(act[sk].teacherAction || '') ||
+            /Trí tuệ nhân tạo|Robot|trợ lý AI|công cụ AI/i.test(act[sk].teacherAction || '')
+          )
+        )
+      );
+
+      if (!hasAiTag) {
+        const targetAct = plan.activities[0];
+        const targetStep = targetAct.step1 ? 'step1' : (targetAct.step2 ? 'step2' : null);
+        if (targetStep && targetAct[targetStep]) {
+          const aiBlock = `\n\n[Tích hợp AI]\n- Cô giáo ứng dụng công cụ Trí tuệ nhân tạo (AI) (tạo tranh ảnh minh họa, âm thanh sinh động, câu chuyện hoặc nhân vật ảo Robot trò chuyện) để gây hứng thú, tạo bất ngờ và dẫn dắt trẻ khám phá bài học.`;
+          targetAct[targetStep].teacherAction += aiBlock;
+        }
       }
     }
 
@@ -2399,8 +2418,21 @@ function enforcePPCTCompetencies(
   }
 
   // 1. Digital Competencies (NLS)
-  if (config.enableNLS && !isPreschool) {
-    if (config.nlsMode === 'custom') {
+  if (config.enableNLS) {
+    if (isPreschool) {
+      if (config.nlsMode === 'custom' && config.customNLS?.trim()) {
+        const customList = parseCustomIndicators(config.customNLS);
+        if (customList.length > 0) {
+          plan.objectives.digitalCompetencies = customList;
+        }
+      }
+      if (!Array.isArray(plan.objectives.digitalCompetencies) || plan.objectives.digitalCompetencies.length === 0) {
+        plan.objectives.digitalCompetencies = [
+          'Ứng dụng thiết bị và công cụ kỹ thuật số hỗ trợ trực quan hóa bài học cho trẻ.',
+          'Phát triển kỹ năng nhận biết và sử dụng học liệu điện tử an toàn dưới sự hướng dẫn của giáo viên.'
+        ];
+      }
+    } else if (config.nlsMode === 'custom') {
       const customList = parseCustomIndicators(config.customNLS);
       if (customList.length > 0) {
         plan.objectives.digitalCompetencies = customList;
@@ -2428,13 +2460,31 @@ function enforcePPCTCompetencies(
         );
       }
     }
-  } else if (!config.enableNLS && !isPreschool) {
-    plan.objectives.digitalCompetencies = [];
+  } else {
+    if (plan.objectives) plan.objectives.digitalCompetencies = [];
   }
 
   // 2. AI Competencies
-  if (config.enableAI && !isPreschool) {
-    if (config.aiMode === 'custom') {
+  if (config.enableAI) {
+    if (isPreschool) {
+      if (config.aiMode === 'custom' && config.customAI?.trim()) {
+        const customList = parseCustomIndicators(config.customAI);
+        if (customList.length > 0) {
+          plan.objectives.aiCompetencies = customList;
+        }
+      }
+      if (!Array.isArray(plan.objectives.aiCompetencies) || plan.objectives.aiCompetencies.length === 0) {
+        plan.objectives.aiCompetencies = [
+          'Giáo viên ứng dụng công cụ Trí tuệ nhân tạo (AI) (tạo hình ảnh, âm thanh, câu chuyện sinh động và nhân vật Robot tương tác) hỗ trợ trẻ quan sát, khám phá bài học.',
+          'Trẻ nhận biết và tương tác với các sản phẩm học liệu do AI hỗ trợ dưới sự hướng dẫn của cô giáo, phát triển trí tò mò và tư duy sáng tạo.'
+        ];
+      } else {
+        // Strip high-school codes like 10.C3.1 or [AI ...] from preschool items if present
+        plan.objectives.aiCompetencies = plan.objectives.aiCompetencies.map((item: string) =>
+          item.replace(/\[?AI\s+[a-z0-9._\-]+\]?:?/gi, '').replace(/^\d+(\.\d+)*[A-Z0-9\.]*\s*:\s*/, '').trim()
+        ).filter(Boolean);
+      }
+    } else if (config.aiMode === 'custom') {
       const customList = parseCustomIndicators(config.customAI);
       if (customList.length > 0) {
         plan.objectives.aiCompetencies = customList;
@@ -2456,8 +2506,8 @@ function enforcePPCTCompetencies(
         );
       }
     }
-  } else if (!config.enableAI && !isPreschool) {
-    plan.objectives.aiCompetencies = [];
+  } else {
+    if (plan.objectives) plan.objectives.aiCompetencies = [];
   }
 
   // 3. Competency Matrix NLS Items
@@ -2630,7 +2680,7 @@ async function generateKHBDSectional(
     ? primaryModel
     : (config.aiModel && config.aiModel !== 'auto')
       ? config.aiModel
-      : 'gemini-3.5-flash-lite';
+      : 'gemini-3.1-flash-lite';
 
   const subject = config.subject || 'Tin học';
   const grade = config.grade || 'Lớp 6';
@@ -2863,7 +2913,7 @@ MỤC ĐÍCH DUY NHẤT: BẢO TỒN NGUYÊN VẸN NỘI DUNG, HÌNH ẢNH, BÀI
   const yccdInstruction = yccdPreschool ? `\n- BẮT BUỘC sử dụng nguyên văn nội dung sau làm Yêu cầu cần đạt (Kiến thức/Kỹ năng): "${yccdPreschool}". KHÔNG ĐƯỢC TỰ BỊA THÊM.` : '';
 
   const nlsInstruction = config.enableNLS ? `\n- TÍCH HỢP NĂNG LỰC SỐ (NLS): Nếu người dùng chọn tích hợp NLS, BẮT BUỘC xuất vào mảng digitalCompetencies để hiển thị ở Mục "5. Tích hợp Năng lực số (NLS)". Mô tả rõ: Các hoạt động ứng dụng công nghệ, thiết bị số, màn hình tương tác hoặc hình ảnh/video mô phỏng phù hợp lứa tuổi mầm non (tuyệt đối KHÔNG dùng mã chỉ báo phổ thông).` : '';
-  const aiInstruction = config.enableAI ? `\n- TÍCH HỢP TRÍ TUỆ NHÂN TẠO (AI): Nếu người dùng chọn tích hợp AI, BẮT BUỘC xuất vào mảng aiCompetencies để hiển thị ở Mục "6. Tích hợp Trí tuệ nhân tạo (AI)". Mô tả rõ: Giáo viên ứng dụng trợ lý AI tạo ra hình ảnh, âm thanh, câu chuyện, tranh ảnh minh họa sống động hoặc nhân vật ảo Robot trò chuyện với trẻ. Trẻ tương tác với AI thông qua sự hướng dẫn của giáo viên (tuyệt đối KHÔNG dùng mã chỉ báo phổ thông).` : '';
+  const aiInstruction = config.enableAI ? `\n- TÍCH HỢP TRÍ TUỆ NHÂN TẠO (AI): Nếu người dùng chọn tích hợp AI, BẮT BUỘC xuất vào mảng aiCompetencies để hiển thị ở Mục "6. Tích hợp Trí tuệ nhân tạo (AI)" (hoặc Mục "5. Tích hợp Trí tuệ nhân tạo (AI)"). Mô tả rõ: Giáo viên ứng dụng trợ lý AI tạo ra hình ảnh, âm thanh, câu chuyện, tranh ảnh minh họa sống động hoặc nhân vật ảo Robot trò chuyện với trẻ. Trẻ tương tác với AI thông qua sự hướng dẫn của giáo viên (tuyệt đối KHÔNG dùng mã chỉ báo phổ thông). Đồng thời trong Tiến trình hoạt động (Hoạt động của cô), BẮT BUỘC chèn khối "[Tích hợp AI]" mô tả cụ thể cô ứng dụng AI.` : '';
 
   const preschoolAgeProfile = isPreschool ? analyzePreschoolAgeProfile(grade || 'Mẫu giáo lớn (5-6 tuổi)') : null;
   const isMixedAgeClass = preschoolAgeProfile?.category === 'MIXED_AGE';
@@ -2875,7 +2925,15 @@ MỤC ĐÍCH DUY NHẤT: BẢO TỒN NGUYÊN VẸN NỘI DUNG, HÌNH ẢNH, BÀI
     ${customCodesFromUser ? `"${customCodesFromUser}"` : 'Các mã chuẩn theo QĐ 388 (ví dụ: NT 3.1, TX 4.4, TC 1.2, NN 2.2...)'}
   + BẮT BUỘC ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng các mã chỉ báo trên.
   + 1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ biết/nhận biết... (Mã: NT 1.1)")
-  + 2. Kỹ năng: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)")`
+${isMixedAgeClass ? `    * BẮT BUỘC ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): TÁCH RIÊNG KIẾN THỨC CHO TỪNG ĐỘ TUỔI TRONG 1 BÀI DẠY (Ví dụ nếu lớp ghép 3-4-5 tuổi: kiến thức 3 tuổi riêng, 4 tuổi riêng, 5 tuổi riêng):
+      - 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X, nhận biết chữ số... (Mã: NT 3.1)
+      - 4 tuổi: Trẻ biết đếm đến X, nhận biết nhóm X đối tượng, tạo nhóm... (Mã: NT 1.2)
+      - 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô, đếm cùng các bạn... (Mã: NT 1.1)` : ''}
+  + 2. Kỹ năng: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)")
+${isMixedAgeClass ? `    * BẮT BUỘC ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): TÁCH RIÊNG KỸ NĂNG CHO TỪNG ĐỘ TUỔI TRONG 1 BÀI DẠY (Kỹ năng 3 tuổi riêng, 4 tuổi riêng, 5 tuổi riêng):
+      - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh, thêm bớt... (Mã: TC 3.1)
+      - 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1, đếm theo thứ tự... (Mã: TC 1.2)
+      - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay đếm theo cô... (Mã: TC 1.1)` : ''}`
     : `- ĐỐI VỚI GIÁO ÁN MẦM NON CŨ/TRUYỀN THỐNG (Văn học thơ/truyện, Làm quen chữ cái, Khám phá khoa học, Xã hội, Toán, Tạo hình, Âm nhạc, Thể chất, Tình cảm - KNXH...):
   + BẮT BUỘC LẤY LẠI ĐÚNG MẪU GIÁO ÁN BAN ĐẦU TRƯỚC KHI CẬP NHẬT 8 LĨNH VỰC MỚI, GIỮ NGUYÊN ĐỊNH DẠNG BAN ĐẦU.
   + TUYỆT ĐỐI KHÔNG ĐIỀN MÃ TIÊU CHÍ NÀO: KHÔNG ghi "(Mã: NN 5.1)", KHÔNG ghi "(Mã: NT 1.1)", KHÔNG ghi bất kỳ mã chỉ báo nào trong phần Kiến thức và Kỹ năng.
@@ -2977,16 +3035,20 @@ Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động củ
   + Bước 4 BẮT BUỘC là "4. Thực hành – Vận dụng": Trẻ lần lượt thực hành theo hàng/nhóm từ dễ đến khó (cá nhân -> nhóm -> thi đua giữa các tổ); Cô bao quát sửa sai; Tổ chức trò chơi vận động củng cố hào hứng.
   + Bước 5 BẮT BUỘC là "5. Chia sẻ – Đánh giá và Hồi tĩnh": Trao đổi cảm nhận của trẻ sau buổi tập, cô nhận xét tuyên dương; Hồi tĩnh: Cho trẻ đi nhẹ nhàng 1 - 2 vòng quanh sân/phòng tập theo nhạc êm dịu, làm động tác chim bay thả lỏng cơ thể, hít thở sâu.
 - RIÊNG ĐỐI VỚI HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG GÓC):
-  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP (BẢN CŨ / TRUYỀN THỐNG 5 BƯỚC): Áp dụng 5 bước chuẩn mực: "1. Ổn định tổ chức và trò chuyện chủ đề", "2. Thỏa thuận trước khi chơi", "3. Quá trình chơi / Trải nghiệm tại các góc chơi", "4. Nhận xét sau khi chơi", "5. Kết thúc và thu dọn đồ chơi".
-  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP 1 (MẪU MỚI 3 BƯỚC): BẮT BUỘC tuân thủ đúng 3 BƯỚC TIẾN TRÌNH CHUẨN MỰC sau (Mục I. Mục tiêu và Mục II. Chuẩn bị giữ nguyên chuẩn QĐ 388):
-    + Bước 1: "1. Thỏa thuận trước khi chơi": Hát/đọc thơ tạo cảm xúc; Cô giới thiệu các góc chơi hôm nay (Góc Nghệ thuật, Góc học tập - khám phá khoa học, Góc Phân vai...); Trẻ thỏa thuận vai chơi, tự chọn góc chơi và cam kết nội quy chơi văn minh, đoàn kết.
-    + Bước 2: "2. Theo dõi quá trình chơi": Phân chia chi tiết và đầy đủ cả 3 góc chơi:
-      * Góc Nghệ thuật: Cô hướng dẫn nguyên vật liệu mở (giấy màu, đất nặn, sáp màu...); Trẻ khéo léo tạo hình sản phẩm hoặc biểu diễn văn nghệ theo chủ đề.
-      * Góc học tập - khám phá khoa học: Cô gợi ý bài tập phân loại, so sánh, đếm, ghép tranh, xem sách truyện, làm thí nghiệm; Trẻ say sưa trải nghiệm khám phá.
-      * Góc Phân vai: Cô quan sát, nhập vai mở rộng tình huống giao tiếp, kết nối liên góc; Trẻ thể hiện đúng vai diễn (mẹ chăm sóc con, bác sĩ khám bệnh, người bán hàng niềm nở).
-    + Bước 3: "3. Nhận xét sau khi chơi": Báo hiệu hết giờ; Cô cùng trẻ tham quan các góc chơi nổi bật; Đại diện góc tự tin giới thiệu công trình/sản phẩm; Cô nhận xét tuyên dương tinh thần đoàn kết, sáng tạo và cùng trẻ thu dọn đồ chơi ngăn nắp vào đúng nơi quy định.
+  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP (BẢN CŨ / TRUYỀN THỐNG 4 BƯỚC): Áp dụng 4 bước chuẩn mực theo mẫu khôi phục: "1. Gây hứng thú" (Hát/đọc thơ, đàm thoại chủ đề, giới thiệu các góc chơi), "2. Thỏa thuận trước khi chơi" (Giới thiệu các góc chơi, đàm thoại nhận vai chơi, thỏa thuận phân công công việc, quy tắc chơi văn minh), "3. Quá trình chơi" (Chi tiết các góc chơi như Góc xây dựng, Góc phân vai..., cô bao quát gợi mở tình huống), "4. Nhận xét – kết thúc" (Nhận xét từng góc, khen ngợi công trình/sản phẩm, mời đại diện chia sẻ, dặn dò giữ gìn cất đồ chơi và rửa tay).
+  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP 1 (MẪU MỚI 3 BƯỚC): BẮT BUỘC tuân thủ MẪU NGẮN GỌN VÀ SÚC TÍCH, KHÔNG đưa văn xuôi rườm rà.
+    Cấu trúc chi tiết:
+    - Bước 1: "1. Thỏa thuận trước khi chơi":
+      + Hoạt động của cô: Lời thoại ngắn gọn cô giới thiệu các góc chơi ("Hôm nay cô chuẩn bị cho các con 3 góc chơi rất thú vị: Góc Nghệ thuật..., Góc Học tập..., Góc Phân vai..."), các câu hỏi cô hỏi trẻ ("Con thích chơi ở góc nào?", "Ở góc đó con sẽ chơi gì?", "Khi chơi cùng bạn con phải như thế nào?"), cho trẻ chọn góc, nhắc nhở không tranh giành và dặn về góc chơi.
+      + Hoạt động của trẻ (CỰC KỲ NGẮN GỌN): các gạch đầu dòng ngắn: "- Trẻ lắng nghe", "- Trẻ trả lời cô", "- Trẻ chọn góc chơi", "- Trẻ lấy ký hiệu về góc chơi", "- Trẻ lắng nghe".
+    - Bước 2: "2. Theo dõi quá trình chơi":
+      + Hoạt động của cô: Lời dẫn ngắn cô cho trẻ về các góc, rồi phân chia từng góc (* Góc Nghệ thuật:..., * Góc Học tập - Khám phá khoa học:..., * Góc Phân vai:...). Mỗi góc cô gợi hỏi 3-4 câu ngắn gọn trực tiếp ("Con đang làm gì?", "Sản phẩm/đồ chơi có đặc điểm gì?", "Con làm thế nào để...?"), cô gợi ý/khuyến khích ngắn.
+      + Hoạt động của trẻ (CỰC KỲ NGẮN GỌN): các gạch đầu dòng ngắn: "- Trẻ về góc chơi", "- Trẻ chơi và trả lời cô", "- Trẻ lắng nghe", "- Trẻ chơi đoàn kết".
+    - Bước 3: "3. Nhận xét sau khi chơi":
+      + Hoạt động của cô: Lời thoại ngắn cô tập trung trẻ đi tham quan sản phẩm các góc, mời đại diện góc giới thiệu và đặt câu hỏi gợi mở ngắn ("Các con đã chơi ở góc nào?", "Hôm nay con đã làm gì?", "Đây là sản phẩm gì?", "Con thích sản phẩm nào nhất?"), cô nhận xét chung ngắn gọn và nhắc thu dọn đồ chơi.
+      + Hoạt động của trẻ (CỰC KỲ NGẮN GỌN): các gạch đầu dòng ngắn: "- Trẻ tập trung quanh cô", "- Trẻ đi tham quan các góc chơi", "- Nghe nhóm bạn giới thiệu", "- Trẻ giới thiệu", "- Trẻ nghe cô nhận xét", "- Cất đồ dùng đúng nơi quy định".
 - RIÊNG ĐỐI VỚI HOẠT ĐỘNG NGOÀI TRỜI:
-  + Nếu là HOẠT ĐỘNG NGOÀI TRỜI (BẢN CŨ / TRUYỀN THỐNG 5 BƯỚC): Áp dụng 5 bước: "1. Ổn định tổ chức và chuẩn bị", "2. Hoạt động có mục đích (Quan sát / Trải nghiệm có chủ đích)", "3. Trò chơi vận động", "4. Chơi tự do", "5. Kết thúc và nhận xét - vệ sinh".
+  + Nếu là HOẠT ĐỘNG NGOÀI TRỜI (BẢN CŨ / TRUYỀN THỐNG 3 BƯỚC): Áp dụng 3 bước chuẩn mực theo mẫu khôi phục: "1. Trước khi chơi" (Kiểm tra sĩ số/trang phục, trò chuyện đàm thoại dẫn dắt, giới thiệu nội dung hoạt động và dặn dò quy tắc an toàn), "2. Trong khi chơi" (Bao gồm 2 phần: * Quan sát/trò chơi có mục đích với hệ thống câu hỏi đàm thoại chi tiết, và * Chơi tự do với đồ chơi ngoài trời), "3. Sau khi chơi" (Kiểm tra sĩ số, đàm thoại củng cố cảm nhận, cô nhận xét tuyên dương, hướng dẫn vệ sinh rửa tay và xếp hàng đi nhẹ nhàng về lớp).
   + Nếu là HOẠT ĐỘNG NGOÀI TRỜI 1 (QUAN SÁT) (MẪU MỚI 3 BƯỚC):
     + Bước 1: "1. Trước khi quan sát": Kiểm tra sĩ số, trang phục gọn gàng; Nhắc nhở quy định an toàn khi ra sân; Dẫn dắt tạo hứng thú ra sân quan sát.
     + Bước 2: "2. Trong khi quan sát": BẮT BUỘC có đủ 3 nội dung:
@@ -2998,8 +3060,8 @@ Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động củ
     + Bước 1: "1. Trước khi chơi" (hoặc "1. Trước khi ra sân"): Kiểm tra trang phục, phổ biến nội dung và dặn dò an toàn ngoài trời.
     + Bước 2: "2. Trong khi chơi": BẮT BUỘC có đủ 2 nội dung:
       * Trò chơi vận động: [Tên trò chơi vận động]
-        Cách chơi: [Mô tả chi tiết cách chơi: chia đội, hiệu lệnh, thao tác vận động tiếp sức...]
-        Luật chơi: [Mô tả chi tiết luật chơi: điều được làm, điều phạm quy, phần thưởng...]
+        - Cách chơi: [Mô tả chi tiết cách chơi: chia đội, hiệu lệnh, thao tác vận động tiếp sức...]
+        - Luật chơi: [Mô tả chi tiết luật chơi: điều được làm, điều phạm quy, phần thưởng...]
         Tổ chức cho trẻ chơi 2 - 3 lần sôi nổi, bao quát cổ vũ động viên trẻ.
       * Chơi với đồ chơi ngoài trời: Hướng dẫn trẻ đến khu vực đồ chơi ngoài trời (cầu trượt, bập bênh, xích đu, thú nhún), nhắc nhở quy tắc an toàn, nhường nhịn nhau, cô theo sát bao quát.
     + Bước 3: "3. Sau khi chơi": Tập trung trẻ, điểm danh; Cho trẻ làm động tác hồi tĩnh thả lỏng cơ thể; Nhận xét tuyên dương, cất đồ dùng, rửa tay sạch sẽ và vào lớp.
@@ -3233,6 +3295,21 @@ YÊU CẦU BẮT BUỘC:
 - Kiến thức (knowledge): Trẻ nhận biết, hiểu được gì... gắn với mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ nhận biết và gọi tên được... (Mã: NT 1.1)", "- Trẻ hiểu được nội dung... (Mã: NT 1.2)").
 - Kỹ năng (subjectCompetencies): Các kỹ năng vận động, kỹ năng tư duy, thao tác... gắn với mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)", "- Trẻ phối hợp khéo léo... (Mã: TC 1.2, TX 4.4)").
 `}
+${isMixedAgeClass ? `
+BẮT BUỘC ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): TÁCH RIÊNG KIẾN THỨC VÀ KỸ NĂNG CHO TỪNG ĐỘ TUỔI TRONG 1 BÀI DẠY (Ví dụ nếu lớp ghép 3-4-5 tuổi: Kiến thức 3 tuổi riêng, 4 tuổi riêng, 5 tuổi riêng; Kỹ năng 3 tuổi riêng, 4 tuổi riêng, 5 tuổi riêng và gắn mã QĐ 388 phù hợp).
+Ví dụ chuẩn phân hóa mảng knowledge trong JSON:
+[
+  "- 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X... (Mã: NT 3.1)",
+  "- 4 tuổi: Trẻ biết đếm đến X, nhận biết nhóm X đối tượng... (Mã: NT 1.2)",
+  "- 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô... (Mã: NT 1.1)"
+]
+Ví dụ chuẩn phân hóa mảng subjectCompetencies trong JSON:
+[
+  "- 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh... (Mã: TC 3.1)",
+  "- 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1... (Mã: TC 1.2)",
+  "- 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay và đếm theo cô... (Mã: TC 1.1)"
+]
+` : ''}
 - Phẩm chất (qualities): BẮT BUỘC gắn với 4 phẩm chất cốt lõi (Yêu thương, Tôn trọng, Trung thực, Trách nhiệm). Ví dụ: "Yêu thương: ...", "Tôn trọng: ...".
 - Năng lực (generalCompetencies): BẮT BUỘC gắn với 5 năng lực nền tảng (Giao tiếp, Hợp tác, Giải quyết vấn đề, Tự lực, Thích ứng). Ví dụ: "Tự lực: ...", "Thích ứng: ...".
 2. TÍCH HỢP NĂNG LỰC SỐ VÀ TRÍ TUỆ NHÂN TẠO:
@@ -4201,7 +4278,7 @@ Trả về JSON dạng:
           return res;
         }
       } catch (err: any) {
-        console.warn(`[Sectional Generator] Task ${step} attempt ${attempt + 1} warning:`, err?.message || String(err));
+        console.log(`[Sectional Generator] Task ${step} attempt ${attempt + 1} retry:`, err?.message || String(err));
         if (attempt < 2) {
           await new Promise((r) => setTimeout(r, 600));
         }
@@ -4543,7 +4620,12 @@ const handleGenerateKHBD = async (req: express.Request, res: express.Response) =
 
     // Direct Execution via High-Speed Resilient Sectional Pipeline (Instant 3-Second Execution)
     // Runs 4 sub-tasks concurrently in parallel for maximum speed and zero timeout/errors!
-    const sectionalResult = await generateKHBDSectional(config, undefined, auth.keys, 'gemini-3.1-flash-lite');
+    const sectionalResult = await generateKHBDSectional(
+      config,
+      undefined,
+      auth.keys,
+      (config.aiModel && config.aiModel !== 'auto') ? config.aiModel : 'gemini-3.1-flash-lite'
+    );
     return res.json({ success: true, data: sectionalResult, lessonPlan: sectionalResult });
 
     const isNew8Activity = isPreschoolNew8Activity(config.subject, config.lessonTitle);
@@ -4558,7 +4640,15 @@ const handleGenerateKHBD = async (req: express.Request, res: express.Response) =
     ${customCodesFromUser ? `"${customCodesFromUser}"` : 'Các mã chuẩn theo QĐ 388 (ví dụ: NT 3.1, TX 4.4, TC 1.2, NN 2.2...)'}
   + BẮT BUỘC ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng các mã chỉ báo trên.
   + 1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ biết/nhận biết... (Mã: NT 1.1)")
-  + 2. Kỹ năng: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)")`
+${isMixedAgeClass ? `    * BẮT BUỘC ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${config.grade}): TÁCH RIÊNG KIẾN THỨC CHO TỪNG ĐỘ TUỔI TRONG 1 BÀI DẠY (Ví dụ nếu lớp ghép 3-4-5 tuổi: kiến thức 3 tuổi riêng, 4 tuổi riêng, 5 tuổi riêng):
+      - 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X... (Mã: NT 3.1)
+      - 4 tuổi: Trẻ biết đếm đến X, nhận biết nhóm X đối tượng... (Mã: NT 1.2)
+      - 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô... (Mã: NT 1.1)` : ''}
+  + 2. Kỹ năng: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)")
+${isMixedAgeClass ? `    * BẮT BUỘC ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${config.grade}): TÁCH RIÊNG KỸ NĂNG CHO TỪNG ĐỘ TUỔI TRONG 1 BÀI DẠY (Kỹ năng 3 tuổi riêng, 4 tuổi riêng, 5 tuổi riêng):
+      - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh, thêm bớt... (Mã: TC 3.1)
+      - 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1, đếm theo thứ tự... (Mã: TC 1.2)
+      - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay đếm theo cô... (Mã: TC 1.1)` : ''}`
       : `- ĐỐI VỚI GIÁO ÁN MẦM NON CŨ/TRUYỀN THỐNG (Văn học thơ/truyện, Làm quen chữ cái, Khám phá khoa học, Xã hội, Toán, Tạo hình, Âm nhạc, Thể chất, Tình cảm - KNXH...):
   + BẮT BUỘC LẤY LẠI ĐÚNG MẪU GIÁO ÁN BAN ĐẦU TRƯỚC KHI CẬP NHẬT 8 LĨNH VỰC MỚI, GIỮ NGUYÊN ĐỊNH DẠNG BAN ĐẦU.
   + TUYỆT ĐỐI KHÔNG ĐIỀN MÃ TIÊU CHÍ NÀO: KHÔNG ghi "(Mã: NN 5.1)", KHÔNG ghi "(Mã: NT 1.1)", KHÔNG ghi bất kỳ mã chỉ báo nào trong phần Kiến thức và Kỹ năng.
@@ -4632,16 +4722,20 @@ Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động củ
 - YÊU CẦU ĐẶC BIỆT CHO PHẦN "2. Khám phá - Trải nghiệm": BẮT BUỘC thiết kế theo hướng trải nghiệm. Giáo viên cho trẻ trải nghiệm/thực hiện thử nhiệm vụ trước -> Đặt câu hỏi gợi mở để trẻ tự suy nghĩ và nêu lên cách thực hiện -> SAU ĐÓ giáo viên mới thực hiện làm mẫu và chuẩn hóa lại kỹ năng. Tuyệt đối KHÔNG làm mẫu hoặc giải thích cách làm trước khi trẻ được trải nghiệm.
 - TRÌNH BÀY RÕ RÀNG VÀ CHI TIẾT: Các hoạt động 1, 2, 3, 4, 5 (Tiến trình hoạt động) PHẢI SOẠN RẤT CHI TIẾT, ĐẦY ĐỦ VÀ SÂU SẮC. Bắt buộc mô tả cụ thể từng lời nói, câu lệnh, câu hỏi gợi mở của giáo viên và hành động, lời đáp, thái độ dự kiến của trẻ. Không viết chung chung sơ sài.
 - RIÊNG ĐỐI VỚI HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG GÓC):
-  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP (BẢN CŨ / TRUYỀN THỐNG 5 BƯỚC): Áp dụng 5 bước chuẩn mực: "1. Ổn định tổ chức và trò chuyện chủ đề", "2. Thỏa thuận trước khi chơi", "3. Quá trình chơi / Trải nghiệm tại các góc chơi", "4. Nhận xét sau khi chơi", "5. Kết thúc và thu dọn đồ chơi".
-  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP 1 (MẪU MỚI 3 BƯỚC): BẮT BUỘC tuân thủ đúng 3 BƯỚC TIẾN TRÌNH CHUẨN MỰC sau (Mục I. Mục tiêu và Mục II. Chuẩn bị giữ nguyên chuẩn QĐ 388):
-    + Bước 1: "1. Thỏa thuận trước khi chơi": Hát/đọc thơ tạo cảm xúc; Cô giới thiệu các góc chơi hôm nay (Góc Nghệ thuật, Góc học tập - khám phá khoa học, Góc Phân vai...); Trẻ thỏa thuận vai chơi, tự chọn góc chơi và cam kết nội quy chơi văn minh, đoàn kết.
-    + Bước 2: "2. Theo dõi quá trình chơi": Phân chia chi tiết và đầy đủ cả 3 góc chơi:
-      * Góc Nghệ thuật: Cô hướng dẫn nguyên vật liệu mở (giấy màu, đất nặn, sáp màu...); Trẻ khéo léo tạo hình sản phẩm hoặc biểu diễn văn nghệ theo chủ đề.
-      * Góc học tập - khám phá khoa học: Cô gợi ý bài tập phân loại, so sánh, đếm, ghép tranh, xem sách truyện, làm thí nghiệm; Trẻ say sưa trải nghiệm khám phá.
-      * Góc Phân vai: Cô quan sát, nhập vai mở rộng tình huống giao tiếp, kết nối liên góc; Trẻ thể hiện đúng vai diễn (mẹ chăm sóc con, bác sĩ khám bệnh, người bán hàng niềm nở).
-    + Bước 3: "3. Nhận xét sau khi chơi": Báo hiệu hết giờ; Cô cùng trẻ tham quan các góc chơi nổi bật; Đại diện góc tự tin giới thiệu công trình/sản phẩm; Cô nhận xét tuyên dương tinh thần đoàn kết, sáng tạo và cùng trẻ thu dọn đồ chơi ngăn nắp vào đúng nơi quy định.
+  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP (BẢN CŨ / TRUYỀN THỐNG 4 BƯỚC): Áp dụng 4 bước chuẩn mực theo mẫu khôi phục: "1. Gây hứng thú" (Hát/đọc thơ, đàm thoại chủ đề, giới thiệu các góc chơi), "2. Thỏa thuận trước khi chơi" (Giới thiệu các góc chơi, đàm thoại nhận vai chơi, thỏa thuận phân công công việc, quy tắc chơi văn minh), "3. Quá trình chơi" (Chi tiết các góc chơi như Góc xây dựng, Góc phân vai..., cô bao quát gợi mở tình huống), "4. Nhận xét – kết thúc" (Nhận xét từng góc, khen ngợi công trình/sản phẩm, mời đại diện chia sẻ, dặn dò giữ gìn cất đồ chơi và rửa tay).
+  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP 1 (MẪU MỚI 3 BƯỚC): BẮT BUỘC tuân thủ MẪU NGẮN GỌN VÀ SÚC TÍCH, KHÔNG đưa văn xuôi rườm rà.
+    Cấu trúc chi tiết:
+    - Bước 1: "1. Thỏa thuận trước khi chơi":
+      + Hoạt động của cô: Lời thoại ngắn gọn cô giới thiệu các góc chơi ("Hôm nay cô chuẩn bị cho các con 3 góc chơi rất thú vị: Góc Nghệ thuật..., Góc Học tập..., Góc Phân vai..."), các câu hỏi cô hỏi trẻ ("Con thích chơi ở góc nào?", "Ở góc đó con sẽ chơi gì?", "Khi chơi cùng bạn con phải như thế nào?"), cho trẻ chọn góc, nhắc nhở không tranh giành và dặn về góc chơi.
+      + Hoạt động của trẻ (CỰC KỲ NGẮN GỌN): các gạch đầu dòng ngắn: "- Trẻ lắng nghe", "- Trẻ trả lời cô", "- Trẻ chọn góc chơi", "- Trẻ lấy ký hiệu về góc chơi", "- Trẻ lắng nghe".
+    - Bước 2: "2. Theo dõi quá trình chơi":
+      + Hoạt động của cô: Lời dẫn ngắn cô cho trẻ về các góc, rồi phân chia từng góc (* Góc Nghệ thuật:..., * Góc Học tập - Khám phá khoa học:..., * Góc Phân vai:...). Mỗi góc cô gợi hỏi 3-4 câu ngắn gọn trực tiếp ("Con đang làm gì?", "Sản phẩm/đồ chơi có đặc điểm gì?", "Con làm thế nào để...?"), cô gợi ý/khuyến khích ngắn.
+      + Hoạt động của trẻ (CỰC KỲ NGẮN GỌN): các gạch đầu dòng ngắn: "- Trẻ về góc chơi", "- Trẻ chơi và trả lời cô", "- Trẻ lắng nghe", "- Trẻ chơi đoàn kết".
+    - Bước 3: "3. Nhận xét sau khi chơi":
+      + Hoạt động của cô: Lời thoại ngắn cô tập trung trẻ đi tham quan sản phẩm các góc, mời đại diện góc giới thiệu và đặt câu hỏi gợi mở ngắn ("Các con đã chơi ở góc nào?", "Hôm nay con đã làm gì?", "Đây là sản phẩm gì?", "Con thích sản phẩm nào nhất?"), cô nhận xét chung ngắn gọn và nhắc thu dọn đồ chơi.
+      + Hoạt động của trẻ (CỰC KỲ NGẮN GỌN): các gạch đầu dòng ngắn: "- Trẻ tập trung quanh cô", "- Trẻ đi tham quan các góc chơi", "- Nghe nhóm bạn giới thiệu", "- Trẻ giới thiệu", "- Trẻ nghe cô nhận xét", "- Cất đồ dùng đúng nơi quy định".
 - RIÊNG ĐỐI VỚI HOẠT ĐỘNG NGOÀI TRỜI:
-  + Nếu là HOẠT ĐỘNG NGOÀI TRỜI (BẢN CŨ / TRUYỀN THỐNG 5 BƯỚC): Áp dụng 5 bước: "1. Ổn định tổ chức và chuẩn bị", "2. Hoạt động có mục đích (Quan sát / Trải nghiệm có chủ đích)", "3. Trò chơi vận động", "4. Chơi tự do", "5. Kết thúc và nhận xét - vệ sinh".
+  + Nếu là HOẠT ĐỘNG NGOÀI TRỜI (BẢN CŨ / TRUYỀN THỐNG 3 BƯỚC): Áp dụng 3 bước chuẩn mực theo mẫu khôi phục: "1. Trước khi chơi" (Kiểm tra sĩ số/trang phục, trò chuyện đàm thoại dẫn dắt, giới thiệu nội dung hoạt động và dặn dò quy tắc an toàn), "2. Trong khi chơi" (Bao gồm 2 phần: * Quan sát/trò chơi có mục đích với hệ thống câu hỏi đàm thoại chi tiết, và * Chơi tự do với đồ chơi ngoài trời), "3. Sau khi chơi" (Kiểm tra sĩ số, đàm thoại củng cố cảm nhận, cô nhận xét tuyên dương, hướng dẫn vệ sinh rửa tay và xếp hàng đi nhẹ nhàng về lớp).
   + Nếu là HOẠT ĐỘNG NGOÀI TRỜI 1 (QUAN SÁT) (MẪU MỚI 3 BƯỚC):
     + Bước 1: "1. Trước khi quan sát": Kiểm tra sĩ số, trang phục gọn gàng; Nhắc nhở quy định an toàn khi ra sân; Dẫn dắt tạo hứng thú ra sân quan sát.
     + Bước 2: "2. Trong khi quan sát": BẮT BUỘC có đủ 3 nội dung:
@@ -4653,12 +4747,12 @@ Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động củ
     + Bước 1: "1. Trước khi chơi" (hoặc "1. Trước khi ra sân"): Kiểm tra trang phục, phổ biến nội dung và dặn dò an toàn ngoài trời.
     + Bước 2: "2. Trong khi chơi": BẮT BUỘC có đủ 2 nội dung:
       * Trò chơi vận động: [Tên trò chơi vận động]
-        Cách chơi: [Mô tả chi tiết cách chơi: chia đội, hiệu lệnh, thao tác vận động tiếp sức...]
-        Luật chơi: [Mô tả chi tiết luật chơi: điều được làm, điều phạm quy, phần thưởng...]
+        - Cách chơi: [Mô tả chi tiết cách chơi: chia đội, hiệu lệnh, thao tác vận động tiếp sức...]
+        - Luật chơi: [Mô tả chi tiết luật chơi: điều được làm, điều phạm quy, phần thưởng...]
         Tổ chức cho trẻ chơi 2 - 3 lần sôi nổi, bao quát cổ vũ động viên trẻ.
       * Chơi với đồ chơi ngoài trời: Hướng dẫn trẻ đến khu vực đồ chơi ngoài trời (cầu trượt, bập bênh, xích đu, thú nhún), nhắc nhở quy tắc an toàn, nhường nhịn nhau, cô theo sát bao quát.
     + Bước 3: "3. Sau khi chơi": Tập trung trẻ, điểm danh; Cho trẻ làm động tác hồi tĩnh thả lỏng cơ thể; Nhận xét tuyên dương, cất đồ dùng, rửa tay sạch sẽ và vào lớp.
-- RIÊNG ĐỐI VỚI MÔN ÂM NHẠC (LĨNH VỰC NGHỆ THUẬT): Soạn RẤT CHI TIẾT VÀ KỸ LƯỠNG. Dùng VĂN PHONG SƯ PHẠM MẦM NON NGỌT NGÀO, DỊU DÀNG, TRÌU MẾN, GIÀU TÍNH NGHỆ THUẬT VÀ CẢM XÚC. Sử dụng nhiều ngữ điệu tình cảm mầm non ("các con ơi", "nhé", "nhỉ", "nào", "à", "ơi", "nào chúng mình...", "thật là hay đúng không nào!"). QUY ĐỊNH BẮT BUỘC: Ở Mục "3. Chia sẻ – Thảo luận" BẮT BUỘC PHẢI CÓ 2 PHẦN CHI TIẾT Ở CỘT HOẠT ĐỘNG CỦA CÔ theo đúng trọng tâm: Nếu là Dạy hát thì có "a. Dạy hát (TT)" và "b. Nghe hát". Nếu là Nghe hát thì có "a. Nghe hát (TT)" và "b. Hát vận động (hoặc Trò chơi)". Nếu là Hát vận động thì có "a. Hát vận động (TT)" và "b. Nghe hát". Trong cột Hoạt động của trẻ tuyệt đối KHÔNG chứa nhãn "a." hay "b." đứng riêng lẻ, chỉ ghi các gạch đầu dòng. Mô tả chi tiết từng câu thoại truyền cảm của cô, cử chỉ điệu bộ và sự hào hứng của trẻ. KHÔNG ĐƯỢC soạn ngắn gọn khô cứng như môn Thể dục.
+- RIÊNG ĐỐI VỚI MÔN ÂM NHẠC (LĨNH VỰC NGHỆ THUẬT): Soạn RẤT CHI TIẾT VÀ KỸ LƯỠNG. Dùng VĂN PHONG SƯ PHẠM MẦM NON NGỌT NGÀO, DỊU DÀNG, TRÌU MẾN, GIÀU TÍNH NGHỆ THUẬT VÀ CẢM XÚC. Sử dụng nhiều ngữ điệu tình cảm mầm non ("các con ơi", "nhé", "nhỉ", "nào", "à", "ơi", "nào chúng mình...", "thật là hay đúng không nào!"). QUY ĐỊNH BẮT BUỘC: Ở Mục "3. Chia sẻ – Thảo luận" BẮT BUỘC PHẢI CÓ 2 PHẦN CHI TIẾT Ở CỘT HOẠT ĐỘNG CỦA CÔ theo đúng trọng tâm: Nếu là Dạy hát thì có "a. Dạy hát (TT)" và "b. Nghe hát". Nếu là Nghe hát thì có "a. Nghe hát (TT)" và "b. Hát vận động (hoặc Trò chơi)". Nếu là Hát vận động thì có "a. Hát vận động (TT)" and "b. Nghe hát". Trong cột Hoạt động của trẻ tuyệt đối KHÔNG chứa nhãn "a." hay "b." đứng riêng lẻ, chỉ ghi các gạch đầu dòng. Mô tả chi tiết từng câu thoại truyền cảm của cô, cử chỉ điệu bộ và sự hào hứng của trẻ. KHÔNG ĐƯỢC soạn ngắn gọn khô cứng như môn Thể dục.
 - QUY ĐỊNH BẮT BUỘC VỀ XUỐNG DÒNG VÀ IN ĐẬM:
   + Mỗi mục, mỗi ý, mỗi hành động, mỗi câu lệnh của cô và phản hồi của trẻ BẮT BUỘC PHẢI XUỐNG DÒNG RIÊNG BIỆT (dùng ký tự \n). Sử dụng gạch đầu dòng (-) hoặc (+) rõ ràng ở mỗi ý con. TUYỆT ĐỐI KHÔNG viết dồn ép các ý vào cùng một dòng.
   + Phân hóa độ tuổi (+ Trẻ 5 tuổi: ..., + Trẻ 4 tuổi: ..., + Trẻ 3 tuổi: ...), các trò chơi (Trò chơi 1:, Trò chơi 2:), và các phần (Cách chơi:, Luật chơi:, Mục tiêu:) BẮT BUỘC MỖI MỤC PHẢI XUỐNG DÒNG RIÊNG BIỆT.

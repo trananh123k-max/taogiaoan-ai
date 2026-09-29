@@ -25,11 +25,13 @@ export const PreschoolQD388CodesConfig: React.FC<PreschoolQD388CodesConfigProps>
   const defaultInfo = useMemo(() => getDefaultQD388ForSubject(subject), [subject]);
 
   // Tự động khởi tạo giá trị ban đầu nếu đang ở mode default_388 và customCodes rỗng
+  const hasInitializedRef = React.useRef(false);
   useEffect(() => {
-    if (mode === 'default_388' && defaultInfo && !customCodes.trim()) {
+    if (mode === 'default_388' && defaultInfo && !customCodes?.trim() && !hasInitializedRef.current) {
+      hasInitializedRef.current = true;
       onChangeCodes(defaultInfo.summary);
     }
-  }, [subject, mode, defaultInfo]);
+  }, [subject, mode, defaultInfo, customCodes, onChangeCodes]);
 
   return (
     <div className="flex flex-col gap-2 p-2.5 rounded-lg bg-blue-50/40 border border-blue-200/70 text-xs">

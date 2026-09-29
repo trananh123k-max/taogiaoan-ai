@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   BookOpen,
@@ -212,9 +212,14 @@ export const FirebaseStorageModal: React.FC<FirebaseStorageModalProps> = ({
     }
   }, [isOpen]);
 
+  const isFirstMountBooksRef = useRef(true);
   useEffect(() => {
     try {
       localStorage.setItem('khbd_my_firebase_books', JSON.stringify(myUploadedBooks));
+      if (isFirstMountBooksRef.current) {
+        isFirstMountBooksRef.current = false;
+        return;
+      }
       if (onBooksUpdated) onBooksUpdated(myUploadedBooks);
     } catch {
       // ignore

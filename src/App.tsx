@@ -5,6 +5,8 @@ import {
   ActivityDetail,
   TextbookSample,
   CustomUploadedBook,
+  CombineWeekConfig,
+  SavedCombineItem,
 } from './types';
 import {
 
@@ -53,21 +55,89 @@ import {
   Plus,
   Loader2,
   Key,
+  Layers,
 } from 'lucide-react';
-import { exportLessonPlanToDocx } from './utils/docxExporter';
+import { exportLessonPlanToDocx, exportMultipleMergedLessonPlansToDocx } from './utils/docxExporter';
+import { CombineLessonPlansTab } from './components/CombineLessonPlansTab';
 
 export type StepProgress = 'pending' | 'start' | 'done';
 
 export default function App() {
-  // Active Tab state ('config' for Tab 1, 'result' for Tab 2)
-  const [activeTab, setActiveTab] = useState<'config' | 'result'>('config');
+  // Active Tab state ('config' for Tab 1, 'result' for Tab 2, 'combine' for Tab 3) - Cố định tab được chọn
+  const [activeTab, setActiveTabState] = useState<'config' | 'result' | 'combine'>(() => {
+    try {
+      const saved = localStorage.getItem('khbd_active_tab');
+      if (saved === 'config' || saved === 'result' || saved === 'combine') return saved;
+    } catch (e) {
+      console.warn('Failed to parse khbd_active_tab:', e);
+    }
+    return 'config';
+  });
+
+  const setActiveTab = (tab: 'config' | 'result' | 'combine') => {
+    setActiveTabState(tab);
+    try {
+      localStorage.setItem('khbd_active_tab', tab);
+    } catch {}
+  };
+
+  // Tab 3 Combine Saved Plans list state
+  const [combineList, setCombineList] = useState<SavedCombineItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('khbd_combine_list');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Failed to parse khbd_combine_list from localStorage:', e);
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('khbd_combine_list', JSON.stringify(combineList));
+    } catch (e) {
+      console.warn('Failed to save khbd_combine_list to localStorage:', e);
+    }
+  }, [combineList]);
+
+  // Tab 3: Cấu hình Giáo án Tuần & Ghép Ngày theo mẫu chuẩn
+  const [weekConfig, setWeekConfig] = useState<CombineWeekConfig>(() => {
+    try {
+      const saved = localStorage.getItem('khbd_combine_week_config');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Failed to parse khbd_combine_week_config:', e);
+    }
+    return {
+      enabled: true,
+      weekTitle: 'TUẦN 1:',
+      themeGroup: 'BẢN THÂN',
+      subTheme: 'TÔI LÀ AI?',
+      dateRangeText: '',
+      startDate: '',
+      endDate: '',
+      startPrepDate: '',
+      useAsteriskDivider: true,
+      showItemTitleBanner: false,
+    };
+  });
+
+  const handleUpdateWeekConfig = (patch: Partial<CombineWeekConfig>) => {
+    setWeekConfig((prev) => {
+      const updated = { ...prev, ...patch };
+      try {
+        localStorage.setItem('khbd_combine_week_config', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
 
   // Config state
   const [config, setConfig] = useState<LessonPlanConfig>({
     lessonTitle: '',
-    subject: 'Tin học',
-    schoolLevel: 'THCS',
-    grade: 'Lớp 6',
+    subject: 'GIÁO ÁN VĂN HỌC (THƠ)',
+    schoolLevel: 'Mầm non',
+    grade: 'Mẫu giáo lớn (5-6 tuổi)',
     bookSeries: 'Kết nối tri thức với cuộc sống',
     periods: 2,
     tableLayout: 'two_column',
@@ -201,11 +271,16 @@ export default function App() {
               if (fresh) {
                 setCurrentUser(fresh);
                 setUserRole(fresh.role);
-                setConfig((prev) => ({
-                  ...prev,
-                  teacherName: fresh.fullName,
-                  schoolName: fresh.schoolName || prev.schoolName,
-                }));
+                setConfig((prev) => {
+                  if (prev.teacherName === fresh.fullName && prev.schoolName === (fresh.schoolName || prev.schoolName)) {
+                    return prev;
+                  }
+                  return {
+                    ...prev,
+                    teacherName: fresh.fullName,
+                    schoolName: fresh.schoolName || prev.schoolName,
+                  };
+                });
               }
             }
           }
@@ -274,9 +349,19 @@ export default function App() {
   // Keep allUserAccounts synchronized with currentUser's live active timer
   useEffect(() => {
     if (currentUser?.id) {
-      setAllUserAccounts((prev) =>
-        prev.map((a) => (a.id === currentUser.id ? currentUser : a))
-      );
+      setAllUserAccounts((prev) => {
+        const found = prev.find((a) => a.id === currentUser.id);
+        if (
+          found &&
+          found.activeSecondsToday === currentUser.activeSecondsToday &&
+          found.activeMinutesToday === currentUser.activeMinutesToday &&
+          found.lastActiveTimestamp === currentUser.lastActiveTimestamp &&
+          found.lastActiveDate === currentUser.lastActiveDate
+        ) {
+          return prev;
+        }
+        return prev.map((a) => (a.id === currentUser.id ? currentUser : a));
+      });
     }
   }, [currentUser]);
 
@@ -401,6 +486,88 @@ export default function App() {
       oldPlanFileName: '',
     }));
     showToast('Đã khởi tạo bài mới, chuyển về Tab 1 để thiết lập!', 'info');
+  };
+
+  // Function to add a plan (current or specified) into Tab 3 combine list
+  const handleAddPlanToCombineList = (planToAdd?: LessonPlanOutput) => {
+    const targetPlan = planToAdd || currentPlan;
+    if (!targetPlan) {
+      showToast('Chưa có giáo án để lưu vào Tab 3!', 'error');
+      return;
+    }
+
+    setCombineList((prev) => {
+      const nextIdx = prev.length + 1;
+      const newItem: SavedCombineItem = {
+        id: 'combine-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+        autoIndex: nextIdx,
+        mergeOrder: nextIdx,
+        selected: true,
+        title: targetPlan.lessonTitle || 'Kế hoạch bài dạy',
+        schoolLevel: targetPlan.schoolLevel || config.schoolLevel || 'Mầm non',
+        grade: targetPlan.grade || config.grade || '',
+        subject: targetPlan.subject || config.subject || '',
+        createdAt: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' + new Date().toLocaleDateString('vi-VN'),
+        source: 'generated',
+        plan: targetPlan,
+      };
+      return [...prev, newItem];
+    });
+
+    showToast(`Đã lưu bài "${targetPlan.lessonTitle || 'Bài soạn'}" vào Tab 3!`, 'success');
+  };
+
+  // Function to export multiple selected plans merged into a single Word document
+  const handleExportMergedDocx = async (
+    selectedItems: SavedCombineItem[],
+    customWeekConfig?: CombineWeekConfig
+  ): Promise<boolean> => {
+    if (!selectedItems || selectedItems.length === 0) {
+      showToast('Vui lòng tích chọn ít nhất 1 bài soạn để ghép!', 'info');
+      return false;
+    }
+
+    setIsExportingDocx(true);
+    try {
+      const activeWeekCfg = customWeekConfig || weekConfig;
+      const sortedPlans = [...selectedItems]
+        .sort((a, b) => a.mergeOrder - b.mergeOrder)
+        .map((item) => ({
+          ...item.plan,
+          prepDate: item.prepDate,
+          teachDate: item.teachDate,
+          dayOfWeek: item.dayOfWeek,
+          daysOfWeek: item.daysOfWeek,
+          activitySection: item.activitySection,
+          activitySectionTitle: item.activitySectionTitle,
+        }));
+
+      const cleanWeekName = activeWeekCfg?.enabled && activeWeekCfg.weekTitle
+        ? activeWeekCfg.weekTitle.replace(/[^a-zA-Z0-9\u00C0-\u1EF9]/g, '_')
+        : '';
+      const mergedTitleName = cleanWeekName
+        ? `${cleanWeekName}_GHEP_${selectedItems.length}_BAI_${new Date().toISOString().slice(0, 10)}`
+        : `GHEP_HOAN_CHINH_${selectedItems.length}_BAI_${new Date().toISOString().slice(0, 10)}`;
+
+      const success = await exportMultipleMergedLessonPlansToDocx(
+        sortedPlans,
+        mergedTitleName,
+        config.imageSlots || [],
+        config.tableLayout || 'two_column',
+        activeWeekCfg
+      );
+
+      if (success) {
+        showToast(`Đã xuất file Word tổng hợp (${selectedItems.length} bài) thành công!`, 'success');
+      }
+      return success;
+    } catch (err) {
+      console.error('Error exporting merged docx:', err);
+      showToast('Có lỗi khi xuất file Word tổng hợp.', 'error');
+      return false;
+    } finally {
+      setIsExportingDocx(false);
+    }
   };
 
   // Generate Lesson Plan via Gemini Server Endpoint
@@ -603,6 +770,8 @@ export default function App() {
       if (finalPlan) {
         setCurrentPlan(finalPlan);
         setProgressSteps({ 1: 'done', 2: 'done', 3: 'done', 4: 'done' });
+        // Automatically save newly generated lesson plan into Tab 3 list
+        handleAddPlanToCombineList(finalPlan);
       } else if (!controller.signal.aborted) {
         throw new Error('Hệ thống đang bận hoặc quá tải, vui lòng thử lại sau giây lát.');
       }
@@ -846,6 +1015,24 @@ export default function App() {
                     </span>
                   ) : null}
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('combine')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold tracking-wide transition-all cursor-pointer whitespace-nowrap ${
+                    activeTab === 'combine'
+                      ? 'bg-gradient-to-r from-amber-700 via-amber-800 to-amber-900 text-white shadow-xs'
+                      : 'text-slate-700 hover:text-amber-900 hover:bg-white/80'
+                  }`}
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>TAB 3: KHO BÀI SOẠN & GHÉP NỐI GIÁO ÁN</span>
+                  {combineList.length > 0 && (
+                    <span className="inline-flex items-center justify-center min-w-5 h-4 px-1 rounded-full text-[9.5px] bg-amber-400 text-amber-950 font-black">
+                      {combineList.length}
+                    </span>
+                  )}
+                </button>
               </div>
 
               {/* Quick Action Cluster (Soạn bài mới -> Công thức Word nếu Toán -> Tải pptx -> Tải docx) */}
@@ -943,7 +1130,7 @@ export default function App() {
               hasPlan={Boolean(currentPlan)}
             />
           </div>
-        ) : (
+        ) : activeTab === 'result' ? (
           /* TAB 2: Kết quả bài soạn độc lập (Full screen / Mở to hết màn hình) */
           <div className="w-full flex flex-col flex-1 animate-in fade-in duration-300">
             <RightResultEditor
@@ -966,6 +1153,22 @@ export default function App() {
               mathFormulaFormat={config.mathFormulaFormat || 'word_equation'}
               onMathFormulaFormatChange={(fmt) => setConfig((prev) => ({ ...prev, mathFormulaFormat: fmt }))}
               onBackToConfig={() => setActiveTab('config')}
+            />
+          </div>
+        ) : (
+          /* TAB 3: Kho bài soạn & Ghép nối bài soạn Word tổng hợp */
+          <div className="w-full">
+            <CombineLessonPlansTab
+              combineList={combineList}
+              onUpdateCombineList={(newList) => setCombineList(newList)}
+              onAddCurrentPlan={() => handleAddPlanToCombineList()}
+              currentPlan={currentPlan}
+              onExportMergedDocx={handleExportMergedDocx}
+              isExporting={isExportingDocx}
+              onSelectTab={(tab) => setActiveTab(tab)}
+              onViewPlanDetails={(p) => setCurrentPlan(p)}
+              weekConfig={weekConfig}
+              onUpdateWeekConfig={handleUpdateWeekConfig}
             />
           </div>
         )}

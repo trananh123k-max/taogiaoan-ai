@@ -20,6 +20,8 @@ export type PreschoolDomainType =
   | 'VIETNAMESE_ENHANCE' // Hoạt động tăng cường tiếng Việt
   | 'LETTER_TRACING' // Hoạt động tập tô chữ cái
   | 'LETTER_GAME' // Hoạt động trò chơi chữ cái
+  | 'TALK_RECOGNIZE' // Hoạt động nhận biết tập nói
+  | 'OBJECT_PLAY' // Hoạt động với đồ vật
   | 'GENERAL'; // Mầm non chung
 
 export interface PreschoolDomainInfo {
@@ -54,6 +56,39 @@ export function stripPreschoolAICodes(text?: string): string {
   cleaned = cleaned.replace(/\bNLS\s+\d+\.[A-Z0-9\.]+\b/gi, '');
 
   return cleaned.replace(/\n{3,}/g, '\n\n').trim();
+}
+
+/**
+ * Strips high school indicator codes (e.g., AI 6.A1.1, 10.C3.1, NLS 1.1.TC1a)
+ * but PRESERVES [Tích hợp AI], [Tích hợp NLS], and description blocks for preschool.
+ */
+export function stripPreschoolAICodesOnly(text?: string): string {
+  if (!text || typeof text !== 'string') return text || '';
+  let cleaned = text;
+
+  // Remove specific code parentheticals/brackets like (AI 6.A1.1) or [AI 10.C3.1]
+  cleaned = cleaned.replace(/[\[\(]\s*AI\s+[a-z0-9._\-]+\s*[\]\)]/gi, '');
+  cleaned = cleaned.replace(/[\[\(]\s*NLS\s+[a-z0-9._\-]+\s*[\]\)]/gi, '');
+
+  // Remove standalone indicator codes like "AI 10.C3.1:" or "6.A1.1"
+  cleaned = cleaned.replace(/\bAI\s+\d+\.[A-Z0-9\.]+:?\b/gi, '');
+  cleaned = cleaned.replace(/\bNLS\s+\d+\.[A-Z0-9\.]+:?\b/gi, '');
+
+  return cleaned.replace(/\n{3,}/g, '\n\n').trim();
+}
+
+/**
+ * Removes internal labels like "(Bản cũ)", "(Bản mới)", "(Mẫu mới)", "(Bản chuẩn)", "(Quan sát)", "(Trò chơi)"
+ * from display strings in headers, preview cards, and exported Word documents.
+ */
+export function cleanPreschoolSubjectDisplay(subject?: string): string {
+  if (!subject || typeof subject !== 'string') return '';
+  let cleaned = subject
+    .replace(/\s*\([^)]*(?:Bản cũ|Bản mới|Mẫu mới|Mẫu cũ|Bản chuẩn|Theo mẫu mới|Mẫu mới & Bản chuẩn|Quan sát|Trò chơi|5 bước|3 bước)[^)]*\)/gi, '')
+    .replace(/\s*(?:Bản cũ|Bản mới|Mẫu mới|Mẫu cũ|bản cũ|bản mới|mẫu cũ|mẫu mới)\b/gi, '')
+    .replace(/\s+(?:1|2)\s*$/g, '')
+    .trim();
+  return cleaned;
 }
 
 /**
@@ -194,8 +229,63 @@ export function detectPreschoolDomain(
     };
   }
 
-  // 1.9 SKILLS & SOCIAL (Tình cảm - Xã hội / Kỹ năng sống) - HIGH PRIORITY when subject is explicitly Tình cảm / Xã hội
-  const isSkillsSubject = s.includes('tình cảm') || s.includes('kỹ năng') || (s.includes('xã hội') && !s.includes('khoa học'));
+  // 1.8.1 HOẠT ĐỘNG NHẬN BIẾT TẬP NÓI
+  if (
+    s.includes('nhận biết tập nói') ||
+    s.includes('nbtn') ||
+    s.includes('tập nói') ||
+    (s.includes('nhận biết') && !s.includes('chữ cái') && !s.includes('toán') && !s.includes('khoa học')) ||
+    t.includes('nhận biết tập nói') ||
+    t.includes('nbtn') ||
+    t.includes('tập nói')
+  ) {
+    return {
+      domainType: 'TALK_RECOGNIZE',
+      mainHeader: 'NHẬN BIẾT TẬP NÓI',
+      defaultDomainName: 'Nhận biết tập nói',
+      isMusic: false,
+    };
+  }
+
+  // 1.8.2 HOẠT ĐỘNG VỚI ĐỒ VẬT / LĨNH VỰC PT THỂ CHẤT (HĐ VỚI ĐỒ VẬT)
+  if (
+    s.includes('đồ vật') ||
+    s.includes('hoạt động với đồ vật') ||
+    s.includes('hđ với đồ vật') ||
+    s.includes('với đồ vật') ||
+    s.includes('chơi với đồ vật') ||
+    t.includes('hoạt động với đồ vật') ||
+    t.includes('chơi với đồ vật') ||
+    t.includes('với đồ vật')
+  ) {
+    return {
+      domainType: 'OBJECT_PLAY',
+      mainHeader: s.includes('thể chất') ? 'LĨNH VỰC PT THỂ CHẤT (HĐ VỚI ĐỒ VẬT)' : 'HOẠT ĐỘNG VỚI ĐỒ VẬT',
+      defaultDomainName: s.includes('thể chất') ? 'Lĩnh vực PT Thể chất (HĐ với đồ vật)' : 'Hoạt động với đồ vật',
+      isMusic: false,
+    };
+  }
+
+  // 1.8.3 NHẬN BIẾT PHÂN BIỆT / LĨNH VỰC NHẬN BIẾT PHÂN BIỆT
+  if (
+    s.includes('phân biệt') ||
+    s.includes('nhận biết phân biệt') ||
+    s.includes('nbpb') ||
+    t.includes('nhận biết phân biệt') ||
+    t.includes('phân biệt màu') ||
+    t.includes('phân biệt to nhỏ') ||
+    t.includes('phân biệt hình')
+  ) {
+    return {
+      domainType: 'SCIENCE',
+      mainHeader: 'LĨNH VỰC NHẬN BIẾT PHÂN BIỆT',
+      defaultDomainName: 'Lĩnh vực Nhận biết phân biệt',
+      isMusic: false,
+    };
+  }
+
+  // 1.9 SKILLS & SOCIAL (Tình cảm - Xã hội / Kỹ năng xã hội KNXH) - HIGH PRIORITY when subject is explicitly Tình cảm / Xã hội / KNXH
+  const isSkillsSubject = s.includes('tình cảm') || s.includes('kỹ năng') || s.includes('knxh') || (s.includes('xã hội') && !s.includes('khoa học'));
   const isSkillsTitle = t.includes('tết') || t.includes('cảm xúc') || t.includes('lễ phép') ||
     t.includes('xin phép') || t.includes('chào hỏi') || t.includes('cất đồ chơi') ||
     t.includes('tự phục vụ') || t.includes('tâm thế vào lớp') || t.includes('quy tắc lớp học') ||
@@ -203,13 +293,15 @@ export function detectPreschoolDomain(
     t.includes('chú công an') || t.includes('bác cấp dưỡng') || t.includes('cô giáo') ||
     t.includes('trường mầm non') || t.includes('nghề nghiệp') || t.includes('gia đình') ||
     t.includes('lễ hội') || t.includes('quê hương') || t.includes('làng nghề') ||
+    t.includes('kỹ năng xã hội') || t.includes('knxh') ||
     t.includes('trò chuyện về');
 
   if (isSkillsSubject || (isSkillsTitle && !s.includes('thể chất') && !s.includes('thể dục') && !s.includes('khoa học') && !s.includes('toán') && !s.includes('âm nhạc') && !s.includes('hát'))) {
+    const isKnxhExplicit = s.includes('knxh') || t.includes('knxh') || s.includes('kỹ năng xã hội') || t.includes('kỹ năng xã hội');
     return {
       domainType: 'SKILLS',
-      mainHeader: 'GIÁO ÁN TÌNH CẢM - XÃ HỘI',
-      defaultDomainName: 'Lĩnh vực Phát triển tình cảm - kỹ năng xã hội',
+      mainHeader: isKnxhExplicit ? 'GIÁO ÁN TÌNH CẢM - XÃ HỘI (KNXH)' : 'GIÁO ÁN TÌNH CẢM - XÃ HỘI',
+      defaultDomainName: isKnxhExplicit ? 'Lĩnh vực Phát triển tình cảm - kỹ năng xã hội (KNXH)' : 'Lĩnh vực Phát triển tình cảm - kỹ năng xã hội',
       isMusic: false,
     };
   }
@@ -700,6 +792,11 @@ export function formatPreschoolPhysicalActivities(
       .replace(/^a[\.\)]\s*Dạy hát[^\n]*\n?/gmi, '')
       .replace(/^b[\.\)]\s*Nghe hát[^\n]*\n?/gmi, '')
       .replace(/Trò chơi âm nhạc\s*[:'"][^\n]*\n?/gmi, '');
+
+    // Format "Cách chơi:" and "Luật chơi:" with hyphen prefix "- "
+    teacherAction = teacherAction
+      .replace(/(?:\n|^)\s*\*?\*?\s*Cách chơi\s*[:\-\–—]\s*\*?\*?/gi, '\n- Cách chơi:')
+      .replace(/(?:\n|^)\s*\*?\*?\s*Luật chơi\s*[:\-\–—]\s*\*?\*?/gi, '\n- Luật chơi:');
     studentAction = studentAction
       .replace(/^a[\.\)][^\n]*\n?/gmi, '')
       .replace(/^b[\.\)][^\n]*\n?/gmi, '');
@@ -1089,21 +1186,21 @@ export function generateDefaultPreschoolActivities(
   }
 
   if (domain.domainType === 'PLAY_INDOOR') {
-    const isOld5Step = (subject || '').includes('Bản cũ') || (subject || '').trim() === 'HOẠT ĐỘNG VUI CHƠI TRONG LỚP' || (title || '').toLowerCase().includes('bản cũ') || (title || '').toLowerCase().includes('truyền thống') || (title || '').toLowerCase().includes('5 bước');
+    const isOld5Step = (subject || '').includes('5 bước') || (subject || '').includes('Bản cũ') || (subject || '').trim() === 'HOẠT ĐỘNG VUI CHƠI TRONG LỚP' || (title || '').toLowerCase().includes('bản cũ') || (title || '').toLowerCase().includes('truyền thống') || (title || '').toLowerCase().includes('5 bước') || (title || '').toLowerCase().includes('4 bước');
     
     if (isOld5Step) {
-      // HOẠT ĐỘNG VUI CHƠI TRONG LỚP (BẢN CŨ / TRUYỀN THỐNG 5 BƯỚC)
+      // HOẠT ĐỘNG VUI CHƠI TRONG LỚP (BẢN CŨ / TRUYỀN THỐNG 4 BƯỚC THEO MẪU MỚI KHÔI PHỤC)
       return [
         {
           id: 'act-1',
           index: 1,
-          name: '1. Ổn định tổ chức và trò chuyện chủ đề',
+          name: '1. Gây hứng thú',
           duration: '3 - 5 phút',
-          objective: 'Trẻ hào hứng, tập trung và chuẩn bị tâm thế bước vào giờ hoạt động góc',
+          objective: 'Trẻ hào hứng, tập trung và sẵn sàng tham gia hoạt động góc',
           step1: {
-            title: '1. Ổn định tổ chức và trò chuyện chủ đề',
-            teacherAction: `- Cô cùng trẻ hát và vận động theo bài hát chủ đề (ví dụ "Trường chúng cháu là trường mầm non" / "Đố bạn").\n- Trò chuyện dẫn dắt gợi mở cảm xúc về chủ đề: "${title}".\n- Giới thiệu các góc chơi sẽ mở trong buổi chơi hôm nay.`,
-            studentAction: `- Trẻ vui tươi hát và vận động theo giai điệu bài hát cùng cô.\n- Trẻ hào hứng trả lời câu hỏi và đón chờ giờ chơi.`,
+            title: '1. Gây hứng thú',
+            teacherAction: `- Cô cho trẻ hát bài/đọc thơ theo chủ đề (ví dụ "Trường chúng cháu là trường mầm non" / "Đố bạn").\n- Cô trò chuyện với trẻ về chủ đề "${title}":\n  + Các con đang học ở trường/lớp nào?\n  + Trong trường/lớp có những khu vực nào?\n  + Ở trường các con thường được làm những gì?\n  + Khi chơi cùng các bạn, chúng mình cần làm gì để cùng nhau chơi vui vẻ?\n- Cô giới thiệu các góc chơi hôm nay và dẫn dắt trẻ lựa chọn góc chơi phù hợp với sở thích.`,
+            studentAction: `- Trẻ vui tươi hát và vận động theo giai điệu bài hát cùng cô.\n- Trẻ hăng hái trả lời các câu hỏi trò chuyện của cô.\n- Trẻ chú ý lắng nghe cô giới thiệu các góc chơi.`,
             productExpected: '',
             digitalOrAiTool: '',
           },
@@ -1113,11 +1210,11 @@ export function generateDefaultPreschoolActivities(
           index: 2,
           name: '2. Thỏa thuận trước khi chơi',
           duration: '5 - 7 phút',
-          objective: 'Trẻ tự chọn góc chơi, nhận vai chơi và thống nhất nội quy chơi',
+          objective: 'Trẻ tự chọn góc chơi, nhận vai chơi, thỏa thuận nhóm trưởng, phân công công việc và nắm quy tắc chơi',
           step1: {
             title: '2. Thỏa thuận trước khi chơi',
-            teacherAction: `- Hướng dẫn trẻ thỏa thuận nội dung chơi tại các góc: Góc Phân vai, Góc Xây dựng, Góc Nghệ thuật, Góc Học tập - Khám phá.\n- Cho trẻ tự nguyện nhận vai chơi và chọn góc chơi yêu thích.\n- Nhắc nhở quy tắc chơi văn minh: Đoàn kết, nhường nhịn, không ném đồ chơi, nói năng nhẹ nhàng.\n- Cho trẻ nhẹ nhàng di chuyển về góc chơi đã nhận.`,
-            studentAction: `- Trẻ tự tin giơ tay lựa chọn góc chơi và nhận vai diễn yêu thích.\n- Trẻ ghi nhớ và nhắc lại quy tắc chơi văn minh cùng cô.\n- Trẻ nhẹ nhàng di chuyển về các góc chơi.`,
+            teacherAction: `- Cô giới thiệu các góc chơi: Góc Xây dựng và Góc Phân vai (hoặc các góc mở hôm nay).\n- Đàm thoại gợi hỏi phân vai chơi:\n  + "Bạn nào muốn làm những người thợ xây để xây dựng công trình?"\n  + "Bạn nào muốn đóng vai cô giáo, học sinh / gia đình / bác sĩ?"\n- Cho trẻ tự nhận góc chơi, thỏa thuận nhóm trưởng và phân công công việc cho từng nhóm.\n- Cô gợi ý trẻ suy nghĩ trước về nội dung chơi và cách phối hợp với các bạn.\n- Nhắc trẻ các quy tắc trong khi chơi: Đoàn kết, biết chia sẻ và nhường nhịn nhau, không tranh giành đồ chơi, biết giữ gìn đồ dùng, đồ chơi và cất đúng nơi quy định sau khi kết thúc hoạt động.`,
+            studentAction: `- Trẻ tự tin giơ tay lựa chọn góc chơi và nhận vai diễn yêu thích.\n- Trẻ về nhóm thỏa thuận phân công nhiệm vụ cụ thể cho từng thành viên.\n- Trẻ suy nghĩ ý tưởng chơi và cách phối hợp cùng bạn.\n- Trẻ ghi nhớ và nhắc lại quy tắc chơi văn minh.`,
             productExpected: '',
             digitalOrAiTool: '',
           },
@@ -1125,13 +1222,13 @@ export function generateDefaultPreschoolActivities(
         {
           id: 'act-3',
           index: 3,
-          name: '3. Quá trình chơi / Trải nghiệm tại các góc chơi',
+          name: '3. Quá trình chơi',
           duration: '18 - 22 phút',
-          objective: 'Trẻ tích cực thể hiện vai chơi, sáng tạo sản phẩm và giao lưu liên góc',
+          objective: 'Trẻ tích cực thể hiện vai chơi, sáng tạo sản phẩm, giao lưu liên góc và thể hiện kỹ năng hợp tác',
           step1: {
-            title: '3. Quá trình chơi / Trải nghiệm tại các góc chơi',
-            teacherAction: `- Cô bao quát toàn lớp, hỗ trợ các góc chơi và đóng vai người chơi gợi mở liên kết giữa các góc:\n  + Góc Nghệ thuật: Hướng dẫn trẻ vẽ, xé dán, nặn, biểu diễn văn nghệ theo chủ đề.\n  + Góc Học tập: Hướng dẫn trẻ phân loại đồ vật, ghép tranh, xem truyện tranh.\n  + Góc Phân vai: Hướng dẫn mẹ bế con, bác sĩ khám bệnh, người bán hàng niềm nở.\n  + Góc Xây dựng: Gợi ý các bác thợ xây lắp ghép công trình vững chắc, đẹp mắt.`,
-            studentAction: `- Trẻ say sưa thực hiện nhiệm vụ ở từng góc chơi, trao đổi rôm rả với bạn.\n- Trẻ nhập vai tự nhiên, cử chỉ ân cần, giao tiếp lễ phép và liên kết sôi nổi giữa các góc.`,
+            title: '3. Quá trình chơi',
+            teacherAction: `- Trẻ về các góc chơi đã chọn và tiến hành hoạt động theo nội dung đã chuẩn bị:\n  + Góc Xây dựng: Trẻ sử dụng các khối gỗ, khối hình, bộ lắp ghép, hàng rào, cổng trường, cây xanh để xây dựng công trình theo chủ đề. Trẻ bàn bạc bố trí khu vực. Khuyến khích trẻ sắp xếp các công trình hợp lý, biết phối hợp với bạn trong quá trình xây dựng. Cô gợi mở: "Trường của nhóm mình có cổng trường ở đâu?", "Các con muốn làm sân chơi ở vị trí nào?", "Muốn trường đẹp hơn chúng mình có thể trồng thêm cây xanh ở đâu?".\n  + Góc Phân vai: Trẻ nhận vai cô giáo, học sinh và cùng tham gia các hoạt động quen thuộc ở lớp. Trẻ đóng vai cô giáo đón học sinh, hướng dẫn cất cặp sách, ngồi học, vui chơi. Trẻ đóng vai học sinh biết chào cô, chào bạn, cất đồ dùng. Khuyến khích trẻ sử dụng lời nói, cử chỉ phù hợp với vai chơi. Cô gợi mở các tình huống: "Nếu có bạn mới đến lớp, con sẽ làm gì?", "Cô giáo muốn các bạn cất cặp sách thì cô sẽ nói như thế nào?", "Khi bạn cần giúp đỡ, con sẽ làm gì?".\n- Cô bao quát toàn bộ các góc chơi:\n  + Quan sát thái độ, hành vi giao tiếp và sự hợp tác giữa các trẻ trong nhóm.\n  + Kịp thời hỗ trợ, gợi mở thêm ý tưởng cho trẻ khi gặp khó khăn. Khuyến khích trẻ mạnh dạn thể hiện ý tưởng, chủ động lựa chọn cách chơi và phối hợp với bạn. Khuyến khích sự phối hợp giữa các góc.`,
+            studentAction: `- Trẻ về đúng góc chơi, tự giác bắt tay vào công việc đã phân công.\n- Nhóm xây dựng say sưa lắp ghép, bàn bạc bố trí công trình hài hòa, đẹp mắt.\n- Nhóm phân vai nhập vai tự nhiên, giao tiếp lịch sự, niềm nở, ân cần.\n- Trẻ tích cực trao đổi, tương tác và giao lưu liên kết giữa các góc chơi.`,
             productExpected: '',
             digitalOrAiTool: '',
           },
@@ -1139,27 +1236,13 @@ export function generateDefaultPreschoolActivities(
         {
           id: 'act-4',
           index: 4,
-          name: '4. Nhận xét sau khi chơi',
+          name: '4. Nhận xét – kết thúc',
           duration: '4 - 6 phút',
-          objective: 'Trẻ tham quan góc chơi nổi bật, chia sẻ sản phẩm và lắng nghe nhận xét',
+          objective: 'Trẻ tham quan chia sẻ sản phẩm, nhận xét cùng cô, thu dọn đồ chơi ngăn nắp và rửa tay',
           step1: {
-            title: '4. Nhận xét sau khi chơi',
-            teacherAction: `- Cô báo hiệu hết giờ chơi, tập trung trẻ lại.\n- Dẫn cả lớp đến tham quan 1 - 2 góc chơi nổi bật trong ngày.\n- Mời đại diện góc tự tin giới thiệu công trình/sản phẩm; các bạn góc khác nhận xét.\n- Cô nhận xét chung, khen ngợi tinh thần đoàn kết, sáng tạo và ý thức giữ gìn đồ chơi.`,
-            studentAction: `- Trẻ dừng tay khi nghe hiệu lệnh hết giờ và tập trung quanh cô.\n- Đại diện góc tự tin thuyết minh về công trình của mình.\n- Trẻ chăm chú lắng nghe, vỗ tay tuyên dương bạn.`,
-            productExpected: '',
-            digitalOrAiTool: '',
-          },
-        },
-        {
-          id: 'act-5',
-          index: 5,
-          name: '5. Kết thúc và thu dọn đồ chơi',
-          duration: '3 - 5 phút',
-          objective: 'Trẻ tự giác thu dọn, phân loại đồ chơi ngăn nắp vào đúng nơi quy định',
-          step1: {
-            title: '5. Kết thúc và thu dọn đồ chơi',
-            teacherAction: `- Hướng dẫn và cùng trẻ thu dọn đồ dùng đồ chơi về đúng các góc.\n- Kiểm tra và tuyên dương nề nếp gọn gàng, sạch sẽ của cả lớp.`,
-            studentAction: `- Trẻ nhanh nhẹn, tự giác phân loại và cất đồ chơi gọn gàng lên giá kệ.\n- Trẻ vui vẻ xếp hàng chuyển sang hoạt động tiếp theo.`,
+            title: '4. Nhận xét – kết thúc',
+            teacherAction: `- Cô đi đến từng góc chơi để nhận xét quá trình hoạt động của trẻ.\n- Biểu dương trẻ ở góc phân vai biết giao tiếp, thể hiện đúng vai chơi, biết chào hỏi và phối hợp với bạn.\n- Khen ngợi nhóm xây dựng biết phối hợp, biết bố trí các khu vực và có ý tưởng sáng tạo. Mời đại diện góc xây dựng chia sẻ về sản phẩm và những điều trẻ đã thực hiện trong quá trình chơi.\n- Khuyến khích trẻ nhận xét sản phẩm của nhóm mình và của nhóm bạn với thái độ vui vẻ, tôn trọng.\n- Nhắc nhở trẻ về phẩm chất trách nhiệm: Cùng nhau thu dọn đồ dùng, đồ chơi gọn gàng, cất đúng nơi quy định, rửa tay sạch sẽ sau khi kết thúc hoạt động.\n- Kết thúc hoạt động, cô cho trẻ rửa tay và chuyển sang hoạt động tiếp theo.`,
+            studentAction: `- Trẻ lắng nghe cô nhận xét tại từng góc chơi.\n- Đại diện góc chơi tự tin giới thiệu sản phẩm và công trình của nhóm mình.\n- Trẻ hào hứng nhận xét sản phẩm của mình và của bạn.\n- Trẻ tự giác, nhanh nhẹn thu dọn đồ dùng đồ chơi cất đúng nơi quy định, sau đó đi rửa tay sạch sẽ.`,
             productExpected: '',
             digitalOrAiTool: '',
           },
@@ -1177,8 +1260,8 @@ export function generateDefaultPreschoolActivities(
         objective: 'Trẻ hứng thú, thảo luận và lựa chọn góc chơi, nhận vai chơi và nắm rõ quy tắc chơi',
         step1: {
           title: '1. Thỏa thuận trước khi chơi',
-          teacherAction: `- Ổn định tổ chức: Cô cùng cả lớp hát vang bài hát theo chủ đề (ví dụ "Trường chúng cháu là trường mầm non" / "Đố bạn" / "Cháu yêu cô chú công nhân").\n- Trò chuyện dẫn dắt: Cô trò chuyện về chủ đề "${title}", gợi hỏi trẻ về các ý tưởng chơi hôm nay.\n- Giới thiệu các góc chơi và hướng dẫn trẻ thỏa thuận nội dung chơi:\n  + "Hôm nay lớp mình mở những góc chơi nào các con?" (Góc Nghệ thuật, Góc học tập - khám phá khoa học, Góc Phân vai, Góc Xây dựng).\n  + "Ở Góc Nghệ thuật, các con dự định sẽ tạo ra những sản phẩm gì?" (Vẽ tranh, nặn đồ chơi, hát múa biểu diễn văn nghệ theo chủ đề).\n  + "Ở Góc học tập - khám phá khoa học, các con sẽ khám phá điều gì?" (Phân loại đồ dùng, đếm số lượng, ghép tranh, đọc sách truyện).\n  + "Ở Góc Phân vai, ai sẽ nhận vai gia đình, bác sĩ khám bệnh, người bán hàng/bác cấp dưỡng?".\n  + "Ở Góc Xây dựng, các bác thợ xây sẽ xây dựng công trình gì hôm nay?".\n- Cho trẻ tự nguyện lựa chọn góc chơi và nhận vai chơi mình yêu thích.\n- Thống nhất quy tắc chơi văn minh: Chơi đoàn kết, nói năng nhẹ nhàng, không tranh giành đồ chơi, biết nhường nhịn và hợp tác cùng bạn bè, chơi xong cất dọn đồ chơi đúng nơi quy định của từng góc.\n- Cho trẻ nhẹ nhàng di chuyển về góc chơi đã chọn.`,
-          studentAction: `- Cả lớp hát và vận động vui tươi cùng cô theo bài hát chủ đề.\n- Trẻ hào hứng trò chuyện cùng cô, đưa ra các ý tưởng chơi phong phú.\n- Trẻ tự tin giơ tay lựa chọn góc chơi và nhận vai chơi mình yêu thích:\n  + Trẻ thích góc Nghệ thuật: "Con muốn vẽ tranh và nặn đồ chơi theo chủ đề ạ!".\n  + Trẻ thích góc Học tập: "Con muốn làm bài tập phân loại và ghép tranh cùng bạn ạ!".\n  + Trẻ thích góc Phân vai: "Con nhận làm bác sĩ / mẹ nấu ăn chăm sóc gia đình ạ!".\n  + Trẻ thích góc Xây dựng: "Chúng con sẽ cùng nhau xây dựng công trình thật đẹp ạ!".\n- Trẻ đồng thanh nhắc lại các quy tắc chơi văn minh.\n- Trẻ nhẹ nhàng đi về các góc chơi đã nhận.`,
+          teacherAction: `- Cô giới thiệu các góc chơi: “Hôm nay cô chuẩn bị cho các con 3 góc chơi rất thú vị.”\n+ Góc Nghệ thuật: Nặn những quả bóng thật đẹp.\n+ Góc Học tập - Khám phá khoa học: Phân loại đồ chơi theo hình dạng, màu sắc.\n+ Góc Phân vai: Cửa hàng đồ dùng - đồ chơi của bé.\n- Cô hỏi trẻ:\n+ Con thích chơi ở góc nào?\n+ Ở góc đó con sẽ chơi gì?\n+ Khi chơi cùng bạn, con phải như thế nào?\n- Trẻ chọn góc chơi\n+ Cô cho trẻ tự chọn góc chơi.\n+ Trẻ lấy ký hiệu của mình và mang về góc đã chọn.\n+ Cô nhắc trẻ không tranh giành đồ chơi, biết chơi cùng bạn và giữ gìn đồ dùng.\n- “Các con đã chọn được góc chơi rồi. Bây giờ chúng mình cùng về góc và bắt đầu chơi nhé!”`,
+          studentAction: `- Trẻ lắng nghe\n- Trẻ trả lời cô\n- Trẻ chọn góc chơi\n- Trẻ lấy ký hiệu về góc chơi\n- Trẻ lắng nghe\n- Trẻ lắng nghe`,
           productExpected: '',
           digitalOrAiTool: '',
         },
@@ -1191,8 +1274,8 @@ export function generateDefaultPreschoolActivities(
         objective: 'Trẻ tích cực nhập vai, phát huy tính sáng tạo và giao lưu liên kết giữa các góc chơi',
         step1: {
           title: '2. Theo dõi quá trình chơi',
-          teacherAction: `Cô bao quát toàn bộ lớp học, quan sát, hỗ trợ và gợi mở tình huống cho từng góc chơi:\n\n* Góc Nghệ thuật:\n- Hoạt động của cô:\n  + Gợi ý trẻ sử dụng các nguyên vật liệu mở (giấy màu, đất nặn, sáp màu, lá cây...) để tạo sản phẩm theo chủ đề "${title}".\n  + Bật nhạc không lời nhẹ nhàng tạo cảm xúc sáng tạo cho trẻ.\n  + Động viên nhóm âm nhạc biểu diễn các bài hát vui tươi.\n- Hoạt động của trẻ:\n  + Trẻ khéo léo vẽ, tô màu, nặn các sản phẩm ngộ nghĩnh đặt lên bảng con.\n  + Nhóm âm nhạc múa hát tự tin, gõ đệm phách tre nhịp nhàng.\n\n* Góc học tập - khám phá khoa học:\n- Hoạt động của cô:\n  + Gợi ý trẻ thực hiện các bài tập phân loại, so sánh, đếm số lượng, ghép hình hoặc làm thí nghiệm đơn giản.\n  + Đặt câu hỏi kích thích tư duy, khám phá của trẻ.\n- Hoạt động của trẻ:\n  + Trẻ say sưa xếp hình, ghép thẻ từ/thẻ số, phân loại đồ dùng chính xác.\n  + Trẻ trao đổi rôm rả với bạn về hiện tượng và kết quả khám phá.\n\n* Góc Phân vai:\n- Hoạt động của cô:\n  + Quan sát sự nhập vai của trẻ, nhập vai chơi khi cần thiết để gợi mở liên kết giữa các góc (ví dụ: cô đóng vai khách hàng đến mua đồ, bác sĩ đến thăm khám).\n  + Hướng dẫn trẻ giao tiếp lễ phép, thân thiện, dùng từ "cảm ơn", "xin chào".\n- Hoạt động của trẻ:\n  + Trẻ thể hiện đúng cử chỉ, hành động của vai diễn (mẹ bế búp bê, bác sĩ khám bệnh, người bán hàng niềm nở).\n  + Trẻ giao tiếp lịch sự và tích cực liên kết với các góc chơi khác.\n\n*(Góc Xây dựng: Trẻ cùng nhau xếp khối gỗ, hàng rào, cây xanh để hoàn thành công trình; cô đến tham quan và khen ngợi tinh thần hợp tác).*`,
-          studentAction: `- Trẻ tại Góc Nghệ thuật say sưa sáng tạo sản phẩm, tự hào khoe với bạn tranh vẽ và sản phẩm đất nặn đẹp mắt; nhóm âm nhạc múa hát rộn rã.\n- Trẻ tại Góc Học tập tập trung đếm số lượng, làm bài tập phân loại và cùng bạn xoay ghép các mảnh tranh hoàn chỉnh.\n- Trẻ tại Góc Phân vai nhập vai tự nhiên, cử chỉ ân cần, giọng nói ngọt ngào lễ phép; các vai chơi liên kết sôi nổi.\n- Trẻ góc Xây dựng phối hợp nhịp nhàng, chuyển khối gỗ cho nhau để hoàn thiện công trình to đẹp.`,
+          teacherAction: `Cô cho trẻ về các góc chơi, quan sát bao quát cả 3 góc, khuyến khích và gợi ý trẻ khi cần.\n* Góc Nghệ thuật: Nặn quả bóng\n- Cô gợi hỏi:\n+ Con đang nặn gì?\n+ Quả bóng của con có màu gì?\n+ Con làm thế nào để đất nặn thành hình tròn?\n+ Con muốn nặn quả bóng to hay nhỏ?\n- Cô khuyến khích: Con thử vo đất nặn thật tròn bằng hai bàn tay nhé.\n\n* Góc Học tập - Khám phá khoa học: Phân loại đồ chơi theo hình dạng, màu sắc\n- Cô gợi hỏi:\n+ Con đang phân loại đồ chơi như thế nào?\n+ Những đồ chơi này có cùng màu gì?\n+ Đồ chơi nào có dạng hình tròn?\n+ Vì sao con xếp những đồ chơi này cùng một nhóm?\n- Cô khuyến khích: Con hãy quan sát thật kỹ màu sắc và hình dạng của đồ chơi nhé.\n\n* Góc Phân vai: Cửa hàng đồ dùng, đồ chơi\n- Cô gợi hỏi:\n+ Con đang đóng vai gì?\n+ Người bán hàng làm công việc gì?\n+ Người mua muốn mua đồ chơi gì?\n+ Khi mua hàng con nói như thế nào?\n- Cô gợi ý trẻ giao tiếp: Cháu muốn mua quả bóng ạ. Của cháu 10 nghìn đồng. Cháu cảm ơn ạ.\n- Khuyến khích trẻ cùng chơi, trao đổi với nhau.\n- Hỗ trợ trẻ còn rụt rè.\n- Nhắc trẻ lấy và cất đồ chơi đúng nơi quy định.`,
+          studentAction: `- Trẻ về góc chơi\n- Trẻ chơi và trả lời cô\n- Trẻ lắng nghe\n- Trẻ chơi và trả lời cô\n- Trẻ lắng nghe\n- Trẻ chơi và trả lời cô\n- Trẻ lắng nghe cô gợi ý\n- Trẻ chơi đoàn kết`,
           productExpected: '',
           digitalOrAiTool: '',
         },
@@ -1205,8 +1288,8 @@ export function generateDefaultPreschoolActivities(
         objective: 'Trẻ tham quan chia sẻ sản phẩm, cô nhận xét tuyên dương và cùng trẻ thu dọn đồ chơi ngăn nắp',
         step1: {
           title: '3. Nhận xét sau khi chơi',
-          teacherAction: `- Cô dùng hiệu lệnh gõ xắc xô nhẹ nhàng báo hiệu giờ chơi đã kết thúc: "Đã hết giờ chơi rồi, cô mời các con cùng dừng tay nào!".\n- Cô tập trung trẻ lại và dẫn cả lớp đến tham quan góc chơi nổi bật nhất hôm nay.\n- Mời đại diện các góc tự tin giới thiệu về sản phẩm, công trình hoặc vai diễn của nhóm mình.\n- Cho trẻ ở các góc khác nhận xét, đóng góp ý kiến khen ngợi bạn.\n- Cô nhận xét chung toàn bộ buổi chơi:\n  + Tuyên dương tinh thần đoàn kết, sự khéo léo, sáng tạo và ý thức giữ gìn đồ chơi của trẻ.\n  + Động viên, khích lệ những trẻ còn nhút nhát để lần sau tự tin hơn.\n- Cô hướng dẫn và cùng trẻ thu dọn đồ dùng đồ chơi: "Bây giờ chúng mình cùng thu dọn đồ chơi về đúng vị trí thật ngăn nắp nhé!".\n- Cô và trẻ cùng phân loại, cất đồ chơi gọn gàng lên giá kệ của từng góc.`,
-          studentAction: `- Trẻ dừng tay ngay khi nghe tiếng xắc xô báo hiệu hết giờ.\n- Trẻ cùng cô đến tham quan các góc chơi trọng tâm.\n- Đại diện các góc tự tin thuyết minh về công trình và sản phẩm của góc mình.\n- Trẻ các góc khác lắng nghe, vỗ tay tán thưởng và chúc mừng bạn.\n- Trẻ chú ý lắng nghe cô nhận xét với nét mặt tươi vui, phấn khởi.\n- Trẻ tự giác, nhanh nhẹn thu dọn đồ dùng đồ chơi, phân loại và xếp ngay ngắn vào đúng nơi quy định của từng góc.`,
+          teacherAction: `Cô tập trung trẻ và nói: “Các con đã chơi rất vui. Bây giờ cô và các con cùng đi tham quan xem các bạn đã chơi và tạo ra những sản phẩm gì nhé!”\n- Trẻ lần lượt tham quan góc học tập - khám phá khoa học. Tham quan góc Phân vai.\n- Cuối cùng cô cho trẻ về góc Nghệ thuật. Trẻ ở góc Nghệ thuật giới thiệu sản phẩm.\n- Cô mời trẻ ở góc Nghệ thuật giới thiệu:\n+ Các con đã chơi ở góc nào?\n+ Hôm nay các con đã làm gì?\n+ Đây là sản phẩm gì?\n+ Con nặn quả bóng màu gì?\n+ Con thích sản phẩm nào nhất?\n-> Trẻ giới thiệu sản phẩm của mình và của nhóm.\n- Cô nhận xét chung: Hôm nay các con chơi rất vui và biết phối hợp với nhau. Cô khen cả lớp!\n- Bây giờ chúng mình cùng thu dọn đồ chơi thật gọn gàng nhé.`,
+          studentAction: `- Trẻ tập trung quanh cô\n- Trẻ đi tham quan các góc chơi\n- Trẻ đến tham quan góc nghệ thuật\n- Nghe nhóm bạn giới thiệu\n- Trẻ giới thiệu\n- Trẻ nghe cô nhận xét\n- Cất đồ dùng đúng nơi quy định`,
           productExpected: '',
           digitalOrAiTool: '',
         },
@@ -1215,21 +1298,21 @@ export function generateDefaultPreschoolActivities(
   }
 
   if (domain.domainType === 'OUTDOOR') {
-    const isOld5Step = (subject || '').includes('Bản cũ') || (subject || '').trim() === 'HOẠT ĐỘNG NGOÀI TRỜI' || (title || '').toLowerCase().includes('bản cũ') || (title || '').toLowerCase().includes('truyền thống') || (title || '').toLowerCase().includes('5 bước');
+    const isOld5Step = (subject || '').includes('5 bước') || (subject || '').includes('Bản cũ') || (subject || '').trim() === 'HOẠT ĐỘNG NGOÀI TRỜI' || (title || '').toLowerCase().includes('bản cũ') || (title || '').toLowerCase().includes('truyền thống') || (title || '').toLowerCase().includes('5 bước') || (title || '').toLowerCase().includes('3 bước');
     
     if (isOld5Step) {
-      // HOẠT ĐỘNG NGOÀI TRỜI (BẢN CŨ / TRUYỀN THỐNG 5 BƯỚC)
+      // HOẠT ĐỘNG NGOÀI TRỜI (BẢN CŨ / TRUYỀN THỐNG 3 BƯỚC TIẾN TRÌNH THEO MẪU MỚI KHÔI PHỤC)
       return [
         {
           id: 'act-1',
           index: 1,
-          name: '1. Ổn định tổ chức và chuẩn bị',
+          name: '1. Trước khi chơi',
           duration: '3 - 5 phút',
-          objective: 'Kiểm tra sĩ số, trang phục, dặn dò an toàn khi ra sân',
+          objective: 'Trẻ tập trung, kiểm tra trang phục, lắng nghe trò chuyện dẫn dắt và dặn dò quy tắc an toàn khi ra sân',
           step1: {
-            title: '1. Ổn định tổ chức và chuẩn bị',
-            teacherAction: `- Cô tập trung trẻ, kiểm tra sĩ số, trang phục, giày dép, mũ nón đảm bảo gọn gàng, phù hợp thời tiết.\n- Dặn dò quy định an toàn khi ra sân: Đi theo hàng, không xô đẩy, lắng nghe hiệu lệnh của cô.\n- Dẫn dắt tạo hứng thú, cho trẻ xếp hàng nhẹ nhàng ra sân trường.`,
-            studentAction: `- Trẻ tập trung chỉnh tề trang phục, lắng nghe cô dặn dò an toàn và vui vẻ xếp hàng ra sân.`,
+            title: '1. Trước khi chơi',
+            teacherAction: `- Cô tập trung trẻ lại, kiểm tra sĩ số, quan sát trang phục và nhắc trẻ đi giày dép ngay ngắn trước khi ra sân.\n- Cô trò chuyện với trẻ:\n  + Mỗi ngày đến trường, các con thường nhìn thấy những gì?\n  + Khi đi tham quan quanh trường, chúng mình cần đi như thế nào để đảm bảo an toàn?\n- Cô giới thiệu nội dung hoạt động:\n  + Quan sát ${title}.\n  + Chơi trò chơi vận động / Trò chơi dân gian / Chơi tự do.\n- Cô dặn dò trẻ trước khi chơi: Đi theo cô, không tự ý chạy ra ngoài khu vực quy định; biết quan sát, lắng nghe và trả lời câu hỏi. Khi chơi cùng bạn phải đoàn kết, không tranh giành, không chen lấn, xô đẩy; biết giữ gìn cây xanh, không hái hoa, bẻ cành, không vứt rác.`,
+            studentAction: `- Trẻ tập trung chỉnh tề trang phục, lắng nghe cô dặn dò an toàn và hào hứng hưởng ứng bài học.`,
             productExpected: '',
             digitalOrAiTool: '',
           },
@@ -1237,13 +1320,13 @@ export function generateDefaultPreschoolActivities(
         {
           id: 'act-2',
           index: 2,
-          name: '2. Hoạt động có mục đích (Quan sát / Khám phá có chủ đích)',
-          duration: '10 - 15 phút',
-          objective: 'Trẻ dùng đa giác quan quan sát, tìm hiểu đối tượng ngoài trời',
+          name: '2. Trong khi chơi',
+          duration: '20 - 25 phút',
+          objective: 'Trẻ tích cực quan sát, đàm thoại tự tin, tham gia trò chơi có mục đích và tự do lựa chọn đồ chơi ngoài trời an toàn',
           step1: {
-            title: '2. Hoạt động có mục đích (Quan sát / Khám phá có chủ đích)',
-            teacherAction: `- Cho trẻ quây quần quanh đối tượng quan sát (${title}).\n- Đặt câu hỏi gợi mở về đặc điểm, hình dáng, màu sắc, công dụng, ích lợi.\n- Cho trẻ đến gần sờ, ngửi, cảm nhận và nêu nhận xét.\n- Cô chuẩn hóa kiến thức, giáo dục trẻ yêu quý và bảo vệ thiên nhiên/môi trường.`,
-            studentAction: `- Trẻ chăm chú quan sát, tự tin trả lời các câu hỏi gợi mở của cô.\n- Trẻ sờ, cảm nhận và trao đổi rôm rả với bạn về đối tượng quan sát.`,
+            title: '2. Trong khi chơi',
+            teacherAction: `* Quan sát / Khám phá có mục đích (${title}):\n- Cô cho trẻ đứng ở vị trí phù hợp để quan sát toàn cảnh / đối tượng.\n- Cô gợi hỏi hệ thống câu hỏi đàm thoại gợi mở:\n  + Các con đang nhìn thấy gì?\n  + [Tên đối tượng/ngôi trường] có đặc điểm, khu vực gì nổi bật?\n  + Lớp học/cổng trường/sân trường của chúng mình ở đâu và có đặc điểm gì?\n- Cô khuyến khích trẻ quan sát, nhận xét và nói thành câu rõ ràng.\n- Cô khái quát kiến thức, giáo dục trẻ yêu quý, giữ gìn và bảo vệ môi trường trường lớp luôn sạch đẹp.\n\n* Chơi tự do:\n- Cô cho trẻ lựa chọn đồ chơi ngoài trời mà trẻ yêu thích: cầu trượt, bập bênh, đu quay và một số đồ chơi phù hợp khác.\n- Cô bao quát trẻ chơi và nhắc trẻ sử dụng đồ chơi đúng cách, không leo trèo ở những nơi nguy hiểm, không chen lấn, xô đẩy hoặc tranh giành đồ chơi.`,
+            studentAction: `- Trẻ tập trung quây quần quan sát đối tượng, tự tin trả lời các câu hỏi gợi mở của cô và đưa ra nhận xét cá nhân.\n- Trẻ chú ý lắng nghe cô khái quát và ghi nhớ lời dặn bảo vệ môi trường.\n- Trẻ tự do lựa chọn góc chơi, đồ chơi ngoài trời yêu thích, chơi đoàn kết, chia sẻ đồ chơi cùng bạn.`,
             productExpected: '',
             digitalOrAiTool: '',
           },
@@ -1251,41 +1334,13 @@ export function generateDefaultPreschoolActivities(
         {
           id: 'act-3',
           index: 3,
-          name: '3. Trò chơi vận động',
-          duration: '6 - 8 phút',
-          objective: 'Trẻ rèn luyện thể lực, phản xạ nhanh nhẹn và tinh thần đồng đội',
+          name: '3. Sau khi chơi',
+          duration: '4 - 6 phút',
+          objective: 'Trẻ chia sẻ cảm nhận, lắng nghe cô nhận xét biểu dương, vệ sinh cá nhân và xếp hàng về lớp',
           step1: {
-            title: '3. Trò chơi vận động',
-            teacherAction: `- Giới thiệu tên trò chơi vận động phù hợp chủ đề.\n- Phổ biến cách chơi và luật chơi rõ ràng.\n- Tổ chức cho trẻ chơi 2 – 3 lần sôi nổi, bao quát cổ vũ động viên trẻ.`,
-            studentAction: `- Trẻ lắng nghe luật chơi và hào hứng tham gia chơi 2 – 3 lần sôi nổi, reo vui cổ vũ bạn.`,
-            productExpected: '',
-            digitalOrAiTool: '',
-          },
-        },
-        {
-          id: 'act-4',
-          index: 4,
-          name: '4. Chơi tự do',
-          duration: '8 - 10 phút',
-          objective: 'Trẻ thỏa sức chơi với đồ chơi ngoài trời hoặc trò chơi dân gian yêu thích an toàn',
-          step1: {
-            title: '4. Chơi tự do',
-            teacherAction: `- Giới thiệu khu vực chơi tự do (cầu trượt, xích đu, vẽ phấn trên sân, nhặt lá xếp hình).\n- Dặn dò chơi an toàn, nhường nhịn bạn bè; cô theo sát bao quát toàn sân.`,
-            studentAction: `- Trẻ tự chọn khu vực chơi yêu thích, chơi đoàn kết, chia sẻ đồ chơi cùng bạn.`,
-            productExpected: '',
-            digitalOrAiTool: '',
-          },
-        },
-        {
-          id: 'act-5',
-          index: 5,
-          name: '5. Kết thúc, nhận xét, vệ sinh',
-          duration: '3 - 5 phút',
-          objective: 'Hồi tĩnh, điểm danh, nhận xét tuyên dương và rửa tay sạch sẽ',
-          step1: {
-            title: '5. Kết thúc, nhận xét, vệ sinh',
-            teacherAction: `- Tập trung trẻ, điểm danh sĩ số.\n- Cho trẻ đi lại nhẹ nhàng hít thở sâu thả lỏng cơ thể.\n- Nhận xét buổi chơi, tuyên dương tinh thần sôi nổi, tự giác của cả lớp.\n- Hướng dẫn trẻ xếp hàng rửa tay bằng xà phòng sạch sẽ và vào lớp.`,
-            studentAction: `- Trẻ tập trung quanh cô, thực hiện động tác hồi tĩnh nhẹ nhàng.\n- Trẻ chú ý nghe nhận xét và tự giác xếp hàng rửa tay sạch sẽ trước khi vào lớp.`,
+            title: '3. Sau khi chơi',
+            teacherAction: `- Cô tập trung trẻ lại, kiểm tra sĩ số và quan sát tình trạng của trẻ sau khi chơi.\n- Cô hỏi đàm thoại củng cố cảm nhận của trẻ:\n  + Hôm nay các con đã được quan sát những gì? Con thích khu vực nào nhất trong trường?\n  + Các con vừa chơi trò chơi gì? Khi chơi cùng bạn, chúng mình cần làm gì?\n- Cô nhận xét chung, động viên những trẻ tích cực quan sát, mạnh dạn trả lời, thực hiện đúng hiệu lệnh và biết chơi đoàn kết với bạn.\n- Cô hướng dẫn trẻ vệ sinh tay, chỉnh trang quần áo sau khi chơi.\n- Kết thúc: Cô cho trẻ xếp hàng, đi nhẹ nhàng về lớp.`,
+            studentAction: `- Trẻ tập trung xung quanh cô, vui vẻ trả lời câu hỏi và chia sẻ cảm nhận về giờ chơi.\n- Trẻ lắng nghe cô nhận xét với nét mặt tươi vui, phấn khởi.\n- Trẻ thực hiện vệ sinh rửa tay sạch sẽ, chỉnh trang quần áo và vui vẻ xếp hàng đi về lớp.`,
             productExpected: '',
             digitalOrAiTool: '',
           },
@@ -2842,27 +2897,20 @@ export function parseActivityPairs(act: any): PreschoolPairRow[] {
 
 export function isPreschoolPlan(plan: any): boolean {
   if (!plan) return false;
-  if (plan.schoolLevel && plan.schoolLevel !== 'Mầm non') return false;
-  if (plan.grade && (
-    plan.grade.includes('Lớp 1') ||
-    plan.grade.includes('Lớp 2') ||
-    plan.grade.includes('Lớp 3') ||
-    plan.grade.includes('Lớp 4') ||
-    plan.grade.includes('Lớp 5') ||
-    plan.grade.includes('Lớp 6') ||
-    plan.grade.includes('Lớp 7') ||
-    plan.grade.includes('Lớp 8') ||
-    plan.grade.includes('Lớp 9') ||
-    plan.grade.includes('Lớp 10') ||
-    plan.grade.includes('Lớp 11') ||
-    plan.grade.includes('Lớp 12')
-  )) return false;
+  const sl = (plan.schoolLevel || '').toString().toLowerCase().trim();
+  const gr = (plan.grade || '').toString().toLowerCase().trim();
+  const subj = (plan.subject || '').toString().toLowerCase().trim();
+  const title = (plan.lessonTitle || '').toString().toLowerCase().trim();
 
-  return plan.schoolLevel === 'Mầm non' || 
-         (plan.grade || '').toLowerCase().includes('mầm non') ||
-         (plan.grade || '').toLowerCase().includes('tuổi') ||
-         (plan.targetPeriodDetail || '').toLowerCase().includes('mầm non') ||
-         (plan.targetPeriodDetail || '').toLowerCase().includes('tuổi');
+  if (sl === 'tiểu học' || sl === 'thcs' || sl === 'thpt') return false;
+  if (/lớp\s*(1|2|3|4|5|6|7|8|9|10|11|12)\b/i.test(gr)) return false;
+
+  if (sl.includes('mầm non') || sl.includes('mẫu giáo') || sl.includes('nhà trẻ')) return true;
+  if (gr.includes('mầm non') || gr.includes('mẫu giáo') || gr.includes('nhà trẻ') || gr.includes('tuổi') || gr.includes('tháng')) return true;
+  if (subj.includes('mầm non') || subj.includes('ngoài trời') || subj.includes('vui chơi trong lớp') || subj.includes('trò chơi vận động') || subj.includes('chữ cái') || subj.includes('kỹ năng') || subj.includes('tăng cường tiếng việt')) return true;
+  if (title.includes('ngoài trời') || title.includes('vui chơi trong lớp') || title.includes('trường mn')) return true;
+
+  return false;
 }
 
 export function sanitizeStandardActivity(act: any, idx: number): any {
@@ -2939,7 +2987,10 @@ export const MAM_NON_8_NEW_ACTIVITIES_LIST = [
   'TRÒ CHƠI DÂN GIAN',
   'HOẠT ĐỘNG TĂNG CƯỜNG TIẾNG VIỆT',
   'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
-  'HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI'
+  'HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI',
+  'HOẠT ĐỘNG NHẬN BIẾT TẬP NÓI',
+  'NHẬN BIẾT TẬP NÓI',
+  'HOẠT ĐỘNG VỚI ĐỒ VẬT'
 ];
 
 export const PRESCHOOL_NEW_8_DOMAINS: PreschoolDomainType[] = [
@@ -2951,7 +3002,9 @@ export const PRESCHOOL_NEW_8_DOMAINS: PreschoolDomainType[] = [
   'FOLK_GAME',
   'VIETNAMESE_ENHANCE',
   'LETTER_TRACING',
-  'LETTER_GAME'
+  'LETTER_GAME',
+  'TALK_RECOGNIZE',
+  'OBJECT_PLAY'
 ];
 
 /**
@@ -3612,5 +3665,136 @@ export function getPreschoolPreparation(equipment: any, context?: PreschoolLesso
     parentCollaboration: finalParentCollab,
   };
 }
+
+export interface PreschoolSectionCHeaderInfo {
+  domain: string;      // e.g. "NHẬN THỨC"
+  activity: string;    // e.g. "KHÁM PHÁ KHOA HỌC"
+  topic: string;       // e.g. "KHÁM PHÁ CƠ THỂ BÉ"
+}
+
+/**
+ * Trích xuất và chuẩn hóa đầy đủ tiêu đề 3 dòng chuẩn Mầm non cho Mục C (Hoạt động học):
+ * - LĨNH VỰC PHÁT TRIỂN: NHẬN THỨC
+ * - HOẠT ĐỘNG: KHÁM PHÁ KHOA HỌC
+ * - ĐỀ TÀI: KHÁM PHÁ CƠ THỂ BÉ
+ */
+export function getPreschoolSectionCHeaderInfo(plan: any): PreschoolSectionCHeaderInfo {
+  const subj = (plan?.subject || '').trim();
+  const rawTitle = (plan?.lessonTitle || plan?.title || '').trim();
+  const domainInfo = detectPreschoolDomain(subj, rawTitle);
+
+  // 1. Domain
+  let domain = '';
+  if (plan?.preschoolDomain) {
+    domain = plan.preschoolDomain;
+  } else if (plan?.domain) {
+    domain = plan.domain;
+  } else if (plan?.field) {
+    domain = plan.field;
+  } else {
+    switch (domainInfo.domainType) {
+      case 'MUSIC':
+      case 'ART':
+        domain = 'THẨM MỸ';
+        break;
+      case 'SCIENCE':
+      case 'SOCIAL':
+      case 'MATH':
+        domain = 'NHẬN THỨC';
+        break;
+      case 'POETRY':
+      case 'STORY':
+      case 'LETTER':
+      case 'LETTER_TRACING':
+      case 'LETTER_GAME':
+      case 'VIETNAMESE_ENHANCE':
+      case 'TALK_RECOGNIZE':
+        domain = 'NGÔN NGỮ';
+        break;
+      case 'PHYSICAL':
+      case 'PHYSICAL_GAME':
+        domain = 'THỂ CHẤT';
+        break;
+      case 'OBJECT_PLAY':
+        domain = 'NHẬN THỨC / THỂ CHẤT';
+        break;
+      case 'SKILLS':
+      case 'FOLK_GAME':
+        domain = 'TÌNH CẢM - KỸ NĂNG XÃ HỘI';
+        break;
+      default:
+        domain = 'NHẬN THỨC';
+        break;
+    }
+  }
+  domain = domain.replace(/^LĨNH\s*VỰC\s*(?:PHÁT\s*TRIỂN)?\s*[:\-\.]?\s*/i, '').trim().toUpperCase();
+  if (!domain) domain = 'NHẬN THỨC';
+
+  // 2. Activity / Subject
+  let activity = '';
+  if (subj && subj !== 'Mầm non' && !subj.toLowerCase().startsWith('mầm non')) {
+    activity = subj.replace(/^(?:Môn\s*học|Phân\s*môn|Hoạt\s*động)\s*[:\-\.]?\s*/i, '').trim();
+  } else {
+    switch (domainInfo.domainType) {
+      case 'MUSIC':
+        activity = 'GIÁO DỤC ÂM NHẠC';
+        break;
+      case 'ART':
+        activity = 'TẠO HÌNH';
+        break;
+      case 'SCIENCE':
+        activity = 'KHÁM PHÁ KHOA HỌC';
+        break;
+      case 'SOCIAL':
+        activity = 'KHÁM PHÁ XÃ HỘI';
+        break;
+      case 'MATH':
+        activity = 'LÀM QUEN VỚI TOÁN';
+        break;
+      case 'POETRY':
+        activity = 'LÀM QUEN VĂN HỌC (THƠ)';
+        break;
+      case 'STORY':
+        activity = 'LÀM QUEN VĂN HỌC (TRUYỆN)';
+        break;
+      case 'LETTER':
+      case 'LETTER_TRACING':
+      case 'LETTER_GAME':
+        activity = 'LÀM QUEN CHỮ CÁI';
+        break;
+      case 'TALK_RECOGNIZE':
+        activity = 'NHẬN BIẾT TẬP NÓI';
+        break;
+      case 'OBJECT_PLAY':
+        activity = 'HOẠT ĐỘNG VỚI ĐỒ VẬT';
+        break;
+      case 'PHYSICAL':
+      case 'PHYSICAL_GAME':
+        activity = 'GIÁO DỤC THỂ CHẤT';
+        break;
+      case 'SKILLS':
+        activity = 'KỸ NĂNG XÃ HỘI';
+        break;
+      default:
+        activity = 'KHÁM PHÁ KHOA HỌC';
+        break;
+    }
+  }
+  activity = activity.replace(/^HOẠT\s*ĐỘNG\s*[:\-\.]?\s*/i, '').trim().toUpperCase();
+  if (!activity) activity = 'KHÁM PHÁ KHOA HỌC';
+
+  // 3. Topic / Lesson Title
+  let topic = rawTitle.replace(/^(?:Đề\s*tài|Tên\s*bài|Bài\s*học|Chủ\s*đề)\s*[:\-\.]?\s*/i, '').trim().toUpperCase();
+  if (!topic) {
+    topic = 'KHÁM PHÁ VỀ CHỦ ĐỀ';
+  }
+
+  return {
+    domain,
+    activity,
+    topic,
+  };
+}
+
 
 

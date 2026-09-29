@@ -248,6 +248,232 @@ export const VERIFIED_KNTT_CURRICULUM: Record<string, CurriculumItem> = {
     ]
   },
 
+  // === HOẠT ĐỘNG NHẬN BIẾT TẬP NÓI (CHUẨN QĐ 388) ===
+  'HOẠT ĐỘNG NHẬN BIẾT TẬP NÓI_Nhà trẻ (24-36 tháng)': {
+    themes: ['Chương trình Nhà trẻ - Nhận biết tập nói theo chủ đề'],
+    lessons: [
+      'Nhận biết tập nói: Con chó - Con mèo',
+      'Nhận biết tập nói: Con gà - Con vịt',
+      'Nhận biết tập nói: Quả cam - Quả chuối',
+      'Nhận biết tập nói: Quả táo - Quả dưa hấu',
+      'Nhận biết tập nói: Chiếc ô tô - Chiếc xe máy',
+      'Nhận biết tập nói: Chiếc bát - Chiếc thìa',
+      'Nhận biết tập nói: Quần áo của bé',
+      'Nhận biết tập nói: Đôi mắt - Đôi tai - Cái miệng của bé',
+      'Nhận biết tập nói: Bông hoa hồng - Bông hoa cúc',
+      'Nhận biết tập nói: Các đồ chơi trong lớp của bé'
+    ]
+  },
+  'HOẠT ĐỘNG NHẬN BIẾT TẬP NÓI_Mẫu giáo bé (3-4 tuổi)': {
+    themes: ['Chương trình Mẫu giáo bé - Mở rộng nhận biết và phát triển ngôn ngữ'],
+    lessons: [
+      'Nhận biết tập nói: Con vật nuôi trong gia đình',
+      'Nhận biết tập nói: Các loại quả có múi',
+      'Nhận biết tập nói: Phương tiện giao thông đường bộ',
+      'Nhận biết tập nói: Đồ dùng ăn uống của bé',
+      'Nhận biết tập nói: Cây xanh và các loài hoa'
+    ]
+  },
+  'NHẬN BIẾT TẬP NÓI_Nhà trẻ (24-36 tháng)': {
+    themes: ['Chương trình Nhà trẻ - Nhận biết tập nói'],
+    lessons: [
+      'Nhận biết tập nói: Con chó - Con mèo',
+      'Nhận biết tập nói: Con gà - Con vịt',
+      'Nhận biết tập nói: Quả cam - Quả chuối',
+      'Nhận biết tập nói: Chiếc ô tô - Chiếc xe máy',
+      'Nhận biết tập nói: Chiếc bát - Chiếc thìa'
+    ]
+  },
+
+  // === HOẠT ĐỘNG VỚI ĐỒ VẬT / LĨNH VỰC PT THỂ CHẤT (HĐ VỚI ĐỒ VẬT) ===
+  'HOẠT ĐỘNG VỚI ĐỒ VẬT_Nhà trẻ (24-36 tháng)': {
+    themes: ['Chương trình Nhà trẻ - Thao tác với đồ vật & phát triển vận động tinh'],
+    lessons: [
+      'Xếp chồng các khối gỗ tạo thành tháp cao',
+      'Lồng các hộp tròn / hộp vuông to nhỏ',
+      'Xâu vòng hoa / xâu hạt tặng mẹ',
+      'Đóng mở nắp chai lọ có ren vặn',
+      'Xếp cạnh các khối gỗ tạo thành hàng rào / con đường',
+      'Gắp hạt / chuyển bóng bằng kẹp mềm',
+      'Ghép các mảnh hình khối đơn giản',
+      'Xếp bàn ghế từ các khối gỗ vuông chữ nhật',
+      'Xâu luồn dây qua các lỗ tròn to',
+      'Phân loại đồ chơi theo màu sắc đỏ - vàng'
+    ]
+  },
+  'LĨNH VỰC PT THỂ CHẤT (HĐ VỚI ĐỒ VẬT)_Nhà trẻ (24-36 tháng)': {
+    themes: ['Chương trình Nhà trẻ - Thao tác với đồ vật & phát triển vận động tinh'],
+    lessons: [
+      'Xếp chồng các khối gỗ tạo thành tháp cao',
+      'Lồng các hộp tròn / hộp vuông to nhỏ',
+      'Xâu vòng hoa / xâu hạt tặng mẹ',
+      'Đóng mở nắp chai lọ có ren vặn',
+      'Xếp cạnh các khối gỗ tạo thành hàng rào / con đường',
+      'Gắp hạt / chuyển bóng bằng kẹp mềm',
+      'Ghép các mảnh hình khối đơn giản',
+      'Xếp bàn ghế từ các khối gỗ vuông chữ nhật',
+      'Xâu luồn dây qua các lỗ tròn to',
+      'Phân loại đồ chơi theo màu sắc đỏ - vàng'
+    ]
+  },
+  'HOẠT ĐỘNG VỚI ĐỒ VẬT_Mẫu giáo bé (3-4 tuổi)': {
+    themes: ['Chương trình Mẫu giáo bé - Thao tác đồ vật và khéo léo đôi bàn tay'],
+    lessons: [
+      'Xếp chồng và xếp cạnh xây ngôi nhà của bé',
+      'Xâu vòng hoa xen kẽ 2 màu đỏ - vàng',
+      'Lồng hộp và phân loại hình khối',
+      'Ghép tranh 2-4 mảnh ghép',
+      'Cài cởi cúc áo và buộc dây đơn giản'
+    ]
+  },
+  'LĨNH VỰC PT THỂ CHẤT (HĐ VỚI ĐỒ VẬT)_Mẫu giáo bé (3-4 tuổi)': {
+    themes: ['Chương trình Mẫu giáo bé - Thao tác đồ vật và khéo léo đôi bàn tay'],
+    lessons: [
+      'Xếp chồng và xếp cạnh xây ngôi nhà của bé',
+      'Xâu vòng hoa xen kẽ 2 màu đỏ - vàng',
+      'Lồng hộp và phân loại hình khối',
+      'Ghép tranh 2-4 mảnh ghép',
+      'Cài cởi cúc áo và buộc dây đơn giản'
+    ]
+  },
+
+  // === NHẬN BIẾT PHÂN BIỆT (NBPB) ===
+  'LĨNH VỰC NHẬN BIẾT PHÂN BIỆT_Nhà trẻ (24-36 tháng)': {
+    themes: ['Chương trình Nhà trẻ - Nhận biết phân biệt màu sắc, kích thước, hình khối'],
+    lessons: [
+      'Nhận biết phân biệt: Màu đỏ - Màu vàng',
+      'Nhận biết phân biệt: Màu xanh - Màu đỏ',
+      'Nhận biết phân biệt: To hơn - Nhỏ hơn',
+      'Nhận biết phân biệt: Hình tròn - Hình vuông',
+      'Nhận biết phân biệt: 1 và nhiều',
+      'Nhận biết phân biệt: Cao hơn - Thấp hơn',
+      'Nhận biết phân biệt: Quả to - Quả nhỏ',
+      'Nhận biết phân biệt: Đồ chơi màu đỏ - Đồ chơi màu vàng',
+      'Nhận biết phân biệt: Áo bạn trai - Váy bạn gái',
+      'Nhận biết phân biệt: Buổi sáng - Buổi tối'
+    ]
+  },
+  'NHẬN BIẾT PHÂN BIỆT_Nhà trẻ (24-36 tháng)': {
+    themes: ['Chương trình Nhà trẻ - Nhận biết phân biệt màu sắc, kích thước, hình khối'],
+    lessons: [
+      'Nhận biết phân biệt: Màu đỏ - Màu vàng',
+      'Nhận biết phân biệt: Màu xanh - Màu đỏ',
+      'Nhận biết phân biệt: To hơn - Nhỏ hơn',
+      'Nhận biết phân biệt: Hình tròn - Hình vuông',
+      'Nhận biết phân biệt: 1 và nhiều',
+      'Nhận biết phân biệt: Cao hơn - Thấp hơn',
+      'Nhận biết phân biệt: Quả to - Quả nhỏ',
+      'Nhận biết phân biệt: Đồ chơi màu đỏ - Đồ chơi màu vàng'
+    ]
+  },
+  'LĨNH VỰC NHẬN BIẾT PHÂN BIỆT_Mẫu giáo bé (3-4 tuổi)': {
+    themes: ['Chương trình Mẫu giáo bé - Nhận biết phân biệt nâng cao'],
+    lessons: [
+      'Nhận biết phân biệt: Màu đỏ - Màu vàng - Màu xanh',
+      'Nhận biết phân biệt: Kích thước to - nhỏ',
+      'Nhận biết phân biệt: Hình tròn, hình vuông, hình tam giác',
+      'Nhận biết phân biệt: Phía trên - phía dưới của bản thân',
+      'Nhận biết phân biệt: Phía trước - phía sau của bản thân'
+    ]
+  },
+  // === GIÁO ÁN TÌNH CẢM - XÃ HỘI (KNXH - KỸ NĂNG XÃ HỘI) ===
+  'GIÁO ÁN TÌNH CẢM - XÃ HỘI (KNXH)_Nhà trẻ (24-36 tháng)': {
+    themes: ['Chương trình Nhà trẻ - Tình cảm & Kỹ năng xã hội đầu đời'],
+    lessons: [
+      'Kỹ năng chào hỏi lễ phép khi đến lớp và khi ra về',
+      'Kỹ năng nói lời cảm ơn khi được giúp đỡ, xin lỗi khi làm sai',
+      'Kỹ năng cùng chơi đoàn kết và chia sẻ đồ chơi với bạn',
+      'Kỹ năng tự phục vụ: Rửa tay bằng xà phòng trước khi ăn',
+      'Kỹ năng tự phục vụ: Tự xúc cơm, uống nước và lau miệng',
+      'Kỹ năng cất dọn đồ chơi gọn gàng vào đúng nơi quy định',
+      'Kỹ năng đi vệ sinh đúng nơi quy định',
+      'Nhận biết và thể hiện tình cảm yêu thương với cô giáo và bạn bè',
+      'Nhận biết cảm xúc vui, buồn qua nét mặt'
+    ]
+  },
+  'GIÁO ÁN TÌNH CẢM - XÃ HỘI (KNXH)_Mẫu giáo bé (3-4 tuổi)': {
+    themes: ['Chương trình Mẫu giáo bé - Phát triển tình cảm & Kỹ năng xã hội'],
+    lessons: [
+      'Kỹ năng chào hỏi, xưng hô lễ phép với người lớn và bạn bè',
+      'Kỹ năng tự phục vụ: Tự đi giày dép, cất ba lô đúng ngăn quy định',
+      'Kỹ năng tự phục vụ: Rửa tay 6 bước bằng xà phòng và lau khô tay',
+      'Kỹ năng chia sẻ đồ dùng, đồ chơi và nhường nhịn bạn bè',
+      'Kỹ năng xếp hàng chờ đến lượt khi tham gia các hoạt động',
+      'Kỹ năng phòng tránh nguy hiểm: Không đi theo người lạ',
+      'Kỹ năng phòng tránh nguy hiểm: Không nghịch ổ điện, phích nước nóng',
+      'Nhận biết và bộc lộ cảm xúc vui, buồn, ngạc nhiên đúng cách',
+      'Bé thể hiện tình cảm yêu quý, kính trọng ông bà cha mẹ'
+    ]
+  },
+  'GIÁO ÁN TÌNH CẢM - XÃ HỘI (KNXH)_Mẫu giáo nhỡ (4-5 tuổi)': {
+    themes: ['Chương trình Mẫu giáo nhỡ - Hoàn thiện kỹ năng xã hội & cảm xúc'],
+    lessons: [
+      'Kỹ năng lắng nghe người khác nói và không ngắt lời',
+      'Kỹ năng nói lời cảm ơn, xin lỗi chân thành trong các tình huống',
+      'Kỹ năng hợp tác nhóm và phân công nhiệm vụ khi chơi',
+      'Kỹ năng tự phục vụ: Tự gấp quần áo, trải chiếu gối giờ ngủ',
+      'Kỹ năng xử lý tình huống khi bị lạc ở nơi công cộng (siêu thị, công viên)',
+      'Kỹ năng phòng tránh xâm hại: Quy tắc 5 ngón tay bảo vệ cơ thể',
+      'Kỹ năng kiểm soát cảm xúc khi tức giận hoặc thất vọng',
+      'Kỹ năng giữ gìn vệ sinh chung, bỏ rác đúng nơi quy định',
+      'Tình yêu quê hương, làng xóm và lòng biết ơn các cô bác lao động'
+    ]
+  },
+  'GIÁO ÁN TÌNH CẢM - XÃ HỘI (KNXH)_Mẫu giáo lớn (5-6 tuổi)': {
+    themes: ['Chương trình Mẫu giáo lớn - Tự lập, tự tin & Kỹ năng xã hội tiền tiểu học'],
+    lessons: [
+      'Kỹ năng tự tin giao tiếp, thuyết trình và bày tỏ ý kiến trước đám đông',
+      'Kỹ năng hợp tác, thỏa thuận và giải quyết xung đột khi làm việc nhóm',
+      'Kỹ năng tự lập: Chuẩn bị đồ dùng cá nhân sẵn sàng vào lớp 1',
+      'Kỹ năng ứng phó khi gặp hỏa hoạn: Thoát hiểm an toàn bằng khăn ẩm',
+      'Kỹ năng an toàn giao thông: Đi bộ trên vỉa hè, đội mũ bảo hiểm',
+      'Kỹ năng phòng tránh đuối nước và nguy cơ tai nạn thương tích',
+      'Kỹ năng đồng cảm, sẻ chia và giúp đỡ người gặp khó khăn',
+      'Kỹ năng bảo vệ môi trường: Tiết kiệm điện nước, chăm sóc cây xanh',
+      'Tìm hiểu về Bác Hồ kính yêu và tình cảm của Bác dành cho các cháu thiếu nhi'
+    ]
+  },
+  'GIÁO ÁN TÌNH CẢM - XÃ HỘI_Nhà trẻ (24-36 tháng)': {
+    themes: ['Chương trình Nhà trẻ - Tình cảm & Kỹ năng xã hội'],
+    lessons: [
+      'Kỹ năng chào hỏi lễ phép khi đến lớp và khi ra về',
+      'Kỹ năng nói lời cảm ơn khi được giúp đỡ, xin lỗi khi làm sai',
+      'Kỹ năng cùng chơi đoàn kết và chia sẻ đồ chơi với bạn',
+      'Kỹ năng tự phục vụ: Rửa tay bằng xà phòng trước khi ăn',
+      'Kỹ năng cất dọn đồ chơi gọn gàng vào đúng nơi quy định'
+    ]
+  },
+  'GIÁO ÁN TÌNH CẢM - XÃ HỘI_Mẫu giáo bé (3-4 tuổi)': {
+    themes: ['Chương trình Mẫu giáo bé - Tình cảm & Kỹ năng xã hội'],
+    lessons: [
+      'Kỹ năng chào hỏi, xưng hô lễ phép với người lớn và bạn bè',
+      'Kỹ năng chia sẻ đồ dùng, đồ chơi và nhường nhịn bạn bè',
+      'Kỹ năng xếp hàng chờ đến lượt khi tham gia các hoạt động',
+      'Kỹ năng phòng tránh nguy hiểm: Không đi theo người lạ',
+      'Nhận biết và bộc lộ cảm xúc vui, buồn đúng cách'
+    ]
+  },
+  'GIÁO ÁN TÌNH CẢM - XÃ HỘI_Mẫu giáo nhỡ (4-5 tuổi)': {
+    themes: ['Chương trình Mẫu giáo nhỡ - Tình cảm & Kỹ năng xã hội'],
+    lessons: [
+      'Kỹ năng lắng nghe người khác nói và không ngắt lời',
+      'Kỹ năng hợp tác nhóm và phân công nhiệm vụ khi chơi',
+      'Kỹ năng xử lý tình huống khi bị lạc ở nơi công cộng',
+      'Kỹ năng phòng tránh xâm hại: Quy tắc 5 ngón tay bảo vệ cơ thể',
+      'Kỹ năng giữ gìn vệ sinh chung, bỏ rác đúng nơi quy định'
+    ]
+  },
+  'GIÁO ÁN TÌNH CẢM - XÃ HỘI_Mẫu giáo lớn (5-6 tuổi)': {
+    themes: ['Chương trình Mẫu giáo lớn - Tình cảm & Kỹ năng xã hội'],
+    lessons: [
+      'Kỹ năng tự tin giao tiếp và bày tỏ ý kiến trước đám đông',
+      'Kỹ năng hợp tác, thỏa thuận và giải quyết xung đột trong nhóm',
+      'Kỹ năng tự lập: Chuẩn bị tâm thế và đồ dùng vào lớp 1',
+      'Kỹ năng thoát hiểm an toàn khi có sự cố hỏa hoạn',
+      'Kỹ năng đồng cảm, sẻ chia và giúp đỡ người gặp khó khăn'
+    ]
+  },
+
 
 
 
@@ -3202,13 +3428,25 @@ export const standardSubjectMap: Record<string, string> = {
   'GIÁO ÁN ÂM NHẠC (Dạy hát)': 'Lĩnh vực Phát triển nghệ thuật',
   'GIÁO ÁN ÂM NHẠC (Nghe hát)': 'Lĩnh vực Phát triển nghệ thuật',
   'GIÁO ÁN ÂM NHẠC (Hát vận động)': 'Lĩnh vực Phát triển nghệ thuật',
+  'GIÁO ÁN TÌNH CẢM - XÃ HỘI (KNXH)': 'GIÁO ÁN TÌNH CẢM - XÃ HỘI (KNXH)',
+  'TÌNH CẢM - XÃ HỘI (KNXH)': 'GIÁO ÁN TÌNH CẢM - XÃ HỘI (KNXH)',
+  'KNXH': 'GIÁO ÁN TÌNH CẢM - XÃ HỘI (KNXH)',
+  'Kỹ năng xã hội': 'GIÁO ÁN TÌNH CẢM - XÃ HỘI (KNXH)',
   'GIÁO ÁN TÌNH CẢM - XÃ HỘI': 'Lĩnh vực Phát triển tình cảm - xã hội',
+  'LĨNH VỰC PHÁT TRIỂN THỂ CHẤT': 'Lĩnh vực Phát triển thể chất',
+  'Lĩnh vực Phát triển thể chất': 'Lĩnh vực Phát triển thể chất',
   'TẬP TÔ CHỮ CÁI': 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
   'Tập tô chữ cái': 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
   'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI': 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
   'Hoạt động tập tô chữ cái': 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
   'TẬP TÔ, ĐỒ CHỮ CÁI': 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
   'TẬP TÔ NÉT CƠ BẢN': 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
+  'HOẠT ĐỘNG NHẬN BIẾT TẬP NÓI': 'HOẠT ĐỘNG NHẬN BIẾT TẬP NÓI',
+  'NHẬN BIẾT TẬP NÓI': 'NHẬN BIẾT TẬP NÓI',
+  'LĨNH VỰC NHẬN BIẾT PHÂN BIỆT': 'LĨNH VỰC NHẬN BIẾT PHÂN BIỆT',
+  'NHẬN BIẾT PHÂN BIỆT': 'NHẬN BIẾT PHÂN BIỆT',
+  'LĨNH VỰC PT THỂ CHẤT (HĐ VỚI ĐỒ VẬT)': 'LĨNH VỰC PT THỂ CHẤT (HĐ VỚI ĐỒ VẬT)',
+  'HOẠT ĐỘNG VỚI ĐỒ VẬT': 'HOẠT ĐỘNG VỚI ĐỒ VẬT',
 };
 
 /**

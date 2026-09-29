@@ -60,13 +60,11 @@ export const SUBJECTS_LIST = Array.from(new Set([
 ]));
 
 export const MAM_NON_NEW_ACTIVITIES = [
-  'HOẠT ĐỘNG NGOÀI TRỜI (Bản cũ)',
+  'HOẠT ĐỘNG NGOÀI TRỜI (5 bước)',
   'HOẠT ĐỘNG NGOÀI TRỜI 1 (Quan sát)',
   'HOẠT ĐỘNG NGOÀI TRỜI 2 (Trò chơi)',
-  'HOẠT ĐỘNG VUI CHƠI TRONG LỚP (Bản cũ)',
+  'HOẠT ĐỘNG VUI CHƠI TRONG LỚP (5 bước)',
   'HOẠT ĐỘNG VUI CHƠI TRONG LỚP 1',
-  'HOẠT ĐỘNG NGOÀI TRỜI',
-  'HOẠT ĐỘNG VUI CHƠI TRONG LỚP',
   'TRÒ CHƠI VẬN ĐỘNG',
   'TRÒ CHƠI HỌC TẬP',
   'HOẠT ĐỘNG GIÁO DỤC KỸ NĂNG',
@@ -87,8 +85,13 @@ export const MAM_NON_TRADITIONAL_DOMAINS = [
   'GIÁO ÁN ÂM NHẠC (Dạy hát)',
   'GIÁO ÁN ÂM NHẠC (Nghe hát)',
   'GIÁO ÁN ÂM NHẠC (Hát vận động)',
+  'GIÁO ÁN TÌNH CẢM - XÃ HỘI (KNXH)',
   'GIÁO ÁN TÌNH CẢM - XÃ HỘI',
-  'Lĩnh vực Phát triển thể chất',
+  'LĨNH VỰC PHÁT TRIỂN THỂ CHẤT',
+  'NHẬN BIẾT TẬP NÓI',
+  'LĨNH VỰC NHẬN BIẾT PHÂN BIỆT',
+  'LĨNH VỰC PT THỂ CHẤT (HĐ VỚI ĐỒ VẬT)',
+  'HOẠT ĐỘNG VỚI ĐỒ VẬT'
 ];
 
 export const MAM_NON_MAIN_THEMES = [

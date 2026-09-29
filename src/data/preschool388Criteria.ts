@@ -1128,6 +1128,68 @@ export const DEFAULT_CRITERIA_BY_ACTIVITY: Record<string, string[]> = {
     'NN 2.2', // Phát âm nhanh, chuẩn xác khi nhận diện chữ
     'TC 1.2', // Tiếp sức nhanh nhẹn gắn thẻ chữ
     'TX 4.4'  // Hợp tác nhóm tìm đúng chữ cái theo hiệu lệnh
+  ],
+  'HOẠT ĐỘNG NHẬN BIẾT TẬP NÓI': [
+    'NN 1.1', // Nghe hiểu các câu hỏi và lời hướng dẫn đơn giản của cô
+    'NN 1.2', // Lắng nghe và nhận biết tên gọi đối tượng
+    'NN 2.1', // Phát âm rõ ràng tên gọi, đặc điểm nổi bật
+    'NN 2.2', // Trả lời câu hỏi của cô bằng từ/câu ngắn 3-4 từ
+    'NT 1.1', // Quan sát, chỉ đúng đối tượng được hỏi
+    'TX 4.4'  // Hào hứng tương tác, trò chuyện cùng cô và bạn
+  ],
+  'NHẬN BIẾT TẬP NÓI': [
+    'NN 1.1', // Nghe hiểu các câu hỏi và lời hướng dẫn đơn giản của cô
+    'NN 1.2', // Lắng nghe và nhận biết tên gọi đối tượng
+    'NN 2.1', // Phát âm rõ ràng tên gọi, đặc điểm nổi bật
+    'NN 2.2', // Trả lời câu hỏi của cô bằng từ/câu ngắn 3-4 từ
+    'NT 1.1', // Quan sát, chỉ đúng đối tượng được hỏi
+    'TX 4.4'  // Hào hứng tương tác, trò chuyện cùng cô và bạn
+  ],
+  'HOẠT ĐỘNG VỚI ĐỒ VẬT': [
+    'TC 1.1', // Khéo léo cầm, nắm, đặt, xếp, lồng hộp, xâu hạt
+    'TC 1.2', // Phối hợp vận động tay - mắt linh hoạt
+    'NT 1.1', // Nhận biết màu sắc, hình dáng cơ bản của đồ vật
+    'NT 2.1', // Thực hiện thao tác với đồ vật, đồ chơi theo hướng dẫn
+    'TX 1.1', // Thích thú khám phá các tính năng của đồ chơi
+    'TX 4.4'  // Biết cất dọn và giữ gìn đồ dùng, đồ chơi sau khi chơi
+  ],
+  'LĨNH VỰC PT THỂ CHẤT (HĐ VỚI ĐỒ VẬT)': [
+    'TC 1.1', // Khéo léo cầm, nắm, đặt, xếp, lồng hộp, xâu hạt
+    'TC 1.2', // Phối hợp vận động tay - mắt linh hoạt
+    'NT 1.1', // Nhận biết màu sắc, hình dáng cơ bản của đồ vật
+    'NT 2.1', // Thực hiện thao tác với đồ vật, đồ chơi theo hướng dẫn
+    'TX 1.1', // Thích thú khám phá các tính năng của đồ chơi
+    'TX 4.4'  // Biết cất dọn và giữ gìn đồ dùng, đồ chơi sau khi chơi
+  ],
+  'LĨNH VỰC NHẬN BIẾT PHÂN BIỆT': [
+    'NT 1.1', // Quan sát, chỉ và gọi đúng tên màu sắc, hình dáng, kích thước
+    'NT 1.2', // Phân biệt sự khác nhau cơ bản giữa 2 đối tượng (to - nhỏ, đỏ - vàng...)
+    'NT 2.1', // Thực hiện thao tác chọn, phân loại đối tượng theo dấu hiệu
+    'NN 1.1', // Nghe hiểu các câu hỏi và hiệu lệnh yêu cầu
+    'TX 1.1'  // Hứng thú tìm tòi khám phá, tập trung trong giờ học
+  ],
+  'NHẬN BIẾT PHÂN BIỆT': [
+    'NT 1.1', // Quan sát, chỉ và gọi đúng tên màu sắc, hình dáng, kích thước
+    'NT 1.2', // Phân biệt sự khác nhau cơ bản giữa 2 đối tượng (to - nhỏ, đỏ - vàng...)
+    'NT 2.1', // Thực hiện thao tác chọn, phân loại đối tượng theo dấu hiệu
+    'NN 1.1', // Nghe hiểu các câu hỏi và hiệu lệnh yêu cầu
+    'TX 1.1'  // Hứng thú tìm tòi khám phá, tập trung trong giờ học
+  ],
+  'GIÁO ÁN TÌNH CẢM - XÃ HỘI (KNXH)': [
+    'TX 1.1', // Nhận biết cảm xúc và các mối quan hệ xã hội
+    'TX 1.2', // Bộc lộ cảm xúc phù hợp với hoàn cảnh
+    'TX 2.1', // Kỹ năng tự phục vụ và tự chăm sóc bản thân
+    'TX 3.1', // Lắng nghe và tôn trọng sự khác biệt của người khác
+    'TX 4.1', // Hợp tác, chia sẻ và làm việc nhóm cùng bạn bè
+    'TX 4.4'  // Hành vi văn minh, chào hỏi lễ phép, cảm ơn - xin lỗi
+  ],
+  'TÌNH CẢM - XÃ HỘI (KNXH)': [
+    'TX 1.1', // Nhận biết cảm xúc và các mối quan hệ xã hội
+    'TX 1.2', // Bộc lộ cảm xúc phù hợp với hoàn cảnh
+    'TX 2.1', // Kỹ năng tự phục vụ và tự chăm sóc bản thân
+    'TX 3.1', // Lắng nghe và tôn trọng sự khác biệt của người khác
+    'TX 4.1', // Hợp tác, chia sẻ và làm việc nhóm cùng bạn bè
+    'TX 4.4'  // Hành vi văn minh, chào hỏi lễ phép, cảm ơn - xin lỗi
   ]
 };
 

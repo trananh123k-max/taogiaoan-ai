@@ -38,12 +38,14 @@ export const CustomSubjectSelect: React.FC<CustomSubjectSelectProps> = ({
 
   // Focus search input when dropdown opens
   useEffect(() => {
-    if (isOpen && searchInputRef.current) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 50);
+    if (isOpen) {
+      if (searchInputRef.current) {
+        setTimeout(() => {
+          searchInputRef.current?.focus();
+        }, 50);
+      }
     } else {
-      setSearchTerm('');
+      setSearchTerm((prev) => (prev ? '' : prev));
     }
   }, [isOpen]);
 
@@ -199,7 +201,7 @@ export const CustomSubjectSelect: React.FC<CustomSubjectSelectProps> = ({
                   <div>
                     <div className="px-2 py-1 text-[11px] font-bold text-emerald-800 uppercase tracking-wider bg-emerald-50 rounded-md flex items-center gap-1.5 mb-1 border border-emerald-100">
                       <BookOpen className="w-3 h-3 text-emerald-600" />
-                      <span>Lĩnh vực phát triển mầm non</span>
+                      <span>LĨNH VỰC PHÁT TRIỂN MẦM NON</span>
                     </div>
                     <div className="space-y-0.5">
                       {traditionalPreschool.map((subj) => {
@@ -229,12 +231,12 @@ export const CustomSubjectSelect: React.FC<CustomSubjectSelectProps> = ({
                   <div>
                     <div className="px-2 py-1 text-[11px] font-bold text-blue-800 uppercase tracking-wider bg-blue-50 rounded-md flex items-center gap-1.5 mb-1 mt-1 border border-blue-100">
                       <Sparkles className="w-3 h-3 text-blue-600" />
-                      <span>Hoạt động phát triển (Theo QĐ 388)</span>
+                      <span>HOẠT ĐỘNG PHÁT TRIỂN (THEO QĐ 388)</span>
                     </div>
                     <div className="space-y-0.5">
                       {newPreschool.map((subj) => {
                         const isSelected = value === subj;
-                        const isOldVer = subj.includes('Bản cũ');
+                        const isOldVer = subj.includes('5 bước') || subj.includes('Bản cũ');
                         const isNew1Ver = subj.includes(' 1') || subj.includes(' 2');
                         return (
                           <button

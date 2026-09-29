@@ -195,7 +195,6 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
         'Mẫu giáo nhỡ (4-5 tuổi)',
         'Mẫu giáo lớn (5-6 tuổi)',
         'Lớp ghép (3 - 4 - 5 tuổi)',
-        'Lớp ghép (4 - 5 tuổi)',
       ];
     }
     if (config.schoolLevel === 'Tiểu học') {
@@ -260,36 +259,54 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
     return seedMatch || userMatch;
   }, [config.subject, config.grade, config.lessonTitle]);
 
-  // Auto-sync periods and STEM topic from matched PPCT
+  // Auto-sync periods and STEM topic from matched PPCT without infinite loop
+  const prevSyncedPPCTRef = useRef<string | null>(null);
   useEffect(() => {
     if (matchedPPCTLesson) {
+      const syncKey = `${config.subject}_${config.grade}_${config.lessonTitle}_${matchedPPCTLesson.lessonTitle}`;
+      if (prevSyncedPPCTRef.current === syncKey) return;
+
       const updates: Partial<LessonPlanConfig> = {};
-      if (matchedPPCTLesson.periods && matchedPPCTLesson.periods !== config.periods) {
-        updates.periods = matchedPPCTLesson.periods;
+      if (matchedPPCTLesson.periods && Number(matchedPPCTLesson.periods) !== Number(config.periods)) {
+        updates.periods = Number(matchedPPCTLesson.periods);
       }
-      if (matchedPPCTLesson.periodDetail && (!config.targetPeriodDetail || config.targetPeriodDetail.startsWith('Tiết 1') || config.targetPeriodDetail === '1' || config.targetPeriodDetail === '1+2' || config.targetPeriodDetail.startsWith('1-'))) {
+      if (
+        matchedPPCTLesson.periodDetail &&
+        matchedPPCTLesson.periodDetail !== config.targetPeriodDetail &&
+        (!config.targetPeriodDetail ||
+          config.targetPeriodDetail.startsWith('Tiết 1') ||
+          config.targetPeriodDetail === '1' ||
+          config.targetPeriodDetail === '1+2' ||
+          config.targetPeriodDetail.startsWith('1-'))
+      ) {
         updates.targetPeriodDetail = matchedPPCTLesson.periodDetail;
       }
       if (matchedPPCTLesson.hasStemIntegration) {
-        updates.hasStemFromPPCT = true;
-        if (matchedPPCTLesson.stemTopic && !config.stemTopic) {
+        if (!config.hasStemFromPPCT) {
+          updates.hasStemFromPPCT = true;
+        }
+        if (matchedPPCTLesson.stemTopic && matchedPPCTLesson.stemTopic !== config.stemTopic) {
           updates.stemTopic = matchedPPCTLesson.stemTopic;
         }
       }
+      prevSyncedPPCTRef.current = syncKey;
       if (Object.keys(updates).length > 0) {
         onChangeConfig(updates);
       }
     }
-  }, [matchedPPCTLesson]);
+  }, [matchedPPCTLesson, config.periods, config.targetPeriodDetail, config.hasStemFromPPCT, config.stemTopic, config.subject, config.grade, config.lessonTitle]);
 
-  // Auto-set lessonTitle if empty or not in availableLessons
+  // Auto-set lessonTitle ONLY if completely empty and standard lessons exist
+  const hasAutoSetLessonRef = useRef<string | null>(null);
   useEffect(() => {
-    if (availableLessons.length > 0 && (!config.lessonTitle || !availableLessons.includes(config.lessonTitle))) {
-      if (!isCustomLessonInput) {
-        onChangeConfig({ lessonTitle: availableLessons[0] });
+    const firstLesson = availableLessons[0]?.trim();
+    if (!config.lessonTitle && firstLesson && !isCustomLessonInput) {
+      if (hasAutoSetLessonRef.current !== `${config.subject}_${config.grade}_${firstLesson}`) {
+        hasAutoSetLessonRef.current = `${config.subject}_${config.grade}_${firstLesson}`;
+        onChangeConfig({ lessonTitle: firstLesson });
       }
     }
-  }, [availableLessons, config.lessonTitle, isCustomLessonInput]);
+  }, [availableLessons, config.lessonTitle, isCustomLessonInput, config.subject, config.grade]);
 
   // Handler: Upload Textbook File (PDF / DOCX / TXT)
   const handleTextbookUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -488,373 +505,423 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
 
   return (
     <div className="w-full space-y-4 text-slate-800 min-h-[650px] pb-32">
-      {/* Panel Header */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-4.5 shadow-xs flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center space-x-2.5">
-          <div className="p-2 rounded-xl bg-amber-100 text-amber-900 border border-amber-200">
-            <BookOpen className="w-5 h-5 text-amber-800" />
+      {/* Top 2-Column Row: Side-by-Side Attachments & Additional Requirements */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        {/* 1. KHỐI TẢI FILE: TẢI FILE SGK, MẪU VÀ PPCT */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-4.5 shadow-xs space-y-3 flex flex-col justify-between">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+              <UploadCloud className="w-3.5 h-3.5 text-amber-700" />
+              <span>Tài liệu & Học liệu đính kèm</span>
+            </span>
+            <span className="text-[10.5px] text-slate-400 font-medium">Tự động trích xuất nội dung</span>
           </div>
-          <div>
-            <h2 className="font-extrabold text-sm sm:text-base text-amber-900 tracking-tight uppercase">
-              CẤU HÌNH SOẠN BÀI DẠY
-            </h2>
-            <p className="text-[11px] text-slate-500 font-medium">
-              Thiết lập thông tin bài học, môn học, chuẩn NLS (TT 02/2025), AI (QĐ 2422), STEM và tiến trình dạy học
-            </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1 items-center">
+            {/* 1. Nút Tải File SGK */}
+            <div>
+              <input
+                ref={textbookInputRef}
+                type="file"
+                accept=".pdf,.docx,.doc,.txt"
+                onChange={handleTextbookUpload}
+                className="hidden"
+              />
+              {activeUploadedBook ? (
+                <div className="p-2 rounded-xl bg-amber-50/80 border border-amber-300 flex items-center justify-between gap-1 shadow-2xs h-full">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <CheckCircle2 className="w-4 h-4 text-amber-700 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-bold text-slate-900 truncate">
+                        {activeUploadedBook.fileName || activeUploadedBook.title}
+                      </p>
+                      <p className="text-[10px] text-amber-800 font-medium whitespace-nowrap truncate">
+                        {activeUploadedBook.lessons?.length || 0} bài học
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleClearBook}
+                    className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-all cursor-pointer shrink-0"
+                    title="Xóa file SGK"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => textbookInputRef.current?.click()}
+                  disabled={isUploadingBook}
+                  className="w-full h-full py-2 px-1.5 sm:px-2 rounded-xl border border-amber-300 bg-amber-50/50 hover:bg-amber-100/70 text-amber-950 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs group active:scale-[0.99] whitespace-nowrap"
+                >
+                  {isUploadingBook ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-700 shrink-0" />
+                      <span className="truncate">{bookUploadMsg || 'Đang quét...'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <BookOpen className="w-3.5 h-3.5 text-amber-700 group-hover:scale-110 transition-transform shrink-0" />
+                      <span className="whitespace-nowrap">Tải SGK</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+
+            {/* 2. Nút Tải File Bài Soạn Mẫu (Word .docx, .doc, PDF, TXT) */}
+            <div>
+              <input
+                ref={docxInputRef}
+                type="file"
+                accept=".docx,.doc,.pdf,.txt,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,text/plain"
+                onChange={handleDocxUpload}
+                className="hidden"
+              />
+              {docxFileName ? (
+                <div className="p-2 rounded-xl bg-indigo-50/80 border border-indigo-300 flex items-center justify-between gap-1 shadow-2xs h-full">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <CheckCircle2 className="w-4 h-4 text-indigo-700 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-bold text-slate-900 truncate">
+                        {docxFileName}
+                      </p>
+                      {docxStatusMsg && (
+                        <p className="text-[10px] text-indigo-700 font-medium whitespace-nowrap truncate">
+                          {docxStatusMsg}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleClearDocx}
+                    className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-all cursor-pointer shrink-0"
+                    title="Xóa file bài soạn mẫu"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => docxInputRef.current?.click()}
+                  disabled={isParsingDocx}
+                  title="Tải file bài soạn mẫu (Word .docx/.doc, PDF, TXT) để nâng cấp và bảo tồn 100% nội dung gốc"
+                  className="w-full h-full py-2 px-1.5 sm:px-2 rounded-xl border border-indigo-200 bg-indigo-50/40 hover:bg-indigo-100/60 text-indigo-950 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs group active:scale-[0.99] whitespace-nowrap"
+                >
+                  {isParsingDocx ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-700 shrink-0" />
+                      <span className="truncate">Đang đọc bài mẫu...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FileCode2 className="w-3.5 h-3.5 text-indigo-700 group-hover:scale-110 transition-transform shrink-0" />
+                      <span className="whitespace-nowrap">Tải bài soạn mẫu</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+
+            {/* 3. Nút Tải File PPCT */}
+            <div>
+              <input
+                ref={ppctInputRef}
+                type="file"
+                accept=".xlsx,.xls,.csv,.pdf,.docx,image/*"
+                onChange={handlePPCTUpload}
+                className="hidden"
+              />
+              {ppctFileName ? (
+                <div className="p-2 rounded-xl bg-emerald-50/80 border border-emerald-300 flex items-center justify-between gap-1 shadow-2xs h-full">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-bold text-slate-900 truncate">
+                        {ppctFileName}
+                      </p>
+                      {ppctStatusMsg && (
+                        <p className="text-[10px] text-emerald-700 font-medium whitespace-nowrap truncate">
+                          {ppctStatusMsg}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleClearPPCT}
+                    className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-all cursor-pointer shrink-0"
+                    title="Xóa file PPCT"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => ppctInputRef.current?.click()}
+                  disabled={isUploadingPPCT}
+                  className="w-full h-full py-2 px-1.5 sm:px-2 rounded-xl border border-emerald-200 bg-emerald-50/40 hover:bg-emerald-100/60 text-emerald-950 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs group active:scale-[0.99] whitespace-nowrap"
+                >
+                  {isUploadingPPCT ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-700 shrink-0" />
+                      <span className="truncate">{ppctStatusMsg || 'Đang đọc...'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckSquare className="w-3.5 h-3.5 text-emerald-700 group-hover:scale-110 transition-transform shrink-0" />
+                      <span className="whitespace-nowrap">Tải PPCT</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        {onViewResult && (
-          <button
-            type="button"
-            onClick={onViewResult}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-950 font-bold text-xs transition-all cursor-pointer shadow-2xs"
-          >
-            <FileText className="w-3.5 h-3.5 text-amber-700" />
-            <span>Xem bài soạn {hasPlan ? '✓' : ''}</span>
-          </button>
-        )}
+        {/* 2. KHỐI GHI CHÚ & YÊU CẦU BỔ SUNG */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-4.5 shadow-xs space-y-2 flex flex-col justify-between">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-amber-700" />
+              <span>Ghi chú & Yêu cầu bổ sung (nếu có)</span>
+            </span>
+          </div>
+          <textarea
+            value={config.additionalRequirements || ''}
+            onChange={(e) => onChangeConfig({ additionalRequirements: e.target.value })}
+            placeholder="Ví dụ: Tăng cường hoạt động nhóm, liên hệ tình huống thực tế, lồng ghép trò chơi khởi động sôi nổi..."
+            rows={2}
+            className="w-full bg-[#f8fafc] border border-slate-200 rounded-lg p-2.5 text-xs font-medium text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-amber-600 shadow-2xs flex-1 resize-y"
+          />
+        </div>
       </div>
 
-      {/* Main 2-Column Responsive Layout - Co cột bên trái nhỏ gọn */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-start">
+      {/* Main Full-Width Stacked Layout */}
+      <div className="space-y-4 w-full">
         {/* ========================================================================= */}
-        {/* CỘT 1: TÀI LIỆU HỌC LIỆU & THÔNG TIN BÀI DẠY CƠ BẢN (GỌN GÀNG) */}
+        {/* KHỐI 1: THÔNG TIN BÀI DẠY TRỌNG TÂM (MỞ RỘNG HẾT CỠ TOÀN MÀN HÌNH) */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-5 xl:col-span-4 space-y-4 min-h-[480px]">
-          {/* 1. KHỐI TẢI FILE: TẢI FILE SGK, MẪU VÀ PPCT */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-4.5 shadow-xs space-y-3">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
-                <UploadCloud className="w-3.5 h-3.5 text-amber-700" />
-                <span>Tài liệu & Học liệu đính kèm</span>
-              </span>
-              <span className="text-[10.5px] text-slate-400 font-medium">Tự động trích xuất nội dung</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {/* 1. Nút Tải File SGK */}
-              <div>
-                <input
-                  ref={textbookInputRef}
-                  type="file"
-                  accept=".pdf,.docx,.doc,.txt"
-                  onChange={handleTextbookUpload}
-                  className="hidden"
-                />
-                {activeUploadedBook ? (
-                  <div className="p-2 rounded-xl bg-amber-50/80 border border-amber-300 flex items-center justify-between gap-1 shadow-2xs h-full">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <CheckCircle2 className="w-4 h-4 text-amber-700 shrink-0" />
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-bold text-slate-900 truncate">
-                          {activeUploadedBook.fileName || activeUploadedBook.title}
-                        </p>
-                        <p className="text-[10px] text-amber-800 font-medium whitespace-nowrap truncate">
-                          {activeUploadedBook.lessons?.length || 0} bài học
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleClearBook}
-                      className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-all cursor-pointer shrink-0"
-                      title="Xóa file SGK"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => textbookInputRef.current?.click()}
-                    disabled={isUploadingBook}
-                    className="w-full h-full py-2 px-1.5 sm:px-2 rounded-xl border border-amber-300 bg-amber-50/50 hover:bg-amber-100/70 text-amber-950 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs group active:scale-[0.99] whitespace-nowrap"
-                  >
-                    {isUploadingBook ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-700 shrink-0" />
-                        <span className="truncate">{bookUploadMsg || 'Đang quét...'}</span>
-                      </>
-                    ) : (
-                      <>
-                        <BookOpen className="w-3.5 h-3.5 text-amber-700 group-hover:scale-110 transition-transform shrink-0" />
-                        <span className="whitespace-nowrap">Tải SGK</span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-
-              {/* 2. Nút Tải File Bài Soạn Mẫu (Word .docx, .doc, PDF, TXT) */}
-              <div>
-                <input
-                  ref={docxInputRef}
-                  type="file"
-                  accept=".docx,.doc,.pdf,.txt,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,text/plain"
-                  onChange={handleDocxUpload}
-                  className="hidden"
-                />
-                {docxFileName ? (
-                  <div className="p-2 rounded-xl bg-indigo-50/80 border border-indigo-300 flex items-center justify-between gap-1 shadow-2xs h-full">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <CheckCircle2 className="w-4 h-4 text-indigo-700 shrink-0" />
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-bold text-slate-900 truncate">
-                          {docxFileName}
-                        </p>
-                        {docxStatusMsg && (
-                          <p className="text-[10px] text-indigo-700 font-medium whitespace-nowrap truncate">
-                            {docxStatusMsg}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleClearDocx}
-                      className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-all cursor-pointer shrink-0"
-                      title="Xóa file bài soạn mẫu"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => docxInputRef.current?.click()}
-                    disabled={isParsingDocx}
-                    title="Tải file bài soạn mẫu (Word .docx/.doc, PDF, TXT) để nâng cấp và bảo tồn 100% nội dung gốc"
-                    className="w-full h-full py-2 px-1.5 sm:px-2 rounded-xl border border-indigo-200 bg-indigo-50/40 hover:bg-indigo-100/60 text-indigo-950 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs group active:scale-[0.99] whitespace-nowrap"
-                  >
-                    {isParsingDocx ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-700 shrink-0" />
-                        <span className="truncate">Đang đọc bài mẫu...</span>
-                      </>
-                    ) : (
-                      <>
-                        <FileCode2 className="w-3.5 h-3.5 text-indigo-700 group-hover:scale-110 transition-transform shrink-0" />
-                        <span className="whitespace-nowrap">Tải bài soạn mẫu</span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-
-              {/* 3. Nút Tải File PPCT */}
-              <div>
-                <input
-                  ref={ppctInputRef}
-                  type="file"
-                  accept=".xlsx,.xls,.csv,.pdf,.docx,image/*"
-                  onChange={handlePPCTUpload}
-                  className="hidden"
-                />
-                {ppctFileName ? (
-                  <div className="p-2 rounded-xl bg-emerald-50/80 border border-emerald-300 flex items-center justify-between gap-1 shadow-2xs h-full">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-bold text-slate-900 truncate">
-                          {ppctFileName}
-                        </p>
-                        {ppctStatusMsg && (
-                          <p className="text-[10px] text-emerald-700 font-medium whitespace-nowrap truncate">
-                            {ppctStatusMsg}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleClearPPCT}
-                      className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-all cursor-pointer shrink-0"
-                      title="Xóa file PPCT"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => ppctInputRef.current?.click()}
-                    disabled={isUploadingPPCT}
-                    className="w-full h-full py-2 px-1.5 sm:px-2 rounded-xl border border-emerald-200 bg-emerald-50/40 hover:bg-emerald-100/60 text-emerald-950 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs group active:scale-[0.99] whitespace-nowrap"
-                  >
-                    {isUploadingPPCT ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-700 shrink-0" />
-                        <span className="truncate">{ppctStatusMsg || 'Đang đọc...'}</span>
-                      </>
-                    ) : (
-                      <>
-                        <CheckSquare className="w-3.5 h-3.5 text-emerald-700 group-hover:scale-110 transition-transform shrink-0" />
-                        <span className="whitespace-nowrap">Tải PPCT</span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-            </div>
+        <div className="w-full bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3.5 relative z-20">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+              <BookOpen className="w-3.5 h-3.5 text-amber-700" />
+              <span>Thông tin bài dạy trọng tâm</span>
+            </span>
           </div>
 
-          {/* 2. CẤU HÌNH BÀI DẠY TRỌNG TÂM */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-4.5 shadow-xs space-y-3.5 relative z-20">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
-                <BookOpen className="w-3.5 h-3.5 text-amber-700" />
-                <span>Thông tin bài dạy trọng tâm</span>
-              </span>
-            </div>
+          <div className="space-y-3.5">
+            {/* HÀNG 1: 1. CẤP HỌC, 2. ĐỘ TUỔI / KHỐI LỚP, 3. TÊN BÀI HỌC / CHỦ ĐỀ (SONG SONG 3 CỘT) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
+              {/* 1. CẤP HỌC */}
+              <div className="form-group flex flex-col gap-1.5">
+                <div className="flex items-center justify-between min-h-[26px]">
+                  <label className="text-xs font-bold text-red-600 flex items-center gap-1">
+                    <span>1. CẤP HỌC <span className="text-rose-500">*</span></span>
+                  </label>
+                </div>
+                <div className="relative">
+                  <select
+                    value={config.schoolLevel}
+                    onChange={(e) => {
+                      const newLevel = e.target.value as any;
+                      let newGrade = config.grade;
+                      let newSubject = config.subject;
 
-            <div className="space-y-3">
-        {/* 1. CẤP HỌC & 2. ĐỘ TUỔI / KHỐI LỚP (TRÊN CÙNG 1 HÀNG - CÂN BẰNG SONG SONG) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
-          {/* CẤP HỌC */}
-          <div className="form-group flex flex-col gap-1.5">
-            <div className="flex items-center justify-between min-h-[26px]">
-              <label className="text-xs font-bold text-red-600 flex items-center gap-1">
-                <span>1. Cấp học <span className="text-rose-500">*</span></span>
-              </label>
-            </div>
-            <div className="relative">
-              <select
-                value={config.schoolLevel}
-                onChange={(e) => {
-                  const newLevel = e.target.value as any;
-                  let newGrade = config.grade;
-                  let newSubject = config.subject;
+                      if (newLevel === 'Mầm non') {
+                        setIsCustomGrade(false);
+                        setCustomGradeText('');
+                        newGrade = 'Mẫu giáo lớn (5-6 tuổi)';
+                        if (!MAM_NON_SUBJECTS_LIST.includes(newSubject || '')) {
+                          newSubject = MAM_NON_TRADITIONAL_DOMAINS[0];
+                        }
+                        onChangeConfig({
+                          schoolLevel: newLevel,
+                          grade: newGrade,
+                          subject: newSubject,
+                          lessonTitle: '',
+                          enableNLS: false,
+                          enableAI: false,
+                          enableSTEM: false,
+                        });
+                      } else {
+                        setIsCustomGrade(false);
+                        setCustomGradeText('');
+                        if (newLevel === 'Tiểu học') newGrade = 'Lớp 5';
+                        if (newLevel === 'THCS') newGrade = 'Lớp 6';
+                        if (newLevel === 'THPT') newGrade = 'Lớp 10';
+                        
+                        const activeList = newLevel === 'Tiểu học' ? TIEU_HOC_SUBJECTS_LIST : newLevel === 'THCS' ? THCS_SUBJECTS_LIST : THPT_SUBJECTS_LIST;
+                        if (!activeList.includes(newSubject || '')) {
+                           newSubject = activeList[0];
+                        }
+                        
+                        onChangeConfig({
+                          schoolLevel: newLevel,
+                          grade: newGrade,
+                          subject: newSubject,
+                          lessonTitle: '',
+                          enableNLS: false,
+                          enableAI: false,
+                          enableSTEM: false,
+                        });
+                      }
+                    }}
+                    className="w-full h-[38px] bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 appearance-none focus:bg-white focus:outline-none focus:border-amber-600 cursor-pointer pr-8 shadow-xs"
+                  >
+                    {['Mầm non', 'Tiểu học', 'THCS', 'THPT'].map((lvl) => (
+                      <option key={lvl} value={lvl} className="bg-white text-slate-800">
+                        {lvl}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
+                </div>
+              </div>
 
-                  if (newLevel === 'Mầm non') {
-                    setIsCustomGrade(false);
-                    setCustomGradeText('');
-                    newGrade = 'Mẫu giáo lớn (5-6 tuổi)';
-                    if (!MAM_NON_SUBJECTS_LIST.includes(newSubject || '')) {
-                      newSubject = MAM_NON_TRADITIONAL_DOMAINS[0];
-                    }
-                    onChangeConfig({
-                      schoolLevel: newLevel,
-                      grade: newGrade,
-                      subject: newSubject,
-                      lessonTitle: '',
-                      enableNLS: false,
-                      enableAI: false,
-                      enableSTEM: false,
-                    });
-                  } else {
-                    setIsCustomGrade(false);
-                    setCustomGradeText('');
-                    if (newLevel === 'Tiểu học') newGrade = 'Lớp 5';
-                    if (newLevel === 'THCS') newGrade = 'Lớp 6';
-                    if (newLevel === 'THPT') newGrade = 'Lớp 10';
-                    
-                    const activeList = newLevel === 'Tiểu học' ? TIEU_HOC_SUBJECTS_LIST : newLevel === 'THCS' ? THCS_SUBJECTS_LIST : THPT_SUBJECTS_LIST;
-                    if (!activeList.includes(newSubject || '')) {
-                       newSubject = activeList[0];
-                    }
-                    
-                    onChangeConfig({
-                      schoolLevel: newLevel,
-                      grade: newGrade,
-                      subject: newSubject,
-                      lessonTitle: '',
-                      enableNLS: false,
-                      enableAI: false,
-                      enableSTEM: false,
-                    });
-                  }
-                }}
-                className="w-full h-[38px] bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 appearance-none focus:bg-white focus:outline-none focus:border-amber-600 cursor-pointer pr-8 shadow-xs"
-              >
-                {['Mầm non', 'Tiểu học', 'THCS', 'THPT'].map((lvl) => (
-                  <option key={lvl} value={lvl} className="bg-white text-slate-800">
-                    {lvl}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
-            </div>
-          </div>
+              {/* 2. ĐỘ TUỔI / KHỐI LỚP */}
+              <div className="form-group flex flex-col gap-1.5">
+                <div className="flex items-center justify-between min-h-[26px]">
+                  <label className="text-xs font-bold text-red-600 flex items-center gap-1.5">
+                    <span>2. {config.schoolLevel === 'Mầm non' ? 'ĐỘ TUỔI' : 'ĐỘ TUỔI / KHỐI LỚP'} <span className="text-rose-500">*</span></span>
+                  </label>
+                  <button
+                    type="button"
+                    id="custom-age-grade-btn"
+                    onClick={() => {
+                      if (!isCustomGrade) {
+                        setIsCustomGrade(true);
+                        const initialText = config.grade && !allGrades.includes(config.grade) ? config.grade : '';
+                        setCustomGradeText(initialText);
+                        onChangeConfig({ grade: initialText, lessonTitle: '' });
+                      } else {
+                        setIsCustomGrade(false);
+                        const defaultGrade = allGrades[0] || (config.schoolLevel === 'Mầm non' ? 'Mẫu giáo lớn (5-6 tuổi)' : 'Lớp 1');
+                        setCustomGradeText('');
+                        onChangeConfig({ grade: defaultGrade, lessonTitle: '' });
+                      }
+                    }}
+                    className="text-[11px] px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100 font-medium cursor-pointer transition-colors shadow-2xs"
+                  >
+                    {isCustomGrade
+                      ? (config.schoolLevel === 'Mầm non' ? '← Chọn tuổi' : '← Chọn lớp')
+                      : (config.schoolLevel === 'Mầm non' ? '✍️ Khác...' : '✍️ Khác...')}
+                  </button>
+                </div>
 
-          {/* ĐỘ TUỔI / KHỐI LỚP */}
-          <div className="form-group flex flex-col gap-1.5">
-            <div className="flex items-center justify-between min-h-[26px]">
-              <label className="text-xs font-bold text-red-600 flex items-center gap-1.5">
-                <span>2. {config.schoolLevel === 'Mầm non' ? 'Độ tuổi' : 'Độ tuổi / Khối lớp'} <span className="text-rose-500">*</span></span>
-              </label>
-              <button
-                type="button"
-                id="custom-age-grade-btn"
-                onClick={() => {
-                  if (!isCustomGrade) {
-                    setIsCustomGrade(true);
-                    const initialText = config.grade && !allGrades.includes(config.grade) ? config.grade : '';
-                    setCustomGradeText(initialText);
-                    onChangeConfig({ grade: initialText, lessonTitle: '' });
-                  } else {
-                    setIsCustomGrade(false);
-                    const defaultGrade = allGrades[0] || (config.schoolLevel === 'Mầm non' ? 'Mẫu giáo lớn (5-6 tuổi)' : 'Lớp 1');
-                    setCustomGradeText('');
-                    onChangeConfig({ grade: defaultGrade, lessonTitle: '' });
-                  }
-                }}
-                className="text-[11px] px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100 font-medium cursor-pointer transition-colors shadow-2xs"
-              >
-                {isCustomGrade
-                  ? (config.schoolLevel === 'Mầm non' ? '← Chọn tuổi' : '← Chọn lớp')
-                  : (config.schoolLevel === 'Mầm non' ? '✍️ Khác...' : '✍️ Khác...')}
-              </button>
-            </div>
-
-            {isCustomGrade ? (
-              <input
-                type="text"
-                value={customGradeText}
-                onChange={(e) => {
-                  setCustomGradeText(e.target.value);
-                  onChangeConfig({ grade: e.target.value, lessonTitle: '' });
-                }}
-                placeholder={config.schoolLevel === 'Mầm non' ? "Nhập độ tuổi (ví dụ: Mẫu giáo 3-4 tuổi...)" : "Nhập khối lớp..."}
-                className="w-full h-[38px] bg-[#f8fafc] border border-amber-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
-              />
-            ) : (
-              <div className="relative">
-                <select
-                  value={config.grade}
-                  onChange={(e) => {
-                    if (e.target.value === '__custom_grade__') {
-                      setIsCustomGrade(true);
-                      setCustomGradeText('');
-                      onChangeConfig({ grade: '', lessonTitle: '' });
-                    } else {
+                {isCustomGrade ? (
+                  <input
+                    type="text"
+                    value={customGradeText}
+                    onChange={(e) => {
+                      setCustomGradeText(e.target.value);
                       onChangeConfig({ grade: e.target.value, lessonTitle: '' });
-                    }
-                  }}
-                  className="w-full h-[38px] bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 appearance-none focus:bg-white focus:outline-none focus:border-amber-600 cursor-pointer pr-8 shadow-xs"
-                >
-                  {allGrades.map((gr) => (
-                    <option key={gr} value={gr} className="bg-white text-slate-800">
-                      {gr}
-                    </option>
-                  ))}
-                  <option value="__custom_grade__" className="bg-amber-50 text-amber-900 font-semibold">
-                    ✍️ {config.schoolLevel === 'Mầm non' ? 'Độ tuổi khác...' : 'Khối lớp khác...'}
-                  </option>
-                </select>
-                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
+                    }}
+                    placeholder={config.schoolLevel === 'Mầm non' ? "Nhập độ tuổi..." : "Nhập khối lớp..."}
+                    className="w-full h-[38px] bg-[#f8fafc] border border-amber-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
+                  />
+                ) : (
+                  <div className="relative">
+                    <select
+                      value={config.grade}
+                      onChange={(e) => {
+                        if (e.target.value === '__custom_grade__') {
+                          setIsCustomGrade(true);
+                          setCustomGradeText('');
+                          onChangeConfig({ grade: '', lessonTitle: '' });
+                        } else {
+                          onChangeConfig({ grade: e.target.value, lessonTitle: '' });
+                        }
+                      }}
+                      className="w-full h-[38px] bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 appearance-none focus:bg-white focus:outline-none focus:border-amber-600 cursor-pointer pr-8 shadow-xs"
+                    >
+                      {allGrades.map((gr) => (
+                        <option key={gr} value={gr} className="bg-white text-slate-800">
+                          {gr}
+                        </option>
+                      ))}
+                      <option value="__custom_grade__" className="bg-amber-50 text-amber-900 font-semibold">
+                        ✍️ {config.schoolLevel === 'Mầm non' ? 'Độ tuổi khác...' : 'Khối lớp khác...'}
+                      </option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
 
-        {/* 3. MÔN HỌC / LĨNH VỰC HOẠT ĐỘNG */}
+              {/* 3. TÊN BÀI HỌC / CHỦ ĐỀ */}
+              <div className="form-group flex flex-col gap-1.5">
+                <div className="flex items-center justify-between min-h-[26px]">
+                  <label className="text-xs font-bold text-red-600">
+                    3. TÊN BÀI HỌC / CHỦ ĐỀ <span className="text-rose-500">*</span>
+                  </label>
+                  {availableLessons.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!isCustomLessonInput) {
+                          setIsCustomLessonInput(true);
+                          onChangeConfig({ lessonTitle: '' });
+                        } else {
+                          setIsCustomLessonInput(false);
+                          onChangeConfig({ lessonTitle: availableLessons[0] || '' });
+                        }
+                      }}
+                      className="text-[11px] text-amber-800 hover:underline font-semibold cursor-pointer"
+                    >
+                      {isCustomLessonInput ? 'Chọn bài từ SGK' : '✍️ Tự nhập'}
+                    </button>
+                  )}
+                </div>
+
+                {availableLessons.length > 0 && !isCustomLessonInput ? (
+                  <div className="relative">
+                    <select
+                      value={config.lessonTitle}
+                      onChange={(e) => {
+                        if (e.target.value === '__custom__') {
+                          setIsCustomLessonInput(true);
+                          onChangeConfig({ lessonTitle: '' });
+                        } else {
+                          onChangeConfig({ lessonTitle: e.target.value });
+                        }
+                      }}
+                      className="w-full h-[38px] bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 appearance-none focus:bg-white focus:outline-none focus:border-amber-600 cursor-pointer pr-8 shadow-xs"
+                    >
+                      <option value="" disabled>-- Chọn bài học từ danh mục SGK --</option>
+                      {availableLessons.map((les, idx) => (
+                        <option key={idx} value={les} className="bg-white text-slate-900 py-1">
+                          {les}
+                        </option>
+                      ))}
+                      <option value="__custom__">✍️ Nhập tên bài học khác...</option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
+                  </div>
+                ) : (
+                  <input
+                    type="text"
+                    value={config.lessonTitle}
+                    onChange={(e) => onChangeConfig({ lessonTitle: e.target.value })}
+                    placeholder="Nhập tên bài học / chủ đề..."
+                    className="w-full h-[38px] bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-amber-600 shadow-xs"
+                  />
+                )}
+              </div>
+            </div>
+
+        {/* 4. MÔN HỌC / LĨNH VỰC HOẠT ĐỘNG */}
         {config.schoolLevel === 'Mầm non' ? (
           /* MẦM NON: PHÂN TÁCH RÕ RÀNG GIỮA "LĨNH VỰC PHÁT TRIỂN" VÀ "8 HOẠT ĐỘNG PHÁT TRIỂN MỚI (QĐ 388)" */
           <div className="form-group flex flex-col gap-2 p-3 bg-gradient-to-br from-amber-50/40 via-white to-orange-50/20 border border-amber-200/80 rounded-xl shadow-2xs">
             <div className="flex items-center justify-between flex-wrap gap-1">
               <label className="text-xs font-bold text-red-600 flex items-center gap-1.5">
-                <span>3. Lĩnh vực / Hoạt động mầm non <span className="text-rose-500">*</span></span>
+                <span>4. LĨNH VỰC / HOẠT ĐỘNG MẦM NON <span className="text-rose-500">*</span></span>
               </label>
               <button
                 type="button"
@@ -905,7 +972,7 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                       <BookOpen className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-xs font-bold leading-tight">Lĩnh vực phát triển</div>
+                      <div className="text-xs font-bold leading-tight uppercase">LĨNH VỰC PHÁT TRIỂN</div>
                       <div className="text-[10.5px] text-slate-500 leading-tight mt-0.5 truncate">Văn học, Âm nhạc...</div>
                     </div>
                   </button>
@@ -935,8 +1002,8 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                       <Sparkles className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-xs font-bold leading-tight flex items-center gap-1">
-                        <span>HĐ mới</span>
+                      <div className="text-xs font-bold leading-tight flex items-center gap-1 uppercase">
+                        <span>HĐ MỚI</span>
                         <span className="px-1 py-0.2 rounded bg-blue-100 text-blue-800 text-[8.5px] font-extrabold uppercase border border-blue-200">QĐ 388</span>
                       </div>
                       <div className="text-[10.5px] text-slate-500 leading-tight mt-0.5 truncate">Ngoài trời, Vui chơi...</div>
@@ -966,8 +1033,8 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                       <Layers className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-xs font-bold leading-tight flex items-center gap-1">
-                        <span>Chủ đề</span>
+                      <div className="text-xs font-bold leading-tight flex items-center gap-1 uppercase">
+                        <span>CHỦ ĐỀ</span>
                         <span className="px-1 py-0.2 rounded bg-amber-100 text-amber-800 text-[8.5px] font-extrabold uppercase border border-amber-200">Mới</span>
                       </div>
                       <div className="text-[10.5px] text-slate-500 leading-tight mt-0.5 truncate">Trường MN, Bản thân...</div>
@@ -1145,7 +1212,7 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
           <div className="form-group flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-red-600 flex items-center gap-1">
-                <span>3. Môn học / Lĩnh vực <span className="text-rose-500">*</span></span>
+                <span>4. MÔN HỌC / LĨNH VỰC <span className="text-rose-500">*</span></span>
               </label>
               <button
                 type="button"
@@ -1210,66 +1277,6 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
             )}
           </div>
         )}
-
-        {/* 4. TÊN BÀI HỌC / CHỦ ĐỀ */}
-        <div className="form-group flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-red-600">
-              4. Tên bài học / Chủ đề <span className="text-rose-500">*</span>
-            </label>
-            {availableLessons.length > 0 && (
-              <button
-                type="button"
-                onClick={() => {
-                  if (!isCustomLessonInput) {
-                    setIsCustomLessonInput(true);
-                    onChangeConfig({ lessonTitle: '' });
-                  } else {
-                    setIsCustomLessonInput(false);
-                    onChangeConfig({ lessonTitle: availableLessons[0] || '' });
-                  }
-                }}
-                className="text-[11px] text-amber-800 hover:underline font-semibold cursor-pointer"
-              >
-                {isCustomLessonInput ? 'Chọn bài từ SGK' : '✍️ Tự nhập tên bài'}
-              </button>
-            )}
-          </div>
-
-          {availableLessons.length > 0 && !isCustomLessonInput ? (
-            <div className="relative">
-              <select
-                value={config.lessonTitle}
-                onChange={(e) => {
-                  if (e.target.value === '__custom__') {
-                    setIsCustomLessonInput(true);
-                    onChangeConfig({ lessonTitle: '' });
-                  } else {
-                    onChangeConfig({ lessonTitle: e.target.value });
-                  }
-                }}
-                className="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 appearance-none focus:bg-white focus:outline-none focus:border-amber-600 cursor-pointer pr-8 shadow-xs"
-              >
-                <option value="" disabled>-- Chọn bài học từ danh mục SGK --</option>
-                {availableLessons.map((les, idx) => (
-                  <option key={idx} value={les} className="bg-white text-slate-900 py-1">
-                    {les}
-                  </option>
-                ))}
-                <option value="__custom__">✍️ Nhập tên bài học khác...</option>
-              </select>
-              <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
-            </div>
-          ) : (
-            <input
-              type="text"
-              value={config.lessonTitle}
-              onChange={(e) => onChangeConfig({ lessonTitle: e.target.value })}
-              placeholder="Nhập tên bài học / chủ đề..."
-              className="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-amber-600 shadow-xs"
-            />
-          )}
-        </div>
 
         {/* THÔNG BÁO GỌN CHO MẦM NON KHI CHỌN 8 HOẠT ĐỘNG MỚI */}
         {config.schoolLevel === 'Mầm non' && (MAM_NON_NEW_ACTIVITIES.includes(config.subject) || isPreschoolNew8Activity(config.subject, config.lessonTitle)) && (
@@ -1382,21 +1389,18 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
             )}
           </>
         )}
-            </div>
-          </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* CỘT 2: TÙY CHỌN TÍCH HỢP (NLS, AI, STEM, QĐ 388, GHI CHÚ) & THAO TÁC */}
+        {/* KHỐI 2: TÙY CHỌN TÍCH HỢP CHUYÊN SÂU (NLS, AI, STEM) (MỞ RỘNG HẾT CỠ Ở DƯỚI) */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-7 xl:col-span-8 space-y-4">
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-4.5 shadow-xs space-y-3.5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-700" />
-                <span>Tùy chọn tích hợp chuyên sâu (NLS, AI, STEM)</span>
-              </span>
-            </div>
+        <div className="w-full bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3.5">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+              <span>Tùy chọn tích hợp chuyên sâu (NLS, AI, STEM)</span>
+            </span>
+          </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 items-start">
               {/* Checkbox 1: TÍCH HỢP (NLS) */}
@@ -1771,20 +1775,6 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
             )}
           </div>
           </div>
-          </div>
-
-          {/* Additional Pedagogical Notes Card */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-4.5 shadow-xs space-y-2">
-            <label className="block text-xs font-bold text-red-600">
-              Ghi chú & Yêu cầu bổ sung (nếu có):
-            </label>
-            <textarea
-              value={config.additionalRequirements || ''}
-              onChange={(e) => onChangeConfig({ additionalRequirements: e.target.value })}
-              placeholder="Ví dụ: Tăng cường hoạt động nhóm, liên hệ tình huống thực tế, lồng ghép trò chơi khởi động sôi nổi..."
-              rows={2}
-              className="w-full bg-[#f8fafc] border border-slate-200 rounded-lg p-2.5 text-xs font-medium text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-amber-600 shadow-2xs"
-            />
           </div>
 
           {/* Account Status Alerts (only when trial/expired/custom key applies) */}

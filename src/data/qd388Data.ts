@@ -218,7 +218,7 @@ export const QD388_DEFAULT_CODES_BY_ACTIVITY: Record<string, {
   };
   note: string;
 }> = {
-  'HOẠT ĐỘNG VUI CHƠI TRONG LỚP': {
+  'HOẠT ĐỘNG VUI CHƠI TRONG LỚP (5 bước)': {
     summary: 'NT 3.1, TX 3.2, TX 4.3, TX 4.4, NN 2.2, TX 8.1',
     codes: ['NT 3.1', 'TX 3.2', 'TX 4.3', 'TX 4.4', 'NN 2.2', 'TX 8.1'],
     bySection: {
@@ -227,18 +227,7 @@ export const QD388_DEFAULT_CODES_BY_ACTIVITY: Record<string, {
       qualities: 'TX 4.4, TX 8.1',
       competencies: 'Tự lực lựa chọn góc chơi, Hợp tác nhóm'
     },
-    note: 'Chuẩn Hoạt động góc / Vui chơi trong lớp (Bản truyền thống 5 bước): 1. Ổn định tổ chức & trò chuyện chủ đề, 2. Thỏa thuận trước khi chơi, 3. Quá trình chơi tại các góc, 4. Nhận xét sau khi chơi, 5. Kết thúc và thu dọn đồ chơi.'
-  },
-  'HOẠT ĐỘNG VUI CHƠI TRONG LỚP (Bản cũ)': {
-    summary: 'NT 3.1, TX 3.2, TX 4.3, TX 4.4, NN 2.2, TX 8.1',
-    codes: ['NT 3.1', 'TX 3.2', 'TX 4.3', 'TX 4.4', 'NN 2.2', 'TX 8.1'],
-    bySection: {
-      knowledge: 'NT 3.1, TX 3.2, TX 4.3',
-      skills: 'TX 4.4, NN 2.2',
-      qualities: 'TX 4.4, TX 8.1',
-      competencies: 'Tự lực lựa chọn góc chơi, Hợp tác nhóm'
-    },
-    note: 'Chuẩn Hoạt động vui chơi trong lớp (Bản cũ 5 bước): 1. Ổn định tổ chức & trò chuyện chủ đề, 2. Thỏa thuận trước khi chơi, 3. Quá trình chơi tại các góc, 4. Nhận xét sau khi chơi, 5. Kết thúc và thu dọn đồ chơi.'
+    note: 'Chuẩn Hoạt động vui chơi trong lớp (5 bước): 1. Gây hứng thú, 2. Thỏa thuận trước khi chơi, 3. Quá trình chơi, 4. Nhận xét – kết thúc.'
   },
   'HOẠT ĐỘNG VUI CHƠI TRONG LỚP 1': {
     summary: 'NT 3.1, TX 3.2, TX 4.3, TX 4.4, NN 2.2, TX 8.1',
@@ -251,7 +240,7 @@ export const QD388_DEFAULT_CODES_BY_ACTIVITY: Record<string, {
     },
     note: 'Mẫu mới 3 bước chuẩn: 1. Thỏa thuận trước khi chơi, 2. Theo dõi quá trình chơi (Góc Nghệ thuật, Góc học tập - khám phá, Góc Phân vai...), 3. Nhận xét sau khi chơi.'
   },
-  'HOẠT ĐỘNG NGOÀI TRỜI': {
+  'HOẠT ĐỘNG NGOÀI TRỜI (5 bước)': {
     summary: 'NT 1.1, NT 1.2, NT 3.1, TC 1.1, TC 1.2, TC 3.1, TC 3.3, NN 2.2, TX 4.4',
     codes: ['NT 1.1', 'NT 1.2', 'NT 3.1', 'TC 1.1', 'TC 1.2', 'TC 3.1', 'TC 3.3', 'NN 2.2', 'TX 4.4'],
     bySection: {
@@ -260,18 +249,7 @@ export const QD388_DEFAULT_CODES_BY_ACTIVITY: Record<string, {
       qualities: 'TX 4.4, TX 8.3 (Yêu thiên nhiên, đoàn kết)',
       competencies: 'Thích ứng môi trường tự nhiên, Tự lực bảo vệ an toàn'
     },
-    note: 'Tiến trình truyền thống 5 bước: 1. Ổn định tổ chức & chuẩn bị, 2. Hoạt động có mục đích (Quan sát), 3. Trò chơi vận động, 4. Chơi tự do, 5. Kết thúc, nhận xét, vệ sinh.'
-  },
-  'HOẠT ĐỘNG NGOÀI TRỜI (Bản cũ)': {
-    summary: 'NT 1.1, NT 1.2, NT 3.1, TC 1.1, TC 1.2, TC 3.1, TC 3.3, NN 2.2, TX 4.4',
-    codes: ['NT 1.1', 'NT 1.2', 'NT 3.1', 'TC 1.1', 'TC 1.2', 'TC 3.1', 'TC 3.3', 'NN 2.2', 'TX 4.4'],
-    bySection: {
-      knowledge: 'NT 1.1, NT 1.2, NT 3.1, TC 1.1, TC 3.3',
-      skills: 'NN 2.2, NT 1.2, TC 1.2, TC 3.1',
-      qualities: 'TX 4.4, TX 8.3 (Yêu thiên nhiên, đoàn kết)',
-      competencies: 'Thích ứng môi trường tự nhiên, Tự lực bảo vệ an toàn'
-    },
-    note: 'Tiến trình truyền thống 5 bước: 1. Ổn định tổ chức & chuẩn bị, 2. Hoạt động có mục đích (Quan sát), 3. Trò chơi vận động, 4. Chơi tự do, 5. Kết thúc, nhận xét, vệ sinh.'
+    note: 'Tiến trình truyền thống 5 bước: 1. Trước khi chơi, 2. Trong khi chơi (Quan sát / Trải nghiệm & Chơi tự do), 3. Sau khi chơi (Nhận xét, vệ sinh, về lớp).'
   },
   'HOẠT ĐỘNG NGOÀI TRỜI 1 (Quan sát)': {
     summary: 'NT 1.1, NT 1.2, NT 3.1, TC 1.1, TC 1.2, TC 3.1, TC 3.3, NN 2.2, TX 4.4, TX 8.3',
@@ -371,6 +349,83 @@ export const QD388_DEFAULT_CODES_BY_ACTIVITY: Record<string, {
       competencies: 'Nhận diện chữ cái, Hợp tác nhóm, Phản xạ nhanh'
     },
     note: 'Củng cố nhận diện mặt chữ cái, phát âm chuẩn thông qua các trò chơi vận động và trí tuệ sinh động.'
+  },
+  'HOẠT ĐỘNG NHẬN BIẾT TẬP NÓI': {
+    summary: 'NN 1.1, NN 1.2, NN 2.1, NN 2.2, NT 1.1, TX 4.4',
+    codes: ['NN 1.1', 'NN 1.2', 'NN 2.1', 'NN 2.2', 'NT 1.1', 'TX 4.4'],
+    bySection: {
+      knowledge: 'NN 1.1, NN 1.2, NT 1.1',
+      skills: 'NN 2.1, NN 2.2, TC 1.1',
+      qualities: 'TX 4.4 (Hào hứng tương tác, chú ý lắng nghe cô và bạn)',
+      competencies: 'Giao tiếp ngôn ngữ, Nhận biết đối tượng, Tự tin biểu đạt'
+    },
+    note: 'Nhận biết tên gọi, đặc điểm nổi bật và tập phát âm chuẩn từ ngữ, rèn luyện kỹ năng nói trọn câu và mở rộng vốn từ.'
+  },
+  'NHẬN BIẾT TẬP NÓI': {
+    summary: 'NN 1.1, NN 1.2, NN 2.1, NN 2.2, NT 1.1, TX 4.4',
+    codes: ['NN 1.1', 'NN 1.2', 'NN 2.1', 'NN 2.2', 'NT 1.1', 'TX 4.4'],
+    bySection: {
+      knowledge: 'NN 1.1, NN 1.2, NT 1.1',
+      skills: 'NN 2.1, NN 2.2, TC 1.1',
+      qualities: 'TX 4.4 (Hào hứng tương tác, chú ý lắng nghe cô và bạn)',
+      competencies: 'Giao tiếp ngôn ngữ, Nhận biết đối tượng, Tự tin biểu đạt'
+    },
+    note: 'Nhận biết tên gọi, đặc điểm nổi bật và tập phát âm chuẩn từ ngữ, rèn luyện kỹ năng nói trọn câu và mở rộng vốn từ.'
+  },
+  'HOẠT ĐỘNG VỚI ĐỒ VẬT': {
+    summary: 'TC 1.1, TC 1.2, NT 1.1, NT 2.1, TX 1.1, TX 4.4',
+    codes: ['TC 1.1', 'TC 1.2', 'NT 1.1', 'NT 2.1', 'TX 1.1', 'TX 4.4'],
+    bySection: {
+      knowledge: 'NT 1.1, NT 2.1',
+      skills: 'TC 1.1, TC 1.2',
+      qualities: 'TX 1.1, TX 4.4 (Thích thú khám phá, giữ gìn đồ chơi cẩn thận)',
+      competencies: 'Vận động tinh, Thao tác với đồ vật, Phối hợp tay - mắt'
+    },
+    note: 'Rèn luyện sự khéo léo của đôi bàn tay, ngón tay và khả năng phối hợp tay - mắt qua các thao tác xếp, lồng hộp, xâu hạt, ghép hình.'
+  },
+  'LĨNH VỰC PT THỂ CHẤT (HĐ VỚI ĐỒ VẬT)': {
+    summary: 'TC 1.1, TC 1.2, NT 1.1, NT 2.1, TX 1.1, TX 4.4',
+    codes: ['TC 1.1', 'TC 1.2', 'NT 1.1', 'NT 2.1', 'TX 1.1', 'TX 4.4'],
+    bySection: {
+      knowledge: 'NT 1.1, NT 2.1',
+      skills: 'TC 1.1, TC 1.2',
+      qualities: 'TX 1.1, TX 4.4 (Thích thú khám phá, giữ gìn đồ chơi cẩn thận)',
+      competencies: 'Vận động tinh, Thao tác với đồ vật, Phối hợp tay - mắt'
+    },
+    note: 'Rèn luyện sự khéo léo của đôi bàn tay, ngón tay và khả năng phối hợp tay - mắt qua các thao tác xếp, lồng hộp, xâu hạt, ghép hình.'
+  },
+  'LĨNH VỰC NHẬN BIẾT PHÂN BIỆT': {
+    summary: 'NT 1.1, NT 1.2, NT 2.1, NN 1.1, TX 1.1',
+    codes: ['NT 1.1', 'NT 1.2', 'NT 2.1', 'NN 1.1', 'TX 1.1'],
+    bySection: {
+      knowledge: 'NT 1.1, NT 1.2',
+      skills: 'NT 2.1, NN 1.1',
+      qualities: 'TX 1.1 (Tập trung chú ý, hứng thú tìm hiểu đặc điểm sự vật)',
+      competencies: 'Nhận biết phân biệt màu sắc, hình khối, kích thước'
+    },
+    note: 'Giúp trẻ nhận biết và phân biệt rõ ràng màu sắc, kích thước to - nhỏ, hình dạng khối đơn giản và diễn đạt lại bằng lời nói.'
+  },
+  'NHẬN BIẾT PHÂN BIỆT': {
+    summary: 'NT 1.1, NT 1.2, NT 2.1, NN 1.1, TX 1.1',
+    codes: ['NT 1.1', 'NT 1.2', 'NT 2.1', 'NN 1.1', 'TX 1.1'],
+    bySection: {
+      knowledge: 'NT 1.1, NT 1.2',
+      skills: 'NT 2.1, NN 1.1',
+      qualities: 'TX 1.1 (Tập trung chú ý, hứng thú tìm hiểu đặc điểm sự vật)',
+      competencies: 'Nhận biết phân biệt màu sắc, hình khối, kích thước'
+    },
+    note: 'Giúp trẻ nhận biết và phân biệt rõ ràng màu sắc, kích thước to - nhỏ, hình dạng khối đơn giản và diễn đạt lại bằng lời nói.'
+  },
+  'GIÁO ÁN TÌNH CẢM - XÃ HỘI (KNXH)': {
+    summary: 'TX 1.1, TX 1.2, TX 2.1, TX 3.1, TX 4.1, TX 4.4',
+    codes: ['TX 1.1', 'TX 1.2', 'TX 2.1', 'TX 3.1', 'TX 4.1', 'TX 4.4'],
+    bySection: {
+      knowledge: 'TX 1.1, TX 1.2, TX 3.1',
+      skills: 'TX 2.1, TX 4.1, NN 2.1',
+      qualities: 'TX 4.4 (Lễ phép, biết chia sẻ, đồng cảm, tự tin trong giao tiếp)',
+      competencies: 'Kỹ năng tự phục vụ, Hợp tác nhóm, Thích ứng xã hội, Kiểm soát cảm xúc'
+    },
+    note: 'Giúp trẻ phát triển các chuẩn mực hành vi xã hội, kỹ năng tự phục vụ, ứng xử giao tiếp lễ phép, chia sẻ, hợp tác và giải quyết vấn đề trong đời sống.'
   }
 };
 
@@ -396,6 +451,8 @@ export function getDefaultQD388ForSubject(subject: string = ''): typeof QD388_DE
   if (sLower.includes('tăng cường tiếng việt') || sLower.includes('tctv')) return QD388_DEFAULT_CODES_BY_ACTIVITY['HOẠT ĐỘNG TĂNG CƯỜNG TIẾNG VIỆT'];
   if (sLower.includes('tập tô')) return QD388_DEFAULT_CODES_BY_ACTIVITY['HOẠT ĐỘNG TẬP TÔ CHỮ CÁI'];
   if (sLower.includes('trò chơi chữ cái')) return QD388_DEFAULT_CODES_BY_ACTIVITY['HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI'];
+  if (sLower.includes('nhận biết tập nói') || sLower.includes('nbtn') || sLower.includes('tập nói')) return QD388_DEFAULT_CODES_BY_ACTIVITY['HOẠT ĐỘNG NHẬN BIẾT TẬP NÓI'];
+  if (sLower.includes('đồ vật') || sLower.includes('hđ với đồ vật')) return QD388_DEFAULT_CODES_BY_ACTIVITY['HOẠT ĐỘNG VỚI ĐỒ VẬT'];
 
   return null;
 }

@@ -1,11 +1,29 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig} from 'vite';
+import fs from 'fs';
+import {defineConfig, Plugin} from 'vite';
+
+function syncBuildDirPlugin(): Plugin {
+  return {
+    name: 'sync-build-dir',
+    closeBundle() {
+      try {
+        const distDir = path.resolve(__dirname, 'dist');
+        const buildDir = path.resolve(__dirname, 'build');
+        if (fs.existsSync(distDir)) {
+          fs.cpSync(distDir, buildDir, { recursive: true, force: true });
+        }
+      } catch (err) {
+        console.warn('Could not sync dist to build:', err);
+      }
+    },
+  };
+}
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), syncBuildDirPlugin()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

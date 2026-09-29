@@ -17,8 +17,9 @@ import {
 } from 'docx';
 import fileSaver from 'file-saver';
 const saveAs = (fileSaver as any)?.saveAs || fileSaver;
-import { LessonPlanOutput, ImageSlot, StepDetail, MathFormulaFormatType } from '../types';
-import { formatPreschoolActivities, formatPreschoolMusicActivities, parseActivityPairs, detectPreschoolDomain, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, analyzePreschoolAgeProfile, cleanPreschoolBulletLine, expandPreschoolTextLines, getPreschoolPreparation } from './preschoolUtils';
+import { LessonPlanOutput, ImageSlot, StepDetail, MathFormulaFormatType, CombineWeekConfig } from '../types';
+import { PRESCHOOL_ACTIVITY_SECTIONS, USER_PRESCHOOL_ACTIVITY_SECTIONS, getStandardFixedSectionContent } from '../data/preschoolWeekActivities';
+import { formatPreschoolActivities, formatPreschoolMusicActivities, parseActivityPairs, detectPreschoolDomain, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, analyzePreschoolAgeProfile, cleanPreschoolBulletLine, expandPreschoolTextLines, getPreschoolPreparation, cleanPreschoolSubjectDisplay, isPreschoolPlan, getPreschoolSectionCHeaderInfo } from './preschoolUtils';
 import { latexToDocxMath, splitTextAndMath } from './latexToDocxMath';
 import {
   normalizeWorksheetMarkdown,
@@ -109,7 +110,7 @@ export function formatDocxFileName(plan: {
   const gradeClean = rawGrade.replace(/^(lớp|khối)\s*/i, '').trim();
 
   const rawSubject = (plan.subject || '').trim();
-  const isPreschool = (plan as any).schoolLevel === 'Mầm non';
+  const isPreschool = (plan as any).schoolLevel === 'Mầm non' || isPreschoolPlan(plan);
   const isHDTN = /hoạt động trải nghiệm|hđtn|hdtn/i.test(rawSubject) ||
                  /sinh hoạt dưới cờ|sinh hoạt lớp|chào cờ/i.test(title);
 
@@ -469,7 +470,7 @@ export async function exportLessonPlanToDocx(
     slotMap.set(slot.slotTag.trim(), slot);
   });
 
-  const isPreschool = (plan as any).schoolLevel === 'Mầm non';
+  const isPreschool = (plan as any).schoolLevel === 'Mầm non' || isPreschoolPlan(plan);
   const isHDTN = (plan.subject || '').toLowerCase().includes('hoạt động trải nghiệm') ||
                  (plan.subject || '').toLowerCase().includes('hđtn') ||
                  (plan.lessonTitle || '').toLowerCase().includes('sinh hoạt dưới cờ') ||
@@ -515,6 +516,379 @@ export async function exportLessonPlanToDocx(
 
   const blob = await Packer.toBlob(doc);
   const fileName = formatDocxFileName(plan);
+  return await saveFileWithPickerOrFallback(blob, fileName);
+}
+
+/**
+ * Exports multiple lesson plans merged into ONE seamless .docx file,
+ * preserving all exact formatting, borders, margins, fonts, and table layouts.
+ */
+export async function exportMultipleMergedLessonPlansToDocx(
+  plans: (LessonPlanOutput & { prepDate?: string; teachDate?: string; dayOfWeek?: string })[],
+  mergedTitleName?: string,
+  imageSlots: ImageSlot[] = [],
+  tableLayout: string = 'two_column',
+  weekConfig?: CombineWeekConfig
+): Promise<boolean> {
+  if (!plans || plans.length === 0) return false;
+
+  const fontName = 'Times New Roman';
+  const primaryColor = '000000';
+  const slotMap = new Map<string, ImageSlot>();
+  imageSlots.forEach(slot => {
+    if (slot && slot.slotTag) {
+      slotMap.set(slot.slotTag.trim(), slot);
+    }
+  });
+
+  const children: (Paragraph | Table)[] = [];
+
+  // 1. TIÊU ĐỀ TUẦN & CHỦ ĐIỂM (THEO MẪU GIÁO ÁN TUẦN) NẰM Ở ĐẦU TRANG 1 - LUÔN LUÔN GIỮ NGUYÊN
+  if (weekConfig && (weekConfig.weekTitle || weekConfig.themeGroup || weekConfig.subTheme || weekConfig.dateRangeText || weekConfig.enabled !== false)) {
+    // Dòng 1: TUẦN 4:
+    if (weekConfig.weekTitle) {
+      children.push(
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 120, after: 60 },
+          children: [
+            new TextRun({
+              text: weekConfig.weekTitle.toUpperCase().trim(),
+              bold: true,
+              size: 28, // 14pt
+              font: fontName,
+              color: primaryColor,
+            }),
+          ],
+        })
+      );
+    }
+
+    // Dòng 2: CHỦ ĐIỂM: BẢN THÂN
+    if (weekConfig.themeGroup) {
+      const tgText = weekConfig.themeGroup.toUpperCase().trim();
+      const fullTg = tgText.startsWith('CHỦ ĐIỂM:') ? tgText : `CHỦ ĐIỂM: ${tgText}`;
+      children.push(
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 40, after: 60 },
+          children: [
+            new TextRun({
+              text: fullTg,
+              bold: true,
+              size: 28, // 14pt
+              font: fontName,
+              color: primaryColor,
+            }),
+          ],
+        })
+      );
+    }
+
+    // Dòng 3: CHỦ ĐỀ: TÔI LÀ AI?
+    if (weekConfig.subTheme) {
+      const stText = weekConfig.subTheme.toUpperCase().trim();
+      const fullSt = stText.startsWith('CHỦ ĐỀ:') ? stText : `CHỦ ĐỀ: ${stText}`;
+      children.push(
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 40, after: 60 },
+          children: [
+            new TextRun({
+              text: fullSt,
+              bold: true,
+              size: 28, // 14pt
+              font: fontName,
+              color: primaryColor,
+            }),
+          ],
+        })
+      );
+    }
+
+    // Dòng 4: (Thực hiện từ ngày  xx/xx/xxxx-xx/xx/xxxx)
+    const formatToDDMMYYYY = (val?: string) => {
+      if (!val) return '';
+      const t = val.trim();
+      if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(t)) {
+        const parts = t.split('-');
+        return `${String(parseInt(parts[2], 10)).padStart(2, '0')}/${String(parseInt(parts[1], 10)).padStart(2, '0')}/${parts[0]}`;
+      }
+      if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(t)) {
+        const parts = t.split('/');
+        return `${String(parseInt(parts[0], 10)).padStart(2, '0')}/${String(parseInt(parts[1], 10)).padStart(2, '0')}/${parts[2]}`;
+      }
+      return t;
+    };
+
+    let rangeText = weekConfig.dateRangeText?.trim() || '';
+    if (weekConfig.startDate && weekConfig.endDate) {
+      const sStr = formatToDDMMYYYY(weekConfig.startDate);
+      const eStr = formatToDDMMYYYY(weekConfig.endDate);
+      rangeText = `(Thực hiện từ ngày  ${sStr}-${eStr})`;
+    } else if (weekConfig.startDate && !rangeText) {
+      const sStr = formatToDDMMYYYY(weekConfig.startDate);
+      rangeText = `(Thực hiện từ ngày  ${sStr}-...)`;
+    }
+
+    if (rangeText) {
+      children.push(
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 40, after: 180 },
+          children: [
+            new TextRun({
+              text: rangeText,
+              italics: true,
+              size: 26, // 13pt
+              font: fontName,
+              color: primaryColor,
+            }),
+          ],
+        })
+      );
+    }
+  }
+
+  // =========================================================================
+  // XUẤT FILE GHÉP THEO TỪNG NGÀY & CÁC MỤC HOẠT ĐỘNG (A, B, C, D, E, F, G, H, K)
+  // Mẫu chuẩn cố định theo GIÁO ÁN TUẦN 4.pdf
+  // =========================================================================
+
+  // 1. Nhóm các bài theo Ngày dạy (Thứ hai, Thứ ba, Thứ tư, Thứ năm, Thứ sáu...)
+  interface MergedDayGroup {
+    dayKey: string;
+    prepDate: string;
+    teachDate: string;
+    items: (LessonPlanOutput & {
+      prepDate?: string;
+      teachDate?: string;
+      dayOfWeek?: string;
+      activitySection?: string;
+      activitySectionTitle?: string;
+    })[];
+  }
+
+  const dayGroups: MergedDayGroup[] = [];
+  plans.forEach((plan, idx) => {
+    const rawDays: string[] =
+      Array.isArray((plan as any).daysOfWeek) && (plan as any).daysOfWeek.length > 0
+        ? (plan as any).daysOfWeek
+        : [(plan as any).dayOfWeek || ''];
+
+    rawDays.forEach((day) => {
+      const prep = (plan as any).prepDate || '';
+      const teach = (plan as any).teachDate || '';
+      // Khóa nhóm theo Ngày dạy hoặc Thứ
+      const key = day || (teach ? teach : `Ngày ${idx + 1}`);
+
+      const existing = dayGroups.find((g) => g.dayKey === key);
+      if (!existing) {
+        dayGroups.push({
+          dayKey: key,
+          prepDate: prep,
+          teachDate: teach,
+          items: [plan],
+        });
+      } else {
+        existing.items.push(plan);
+        if (!existing.prepDate && prep) existing.prepDate = prep;
+        if (!existing.teachDate && teach) existing.teachDate = teach;
+      }
+    });
+  });
+
+  const SECTION_CODES = ['A', 'B', 'C', 'D', 'E', 'F', 'H', 'K'];
+
+  // Sắp xếp các nhóm ngày theo thứ tự: Thứ hai -> Thứ ba -> Thứ tư -> Thứ năm -> Thứ sáu
+  const DAY_PRIORITY: Record<string, number> = {
+    'thứ hai': 1,
+    'thứ ba': 2,
+    'thứ tư': 3,
+    'thứ năm': 4,
+    'thứ sáu': 5,
+    'thứ bảy': 6,
+    'chủ nhật': 7,
+  };
+
+  dayGroups.sort((a, b) => {
+    const keyA = (a.dayKey || '').toLowerCase();
+    const keyB = (b.dayKey || '').toLowerCase();
+    const pA = Object.keys(DAY_PRIORITY).find((d) => keyA.includes(d));
+    const pB = Object.keys(DAY_PRIORITY).find((d) => keyB.includes(d));
+    const valA = pA ? DAY_PRIORITY[pA] : 99;
+    const valB = pB ? DAY_PRIORITY[pB] : 99;
+    return valA - valB;
+  });
+
+  dayGroups.forEach((group, dayIdx) => {
+    // A. TỪ NGÀY THỨ 2 TRỞ ĐI (Thứ ba, Thứ tư...):
+    // In dòng dấu sao phân cách *********************************************************
+    // (Đúng như mẫu Giáo án tuần 4: Tiêu đề tuần chỉ ở đầu trang 1, các ngày tiếp theo bắt đầu bằng dấu sao)
+    if (dayIdx > 0) {
+      children.push(
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 240, after: 120 },
+          children: [
+            new TextRun({
+              text: '*********************************************************',
+              bold: true,
+              size: 24, // 12pt
+              font: fontName,
+              color: primaryColor,
+            }),
+          ],
+        })
+      );
+    }
+
+    // C. IN CĂN PHẢI (CHỈ CÓ): Ngày soạn và Ngày dạy của ngày đó
+    // Đúng như yêu cầu: "Ngày thứ 3 sẽ chỉ có: Ngày soạn: Ngày dạy: các ngày khác cũng vậy"
+    const prepDateStr = group.prepDate
+      ? (group.prepDate.startsWith('Ngày soạn:') ? group.prepDate : `Ngày soạn: ${group.prepDate}`)
+      : '';
+    const teachDateStr = group.teachDate
+      ? (group.teachDate.startsWith('Ngày dạy:') ? group.teachDate : `Ngày dạy: ${group.teachDate}`)
+      : '';
+
+    if (prepDateStr || teachDateStr) {
+      const dateRuns: TextRun[] = [];
+      if (prepDateStr) {
+        dateRuns.push(
+          new TextRun({
+            text: prepDateStr,
+            italics: true,
+            size: 26, // 13pt
+            font: fontName,
+            color: primaryColor,
+          })
+        );
+      }
+      if (teachDateStr) {
+        if (dateRuns.length > 0) {
+          dateRuns.push(new TextRun({ break: 1 }));
+        }
+        dateRuns.push(
+          new TextRun({
+            text: teachDateStr,
+            italics: true,
+            size: 26, // 13pt
+            font: fontName,
+            color: primaryColor,
+          })
+        );
+      }
+      children.push(
+        new Paragraph({
+          alignment: AlignmentType.RIGHT,
+          spacing: { before: 80, after: 140 },
+          children: dateRuns,
+        })
+      );
+    }
+
+    // D. XUẤT CÁC BÀI CỦA NGÀY ĐÓ:
+    // Thứ tự cố định chuẩn Mầm non: A -> B -> C -> D -> E -> F -> H -> K
+    // - Nếu người dùng tải/chọn mẫu riêng cho mục nào (kể cả A, B, F, H, K) thì dùng mẫu của người dùng
+    // - Nếu mục cố định (A, B, F, H, K) chưa có bài do người dùng nạp thì hệ thống tự động chèn dập khuôn chuẩn
+    const isAnyPreschool = group.items.some((plan) => (plan as any).schoolLevel === 'Mầm non' || isPreschoolPlan(plan));
+
+    if (isAnyPreschool) {
+      // Đảm bảo các bài do người dùng nạp mà chưa gán mã sẽ mặc định vào C, D, E
+      const unassigned = group.items.filter((p) => !(p as any).activitySection);
+      if (unassigned.length > 0) {
+        const defaultPool = ['C', 'D', 'E'];
+        unassigned.forEach((p, idx) => {
+          (p as any).activitySection = defaultPool[idx % defaultPool.length];
+        });
+      }
+
+      const SECTION_SEQUENCE = ['A', 'B', 'C', 'D', 'E', 'F', 'H', 'K'];
+
+      SECTION_SEQUENCE.forEach((secCode) => {
+        const userPlansForSec = group.items.filter((p) => (p as any).activitySection === secCode);
+
+        if (userPlansForSec.length > 0) {
+          // Xuất các bài do người dùng đã chọn / tải vào mục này
+          userPlansForSec.forEach((plan) => {
+            const secDef = PRESCHOOL_ACTIVITY_SECTIONS.find((s) => s.code === secCode);
+            const secTitle = (plan as any).activitySectionTitle || secDef?.title || `${secCode}. HOẠT ĐỘNG`;
+            const secElements = buildPreschoolWeekSectionDocxElements(
+              plan,
+              secCode,
+              secTitle,
+              slotMap,
+              fontName,
+              primaryColor,
+              tableLayout
+            );
+            children.push(...secElements);
+          });
+        } else if (['A', 'B', 'F', 'H', 'K'].includes(secCode)) {
+          // Tự động chèn nội dung chuẩn dập khuôn cho các mục cố định nếu người dùng chưa chọn mẫu riêng
+          const defaultPlan = getStandardFixedSectionContent(secCode, group.dayKey);
+          const secDef = PRESCHOOL_ACTIVITY_SECTIONS.find((s) => s.code === secCode);
+          const secElements = buildPreschoolWeekSectionDocxElements(
+            defaultPlan,
+            secCode,
+            secDef?.title || `${secCode}. HOẠT ĐỘNG`,
+            slotMap,
+            fontName,
+            primaryColor,
+            tableLayout
+          );
+          children.push(...secElements);
+        }
+      });
+    } else {
+      // Phổ thông: Xuất các bài theo cấu trúc chuẩn
+      group.items.forEach((plan) => {
+        const isHDTN = (plan.subject || '').toLowerCase().includes('hoạt động trải nghiệm') ||
+                       (plan.subject || '').toLowerCase().includes('hđtn') ||
+                       (plan.lessonTitle || '').toLowerCase().includes('sinh hoạt dưới cờ') ||
+                       (plan.lessonTitle || '').toLowerCase().includes('sinh hoạt lớp');
+        const planElements = buildStandardDocxElements(plan, slotMap, fontName, primaryColor, isHDTN, false, tableLayout);
+        children.push(...planElements);
+      });
+    }
+  });
+
+  const doc = new Document({
+    styles: {
+      default: {
+        document: {
+          run: {
+            font: fontName,
+            size: 28, // 14pt
+            color: '000000',
+          },
+          paragraph: {
+            spacing: { line: 260, before: 0, after: 20 },
+          },
+        },
+      },
+    },
+    sections: [
+      {
+        properties: {
+          page: {
+            margin: {
+              top: 1134, // 2.0 cm
+              bottom: 1134, // 2.0 cm
+              left: 1417, // 2.5 cm
+              right: 850, // 1.5 cm
+            },
+          },
+        },
+        children,
+      },
+    ],
+  });
+
+  const blob = await Packer.toBlob(doc);
+  const cleanTitle = (mergedTitleName || `Giao_an_ghep_${plans.length}_bai`).replace(/[:\/\\*?"<>|]/g, ' ').trim();
+  const fileName = `${cleanTitle}.docx`;
   return await saveFileWithPickerOrFallback(blob, fileName);
 }
 
@@ -2789,7 +3163,8 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
     rawLessonTitle = filteredParts[0];
   }
 
-  let lessonTitle = rawLessonTitle;
+  let lessonTitle = cleanPreschoolSubjectDisplay(rawLessonTitle);
+  const cleanMainHeader = cleanPreschoolSubjectDisplay(mainHeader);
   
   if (isMusic) {
     // Extract trailing (TT), (NDTT) if present before or after author
@@ -2967,7 +3342,7 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
 
   let domainLine = '';
   if (isMusic || !mainHeader.toUpperCase().startsWith('LĨNH VỰC')) {
-    let domain = plan.subject || domainInfo.defaultDomainName;
+    let domain = cleanPreschoolSubjectDisplay(plan.subject) || domainInfo.defaultDomainName;
     if (
       domain === 'GIÁO ÁN VĂN HỌC (THƠ)' ||
       domain === 'GIÁO ÁN VĂN HỌC (TRUYỆN)' ||
@@ -2984,7 +3359,10 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
       domain === 'TRÒ CHƠI DÂN GIAN' ||
       domain === 'HOẠT ĐỘNG TĂNG CƯỜNG TIẾNG VIỆT' ||
       domain === 'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI' ||
-      domain === 'HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI'
+      domain === 'HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI' ||
+      domain === 'HOẠT ĐỘNG NHẬN BIẾT TẬP NÓI' ||
+      domain === 'NHẬN BIẾT TẬP NÓI' ||
+      domain === 'HOẠT ĐỘNG VỚI ĐỒ VẬT'
     ) {
       domain = domainInfo.defaultDomainName;
     }
@@ -3004,14 +3382,20 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
          domain = domain.substring(9).trim();
       }
     } else if (
-      domainInfo.domainType === 'PLAY_INDOOR' ||
-      domainInfo.domainType === 'OUTDOOR' ||
-      domainInfo.domainType === 'PHYSICAL_GAME' ||
-      domainInfo.domainType === 'SKILL_EDU' ||
-      domainInfo.domainType === 'FOLK_GAME' ||
-      domainInfo.domainType === 'VIETNAMESE_ENHANCE' ||
-      domainInfo.domainType === 'LETTER_TRACING' ||
-      domainInfo.domainType === 'LETTER_GAME'
+      (domainInfo.domainType as string) === 'PLAY_INDOOR' ||
+      (domainInfo.domainType as string) === 'PLAY_INDOOR_NEW' ||
+      (domainInfo.domainType as string) === 'OUTDOOR' ||
+      (domainInfo.domainType as string) === 'OUTDOOR_OBSERVE' ||
+      (domainInfo.domainType as string) === 'OUTDOOR_GAME' ||
+      (domainInfo.domainType as string) === 'PHYSICAL_GAME' ||
+      (domainInfo.domainType as string) === 'LEARNING_GAME' ||
+      (domainInfo.domainType as string) === 'SKILL_EDU' ||
+      (domainInfo.domainType as string) === 'FOLK_GAME' ||
+      (domainInfo.domainType as string) === 'VIETNAMESE_ENHANCE' ||
+      (domainInfo.domainType as string) === 'LETTER_TRACING' ||
+      (domainInfo.domainType as string) === 'LETTER_GAME' ||
+      (domainInfo.domainType as string) === 'TALK_RECOGNIZE' ||
+      (domainInfo.domainType as string) === 'OBJECT_PLAY'
     ) {
       domainPrefix = 'Hoạt động: ';
       if (domain.toLowerCase().startsWith('lĩnh vực ')) {
@@ -3021,6 +3405,7 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
       domain = `Lĩnh vực ${domain}`;
     }
     
+    domain = cleanPreschoolSubjectDisplay(domain);
     domainLine = `${domainPrefix}${domain}`;
   }
 
@@ -3043,7 +3428,7 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
 
   return {
     isMusic,
-    mainHeader,
+    mainHeader: cleanMainHeader,
     lessonTitle,
     contentLines: finalContentLines,
     domainLine,
@@ -3232,9 +3617,22 @@ function buildPreschoolDocxElements(
   // III. Tiến trình hoạt động
   elements.push(createSectionHeading('III. Tiến trình hoạt động', fontName, primaryColor));
 
-  // Create seamless single table for preschool (no horizontal divider lines between the 5 steps)
+  // Thêm bảng tiến trình hoạt động chuẩn 2 cột Mầm non
+  elements.push(...buildPreschoolActivitiesTable(plan, slotMap, fontName, primaryColor));
+
+  return elements;
+}
+
+/**
+ * Tạo bảng 2 cột (Hoạt động của Cô - Hoạt động của Trẻ) chuẩn Mầm non trong cùng 1 TableRow duy nhất
+ */
+function buildPreschoolActivitiesTable(
+  plan: LessonPlanOutput,
+  slotMap: Map<string, ImageSlot>,
+  fontName: string,
+  primaryColor: string
+): Table[] {
   const borderConfig = { style: BorderStyle.SINGLE, size: 6, color: '000000' };
-  const borderNone = { style: BorderStyle.NONE, size: 0, color: 'auto' };
   const rows: TableRow[] = [];
 
   // Header row (Hoạt động của Cô | Hoạt động của Trẻ)
@@ -3287,9 +3685,6 @@ function buildPreschoolDocxElements(
   formattedActivities.forEach((act, actIdx) => {
     const actTitle = (act.name || `Hoạt động ${act.index || actIdx + 1}`).replace(/\[TIẾT\s*\d+\]\s*/i, '').trim();
 
-    // Nội dung chi tiết Hoạt động của Cô và Trẻ
-    // Toàn bộ các bước nằm trong CÙNG 1 TableRow duy nhất, không tách nhiều dòng (TableRow)
-    // Giúp người dùng khi bôi đen hay sao chép trong Word hoàn toàn liền mạch, không có dòng kẻ ẩn hay khoảng ngắt ô
     const step1 = act.step1 || {};
     const teacherRaw = (step1.teacherAction || '').replace(/\*\*/g, '').trim();
     const studentRaw = (step1.studentAction || '').replace(/\*\*/g, '').trim();
@@ -3297,8 +3692,6 @@ function buildPreschoolDocxElements(
     const tLines = expandPreschoolTextLines(teacherRaw);
     const sLines = expandPreschoolTextLines(studentRaw);
 
-    // Tiêu đề bước (ví dụ: 1. Khởi động – Tạo hứng thú và giao nhiệm vụ)
-    // Đặt trực tiếp trong cột Cô, in đậm, cách trên thoáng để phân biệt bước
     if (actTitle) {
       allTeacherParas.push(
         new Paragraph({
@@ -3366,8 +3759,6 @@ function buildPreschoolDocxElements(
     allStudentParas.push(new Paragraph({ children: [new TextRun({ text: '', font: fontName, size: 28 })] }));
   }
 
-  // ĐÚNG 1 TableRow DUY NHẤT cho toàn bộ nội dung tiến trình (2 ô: Cô và Trẻ)
-  // Tuyệt đối không tạo thêm TableRow giữa các bước -> loại bỏ 100% dòng kẻ ẩn hay đứt đoạn khi bôi đen trong Word
   rows.push(
     new TableRow({
       cantSplit: false,
@@ -3400,7 +3791,7 @@ function buildPreschoolDocxElements(
     })
   );
 
-  elements.push(
+  return [
     new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
       margins: { top: 140, bottom: 140, left: 180, right: 180 },
@@ -3410,11 +3801,218 @@ function buildPreschoolDocxElements(
         left: borderConfig,
         right: borderConfig,
         insideVertical: borderConfig,
-        insideHorizontal: borderConfig, // Chỉ có 1 đường kẻ ngang duy nhất phân cách giữa Tiêu đề cột và Nội dung
+        insideHorizontal: borderConfig,
       },
       rows,
+    }),
+  ];
+}
+
+/**
+ * Xuất từng mục A, B, C, D, E, F, H, K của Giáo án Tuần theo chuẩn mẫu GIÁO ÁN TUẦN 4.pdf
+ * - Cắt bỏ phần thông tin giáo viên, trường lớp rườm rà
+ * - Đối với C. HOẠT ĐỘNG HỌC: Chỉ in Đề tài, I. Mục đích yêu cầu, II. Chuẩn bị, III. Tiến trình hoạt động (Bảng 2 cột)
+ * - Đối với A, B, D, E, F, H, K: In tên mục và nội dung hoạt động ngắn gọn, chuẩn hóa
+ */
+function buildPreschoolWeekSectionDocxElements(
+  plan: LessonPlanOutput,
+  secCode: string,
+  secTitle: string,
+  slotMap: Map<string, ImageSlot>,
+  fontName: string,
+  primaryColor: string,
+  tableLayout: string = 'two_column'
+): (Paragraph | Table)[] {
+  const elements: (Paragraph | Table)[] = [];
+
+  // 1. Tiêu đề mục (In đậm, 14pt, VD: A. ĐÓN TRẺ, TRÒ CHUYỆN SÁNG hoặc C. HOẠT ĐỘNG HỌC)
+  const cleanTitle = (secTitle || `${secCode}. HOẠT ĐỘNG`).toUpperCase().trim();
+  elements.push(
+    new Paragraph({
+      alignment: AlignmentType.LEFT,
+      spacing: { before: 180, after: 60 },
+      children: [
+        new TextRun({
+          text: cleanTitle,
+          bold: true,
+          size: 28, // 14pt
+          font: fontName,
+          color: primaryColor,
+        }),
+      ],
     })
   );
+
+  // MỤC C: HOẠT ĐỘNG HỌC (Bài học chính)
+  if (secCode === 'C') {
+    // Tiêu đề chuẩn 3 dòng chính giữa đúng theo ảnh mẫu quy chuẩn:
+    // C. HOẠT ĐỘNG HỌC
+    //    LĨNH VỰC PHÁT TRIỂN: NHẬN THỨC
+    //    HOẠT ĐỘNG: KHÁM PHÁ KHOA HỌC
+    //    ĐỀ TÀI: KHÁM PHÁ CƠ THỂ BÉ
+    const headerInfo = getPreschoolSectionCHeaderInfo(plan);
+
+    elements.push(
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 60, after: 30 },
+        children: [
+          new TextRun({
+            text: `LĨNH VỰC PHÁT TRIỂN: ${headerInfo.domain}`,
+            bold: true,
+            size: 28, // 14pt
+            font: fontName,
+            color: primaryColor,
+          }),
+        ],
+      })
+    );
+
+    elements.push(
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 30, after: 30 },
+        children: [
+          new TextRun({
+            text: `HOẠT ĐỘNG: ${headerInfo.activity}`,
+            bold: true,
+            size: 28, // 14pt
+            font: fontName,
+            color: primaryColor,
+          }),
+        ],
+      })
+    );
+
+    elements.push(
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 30, after: 100 },
+        children: [
+          new TextRun({
+            text: `ĐỀ TÀI: ${headerInfo.topic}`,
+            bold: true,
+            size: 28, // 14pt
+            font: fontName,
+            color: primaryColor,
+          }),
+        ],
+      })
+    );
+
+    // I. Mục đích - yêu cầu (Cắt gọn, không lấy thông tin rườm rà)
+    const hasKnowledge = (plan.objectives?.knowledge || []).length > 0;
+    const hasSkills = (plan.objectives?.subjectCompetencies || []).length > 0;
+    const hasAttitude = (plan.objectives?.qualities || []).length > 0;
+
+    if (hasKnowledge || hasSkills || hasAttitude) {
+      elements.push(createSectionHeading('I. Mục đích - yêu cầu:', fontName, primaryColor));
+      if (hasKnowledge) {
+        elements.push(createSubHeading('1. Kiến thức:', fontName));
+        plan.objectives.knowledge.forEach((k) => elements.push(createDashListItem(stripPreschoolCodes(k), fontName)));
+      }
+      if (hasSkills) {
+        elements.push(createSubHeading('2. Kỹ năng:', fontName));
+        plan.objectives.subjectCompetencies.forEach((c) => elements.push(createDashListItem(stripPreschoolCodes(c), fontName)));
+      }
+      if (hasAttitude) {
+        elements.push(createSubHeading('3. Thái độ:', fontName));
+        plan.objectives.qualities.forEach((q) => elements.push(createDashListItem(stripPreschoolCodes(q), fontName)));
+      }
+    }
+
+    // II. Chuẩn bị
+    const teacherEquip = plan.equipment?.teacher || [];
+    const studentEquip = plan.equipment?.student || [];
+    if (teacherEquip.length > 0 || studentEquip.length > 0) {
+      elements.push(createSectionHeading('II. Chuẩn bị:', fontName, primaryColor));
+      if (teacherEquip.length > 0) {
+        elements.push(createSubHeading('- Đồ dùng của cô:', fontName));
+        teacherEquip.forEach((item) => elements.push(createDashListItem(item, fontName)));
+      }
+      if (studentEquip.length > 0) {
+        elements.push(createSubHeading('- Đồ dùng của trẻ:', fontName));
+        studentEquip.forEach((item) => elements.push(createDashListItem(item, fontName)));
+      }
+    }
+
+    // III. Tiến trình hoạt động (Bảng 2 cột chuẩn Mầm non: Hoạt động của cô - Hoạt động của trẻ)
+    if (plan.activities && plan.activities.length > 0) {
+      elements.push(createSectionHeading('III. Tiến trình hoạt động:', fontName, primaryColor));
+      elements.push(...buildPreschoolActivitiesTable(plan, slotMap, fontName, primaryColor));
+    }
+
+    return elements;
+  }
+
+  // CÁC MỤC KHÁC (A, B, D, E, F, H, K...):
+  // Cắt lấy nội dung các hoạt động gọn gàng chuẩn mẫu Giáo án Tuần 4
+  if (plan.activities && plan.activities.length > 0) {
+    plan.activities.forEach((act, actIdx) => {
+      const actTitle = (act.name || `Hoạt động ${act.index || actIdx + 1}`).trim();
+      const teacherText = (act.step1?.teacherAction || act.content || '').replace(/\*\*/g, '').trim();
+      const studentText = (act.step1?.studentAction || '').replace(/\*\*/g, '').trim();
+
+      if (actTitle) {
+        elements.push(
+          new Paragraph({
+            alignment: AlignmentType.LEFT,
+            indent: { firstLine: 720 },
+            spacing: { before: actIdx === 0 ? 40 : 100, after: 30 },
+            children: [
+              new TextRun({
+                text: actTitle,
+                bold: true,
+                size: 28,
+                font: fontName,
+                color: '000000',
+              }),
+            ],
+          })
+        );
+      }
+
+      if (teacherText) {
+        const lines = teacherText.split('\n').map((l) => l.trim()).filter(Boolean);
+        lines.forEach((l) => {
+          elements.push(
+            new Paragraph({
+              alignment: AlignmentType.JUSTIFIED,
+              indent: { firstLine: 720 },
+              spacing: { before: 20, after: 20, line: 260 },
+              children: parseMarkdownRuns(cleanPreschoolBulletLine(l), fontName, undefined, 28),
+            })
+          );
+        });
+      }
+
+      if (studentText) {
+        const lines = studentText.split('\n').map((l) => l.trim()).filter(Boolean);
+        lines.forEach((l) => {
+          elements.push(
+            new Paragraph({
+              alignment: AlignmentType.JUSTIFIED,
+              indent: { firstLine: 720 },
+              spacing: { before: 20, after: 20, line: 260 },
+              children: parseMarkdownRuns(cleanPreschoolBulletLine(l), fontName, undefined, 28),
+            })
+          );
+        });
+      }
+    });
+  } else if (plan.objectives?.knowledge && plan.objectives.knowledge.length > 0) {
+    // Dành cho mục Nhận xét cuối ngày (K) hoặc các mục dạng danh sách kiểm tra
+    plan.objectives.knowledge.forEach((k) => {
+      elements.push(
+        new Paragraph({
+          alignment: AlignmentType.JUSTIFIED,
+          indent: { firstLine: 720 },
+          spacing: { before: 20, after: 20, line: 260 },
+          children: parseMarkdownRuns(cleanPreschoolBulletLine(k), fontName, undefined, 28),
+        })
+      );
+    });
+  }
 
   return elements;
 }

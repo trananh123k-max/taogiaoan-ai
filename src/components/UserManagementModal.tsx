@@ -153,8 +153,9 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (!isOpen) return;
     setLocalAccounts(sanitizeUserAccounts(userAccounts));
-  }, [userAccounts]);
+  }, [isOpen, userAccounts]);
 
   if (!isOpen) return null;
 

@@ -106,6 +106,7 @@ export interface ActivityDetail {
   step2: StepDetail; // Bước 2: Thực hiện nhiệm vụ học tập
   step3: StepDetail; // Bước 3: Báo cáo kết quả và thảo luận
   step4: StepDetail; // Bước 4: Kết luận, nhận định
+  steps?: StepDetail[]; // Optional step list for custom/parsed plans
   nlsFocus?: string; // Điểm nhấn Năng lực số
   aiFocus?: string;  // Điểm nhấn Năng lực AI
 }
@@ -137,6 +138,7 @@ export interface LessonPlanOutput {
   schoolName: string;
   teacherName: string;
   lessonTitle: string;
+  schoolLevel?: string;
   subject: string;
   grade: string;
   bookSeries: string;
@@ -255,3 +257,52 @@ export interface CustomUploadedPPCT {
     stemTopic?: string;
   }[];
 }
+
+export interface SavedPlanItem {
+  id: string;
+  orderNumber: number; // Order sequence: 1, 2, 3...
+  title: string;
+  subject: string;
+  schoolLevel: string;
+  grade: string;
+  createdAt: string;
+  plan: LessonPlanOutput;
+  selected: boolean;
+  notes?: string;
+}
+
+export interface CombineWeekConfig {
+  enabled: boolean;
+  weekTitle: string; // e.g. "TUẦN 4:"
+  themeGroup: string; // e.g. "BẢN THÂN" (CHỦ ĐIỂM)
+  subTheme: string; // e.g. "TÔI LÀ AI?" (CHỦ ĐỀ)
+  dateRangeText: string; // e.g. "(Thực hiện từ ngày 28/9/2026 - 02/10/2026)"
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string; // YYYY-MM-DD
+  startPrepDate?: string; // YYYY-MM-DD
+  useAsteriskDivider?: boolean; // Hiển thị dòng ******************** giữa các bài
+  showItemTitleBanner?: boolean; // Hiển thị tiêu đề BÀI 1, BÀI 2...
+  daySchedules?: Record<string, { prepDate: string; teachDate: string }>;
+}
+
+export interface SavedCombineItem {
+  id: string;
+  autoIndex: number; // Order created: 1, 2, 3...
+  mergeOrder: number; // User-defined merge sequence: 1 (first), 2, 3...
+  selected: boolean;
+  title: string;
+  schoolLevel: string;
+  grade: string;
+  subject: string;
+  createdAt: string;
+  source: 'generated' | 'uploaded';
+  fileName?: string;
+  prepDate?: string; // Ngày soạn (ví dụ: "26/9/2026")
+  teachDate?: string; // Ngày dạy (ví dụ: "Thứ hai ngày 28/9/2026")
+  dayOfWeek?: string; // "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu"...
+  daysOfWeek?: string[]; // Mảng các thứ được chọn (cho phép 1 bài gán đồng thời nhiều thứ: Thứ 2, 3, 4, 5, 6)
+  activitySection?: string; // 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'K'
+  activitySectionTitle?: string; // "A. ĐÓN TRẺ, TRÒ CHUYỆN SÁNG", "B. THỂ DỤC SÁNG"...
+  plan: LessonPlanOutput;
+}
+

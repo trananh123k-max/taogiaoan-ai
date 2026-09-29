@@ -37,8 +37,10 @@ export const PedagogicalTable: React.FC<PedagogicalTableProps> = ({
   const [editedActivity, setEditedActivity] = useState<ActivityDetail>(activity || ({} as any));
 
   React.useEffect(() => {
-    if (activity) setEditedActivity(activity);
-  }, [activity]);
+    if (activity && (activity.id !== editedActivity.id || activity.name !== editedActivity.name)) {
+      setEditedActivity(activity);
+    }
+  }, [activity?.id, activity?.name]);
 
   if (!activity) return null;
 
