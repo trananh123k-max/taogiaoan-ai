@@ -3,12 +3,15 @@ import {
   ActivityDetail,
   ImageSlot,
   StepDetail,
+  AiRefineProgress,
 } from '../types';
 import {
   Sparkles,
   Edit3,
+  Loader2,
 } from 'lucide-react';
 import { MathRenderer } from './MathRenderer';
+import { AiRefineProgressBar } from './AiRefineProgressBar';
 import { repairAnswerLineBreaks, dedupeAnswers, stripNlsIntegrationTags } from '../utils/docxExporter';
 
 interface PedagogicalTableProps {
@@ -17,6 +20,10 @@ interface PedagogicalTableProps {
   onRefineActivity: (activity: ActivityDetail, instruction: string) => void;
   onManualEditActivity?: (activity: ActivityDetail) => void;
   isRefining?: boolean;
+  aiRefineProgress?: AiRefineProgress;
+  onRetryRefine?: () => void;
+  onDismissRefineProgress?: () => void;
+  onOpenApiKeyModal?: () => void;
   isPreschool?: boolean;
   tableLayout?: 'two_column' | 'standard_row' | 'math_4_column';
 }
@@ -27,6 +34,10 @@ export const PedagogicalTable: React.FC<PedagogicalTableProps> = ({
   onRefineActivity,
   onManualEditActivity,
   isRefining = false,
+  aiRefineProgress,
+  onRetryRefine,
+  onDismissRefineProgress,
+  onOpenApiKeyModal,
   isPreschool = false,
   tableLayout = 'two_column',
 }) => {
@@ -43,6 +54,17 @@ export const PedagogicalTable: React.FC<PedagogicalTableProps> = ({
   }, [activity?.id, activity?.name]);
 
   if (!activity) return null;
+
+  const isCurrentTarget = Boolean(
+    aiRefineProgress &&
+    aiRefineProgress.status !== 'idle' &&
+    (aiRefineProgress.targetIndex === activity.index ||
+      (aiRefineProgress.targetId && aiRefineProgress.targetId === activity.id))
+  );
+
+  const isCurrentlyRefiningThis = Boolean(
+    isRefining || (isCurrentTarget && aiRefineProgress?.status === 'refining')
+  );
 
   const slotMap = new Map<string, ImageSlot>();
   (imageSlots || []).forEach((slot) => {
@@ -93,7 +115,18 @@ export const PedagogicalTable: React.FC<PedagogicalTableProps> = ({
   ];
 
   return (
-    <div className="bg-white border border-slate-300 rounded-xl shadow-xs overflow-hidden mb-6 transition-all">
+    <div
+      id={`activity-card-${activity.index}`}
+      className={`bg-white border rounded-xl shadow-xs overflow-hidden mb-6 transition-all duration-300 ${
+        isCurrentTarget && aiRefineProgress?.status === 'refining'
+          ? 'border-amber-400 ring-2 ring-amber-400/50 shadow-lg shadow-amber-500/10'
+          : isCurrentTarget && aiRefineProgress?.status === 'success'
+          ? 'border-emerald-400 ring-2 ring-emerald-400/50 shadow-lg shadow-emerald-500/10'
+          : isCurrentTarget && aiRefineProgress?.status === 'error'
+          ? 'border-rose-400 ring-2 ring-rose-400/50 shadow-lg shadow-rose-500/10'
+          : 'border-slate-300'
+      }`}
+    >
       {/* Activity Header Bar (Clean White Background, No Ink Waste) */}
       <div className="bg-white border-b border-slate-300 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 text-slate-900">
         <div>
@@ -150,13 +183,38 @@ export const PedagogicalTable: React.FC<PedagogicalTableProps> = ({
           <button
             type="button"
             onClick={() => setShowRefineInput(!showRefineInput)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 transition-all cursor-pointer shadow-2xs"
+            disabled={isCurrentlyRefiningThis}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer shadow-2xs ${
+              isCurrentlyRefiningThis
+                ? 'bg-amber-100 text-amber-900 border border-amber-300 cursor-wait'
+                : 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-300'
+            }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-700" />
-            <span>{showRefineInput ? 'Đóng gợi ý' : 'Tinh chỉnh AI'}</span>
+            {isCurrentlyRefiningThis ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 text-amber-700 animate-spin" />
+                <span>Đang tinh chỉnh...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+                <span>{showRefineInput ? 'Đóng gợi ý' : 'Tinh chỉnh AI'}</span>
+              </>
+            )}
           </button>
         </div>
       </div>
+
+      {/* INLINE AI PROGRESS BAR & NOTIFICATION: Appears right at the active activity */}
+      {isCurrentTarget && aiRefineProgress && (
+        <AiRefineProgressBar
+          progress={aiRefineProgress}
+          onRetry={onRetryRefine}
+          onDismiss={onDismissRefineProgress}
+          onOpenApiKeyModal={onOpenApiKeyModal}
+          variant="inline"
+        />
+      )}
 
       {/* Refinement input drawer */}
       {showRefineInput && (
@@ -177,10 +235,20 @@ export const PedagogicalTable: React.FC<PedagogicalTableProps> = ({
             <button
               type="button"
               onClick={handleApplyRefine}
-              disabled={isRefining || !refinePrompt.trim()}
-              className="px-4 py-2 rounded-lg bg-amber-700 hover:bg-amber-800 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
+              disabled={isCurrentlyRefiningThis || !refinePrompt.trim()}
+              className="px-4 py-2 rounded-lg bg-amber-700 hover:bg-amber-800 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-bold shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
             >
-              {isRefining ? 'Đang tinh chỉnh...' : 'Cập nhật'}
+              {isCurrentlyRefiningThis ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Đang tinh chỉnh...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Cập nhật</span>
+                </>
+              )}
             </button>
           </div>
         </div>

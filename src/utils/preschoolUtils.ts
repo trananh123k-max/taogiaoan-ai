@@ -876,6 +876,126 @@ export function formatPreschoolPhysicalActivities(
   });
 }
 
+export interface PreschoolCornerInfo {
+  name: string;
+  activity: string;
+  isFocus?: boolean;
+}
+
+/**
+ * Extracts preschool corner names and activities from title, subject or old plan content
+ * e.g. "Chơi hoạt động ở các góc: Góc trọng tâm: Góc XD - LG: Xây vườn hoa; Góc PV: Bán hàng, bác sĩ; Góc NT: Vẽ..."
+ */
+export function parseCornersFromLessonTitle(title: string, subject: string = '', oldPlanContent: string = ''): PreschoolCornerInfo[] {
+  const fullText = `${title || ''}\n${subject || ''}\n${oldPlanContent || ''}`;
+  const corners: PreschoolCornerInfo[] = [];
+  const seen = new Set<string>();
+
+  const normalizeCornerName = (rawName: string): string => {
+    let name = rawName.trim().replace(/^[-+*•\s–—]+/, '').replace(/[:–—\-]\s*$/, '').trim();
+    if (!name) return '';
+
+    if (!/^góc\b/i.test(name) && !/^khu vực\b/i.test(name)) {
+      name = `Góc ${name}`;
+    }
+
+    if (/góc\s*(?:xd\s*[-–—]?\s*lg|xd\b|xây dựng\s*[-–—]?\s*lắp ghép|xây dựng\b|lắp ghép\b)/i.test(name)) {
+      return 'Góc Xây dựng - Lắp ghép';
+    } else if (/góc\s*(?:pv\b|phân vai\b|bác sĩ|bán hàng|nấu ăn|gia đình)/i.test(name)) {
+      return 'Góc Phân vai';
+    } else if (/góc\s*(?:nt\b|nghệ thuật\b|tạo hình\b|vẽ|nặn|xé dán)/i.test(name)) {
+      return 'Góc Nghệ thuật - Tạo hình';
+    } else if (/góc\s*(?:sách\b|sách truyện\b|truyện\b|thư viện)/i.test(name)) {
+      return 'Góc Sách truyện';
+    } else if (/góc\s*(?:ht\b|học tập\b|khám phá\b|khoa học\b|toán)/i.test(name)) {
+      return 'Góc Học tập - Khám phá';
+    } else if (/góc\s*(?:tn\b|thiên nhiên\b|cây xanh|vườn cây)/i.test(name)) {
+      return 'Góc Thiên nhiên';
+    } else if (/góc\s*(?:dân gian\b|trò chơi dân gian\b)/i.test(name)) {
+      return 'Góc Dân gian';
+    } else if (/góc\s*(?:âm nhạc\b|ca nhạc\b|hát\b)/i.test(name)) {
+      return 'Góc Âm nhạc';
+    }
+    return name;
+  };
+
+  const addCorner = (rawName: string, rawAct: string, isFocus: boolean = false) => {
+    let cleanName = rawName.trim().replace(/^[-+*•\s–—]+/, '').replace(/[:–—\-]\s*$/, '').trim();
+    if (!cleanName || cleanName.length > 80) return;
+    
+    if (/^trọng tâm\s*[:–—\-]?\s*/i.test(cleanName)) {
+      cleanName = cleanName.replace(/^trọng tâm\s*[:–—\-]?\s*/i, '').trim();
+      isFocus = true;
+    }
+
+    const normName = normalizeCornerName(cleanName);
+    if (!normName) return;
+
+    let act = rawAct.trim().replace(/^[:–—\-]\s*/, '').replace(/[\.\;\,]+$/, '').trim();
+    // Clean parenthesis if wrapped
+    if (act.startsWith('(') && act.endsWith(')')) {
+      act = act.slice(1, -1).trim();
+    }
+
+    const key = normName.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      corners.push({
+        name: normName,
+        activity: act || `Hoạt động trải nghiệm tại ${normName}`,
+        isFocus,
+      });
+    } else if (isFocus) {
+      const existing = corners.find(c => c.name.toLowerCase() === key);
+      if (existing) existing.isFocus = true;
+    }
+  };
+
+  // 1. Match explicit "Góc trọng tâm: [Góc...]: [Hoạt động]"
+  const focusMatch = fullText.match(/Góc\s+trọng\s+tâm\s*[:–—\-]\s*([^;,\n]+?)(?:[:–—\-]\s*([^;\n]+))?(?:;|\n|$)/i);
+  if (focusMatch) {
+    addCorner(focusMatch[1], focusMatch[2] || '', true);
+  }
+
+  // 2. Match pattern with parenthesis: "Góc XD (Xây công viên)"
+  const parenRegex = /(?:Góc|Khu vực)\s+([^\(:;\n]+?)\s*\(([^)]+)\)/gi;
+  let pm;
+  while ((pm = parenRegex.exec(fullText)) !== null) {
+    addCorner(pm[1].trim(), pm[2].trim());
+  }
+
+  // 3. Match general "Góc [Tên]: [Hoạt động]"
+  const regex = /(?:Góc|Khu vực)\s+([^:;\n–—\.\*\(]+)(?:[:–—\-]\s*([^;\n\.\*]+))?/gi;
+  let m;
+  while ((m = regex.exec(fullText)) !== null) {
+    const rawCorner = m[1].trim();
+    if (/^trọng tâm/i.test(rawCorner)) continue;
+    const rawContent = m[2] || '';
+    addCorner(rawCorner, rawContent);
+  }
+
+  // 4. Fallback: Search keywords if no corners were successfully extracted
+  if (corners.length === 0) {
+    const keywordConfigs: { pattern: RegExp; name: string; defaultAct: string }[] = [
+      { pattern: /(?:xây dựng|lắp ghép|\bxd\b)/i, name: 'Góc Xây dựng - Lắp ghép', defaultAct: `Xây dựng công trình theo chủ đề "${title || 'bài học'}"` },
+      { pattern: /(?:phân vai|\bpv\b|bán hàng|bác sĩ|nấu ăn|gia đình)/i, name: 'Góc Phân vai', defaultAct: 'Gia đình, bán hàng, phòng khám' },
+      { pattern: /(?:nghệ thuật|tạo hình|\bnt\b|vẽ|nặn|xé dán)/i, name: 'Góc Nghệ thuật - Tạo hình', defaultAct: 'Vẽ, nặn, xé dán sản phẩm sáng tạo' },
+      { pattern: /(?:sách|truyện|học tập|\bht\b|khám phá|khoa học)/i, name: 'Góc Học tập - Sách truyện', defaultAct: 'Xem tranh truyện, ghép tranh, phân loại đồ dùng' },
+      { pattern: /(?:thiên nhiên|\btn\b|cây cảnh|tưới cây)/i, name: 'Góc Thiên nhiên', defaultAct: 'Chăm sóc cây xanh, tưới nước, lau lá' },
+      { pattern: /(?:dân gian|trò chơi dân gian)/i, name: 'Góc Dân gian', defaultAct: 'Chơi các trò chơi dân gian truyền thống' },
+      { pattern: /(?:âm nhạc|ca múa)/i, name: 'Góc Âm nhạc', defaultAct: 'Hát, múa và biểu diễn các bài hát theo chủ đề' },
+    ];
+
+    keywordConfigs.forEach(kc => {
+      if (kc.pattern.test(fullText)) {
+        addCorner(kc.name, kc.defaultAct);
+      }
+    });
+  }
+
+  return corners;
+}
+
 /**
  * Generate rich default 5-step preschool activities based on domain, topic, and age.
  * Ensures the lesson plan NEVER has 0 activities even if AI tasks encounter rate limits or return an empty array.
@@ -1250,7 +1370,37 @@ export function generateDefaultPreschoolActivities(
       ];
     }
 
-    // HOẠT ĐỘNG VUI CHƠI TRONG LỚP 1 (3 BƯỚC MẪU MỚI CHUẨN)
+    // HOẠT ĐỘNG VUI CHƠI TRONG LỚP (MẪU 3 BƯỚC CHUẨN ĐỒNG BỘ CÁC GÓC THEO ĐẦU ĐỀ BÀI HỌC)
+    const corners = parseCornersFromLessonTitle(title, subject);
+    const activeCorners = corners.length > 0 ? corners : [
+      { name: 'Góc Xây dựng - Lắp ghép', activity: `Xây dựng công trình theo chủ đề "${title}"`, isFocus: true },
+      { name: 'Góc Phân vai', activity: 'Gia đình, bán hàng, phòng khám theo chủ đề' },
+      { name: 'Góc Nghệ thuật - Tạo hình', activity: 'Vẽ, nặn, xé dán sản phẩm sáng tạo' },
+      { name: 'Góc Học tập - Sách truyện', activity: 'Xem tranh ảnh, ghép tranh, phân loại đồ dùng' }
+    ];
+
+    const cornerIntroLines = activeCorners.map(c => `+ ${c.name}: ${c.activity}${c.isFocus ? ' (Góc trọng tâm)' : ''}`).join('\n');
+    
+    const cornerObserveLines = activeCorners.map(c => {
+      let questions = '';
+      if (/xây dựng/i.test(c.name)) {
+        questions = `- Cô gợi hỏi: "Các chú thợ xây đang xây dựng công trình gì thế?", "Để công trình đẹp và vững chắc, các con bố trí cổng, hàng rào và cây xanh như thế nào?"\n- Cô khuyến khích: Các con phối hợp ăn ý, cùng nhau xếp các khối hình thật khéo léo nhé!`;
+      } else if (/phân vai/i.test(c.name)) {
+        questions = `- Cô gợi hỏi: "Hôm nay con đóng vai gì thế?", "Người bán hàng cần chào đón khách như thế nào?", "Bác sĩ hướng dẫn bệnh nhân uống thuốc ra sao?"\n- Cô gợi ý giao tiếp: Trẻ niềm nở, ân cần và thể hiện đúng vai chơi của mình.`;
+      } else if (/nghệ thuật|tạo hình/i.test(c.name)) {
+        questions = `- Cô gợi hỏi: "Con đang vẽ/nặn/xé dán sản phẩm gì thế?", "Con phối màu như thế nào cho thật sinh động?"\n- Cô khuyến khích: Con hãy dùng đôi bàn tay khéo léo để hoàn thành sản phẩm thật đẹp nhé!`;
+      } else if (/sách|học tập|khám phá/i.test(c.name)) {
+        questions = `- Cô gợi hỏi: "Con đang xem cuốn truyện tranh gì?", "Trong tranh có những hình ảnh nào đáng yêu?", "Con phân loại các đồ vật này theo nhóm như thế nào?"\n- Cô khuyến khích: Trẻ quan sát tỉ mỉ, lật giở từng trang sách nhẹ nhàng.`;
+      } else if (/thiên nhiên/i.test(c.name)) {
+        questions = `- Cô gợi hỏi: "Các con đang chăm sóc cây xanh như thế nào?", "Lau lá và tưới nước giúp cây điều gì?"\n- Cô khuyến khích: Nhắc trẻ nhẹ tay, không làm gãy cành, giữ gìn vệ sinh sạch sẽ.`;
+      } else {
+        questions = `- Cô gợi hỏi: "Các con đang chơi hoạt động gì ở góc này?", "Các con phối hợp cùng bạn như thế nào?"\n- Cô khuyến khích, động viên và hỗ trợ khi trẻ gặp khó khăn.`;
+      }
+      return `* ${c.name}: ${c.activity}\n${questions}`;
+    }).join('\n\n');
+
+    const cornerReviewNames = activeCorners.map(c => c.name).join(', ');
+
     return [
       {
         id: 'act-1',
@@ -1260,8 +1410,8 @@ export function generateDefaultPreschoolActivities(
         objective: 'Trẻ hứng thú, thảo luận và lựa chọn góc chơi, nhận vai chơi và nắm rõ quy tắc chơi',
         step1: {
           title: '1. Thỏa thuận trước khi chơi',
-          teacherAction: `- Cô giới thiệu các góc chơi: “Hôm nay cô chuẩn bị cho các con 3 góc chơi rất thú vị.”\n+ Góc Nghệ thuật: Nặn những quả bóng thật đẹp.\n+ Góc Học tập - Khám phá khoa học: Phân loại đồ chơi theo hình dạng, màu sắc.\n+ Góc Phân vai: Cửa hàng đồ dùng - đồ chơi của bé.\n- Cô hỏi trẻ:\n+ Con thích chơi ở góc nào?\n+ Ở góc đó con sẽ chơi gì?\n+ Khi chơi cùng bạn, con phải như thế nào?\n- Trẻ chọn góc chơi\n+ Cô cho trẻ tự chọn góc chơi.\n+ Trẻ lấy ký hiệu của mình và mang về góc đã chọn.\n+ Cô nhắc trẻ không tranh giành đồ chơi, biết chơi cùng bạn và giữ gìn đồ dùng.\n- “Các con đã chọn được góc chơi rồi. Bây giờ chúng mình cùng về góc và bắt đầu chơi nhé!”`,
-          studentAction: `- Trẻ lắng nghe\n- Trẻ trả lời cô\n- Trẻ chọn góc chơi\n- Trẻ lấy ký hiệu về góc chơi\n- Trẻ lắng nghe\n- Trẻ lắng nghe`,
+          teacherAction: `- Cô giới thiệu các góc chơi hôm nay:\n${cornerIntroLines}\n- Cô đàm thoại hỏi trẻ:\n+ Con thích chơi ở góc nào hôm nay?\n+ Ở góc đó con sẽ thực hiện những nội dung gì?\n+ Khi chơi cùng các bạn, chúng mình cần làm gì để cùng nhau chơi vui vẻ, đoàn kết?\n- Trẻ chọn góc chơi:\n+ Cô cho trẻ tự chọn góc chơi theo sở thích.\n+ Trẻ lấy ký hiệu của mình và mang về góc đã chọn.\n+ Cô nhắc trẻ không tranh giành đồ chơi, biết hợp tác và giữ gìn đồ dùng.\n- “Các con đã chọn được góc chơi rồi. Bây giờ chúng mình cùng về góc và bắt đầu chơi nhé!”`,
+          studentAction: `- Trẻ chú ý lắng nghe cô giới thiệu các góc chơi.\n- Trẻ hào hứng trả lời câu hỏi đàm thoại của cô.\n- Trẻ chủ động giơ tay lựa chọn góc chơi và nhận vai chơi yêu thích.\n- Trẻ lấy ký hiệu nhẹ nhàng về đúng góc chơi đã chọn.\n- Trẻ ghi nhớ và nhắc lại quy tắc chơi đoàn kết, văn minh.`,
           productExpected: '',
           digitalOrAiTool: '',
         },
@@ -1274,8 +1424,8 @@ export function generateDefaultPreschoolActivities(
         objective: 'Trẻ tích cực nhập vai, phát huy tính sáng tạo và giao lưu liên kết giữa các góc chơi',
         step1: {
           title: '2. Theo dõi quá trình chơi',
-          teacherAction: `Cô cho trẻ về các góc chơi, quan sát bao quát cả 3 góc, khuyến khích và gợi ý trẻ khi cần.\n* Góc Nghệ thuật: Nặn quả bóng\n- Cô gợi hỏi:\n+ Con đang nặn gì?\n+ Quả bóng của con có màu gì?\n+ Con làm thế nào để đất nặn thành hình tròn?\n+ Con muốn nặn quả bóng to hay nhỏ?\n- Cô khuyến khích: Con thử vo đất nặn thật tròn bằng hai bàn tay nhé.\n\n* Góc Học tập - Khám phá khoa học: Phân loại đồ chơi theo hình dạng, màu sắc\n- Cô gợi hỏi:\n+ Con đang phân loại đồ chơi như thế nào?\n+ Những đồ chơi này có cùng màu gì?\n+ Đồ chơi nào có dạng hình tròn?\n+ Vì sao con xếp những đồ chơi này cùng một nhóm?\n- Cô khuyến khích: Con hãy quan sát thật kỹ màu sắc và hình dạng của đồ chơi nhé.\n\n* Góc Phân vai: Cửa hàng đồ dùng, đồ chơi\n- Cô gợi hỏi:\n+ Con đang đóng vai gì?\n+ Người bán hàng làm công việc gì?\n+ Người mua muốn mua đồ chơi gì?\n+ Khi mua hàng con nói như thế nào?\n- Cô gợi ý trẻ giao tiếp: Cháu muốn mua quả bóng ạ. Của cháu 10 nghìn đồng. Cháu cảm ơn ạ.\n- Khuyến khích trẻ cùng chơi, trao đổi với nhau.\n- Hỗ trợ trẻ còn rụt rè.\n- Nhắc trẻ lấy và cất đồ chơi đúng nơi quy định.`,
-          studentAction: `- Trẻ về góc chơi\n- Trẻ chơi và trả lời cô\n- Trẻ lắng nghe\n- Trẻ chơi và trả lời cô\n- Trẻ lắng nghe\n- Trẻ chơi và trả lời cô\n- Trẻ lắng nghe cô gợi ý\n- Trẻ chơi đoàn kết`,
+          teacherAction: `Cô cho trẻ về các góc chơi, bao quát toàn bộ các góc và trực tiếp gợi ý, hỗ trợ từng góc:\n\n${cornerObserveLines}\n\n- Cô theo dõi quá trình chơi, động viên các bạn còn rụt rè, kịp thời gợi mở ý tưởng cho trẻ.\n- Khuyến khích sự liên kết, giao lưu vui vẻ giữa các góc chơi.\n- Nhắc trẻ lấy và cất đồ chơi đúng nơi quy định, giữ gìn sản phẩm cẩn thận.`,
+          studentAction: `- Trẻ nhanh nhẹn về góc chơi, bàn bạc phân công nhiệm vụ cụ thể cùng các bạn.\n- Trẻ say sưa thực hiện nội dung chơi của từng góc, trả lời lễ phép câu hỏi gợi mở của cô.\n- Trẻ chủ động trao đổi, tương tác và giao lưu đoàn kết giữa các góc chơi.\n- Trẻ biết giữ gìn đồ chơi cẩn thận trong suốt quá trình hoạt động.`,
           productExpected: '',
           digitalOrAiTool: '',
         },
@@ -1288,8 +1438,8 @@ export function generateDefaultPreschoolActivities(
         objective: 'Trẻ tham quan chia sẻ sản phẩm, cô nhận xét tuyên dương và cùng trẻ thu dọn đồ chơi ngăn nắp',
         step1: {
           title: '3. Nhận xét sau khi chơi',
-          teacherAction: `Cô tập trung trẻ và nói: “Các con đã chơi rất vui. Bây giờ cô và các con cùng đi tham quan xem các bạn đã chơi và tạo ra những sản phẩm gì nhé!”\n- Trẻ lần lượt tham quan góc học tập - khám phá khoa học. Tham quan góc Phân vai.\n- Cuối cùng cô cho trẻ về góc Nghệ thuật. Trẻ ở góc Nghệ thuật giới thiệu sản phẩm.\n- Cô mời trẻ ở góc Nghệ thuật giới thiệu:\n+ Các con đã chơi ở góc nào?\n+ Hôm nay các con đã làm gì?\n+ Đây là sản phẩm gì?\n+ Con nặn quả bóng màu gì?\n+ Con thích sản phẩm nào nhất?\n-> Trẻ giới thiệu sản phẩm của mình và của nhóm.\n- Cô nhận xét chung: Hôm nay các con chơi rất vui và biết phối hợp với nhau. Cô khen cả lớp!\n- Bây giờ chúng mình cùng thu dọn đồ chơi thật gọn gàng nhé.`,
-          studentAction: `- Trẻ tập trung quanh cô\n- Trẻ đi tham quan các góc chơi\n- Trẻ đến tham quan góc nghệ thuật\n- Nghe nhóm bạn giới thiệu\n- Trẻ giới thiệu\n- Trẻ nghe cô nhận xét\n- Cất đồ dùng đúng nơi quy định`,
+          teacherAction: `Cô tập trung trẻ lại và dẫn trẻ đi tham quan sản phẩm của các góc chơi:\n- Cô cùng trẻ lần lượt đến tham quan các góc: ${cornerReviewNames}.\n- Mời đại diện từng góc chơi giới thiệu sản phẩm, công trình hoặc trải nghiệm của nhóm mình:\n+ Các con đã chơi ở góc nào?\n+ Hôm nay nhóm con đã tạo ra những sản phẩm gì?\n+ Con thích nhất điều gì trong buổi chơi hôm nay?\n-> Trẻ tự tin giới thiệu sản phẩm của nhóm mình và khen ngợi nhóm bạn.\n- Cô nhận xét chung, tuyên dương tinh thần đoàn kết, sáng tạo của cả lớp.\n- Hướng dẫn trẻ cùng cô thu dọn đồ dùng đồ chơi gọn gàng, cất đúng nơi quy định và đi rửa tay sạch sẽ.`,
+          studentAction: `- Trẻ quây quần bên cô, hào hứng đi tham quan các góc chơi.\n- Đại diện góc chơi tự tin giới thiệu công trình, sản phẩm của nhóm mình.\n- Trẻ chú ý lắng nghe nhóm bạn chia sẻ và vỗ tay khen ngợi bạn.\n- Trẻ lắng nghe cô nhận xét, tuyên dương.\n- Cả lớp tự giác cùng cô thu dọn đồ dùng đồ chơi ngăn nắp vào đúng nơi quy định và xếp hàng đi rửa tay.`,
           productExpected: '',
           digitalOrAiTool: '',
         },
@@ -1918,6 +2068,32 @@ export function formatPreschoolIndoorPlayActivities(
     return defaults;
   }
 
+  // If 4-step activities are provided (e.g. Traditional 4 steps: Gây hứng thú, Thỏa thuận, Quá trình chơi, Nhận xét)
+  if (activities.length === 4) {
+    return activities.map((act, idx) => {
+      const step1 = act.step1 || {};
+      const tRaw = (step1.teacherAction || '').replace(/\*\*/g, '').trim();
+      const sRaw = (step1.studentAction || '').replace(/\*\*/g, '').trim();
+      const def = defaults[idx] || defaults[defaults.length - 1];
+      return {
+        ...act,
+        id: act.id || `act-${idx + 1}`,
+        index: idx + 1,
+        name: act.name || def?.name || `Hoạt động ${idx + 1}`,
+        duration: act.duration || def?.duration || (idx === 0 ? '3 - 5 phút' : idx === 1 ? '5 - 7 phút' : idx === 2 ? '18 - 22 phút' : '4 - 6 phút'),
+        objective: act.objective || def?.objective || '',
+        step1: {
+          ...step1,
+          title: act.name || def?.step1?.title || `Hoạt động ${idx + 1}`,
+          teacherAction: expandPreschoolTextLines(tRaw || def?.step1?.teacherAction || '').map(l => cleanPreschoolBulletLine(l)).filter(Boolean).join('\n').trim(),
+          studentAction: expandPreschoolTextLines(sRaw || def?.step1?.studentAction || '').map(l => cleanPreschoolBulletLine(l)).filter(Boolean).join('\n').trim(),
+          productExpected: '',
+          digitalOrAiTool: '',
+        }
+      };
+    });
+  }
+
   let rawAct1: any = null;
   let rawAct2: any = null;
   let rawAct3: any = null;
@@ -1926,7 +2102,7 @@ export function formatPreschoolIndoorPlayActivities(
     rawAct1 = activities[0];
     rawAct2 = activities[1];
     rawAct3 = activities[2];
-  } else if (activities.length >= 4) {
+  } else if (activities.length > 4) {
     rawAct1 = activities[0];
     const middleTeacherActions = activities.slice(1, activities.length - 1).map(a => a.step1?.teacherAction || '').filter(Boolean).join('\n\n');
     const middleStudentActions = activities.slice(1, activities.length - 1).map(a => a.step1?.studentAction || '').filter(Boolean).join('\n\n');
@@ -1952,14 +2128,11 @@ export function formatPreschoolIndoorPlayActivities(
   const act1Teacher = (rawAct1?.step1?.teacherAction || defaults[0].step1.teacherAction).replace(/\*\*/g, '').trim();
   const act1Student = (rawAct1?.step1?.studentAction || defaults[0].step1.studentAction).replace(/\*\*/g, '').trim();
 
-  let act2Teacher = (rawAct2?.step1?.teacherAction || defaults[1].step1.teacherAction).replace(/\*\*/g, '').trim();
-  let act2Student = (rawAct2?.step1?.studentAction || defaults[1].step1.studentAction).replace(/\*\*/g, '').trim();
+  let act2Teacher = (rawAct2?.step1?.teacherAction || '').replace(/\*\*/g, '').trim();
+  let act2Student = (rawAct2?.step1?.studentAction || '').replace(/\*\*/g, '').trim();
 
-  const hasArtCorner = /góc nghệ thuật|góc tạo hình/i.test(act2Teacher);
-  const hasLearningCorner = /góc học tập|khám phá khoa học/i.test(act2Teacher);
-  const hasRoleCorner = /góc phân vai/i.test(act2Teacher);
-
-  if (!hasArtCorner || !hasLearningCorner || !hasRoleCorner || act2Teacher.length < 100) {
+  // PRESERVE user manual edits and AI refines 100%! Only fall back to defaults if teacherAction is completely empty
+  if (!act2Teacher) {
     act2Teacher = defaults[1].step1.teacherAction;
     act2Student = defaults[1].step1.studentAction;
   }
@@ -1969,13 +2142,13 @@ export function formatPreschoolIndoorPlayActivities(
 
   return [
     {
-      id: 'act-1',
+      id: rawAct1?.id || 'act-1',
       index: 1,
-      name: '1. Thỏa thuận trước khi chơi',
+      name: rawAct1?.name || '1. Thỏa thuận trước khi chơi',
       duration: rawAct1?.duration || '5 - 7 phút',
       objective: rawAct1?.objective || 'Trẻ hứng thú, thỏa thuận vai chơi, chọn góc chơi và nắm rõ quy tắc chơi',
       step1: {
-        title: '1. Thỏa thuận trước khi chơi',
+        title: rawAct1?.name || '1. Thỏa thuận trước khi chơi',
         teacherAction: expandPreschoolTextLines(act1Teacher).map(l => cleanPreschoolBulletLine(l)).filter(Boolean).join('\n').trim(),
         studentAction: expandPreschoolTextLines(act1Student).map(l => cleanPreschoolBulletLine(l)).filter(Boolean).join('\n').trim(),
         productExpected: '',
@@ -1983,13 +2156,13 @@ export function formatPreschoolIndoorPlayActivities(
       }
     },
     {
-      id: 'act-2',
+      id: rawAct2?.id || 'act-2',
       index: 2,
-      name: '2. Theo dõi quá trình chơi',
+      name: rawAct2?.name || '2. Theo dõi quá trình chơi',
       duration: rawAct2?.duration || '20 - 25 phút',
       objective: rawAct2?.objective || 'Trẻ tích cực nhập vai, phát huy tính sáng tạo và giao lưu liên kết giữa các góc chơi',
       step1: {
-        title: '2. Theo dõi quá trình chơi',
+        title: rawAct2?.name || '2. Theo dõi quá trình chơi',
         teacherAction: expandPreschoolTextLines(act2Teacher).map(l => cleanPreschoolBulletLine(l)).filter(Boolean).join('\n').trim(),
         studentAction: expandPreschoolTextLines(act2Student).map(l => cleanPreschoolBulletLine(l)).filter(Boolean).join('\n').trim(),
         productExpected: '',
@@ -1997,13 +2170,13 @@ export function formatPreschoolIndoorPlayActivities(
       }
     },
     {
-      id: 'act-3',
+      id: rawAct3?.id || 'act-3',
       index: 3,
-      name: '3. Nhận xét sau khi chơi',
+      name: rawAct3?.name || '3. Nhận xét sau khi chơi',
       duration: rawAct3?.duration || '5 - 8 phút',
       objective: rawAct3?.objective || 'Trẻ tham quan chia sẻ sản phẩm, cô nhận xét tuyên dương và cùng trẻ thu dọn đồ chơi ngăn nắp',
       step1: {
-        title: '3. Nhận xét sau khi chơi',
+        title: rawAct3?.name || '3. Nhận xét sau khi chơi',
         teacherAction: expandPreschoolTextLines(act3Teacher).map(l => cleanPreschoolBulletLine(l)).filter(Boolean).join('\n').trim(),
         studentAction: expandPreschoolTextLines(act3Student).map(l => cleanPreschoolBulletLine(l)).filter(Boolean).join('\n').trim(),
         productExpected: '',
@@ -2064,26 +2237,13 @@ export function formatPreschoolOutdoorActivities(
   let act1Teacher = (rawAct1?.step1?.teacherAction || defaults[0].step1.teacherAction).replace(/\*\*/g, '').trim();
   let act1Student = (rawAct1?.step1?.studentAction || defaults[0].step1.studentAction).replace(/\*\*/g, '').trim();
 
-  let act2Teacher = (rawAct2?.step1?.teacherAction || defaults[1].step1.teacherAction).replace(/\*\*/g, '').trim();
-  let act2Student = (rawAct2?.step1?.studentAction || defaults[1].step1.studentAction).replace(/\*\*/g, '').trim();
+  let act2Teacher = (rawAct2?.step1?.teacherAction || '').replace(/\*\*/g, '').trim();
+  let act2Student = (rawAct2?.step1?.studentAction || '').replace(/\*\*/g, '').trim();
 
-  if (isGameFocus) {
-    const hasTCVD = /trò chơi vận động/i.test(act2Teacher);
-    const hasCachChoi = /cách chơi/i.test(act2Teacher);
-    const hasLuatChoi = /luật chơi/i.test(act2Teacher);
-    const hasOutdoorToys = /đồ chơi ngoài trời/i.test(act2Teacher);
-    if (!hasTCVD || !hasCachChoi || !hasLuatChoi || !hasOutdoorToys || act2Teacher.length < 100) {
-      act2Teacher = defaults[1].step1.teacherAction;
-      act2Student = defaults[1].step1.studentAction;
-    }
-  } else {
-    const hasObservation = /quan sát/i.test(act2Teacher);
-    const hasTCVD = /tcvđ|trò chơi vận động|bỏ dẻ/i.test(act2Teacher);
-    const hasFreePlay = /chơi tự do/i.test(act2Teacher);
-    if (!hasObservation || !hasTCVD || !hasFreePlay || act2Teacher.length < 100) {
-      act2Teacher = defaults[1].step1.teacherAction;
-      act2Student = defaults[1].step1.studentAction;
-    }
+  // PRESERVE user manual edits and AI refines 100%! Only fall back if completely empty
+  if (!act2Teacher) {
+    act2Teacher = defaults[1].step1.teacherAction;
+    act2Student = defaults[1].step1.studentAction;
   }
 
   let act3Teacher = (rawAct3?.step1?.teacherAction || defaults[2].step1.teacherAction).replace(/\*\*/g, '').trim();
@@ -2091,13 +2251,13 @@ export function formatPreschoolOutdoorActivities(
 
   return [
     {
-      id: 'act-1',
+      id: rawAct1?.id || 'act-1',
       index: 1,
-      name: step1Title,
+      name: rawAct1?.name || step1Title,
       duration: rawAct1?.duration || '3 - 5 phút',
       objective: rawAct1?.objective || defaults[0].objective,
       step1: {
-        title: step1Title,
+        title: rawAct1?.name || step1Title,
         teacherAction: expandPreschoolTextLines(act1Teacher).map(l => cleanPreschoolBulletLine(l)).filter(Boolean).join('\n').trim(),
         studentAction: expandPreschoolTextLines(act1Student).map(l => cleanPreschoolBulletLine(l)).filter(Boolean).join('\n').trim(),
         productExpected: '',
@@ -2105,13 +2265,13 @@ export function formatPreschoolOutdoorActivities(
       }
     },
     {
-      id: 'act-2',
+      id: rawAct2?.id || 'act-2',
       index: 2,
-      name: step2Title,
+      name: rawAct2?.name || step2Title,
       duration: rawAct2?.duration || '20 - 25 phút',
       objective: rawAct2?.objective || defaults[1].objective,
       step1: {
-        title: step2Title,
+        title: rawAct2?.name || step2Title,
         teacherAction: expandPreschoolTextLines(act2Teacher).map(l => cleanPreschoolBulletLine(l)).filter(Boolean).join('\n').trim(),
         studentAction: expandPreschoolTextLines(act2Student).map(l => cleanPreschoolBulletLine(l)).filter(Boolean).join('\n').trim(),
         productExpected: '',
@@ -2119,13 +2279,13 @@ export function formatPreschoolOutdoorActivities(
       }
     },
     {
-      id: 'act-3',
+      id: rawAct3?.id || 'act-3',
       index: 3,
-      name: step3Title,
+      name: rawAct3?.name || step3Title,
       duration: rawAct3?.duration || '3 - 5 phút',
       objective: rawAct3?.objective || defaults[2].objective,
       step1: {
-        title: step3Title,
+        title: rawAct3?.name || step3Title,
         teacherAction: expandPreschoolTextLines(act3Teacher).map(l => cleanPreschoolBulletLine(l)).filter(Boolean).join('\n').trim(),
         studentAction: expandPreschoolTextLines(act3Student).map(l => cleanPreschoolBulletLine(l)).filter(Boolean).join('\n').trim(),
         productExpected: '',
@@ -2198,7 +2358,7 @@ export function formatPreschoolActivities(activities: any[], lessonTitle: string
   ];
 
   return activities.map((act, idx) => {
-    const newAct = { ...act };
+    let newAct = { ...act };
     const step1 = { ...(newAct.step1 || {}) };
 
     let teacherAction = (step1.teacherAction || '').replace(/\*\*/g, '');
@@ -2280,6 +2440,7 @@ export function formatPreschoolActivities(activities: any[], lessonTitle: string
       .join('\n')
       .trim();
     newAct.step1 = step1;
+    newAct = sanitizePreschoolActivityContent(newAct, lessonTitle);
     return newAct;
   });
 }
@@ -2318,27 +2479,25 @@ export function formatPreschoolMusicActivities(activities: any[], lessonTitle: s
 
     if (determinedIndex === 1) {
       newAct.name = "1. Khởi động – Tạo tình huống";
-      if (!teacherAction || (!teacherAction.includes('âm thanh') && !teacherAction.includes('hát') && !teacherAction.includes('nhạc'))) {
+      if (!teacherAction) {
         teacherAction = `- Cô cùng cả lớp chơi trò chơi âm thanh ("Lắng nghe âm thanh kỳ diệu"): Cô phát các âm thanh vui tươi, tiếng chuông gió hoặc tiếng kêu của các con vật quen thuộc để trẻ lắng nghe và phán đoán.\n- Cô tạo tình huống dẫn dắt dịu dàng, truyền cảm: "Các con ơi! Hôm nay lớp chúng mình sẽ cùng bước vào một không gian âm nhạc vô cùng rộn rã với những giai điệu thật tươi vui đấy! Chúng mình đã sẵn sàng chưa nào?".\n- Cô giới thiệu đề tài và mời các bé cùng chuẩn bị tham gia biểu diễn.`;
         studentAction = `- Trẻ chăm chú lắng nghe âm thanh và hào hứng reo vui, đoán đúng nguồn âm thanh.\n- Trẻ hưởng ứng vỗ tay nồng nhiệt, tươi cười sẵn sàng bước vào bài học âm nhạc cùng cô.`;
       }
     } else if (determinedIndex === 2) {
       newAct.name = "2. Khám phá – Trải nghiệm";
-      if (!teacherAction || (!teacherAction.includes('nhạc cụ') && !teacherAction.includes('nhún nhảy') && !teacherAction.includes('gõ đệm'))) {
+      if (!teacherAction) {
         teacherAction = `- Cô mở bản nhạc bài hát "${mainSong}" với giai điệu vui tươi, rộn rã.\n- Cô khuyến khích trẻ tản ra không gian lớp học, tự do lắng nghe, nhún nhảy và tự sáng tạo các động tác điệu bộ, vỗ tay minh họa theo cảm nhận của riêng mình.\n- Cô để trẻ tự tìm đến khay nhạc cụ (xắc xô, phách tre, gáo dừa, trống lắc) chọn món đồ chơi âm nhạc yêu thích và tự gõ đệm theo nhịp điệu bài hát cùng bạn.\n- Cô bao quát, mỉm cười khích lệ trẻ cảm nhận giai điệu (không uốn nắn hay dạy kỹ thuật ngay lúc này).`;
         studentAction = `- Trẻ di chuyển tự do trong lớp, hào hứng lắng nghe giai điệu bài hát "${mainSong}".\n- Trẻ tự nghĩ ra các động tác nhún nhảy, lắc lư cơ thể và tự nhẩm hát theo lời ca.\n- Trẻ vui vẻ chọn xắc xô, phách tre tự gõ đệm hòa nhịp cùng bạn bên cạnh.`;
       }
     } else if (determinedIndex === 4) {
       newAct.name = "4. Vận dụng – Mở rộng";
-      const hasGameDetails = /cách chơi/i.test(teacherAction) && /luật chơi/i.test(teacherAction);
-      if (!hasGameDetails) {
+      if (!teacherAction) {
         teacherAction = `- Cô tổ chức hoạt động giao lưu âm nhạc và trò chơi củng cố:\n- Mời các nhóm trẻ lên sân khấu đeo mũ múa biểu diễn giao lưu bài hát "${mainSong}" kết hợp gõ đệm nhạc cụ tự tạo (phách tre, xắc xô).\n- Cô bao quát, cổ vũ và khen ngợi sự tự tin, sáng tạo của các nhóm.\n\n+ Trò chơi âm nhạc: “${gameTitle}”\n- **Cách chơi:** Cô chuẩn bị các nốt nhạc / vòng tròn may mắn trên sàn. Khi nhạc nổi lên, cả lớp vừa đi vừa hát bài "Ngày vui của bé". Khi nhạc dừng hoặc có hiệu lệnh của cô, mỗi trẻ nhanh chân nhảy vào 1 nốt nhạc / gọi đúng tên bạn hát hoặc thực hiện yêu cầu âm nhạc vui nhộn.\n- **Luật chơi:** Bạn nào không tìm được nốt nhạc hoặc đoán sai tên bạn hát sẽ phải nhảy lò cò 1 vòng hoặc hát tặng cả lớp 1 câu hát.\n- Tổ chức cho trẻ chơi 2 - 3 lần sôi nổi.`;
         studentAction = `- Trẻ hào hứng đeo mũ múa, tự tin bước lên sân khấu biểu diễn giao lưu cùng các bạn:\n  + Nhóm 1: Trẻ hát vang kết hợp gõ phách tre nhịp nhàng.\n  + Nhóm 2: Trẻ vừa hát vừa nhún nhảy, lắc xắc xô rộn rã.\n  + Nhóm 3: Trẻ tự tin biểu diễn các động tác minh họa sinh động.\n- Trẻ hào hứng lắng nghe cô phổ biến luật chơi và tham gia trò chơi âm nhạc “${gameTitle}” 2 - 3 lần.\n- Trẻ phản xạ nhanh nhạy, reo vui khi đoán đúng và vui vẻ nhảy lò cò khi bị phạm quy.`;
       }
     } else if (determinedIndex === 5) {
       newAct.name = "5. Chia sẻ – Đánh giá";
-      const hasCleanUp = /thu dọn|dọn dẹp|cất đồ|cất nhạc cụ/i.test(teacherAction);
-      if (!hasCleanUp) {
+      if (!teacherAction) {
         teacherAction = `- Cô tập trung trẻ lại, trò chuyện hỏi cảm nhận của trẻ:\n  + "Hôm nay các con cảm thấy thế nào sau giờ học âm nhạc?"\n  + "Các con thích nhất bài hát, điệu múa hay trò chơi âm nhạc nào?"\n  + "Về nhà các con sẽ hát tặng ai bài hát tuyệt vời này?"\n- Cô nhận xét, tuyên dương sự nỗ lực, giọng hát trong sáng, điệu bộ tự tin và tinh thần hợp tác của trẻ trong suốt buổi học.\n- Hướng dẫn trẻ cùng cô thu dọn nhạc cụ (phách tre, xắc xô, trống lắc), mũ múa cất vào đúng góc âm nhạc, củng cố nề nếp ngăn nắp vệ sinh lớp học.`;
         studentAction = `- Trẻ tự tin chia sẻ cảm xúc, niềm vui khi được hát múa và chơi trò chơi âm nhạc cùng cô và các bạn.\n- Trẻ tích cực trả lời: "Con rất vui và thích biểu diễn bài hát ạ!", "Về nhà con sẽ hát cho ông bà, bố mẹ nghe!".\n- Trẻ tươi cười lắng nghe cô nhận xét và đón nhận lời khen ngợi.\n- Trẻ tự giác cùng cô và các bạn thu dọn xắc xô, phách tre, mũ múa xếp gọn gàng vào các khay ở góc âm nhạc.`;
       }
@@ -3181,20 +3340,45 @@ export function sortPreschoolCompetencies(lines: string[]): string[] {
   });
 }
 
-export function sanitizePreschoolObjectives(objectives: any, isNew8Activity: boolean = false): any {
+export function sanitizePreschoolObjectives(objectives: any, isNew8Activity: boolean = false, lessonTitle: string = ''): any {
   if (!objectives) return objectives;
-  if (Array.isArray(objectives.knowledge)) {
-    let list = objectives.knowledge;
+
+  const tLow = (lessonTitle || '').toLowerCase();
+  const isLessonAbout10OrMeasuring = tLow.includes('10') || tLow.includes('đo độ dài') || tLow.includes('thước đo') || tLow.includes('tách gộp 10');
+
+  const sanitizeTextLine = (text: string, isKnowledge: boolean): string => {
+    let line = text;
     if (!isNew8Activity) {
-      list = list.map((k: string) => stripPreschoolCodes(k));
+      line = stripPreschoolCodes(line);
     }
+    // Detect inappropriate hallucination of "tách gộp 10 đối tượng đo độ dài bằng thước đo"
+    if (!isLessonAbout10OrMeasuring) {
+      if (/tách gộp.*?10\s*đối tượng/i.test(line) || 
+          /tách gộp.*?pv\s*10/i.test(line) ||
+          /đo\s*đ[ộọoôiì]+(?:\s*dài)?/i.test(line) ||
+          /thước đo/i.test(line) ||
+          /kỹ năng đo lường/i.test(line) ||
+          /10\s*đối tượng/i.test(line)) {
+        if (tLow.includes('phạm vi 5') || tLow.includes('số 5') || tLow.includes('đếm đến 5')) {
+          return isKnowledge 
+            ? '- Trẻ biết đếm đến 5, nhận biết các nhóm có số lượng trong phạm vi 5 và nhận biết chữ số 5.'
+            : '- Rèn kỹ năng đếm thành thạo trong phạm vi 5, xếp tương ứng 1-1, chọn và gắn đúng thẻ số 5.';
+        } else if (lessonTitle.trim()) {
+          return isKnowledge
+            ? `- Trẻ nhận biết, nắm vững kiến thức trọng tâm của bài học: "${lessonTitle}".`
+            : `- Rèn luyện các kỹ năng thao tác và thực hành bám sát bài học: "${lessonTitle}".`;
+        }
+      }
+    }
+    return line;
+  };
+
+  if (Array.isArray(objectives.knowledge)) {
+    let list = objectives.knowledge.map((k: string) => sanitizeTextLine(k, true));
     objectives.knowledge = sortPreschoolObjectivesByAge(list);
   }
   if (Array.isArray(objectives.subjectCompetencies)) {
-    let list = objectives.subjectCompetencies;
-    if (!isNew8Activity) {
-      list = list.map((c: string) => stripPreschoolCodes(c));
-    }
+    let list = objectives.subjectCompetencies.map((c: string) => sanitizeTextLine(c, false));
     objectives.subjectCompetencies = sortPreschoolObjectivesByAge(list);
   }
   if (Array.isArray(objectives.generalCompetencies)) {
@@ -3220,6 +3404,61 @@ export function sanitizePreschoolObjectives(objectives: any, isNew8Activity: boo
     objectives.qualities = sortPreschoolObjectivesByAge(list);
   }
   return objectives;
+}
+
+/**
+ * Sanitizes preschool activity text to eliminate unwanted hallucinations
+ * like "tách gộp 10 đối tượng đo độ dài bằng thước đo" when the lesson title is different.
+ */
+export function sanitizePreschoolActivityContent(activity: any, lessonTitle: string): any {
+  if (!activity || !lessonTitle) return activity;
+  const tLow = lessonTitle.toLowerCase();
+  const isLessonAbout10OrMeasuring = tLow.includes('10') || tLow.includes('đo độ dài') || tLow.includes('thước đo') || tLow.includes('tách gộp 10');
+
+  if (isLessonAbout10OrMeasuring) return activity;
+
+  const cleanText = (str?: string): string => {
+    if (!str || typeof str !== 'string') return str || '';
+    let res = str;
+    // Replace hallucinated 10 objects / measuring with accurate scope 5
+    if (tLow.includes('phạm vi 5') || tLow.includes('số 5') || tLow.includes('đếm đến 5')) {
+      res = res.replace(/tách gộp\s*(?:nhóm\s*)?10\s*đối tượng[;,]?\s*đo\s*đ[ộọoôiì]+(?:\s*dài)?(?:\s*bằng)?\s*(?:các\s*)?thước đo/gi, 'ôn luyện số lượng trong phạm vi 5 và nhận biết số 5');
+      res = res.replace(/tách gộp\s*(?:nhóm\s*)?10\s*đối tượng/gi, 'đếm và nhận biết các nhóm có 5 đối tượng');
+      res = res.replace(/tách gộp.*?trong\s*(?:phạm vi|pv)\s*10/gi, 'đếm và so sánh trong phạm vi 5');
+      res = res.replace(/thành thạo tách gộp trong\s*pv\s*10/gi, 'thành thạo đếm trong phạm vi 5');
+      res = res.replace(/kỹ năng đo lường/gi, 'kỹ năng nhận biết chữ số 5');
+      res = res.replace(/thực hành đo lường/gi, 'thực hành đếm số lượng');
+      res = res.replace(/đo lường/gi, 'đếm số lượng trong phạm vi 5');
+      res = res.replace(/đo\s*đ[ộọoôiì]+(?:\s*dài)?(?:\s*bằng)?\s*(?:các\s*)?thước đo/gi, 'nhận biết chữ số 5');
+      res = res.replace(/đo\s*đ[ộọoôiì]+(?:\s*dài)?\s*bằng\s*(?:các\s*)?thước/gi, 'nhận biết chữ số 5');
+      res = res.replace(/dùng\s*(?:các\s*)?thước đo/gi, 'dùng thẻ số 5');
+      res = res.replace(/bằng\s*(?:các\s*)?thước đo/gi, 'bằng thẻ số 5');
+      res = res.replace(/thước đo/gi, 'thẻ số 5');
+      res = res.replace(/(?:trong\s*)?phạm vi 10/gi, 'phạm vi 5');
+      res = res.replace(/(?:trong\s*)?pv\s*10/gi, 'phạm vi 5');
+      res = res.replace(/10\s*đối tượng/gi, '5 đối tượng');
+    } else {
+      res = res.replace(/tách gộp\s*(?:nhóm\s*)?10\s*đối tượng[;,]?\s*đo\s*đ[ộọoôiì]+(?:\s*dài)?(?:\s*bằng)?\s*(?:các\s*)?thước đo/gi, `nội dung bài học "${lessonTitle}"`);
+      res = res.replace(/tách gộp\s*(?:nhóm\s*)?10\s*đối tượng/gi, `nội dung bài học "${lessonTitle}"`);
+      res = res.replace(/đo\s*đ[ộọoôiì]+(?:\s*dài)?(?:\s*bằng)?\s*(?:các\s*)?thước đo/gi, `nội dung bài học "${lessonTitle}"`);
+    }
+    return res;
+  };
+
+  if (activity.name) activity.name = cleanText(activity.name);
+  if (activity.objective) activity.objective = cleanText(activity.objective);
+  if (activity.content) activity.content = cleanText(activity.content);
+
+  ['step1', 'step2', 'step3', 'step4'].forEach((stepKey) => {
+    const step = activity[stepKey];
+    if (step) {
+      if (step.teacherAction) step.teacherAction = cleanText(step.teacherAction);
+      if (step.studentAction) step.studentAction = cleanText(step.studentAction);
+      if (step.productExpected) step.productExpected = cleanText(step.productExpected);
+    }
+  });
+
+  return activity;
 }
 
 export interface PreschoolAgeProfile {
@@ -3408,13 +3647,13 @@ ${is345 ? `    - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay và đ�
         'Tư duy trực quan hình tượng đạt mức độ hoàn thiện cao, xuất hiện mầm mống của tư duy logic trừu tượng',
         'Tính tự lập, ý thức trách nhiệm và tính kỷ luật tăng cao; chuẩn bị sẵn sàng tâm thế bước vào lớp Một'
       ],
-      cognitiveFocus: 'Đếm và nhận biết chữ số trong phạm vi 10; tách gộp 10 đối tượng theo các cách khác nhau; đo độ dài bằng các thước đo; làm quen 29 chữ cái tiếng Việt; định hướng không gian; ứng dụng STEM và công nghệ đơn giản.',
+      cognitiveFocus: 'Phát triển tư duy định lượng, nhận biết và so sánh số lượng (trong phạm vi 5 đến 10, ôn luyện hoặc nâng cao căn chỉnh chuẩn xác theo đúng đề tài bài dạy do giáo viên chọn), đếm thành thạo, thêm bớt, phân loại, làm quen chữ cái tiếng Việt, định hướng không gian, làm quen các phép đo lường và ứng dụng thực tiễn.',
       languageAndSpeech: 'Ngôn ngữ phong phú, diễn đạt lưu loát, mạch lạc; tự tin phát biểu trước đám đông; hiểu quy ước đọc viết từ trái sang phải, từ trên xuống dưới.',
       motorSkills: 'Ném trúng đích xa, bật sâu 30cm, chuyền bóng liên hoàn; cầm bút bằng 3 ngón tay chuẩn xác, ngồi đúng tư thế, tô nét trùng khít theo dòng kẻ ô ly.',
       pedagogicalStrategy: 'DẠY HỌC TÍCH HỢP & DỰ ÁN NHỎ: Khuyến khích tư duy phản biện, làm việc nhóm tự quản, ứng dụng kiến thức vào thực tiễn, rèn nề nếp học đường chuẩn mực.',
       promptGuidance: `BẮT BUỘC SOẠN GIÁO ÁN ĐẶC THÙ CHO LỚP LÁ / MẪU GIÁO LỚN 5 – 6 TUỔI (${g}):
 - Thời gian hoạt động: Chuẩn 30 – 35 phút.
-- Mục tiêu và nội dung mang tính thử thách trí tuệ: Tách gộp phân tích số lượng, nhận diện chữ cái trong từ hoàn chỉnh, đo lường so sánh logic.
+- Mục tiêu và nội dung: BÁM SÁT 100% ĐỀ TÀI BÀI DẠY DO GIÁO VIÊN NHẬP (TUYỆT ĐỐI KHÔNG TỰ Ý THAY ĐỔI ĐỀ TÀI HAY GÁN GHÉP CÁC BÀI KHÁC). Tăng cường câu hỏi kích thích tư duy so sánh, phản biện, tự giải thích lý do vừa sức với lứa tuổi 5 – 6 tuổi.
 - Rèn tác phong học tập: Tư thế ngồi thẳng lưng, cách cầm bút 3 ngón, giơ tay phát biểu, lắng nghe cô và bạn trọn vẹn.
 - Hoạt động của trẻ: Trẻ chủ động bàn bạc, phân công nhiệm vụ nhóm, tự kiểm tra kết quả chéo giữa các đội.`
     };

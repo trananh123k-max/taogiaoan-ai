@@ -56,7 +56,15 @@ export const MAM_NON_STANDARDS: Record<string, string> = {
   // Ngôn ngữ MG Lớn
   'Làm quen 29 chữ cái tiếng Việt: Chữ O, Ô, Ơ, A, Ă, Â...': 'Nhận biết chữ cái, hiểu chữ viết thay thế lời nói.',
   'Tập tô nét cơ bản, sao chép tên của mình đúng dòng kẻ': 'Cầm bút chuẩn, sao chép chữ từ trái sang phải.',
-  // Nhận thức MG Lớn
+  // Nhận thức MG Lớn (Toán & Khoa học)
+  'Ôn số lượng trong phạm vi 5 và nhận biết số 5': 'Đếm thành thạo trong phạm vi 5, nhận biết các nhóm có 5 đối tượng và nhận biết chữ số 5.',
+  'Đếm đến 5, nhận biết nhóm có 5 đối tượng, nhận biết số 5': 'Đếm đến 5, nhận biết nhóm có 5 đối tượng và nhận biết chữ số 5.',
+  'Đếm đến 6, nhận biết nhóm có 6 đối tượng, nhận biết số 6': 'Đếm đến 6, nhận biết nhóm có 6 đối tượng và nhận biết chữ số 6.',
+  'Đếm đến 7, nhận biết nhóm có 7 đối tượng, nhận biết số 7': 'Đếm đến 7, nhận biết nhóm có 7 đối tượng và nhận biết chữ số 7.',
+  'Đếm đến 8, nhận biết nhóm có 8 đối tượng, nhận biết số 8': 'Đếm đến 8, nhận biết nhóm có 8 đối tượng và nhận biết chữ số 8.',
+  'Đếm đến 9, nhận biết nhóm có 9 đối tượng, nhận biết số 9': 'Đếm đến 9, nhận biết nhóm có 9 đối tượng và nhận biết chữ số 9.',
+  'Đếm đến 10, nhận biết nhóm có 10 đối tượng, nhận biết số 10': 'Đếm đến 10, nhận biết nhóm có 10 đối tượng và nhận biết chữ số 10.',
+  'Tách gộp trong phạm vi 5': 'Thành thạo các cách tách gộp trong phạm vi 5.',
   'Tách gộp nhóm 10 đối tượng; Đo độ dài bằng thước đo': 'Thành thạo tách gộp trong PV 10; kỹ năng đo lường.',
   'Khám phá quy trình công nghệ đơn giản; Thí nghiệm STEM': 'Ứng dụng khoa học kỹ thuật giải quyết vấn đề.',
   // Nghệ thuật MG Lớn

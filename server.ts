@@ -1,5 +1,5 @@
 import { PRESCHOOL_CURRICULUM_MATRIX, PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE } from './src/data/preschoolCurriculum';
-import { formatPreschoolMusicActivities, formatPreschoolLetterGameActivities, formatPreschoolActivities, isPreschoolMusicPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, stripPreschoolAICodes, stripPreschoolAICodesOnly, sanitizePreschoolObjectives, analyzePreschoolAgeProfile, detectPreschoolDomain, generateDefaultPreschoolActivities, generatePreschoolParentCollaboration, isGenericPreschoolParentCollab } from './src/utils/preschoolUtils';
+import { formatPreschoolMusicActivities, formatPreschoolLetterGameActivities, formatPreschoolActivities, isPreschoolMusicPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, stripPreschoolAICodes, stripPreschoolAICodesOnly, sanitizePreschoolObjectives, sanitizePreschoolActivityContent, analyzePreschoolAgeProfile, detectPreschoolDomain, generateDefaultPreschoolActivities, generatePreschoolParentCollaboration, isGenericPreschoolParentCollab, parseCornersFromLessonTitle } from './src/utils/preschoolUtils';
 import { NLS_DICTIONARY } from './src/data/nlsDictionary';
 import { getVerifiedLessons } from './src/data/verifiedCurriculumList';
 import { getTextbookLessonStructure } from './src/data/textbookStructureDictionary';
@@ -2885,6 +2885,15 @@ MỤC ĐÍCH DUY NHẤT: BẢO TỒN NGUYÊN VẸN NỘI DUNG, HÌNH ẢNH, BÀI
     'Hợp tác làm việc nhóm, thương lượng giải quyết mâu thuẫn': '[TX 4.4, TX 4.5] Kỹ năng thương lượng, hòa giải tích cực không bạo lực.',
     'Làm quen 29 chữ cái tiếng Việt: Chữ O, Ô, Ơ, A, Ă, Â...': '[NN 5.1, NN 7.1] Nhận biết chữ cái, hiểu chữ viết thay thế lời nói.',
     'Tập tô nét cơ bản, sao chép tên của mình đúng dòng kẻ': '[NN 7.2, NN 7.3] Cầm bút chuẩn, sao chép chữ từ trái sang phải.',
+    // Nhận thức MG Lớn (Toán & Khoa học)
+    'Ôn số lượng trong phạm vi 5 và nhận biết số 5': '[NT 4.4, NT 4.5] Đếm thành thạo trong phạm vi 5, nhận biết các nhóm có 5 đối tượng và nhận biết chữ số 5.',
+    'Đếm đến 5, nhận biết nhóm có 5 đối tượng, nhận biết số 5': '[NT 4.4, NT 4.5] Đếm đến 5, nhận biết nhóm có 5 đối tượng và nhận biết chữ số 5.',
+    'Đếm đến 6, nhận biết nhóm có 6 đối tượng, nhận biết số 6': '[NT 4.4, NT 4.5] Đếm đến 6, nhận biết nhóm có 6 đối tượng và nhận biết chữ số 6.',
+    'Đếm đến 7, nhận biết nhóm có 7 đối tượng, nhận biết số 7': '[NT 4.4, NT 4.5] Đếm đến 7, nhận biết nhóm có 7 đối tượng và nhận biết chữ số 7.',
+    'Đếm đến 8, nhận biết nhóm có 8 đối tượng, nhận biết số 8': '[NT 4.4, NT 4.5] Đếm đến 8, nhận biết nhóm có 8 đối tượng và nhận biết chữ số 8.',
+    'Đếm đến 9, nhận biết nhóm có 9 đối tượng, nhận biết số 9': '[NT 4.4, NT 4.5] Đếm đến 9, nhận biết nhóm có 9 đối tượng và nhận biết chữ số 9.',
+    'Đếm đến 10, nhận biết nhóm có 10 đối tượng, nhận biết số 10': '[NT 4.4, NT 4.5] Đếm đến 10, nhận biết nhóm có 10 đối tượng và nhận biết chữ số 10.',
+    'Tách gộp trong phạm vi 5': '[NT 4.4, NT 4.5] Thành thạo các cách tách gộp trong phạm vi 5.',
     'Tách gộp nhóm 10 đối tượng; Đo độ dài bằng thước đo': '[NT 4.4, NT 4.5] Thành thạo tách gộp trong PV 10; kỹ năng đo lường.',
     'Khám phá quy trình công nghệ đơn giản; Thí nghiệm STEM': '[NT 3.3, NT 5.3] Ứng dụng khoa học kỹ thuật giải quyết vấn đề.',
     'Hát ngẫu hứng, sáng tạo lời ca mới theo bài quen thuộc': '[NgT 5.1, NgT 5.2] Sáng tạo âm nhạc, múa ngẫu hứng bộc lộ ý tưởng.',
@@ -2908,7 +2917,22 @@ MỤC ĐÍCH DUY NHẤT: BẢO TỒN NGUYÊN VẸN NỘI DUNG, HÌNH ẢNH, BÀI
 
   const isNew8Activity = isPreschoolNew8Activity(subject, lessonTitle);
 
-  const yccdPreschoolRaw = MAM_NON_STANDARDS[lessonTitle] || '';
+  let yccdPreschoolRaw = (MAM_NON_STANDARDS as any)[lessonTitle] || '';
+  if (!yccdPreschoolRaw) {
+    const lk = lessonTitle.toLowerCase().trim();
+    for (const [key, val] of Object.entries(MAM_NON_STANDARDS)) {
+      if (key.toLowerCase().trim() === lk) {
+        yccdPreschoolRaw = val;
+        break;
+      }
+    }
+  }
+  if (!yccdPreschoolRaw) {
+    const lk = lessonTitle.toLowerCase().trim();
+    if ((lk.includes('phạm vi 5') || lk.includes('pv 5')) && (lk.includes('số 5') || lk.includes('số lượng') || lk.includes('nhận biết'))) {
+      yccdPreschoolRaw = (MAM_NON_STANDARDS as any)['Ôn số lượng trong phạm vi 5 và nhận biết số 5'] || '[NT 4.4, NT 4.5] Đếm thành thạo trong phạm vi 5, nhận biết các nhóm có 5 đối tượng và nhận biết chữ số 5.';
+    }
+  }
   const yccdPreschool = isNew8Activity ? yccdPreschoolRaw : stripPreschoolCodes(yccdPreschoolRaw);
   const yccdInstruction = yccdPreschool ? `\n- BẮT BUỘC sử dụng nguyên văn nội dung sau làm Yêu cầu cần đạt (Kiến thức/Kỹ năng): "${yccdPreschool}". KHÔNG ĐƯỢC TỰ BỊA THÊM.` : '';
 
@@ -2974,11 +2998,36 @@ ${config.preschoolSubTheme ? `- CHỦ ĐỀ NHỎ (CHỦ ĐỀ NHÁNH / SỰ KI�
 =============================================================================
 ` : '';
 
+  const sectionalCorners = parseCornersFromLessonTitle(lessonTitle, subject, config.oldPlanContent || '');
+  const sectionalCornerPrompt = sectionalCorners.length > 0 ? `
+=============================================================================
+DANH SÁCH CÁC GÓC CHƠI BẮT BUỘC THEO ĐẦU ĐỀ BÀI DẠY:
+${sectionalCorners.map((c, i) => `${i + 1}. ${c.name}: ${c.activity}${c.isFocus ? ' [GÓC TRỌNG TÂM]' : ''}`).join('\n')}
+- BẮT BUỘC: Trong Hoạt động của cô (Bước 1 Thỏa thuận, Bước 2 Quá trình chơi, Bước 3 Nhận xét), BẮT BUỘC PHẢI XUẤT HIỆN ĐẦY ĐỦ VÀ CHI TIẾT TỪNG GÓC TRÊN. TUYỆT ĐỐI KHÔNG ĐƯỢC TỰ BỊA ĐẶT CÁC GÓC MẶC ĐỊNH KHÔNG CÓ TRONG ĐẦU ĐỀ!
+=============================================================================
+` : '';
+
+  const isMathScope5 = (lessonTitle.toLowerCase().includes('phạm vi 5') || lessonTitle.toLowerCase().includes('số 5') || lessonTitle.toLowerCase().includes('đếm đến 5'));
+  const preschoolMathTitleGuard = `
+=============================================================================
+CHỈ ĐẠO BẮT BUỘC: SOẠN CHÍNH XÁC 100% THEO ĐỀ TÀI CỦA GIÁO VIÊN: "${lessonTitle}"
+=============================================================================
+- ĐỀ TÀI GIÁO VIÊN YÊU CẦU: "${lessonTitle}".
+- BẢO TOÀN TRỌNG TÂM 100%: Toàn bộ Mục đích - Yêu cầu (Kiến thức, Kỹ năng), Đồ dùng học liệu và Tiến trình 5 bước hoạt động (Khởi động, Khám phá, Thảo luận, Vận dụng, Đánh giá) PHẢI DẠY ĐÚNG ĐỀ TÀI "${lessonTitle}".
+- TUYỆT ĐỐI NGHIÊM CẤM TỰ Ý ĐỔI SANG BÀI KHÁC HOẶC LẤY VÍ DỤ MINH HỌA LÀM LỆCH ĐỀ TÀI (Ví dụ: CẤM TỰ Ý ĐỔI SANG "Tách gộp nhóm 10 đối tượng" hay "Đo độ dài bằng thước đo"!).
+${isMathScope5 ? `- ĐẶC BIỆT CHÚ Ý CHO ĐỀ TÀI VỀ PHẠM VI 5 / CHỮ SỐ 5:
+  + Toàn bộ kiến thức, thao tác đếm, nhóm đối tượng, so sánh số lượng, đố vui, bài tập, trò chơi củng cố BẮT BUỘC PHẢI TRONG PHẠM VI 5 VÀ NHẬN BIẾT CHỮ SỐ 5.
+  + TUYỆT ĐỐI KHÔNG ĐƯỢC CHÈN 10 ĐỐI TƯỢNG, TÁCH GỘP 10 HAY ĐO ĐỘ DÀI BẰNG THƯỚC ĐO.` : ''}
+=============================================================================
+`;
+
   const preschoolPrompt = `\nĐẶC BIỆT QUAN TRỌNG ĐỐI VỚI CẤP MẦM NON:
+${preschoolMathTitleGuard}
 ${PRESCHOOL_CURRICULUM_MATRIX}
 ${PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE}
 ${ageSpecificInstruction}
 ${preschoolThemeInstruction}
+${sectionalCornerPrompt}
 ${yccdInstruction}${nlsInstruction}${aiInstruction}
 
 - BẮT BUỘC soạn theo Kế hoạch tổ chức hoạt động giáo dục Mầm non, TUYỆT ĐỐI KHÔNG dùng Công văn 5512.
@@ -3034,19 +3083,22 @@ Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động củ
   + Bước 3 BẮT BUỘC là "3. Chia sẻ – Hình thành cách thực hiện": Mời trẻ chia sẻ cách thực hiện; Cô làm mẫu 2 - 3 lần (lần 1 toàn phần, lần 2 phân tích kỹ thuật vận động chi tiết, lần 3 nhấn mạnh điểm mấu chốt); Mời 2 trẻ lên thực hiện lại để cô và cả lớp chuẩn hóa.
   + Bước 4 BẮT BUỘC là "4. Thực hành – Vận dụng": Trẻ lần lượt thực hành theo hàng/nhóm từ dễ đến khó (cá nhân -> nhóm -> thi đua giữa các tổ); Cô bao quát sửa sai; Tổ chức trò chơi vận động củng cố hào hứng.
   + Bước 5 BẮT BUỘC là "5. Chia sẻ – Đánh giá và Hồi tĩnh": Trao đổi cảm nhận của trẻ sau buổi tập, cô nhận xét tuyên dương; Hồi tĩnh: Cho trẻ đi nhẹ nhàng 1 - 2 vòng quanh sân/phòng tập theo nhạc êm dịu, làm động tác chim bay thả lỏng cơ thể, hít thở sâu.
-- RIÊNG ĐỐI VỚI HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG GÓC):
-  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP (BẢN CŨ / TRUYỀN THỐNG 4 BƯỚC): Áp dụng 4 bước chuẩn mực theo mẫu khôi phục: "1. Gây hứng thú" (Hát/đọc thơ, đàm thoại chủ đề, giới thiệu các góc chơi), "2. Thỏa thuận trước khi chơi" (Giới thiệu các góc chơi, đàm thoại nhận vai chơi, thỏa thuận phân công công việc, quy tắc chơi văn minh), "3. Quá trình chơi" (Chi tiết các góc chơi như Góc xây dựng, Góc phân vai..., cô bao quát gợi mở tình huống), "4. Nhận xét – kết thúc" (Nhận xét từng góc, khen ngợi công trình/sản phẩm, mời đại diện chia sẻ, dặn dò giữ gìn cất đồ chơi và rửa tay).
-  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP 1 (MẪU MỚI 3 BƯỚC): BẮT BUỘC tuân thủ MẪU NGẮN GỌN VÀ SÚC TÍCH, KHÔNG đưa văn xuôi rườm rà.
-    Cấu trúc chi tiết:
+- RIÊNG ĐỐI VỚI HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG GÓC / CHƠI HOẠT ĐỘNG Ở CÁC GÓC):
+  + ĐẶC BIỆT CHÚ Ý VỀ CÁC GÓC CHƠI NÊU Ở ĐẦU ĐỀ / TÊN BÀI:
+    * BẮT BUỘC ĐỌC KỸ TÊN BÀI DẠY (lessonTitle), CHỦ ĐỀ, CHỦ ĐIỂM HOẶC YÊU CẦU BỔ SUNG để xác định chính xác danh sách các góc chơi (Ví dụ: Góc Xây dựng - Lắp ghép, Góc Phân vai, Góc Nghệ thuật / Tạo hình, Góc Học tập / Sách truyện, Góc Khám phá thiên nhiên, Góc Dân gian... và góc trọng tâm nếu có).
+    * TUYỆT ĐỐI KHÔNG TỰ BỊA ĐẶT hay gán các góc chơi mặc định khác không có trong đầu đề.
+    * BẮT BUỘC ĐỒNG NHẤT 100% GIỮA TÊN CHỦ ĐỀ, CHỦ ĐIỂM, TÊN BÀI DẠY VÀ CÁC HOẠT ĐỘNG Ở TỪNG GÓC.
+  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP (BẢN CŨ / TRUYỀN THỐNG 4 BƯỚC): Áp dụng 4 bước chuẩn mực: "1. Gây hứng thú" (Hát/đọc thơ bám sát chủ đề, đàm thoại, giới thiệu đúng các góc chơi có trong đầu đề), "2. Thỏa thuận trước khi chơi" (Giới thiệu các góc chơi đã nêu, nhận vai, thỏa thuận nhiệm vụ và quy tắc chơi), "3. Quá trình chơi" (Chi tiết hoạt động ở TỪNG GÓC CHƠI ĐÃ NÊU Ở ĐẦU ĐỀ, cô bao quát gợi mở câu hỏi phù hợp với từng góc), "4. Nhận xét – kết thúc" (Nhận xét sản phẩm từng góc, khen ngợi công trình/sản phẩm, mời đại diện chia sẻ, dặn dò cất đồ chơi và rửa tay).
+  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP (MẪU MỚI 3 BƯỚC):
     - Bước 1: "1. Thỏa thuận trước khi chơi":
-      + Hoạt động của cô: Lời thoại ngắn gọn cô giới thiệu các góc chơi ("Hôm nay cô chuẩn bị cho các con 3 góc chơi rất thú vị: Góc Nghệ thuật..., Góc Học tập..., Góc Phân vai..."), các câu hỏi cô hỏi trẻ ("Con thích chơi ở góc nào?", "Ở góc đó con sẽ chơi gì?", "Khi chơi cùng bạn con phải như thế nào?"), cho trẻ chọn góc, nhắc nhở không tranh giành và dặn về góc chơi.
-      + Hoạt động của trẻ (CỰC KỲ NGẮN GỌN): các gạch đầu dòng ngắn: "- Trẻ lắng nghe", "- Trẻ trả lời cô", "- Trẻ chọn góc chơi", "- Trẻ lấy ký hiệu về góc chơi", "- Trẻ lắng nghe".
+      + Hoạt động của cô: Lời thoại ngắn gọn cô giới thiệu ĐẦY ĐỦ CÁC GÓC CHƠI ĐÃ NÊU Ở ĐẦU ĐỀ ("Hôm nay cô chuẩn bị các góc chơi: + [Tên góc 1]: [Nội dung chơi], + [Tên góc 2]: [Nội dung chơi]..."), các câu hỏi cô hỏi trẻ ("Con thích chơi ở góc nào?", "Ở góc đó con sẽ chơi gì?", "Khi chơi cùng bạn con phải như thế nào?"), cho trẻ chọn góc, nhắc nhở không tranh giành và dặn về góc chơi.
+      + Hoạt động của trẻ: các gạch đầu dòng ngắn: "- Trẻ lắng nghe cô", "- Trẻ trả lời cô", "- Trẻ chọn góc chơi yêu thích", "- Trẻ lấy ký hiệu về góc chơi", "- Trẻ lắng nghe quy tắc".
     - Bước 2: "2. Theo dõi quá trình chơi":
-      + Hoạt động của cô: Lời dẫn ngắn cô cho trẻ về các góc, rồi phân chia từng góc (* Góc Nghệ thuật:..., * Góc Học tập - Khám phá khoa học:..., * Góc Phân vai:...). Mỗi góc cô gợi hỏi 3-4 câu ngắn gọn trực tiếp ("Con đang làm gì?", "Sản phẩm/đồ chơi có đặc điểm gì?", "Con làm thế nào để...?"), cô gợi ý/khuyến khích ngắn.
-      + Hoạt động của trẻ (CỰC KỲ NGẮN GỌN): các gạch đầu dòng ngắn: "- Trẻ về góc chơi", "- Trẻ chơi và trả lời cô", "- Trẻ lắng nghe", "- Trẻ chơi đoàn kết".
+      + Hoạt động của cô: Lời dẫn ngắn cô cho trẻ về các góc, rồi PHÂN CHIA HƯỚNG DẪN CHI TIẾT TỪNG GÓC ĐÃ NÊU Ở ĐẦU ĐỀ (* [Tên góc 1]: [Nội dung chơi], * [Tên góc 2]: [Nội dung chơi], * [Tên góc 3]...). Mỗi góc cô gợi hỏi 3-4 câu ngắn gọn trực tiếp bám sát chủ đề ("Con đang làm gì?", "Sản phẩm/công trình/đồ chơi có đặc điểm gì?", "Con làm thế nào để...?"), cô gợi ý/khuyến khích ngắn, gợi mở giao lưu giữa các góc.
+      + Hoạt động của trẻ: các gạch đầu dòng ngắn: "- Trẻ về góc chơi", "- Trẻ tích cực nhập vai và thực hiện nội dung chơi", "- Trẻ trả lời cô", "- Trẻ giao lưu tương tác cùng các góc", "- Trẻ chơi đoàn kết".
     - Bước 3: "3. Nhận xét sau khi chơi":
-      + Hoạt động của cô: Lời thoại ngắn cô tập trung trẻ đi tham quan sản phẩm các góc, mời đại diện góc giới thiệu và đặt câu hỏi gợi mở ngắn ("Các con đã chơi ở góc nào?", "Hôm nay con đã làm gì?", "Đây là sản phẩm gì?", "Con thích sản phẩm nào nhất?"), cô nhận xét chung ngắn gọn và nhắc thu dọn đồ chơi.
-      + Hoạt động của trẻ (CỰC KỲ NGẮN GỌN): các gạch đầu dòng ngắn: "- Trẻ tập trung quanh cô", "- Trẻ đi tham quan các góc chơi", "- Nghe nhóm bạn giới thiệu", "- Trẻ giới thiệu", "- Trẻ nghe cô nhận xét", "- Cất đồ dùng đúng nơi quy định".
+      + Hoạt động của cô: Lời thoại ngắn cô tập trung trẻ đi tham quan sản phẩm các góc vừa chơi, mời đại diện góc giới thiệu và đặt câu hỏi gợi mở ngắn ("Các con đã chơi ở góc nào?", "Hôm nay con đã làm gì?", "Đây là sản phẩm gì?", "Con thích sản phẩm nào nhất?"), cô nhận xét chung ngắn gọn và nhắc thu dọn đồ chơi.
+      + Hoạt động của trẻ: các gạch đầu dòng ngắn: "- Trẻ tập trung quanh cô", "- Trẻ đi tham quan các góc chơi", "- Nghe nhóm bạn giới thiệu", "- Trẻ giới thiệu", "- Trẻ nghe cô nhận xét", "- Cất đồ dùng đúng nơi quy định".
 - RIÊNG ĐỐI VỚI HOẠT ĐỘNG NGOÀI TRỜI:
   + Nếu là HOẠT ĐỘNG NGOÀI TRỜI (BẢN CŨ / TRUYỀN THỐNG 3 BƯỚC): Áp dụng 3 bước chuẩn mực theo mẫu khôi phục: "1. Trước khi chơi" (Kiểm tra sĩ số/trang phục, trò chuyện đàm thoại dẫn dắt, giới thiệu nội dung hoạt động và dặn dò quy tắc an toàn), "2. Trong khi chơi" (Bao gồm 2 phần: * Quan sát/trò chơi có mục đích với hệ thống câu hỏi đàm thoại chi tiết, và * Chơi tự do với đồ chơi ngoài trời), "3. Sau khi chơi" (Kiểm tra sĩ số, đàm thoại củng cố cảm nhận, cô nhận xét tuyên dương, hướng dẫn vệ sinh rửa tay và xếp hàng đi nhẹ nhàng về lớp).
   + Nếu là HOẠT ĐỘNG NGOÀI TRỜI 1 (QUAN SÁT) (MẪU MỚI 3 BƯỚC):
@@ -3497,8 +3549,8 @@ Yêu cầu: Trả về JSON với cấu trúc:
       config: { responseMimeType: 'application/json' },
     });
     const parsed = parseJSONRobust(res.text);
-    if (isPreschool && !isNew8 && parsed?.objectives) {
-      sanitizePreschoolObjectives(parsed.objectives);
+    if (isPreschool && parsed?.objectives) {
+      sanitizePreschoolObjectives(parsed.objectives, isNew8, lessonTitle);
     }
     return parsed;
   };
@@ -3778,7 +3830,15 @@ Trả về JSON dạng:
       taskType: 'pedagogical',
       config: { responseMimeType: 'application/json' },
     });
-    return parseJSONRobust(res.text);
+    const parsed = parseJSONRobust(res.text);
+    if (isPreschool && parsed) {
+      if (Array.isArray(parsed)) {
+        return parsed.map((a: any) => sanitizePreschoolActivityContent(a, lessonTitle));
+      } else if (Array.isArray(parsed.activities)) {
+        parsed.activities = parsed.activities.map((a: any) => sanitizePreschoolActivityContent(a, lessonTitle));
+      }
+    }
+    return parsed;
   };
   // Task 3: Activity 3 (Luyện tập) & Activity 4 (Vận dụng & Hướng dẫn về nhà / Bài tiếp theo)
   const taskActivities3And4 = async (taskCandidateKeys?: string[]) => {
@@ -4192,7 +4252,15 @@ Trả về JSON dạng:
       taskType: 'pedagogical',
       config: { responseMimeType: 'application/json' },
     });
-    return parseJSONRobust(res.text);
+    const parsed = parseJSONRobust(res.text);
+    if (isPreschool && parsed) {
+      if (Array.isArray(parsed)) {
+        return parsed.map((a: any) => sanitizePreschoolActivityContent(a, lessonTitle));
+      } else if (Array.isArray(parsed.activities)) {
+        parsed.activities = parsed.activities.map((a: any) => sanitizePreschoolActivityContent(a, lessonTitle));
+      }
+    }
+    return parsed;
   };
   // Task 4: Competency Matrix & Appendix (Worksheet, Next Lesson Homework)
   const taskMatrixAndAppendix = async (taskCandidateKeys?: string[]) => {
@@ -4549,6 +4617,14 @@ Trả về JSON dạng:
   };
 
   const finalPlan = enforcePPCTCompetencies(mergedPlan, config, effectiveNLSIndicators, effectiveAIIndicators);
+  if (isPreschool) {
+    if (finalPlan.activities && Array.isArray(finalPlan.activities)) {
+      finalPlan.activities = finalPlan.activities.map((a: any) => sanitizePreschoolActivityContent(a, lessonTitle));
+    }
+    if (finalPlan.objectives) {
+      sanitizePreschoolObjectives(finalPlan.objectives, isNew8Activity, lessonTitle);
+    }
+  }
   return finalPlan;
 }
 
@@ -4679,10 +4755,20 @@ ${preschoolAgeProfile.promptGuidance}
 =============================================================================
 ` : '';
 
+    const oneShotCorners = parseCornersFromLessonTitle(config.lessonTitle || '', config.subject || '', config.oldPlanContent || '');
+    const oneShotCornerPrompt = oneShotCorners.length > 0 ? `
+=============================================================================
+DANH SÁCH CÁC GÓC CHƠI BẮT BUỘC THEO ĐẦU ĐỀ BÀI DẠY:
+${oneShotCorners.map((c, i) => `${i + 1}. ${c.name}: ${c.activity}${c.isFocus ? ' [GÓC TRỌNG TÂM]' : ''}`).join('\n')}
+- BẮT BUỘC: Trong Hoạt động của cô (Bước 1 Thỏa thuận, Bước 2 Quá trình chơi, Bước 3 Nhận xét), BẮT BUỘC PHẢI XUẤT HIỆN ĐẦY ĐỦ VÀ CHI TIẾT TỪNG GÓC TRÊN. TUYỆT ĐỐI KHÔNG ĐƯỢC TỰ BỊA ĐẶT CÁC GÓC MẶC ĐỊNH KHÔNG CÓ TRONG ĐẦU ĐỀ!
+=============================================================================
+` : '';
+
     const preschoolPrompt = `\nĐẶC BIỆT QUAN TRỌNG ĐỐI VỚI CẤP MẦM NON:
 ${PRESCHOOL_CURRICULUM_MATRIX}
 ${PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE}
 ${ageSpecificInstruction}
+${oneShotCornerPrompt}
 
 - BẮT BUỘC soạn theo Kế hoạch tổ chức hoạt động giáo dục Mầm non, TUYỆT ĐỐI KHÔNG dùng Công văn 5512.
 ${preschoolObjectivesInstruction}
@@ -4722,19 +4808,22 @@ Bảng chia 2 cột: "Hoạt động của giáo viên" và "Hoạt động củ
 - KHỔNG ĐƯỢC BỎ BẤT KỲ NỘI DUNG NÀO TỪ FILE GIÁO ÁN CŨ TẢI LÊN (oldPlanContent). Tái cấu trúc chuẩn hóa nội dung giáo án cũ khớp đúng 5 bước của Lĩnh vực bài dạy.
 - YÊU CẦU ĐẶC BIỆT CHO PHẦN "2. Khám phá - Trải nghiệm": BẮT BUỘC thiết kế theo hướng trải nghiệm. Giáo viên cho trẻ trải nghiệm/thực hiện thử nhiệm vụ trước -> Đặt câu hỏi gợi mở để trẻ tự suy nghĩ và nêu lên cách thực hiện -> SAU ĐÓ giáo viên mới thực hiện làm mẫu và chuẩn hóa lại kỹ năng. Tuyệt đối KHÔNG làm mẫu hoặc giải thích cách làm trước khi trẻ được trải nghiệm.
 - TRÌNH BÀY RÕ RÀNG VÀ CHI TIẾT: Các hoạt động 1, 2, 3, 4, 5 (Tiến trình hoạt động) PHẢI SOẠN RẤT CHI TIẾT, ĐẦY ĐỦ VÀ SÂU SẮC. Bắt buộc mô tả cụ thể từng lời nói, câu lệnh, câu hỏi gợi mở của giáo viên và hành động, lời đáp, thái độ dự kiến của trẻ. Không viết chung chung sơ sài.
-- RIÊNG ĐỐI VỚI HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG GÓC):
-  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP (BẢN CŨ / TRUYỀN THỐNG 4 BƯỚC): Áp dụng 4 bước chuẩn mực theo mẫu khôi phục: "1. Gây hứng thú" (Hát/đọc thơ, đàm thoại chủ đề, giới thiệu các góc chơi), "2. Thỏa thuận trước khi chơi" (Giới thiệu các góc chơi, đàm thoại nhận vai chơi, thỏa thuận phân công công việc, quy tắc chơi văn minh), "3. Quá trình chơi" (Chi tiết các góc chơi như Góc xây dựng, Góc phân vai..., cô bao quát gợi mở tình huống), "4. Nhận xét – kết thúc" (Nhận xét từng góc, khen ngợi công trình/sản phẩm, mời đại diện chia sẻ, dặn dò giữ gìn cất đồ chơi và rửa tay).
-  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP 1 (MẪU MỚI 3 BƯỚC): BẮT BUỘC tuân thủ MẪU NGẮN GỌN VÀ SÚC TÍCH, KHÔNG đưa văn xuôi rườm rà.
-    Cấu trúc chi tiết:
+- RIÊNG ĐỐI VỚI HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG GÓC / CHƠI HOẠT ĐỘNG Ở CÁC GÓC):
+  + ĐẶC BIỆT CHÚ Ý VỀ CÁC GÓC CHƠI NÊU Ở ĐẦU ĐỀ / TÊN BÀI:
+    * BẮT BUỘC ĐỌC KỸ TÊN BÀI DẠY (lessonTitle), CHỦ ĐỀ, CHỦ ĐIỂM HOẶC YÊU CẦU BỔ SUNG để xác định chính xác danh sách các góc chơi (Ví dụ: Góc Xây dựng - Lắp ghép, Góc Phân vai, Góc Nghệ thuật / Tạo hình, Góc Học tập / Sách truyện, Góc Khám phá thiên nhiên, Góc Dân gian... và góc trọng tâm nếu có).
+    * TUYỆT ĐỐI KHÔNG TỰ BỊA ĐẶT hay gán các góc chơi mặc định khác không có trong đầu đề.
+    * BẮT BUỘC ĐỒNG NHẤT 100% GIỮA TÊN CHỦ ĐỀ, CHỦ ĐIỂM, TÊN BÀI DẠY VÀ CÁC HOẠT ĐỘNG Ở TỪNG GÓC.
+  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP (BẢN CŨ / TRUYỀN THỐNG 4 BƯỚC): Áp dụng 4 bước chuẩn mực: "1. Gây hứng thú" (Hát/đọc thơ bám sát chủ đề, đàm thoại, giới thiệu đúng các góc chơi có trong đầu đề), "2. Thỏa thuận trước khi chơi" (Giới thiệu các góc chơi đã nêu, nhận vai, thỏa thuận nhiệm vụ và quy tắc chơi), "3. Quá trình chơi" (Chi tiết hoạt động ở TỪNG GÓC CHƠI ĐÃ NÊU Ở ĐẦU ĐỀ, cô bao quát gợi mở câu hỏi phù hợp với từng góc), "4. Nhận xét – kết thúc" (Nhận xét sản phẩm từng góc, khen ngợi công trình/sản phẩm, mời đại diện chia sẻ, dặn dò cất đồ chơi và rửa tay).
+  + Nếu là HOẠT ĐỘNG VUI CHƠI TRONG LỚP (MẪU MỚI 3 BƯỚC):
     - Bước 1: "1. Thỏa thuận trước khi chơi":
-      + Hoạt động của cô: Lời thoại ngắn gọn cô giới thiệu các góc chơi ("Hôm nay cô chuẩn bị cho các con 3 góc chơi rất thú vị: Góc Nghệ thuật..., Góc Học tập..., Góc Phân vai..."), các câu hỏi cô hỏi trẻ ("Con thích chơi ở góc nào?", "Ở góc đó con sẽ chơi gì?", "Khi chơi cùng bạn con phải như thế nào?"), cho trẻ chọn góc, nhắc nhở không tranh giành và dặn về góc chơi.
-      + Hoạt động của trẻ (CỰC KỲ NGẮN GỌN): các gạch đầu dòng ngắn: "- Trẻ lắng nghe", "- Trẻ trả lời cô", "- Trẻ chọn góc chơi", "- Trẻ lấy ký hiệu về góc chơi", "- Trẻ lắng nghe".
+      + Hoạt động của cô: Lời thoại ngắn gọn cô giới thiệu ĐẦY ĐỦ CÁC GÓC CHƠI ĐÃ NÊU Ở ĐẦU ĐỀ ("Hôm nay cô chuẩn bị các góc chơi: + [Tên góc 1]: [Nội dung chơi], + [Tên góc 2]: [Nội dung chơi]..."), các câu hỏi cô hỏi trẻ ("Con thích chơi ở góc nào?", "Ở góc đó con sẽ chơi gì?", "Khi chơi cùng bạn con phải như thế nào?"), cho trẻ chọn góc, nhắc nhở không tranh giành và dặn về góc chơi.
+      + Hoạt động của trẻ: các gạch đầu dòng ngắn: "- Trẻ lắng nghe cô", "- Trẻ trả lời cô", "- Trẻ chọn góc chơi yêu thích", "- Trẻ lấy ký hiệu về góc chơi", "- Trẻ lắng nghe quy tắc".
     - Bước 2: "2. Theo dõi quá trình chơi":
-      + Hoạt động của cô: Lời dẫn ngắn cô cho trẻ về các góc, rồi phân chia từng góc (* Góc Nghệ thuật:..., * Góc Học tập - Khám phá khoa học:..., * Góc Phân vai:...). Mỗi góc cô gợi hỏi 3-4 câu ngắn gọn trực tiếp ("Con đang làm gì?", "Sản phẩm/đồ chơi có đặc điểm gì?", "Con làm thế nào để...?"), cô gợi ý/khuyến khích ngắn.
-      + Hoạt động của trẻ (CỰC KỲ NGẮN GỌN): các gạch đầu dòng ngắn: "- Trẻ về góc chơi", "- Trẻ chơi và trả lời cô", "- Trẻ lắng nghe", "- Trẻ chơi đoàn kết".
+      + Hoạt động của cô: Lời dẫn ngắn cô cho trẻ về các góc, rồi PHÂN CHIA HƯỚNG DẪN CHI TIẾT TỪNG GÓC ĐÃ NÊU Ở ĐẦU ĐỀ (* [Tên góc 1]: [Nội dung chơi], * [Tên góc 2]: [Nội dung chơi], * [Tên góc 3]...). Mỗi góc cô gợi hỏi 3-4 câu ngắn gọn trực tiếp bám sát chủ đề ("Con đang làm gì?", "Sản phẩm/công trình/đồ chơi có đặc điểm gì?", "Con làm thế nào để...?"), cô gợi ý/khuyến khích ngắn, gợi mở giao lưu giữa các góc.
+      + Hoạt động của trẻ: các gạch đầu dòng ngắn: "- Trẻ về góc chơi", "- Trẻ tích cực nhập vai và thực hiện nội dung chơi", "- Trẻ trả lời cô", "- Trẻ giao lưu tương tác cùng các góc", "- Trẻ chơi đoàn kết".
     - Bước 3: "3. Nhận xét sau khi chơi":
-      + Hoạt động của cô: Lời thoại ngắn cô tập trung trẻ đi tham quan sản phẩm các góc, mời đại diện góc giới thiệu và đặt câu hỏi gợi mở ngắn ("Các con đã chơi ở góc nào?", "Hôm nay con đã làm gì?", "Đây là sản phẩm gì?", "Con thích sản phẩm nào nhất?"), cô nhận xét chung ngắn gọn và nhắc thu dọn đồ chơi.
-      + Hoạt động của trẻ (CỰC KỲ NGẮN GỌN): các gạch đầu dòng ngắn: "- Trẻ tập trung quanh cô", "- Trẻ đi tham quan các góc chơi", "- Nghe nhóm bạn giới thiệu", "- Trẻ giới thiệu", "- Trẻ nghe cô nhận xét", "- Cất đồ dùng đúng nơi quy định".
+      + Hoạt động của cô: Lời thoại ngắn cô tập trung trẻ đi tham quan sản phẩm các góc vừa chơi, mời đại diện góc giới thiệu và đặt câu hỏi gợi mở ngắn ("Các con đã chơi ở góc nào?", "Hôm nay con đã làm gì?", "Đây là sản phẩm gì?", "Con thích sản phẩm nào nhất?"), cô nhận xét chung ngắn gọn và nhắc thu dọn đồ chơi.
+      + Hoạt động của trẻ: các gạch đầu dòng ngắn: "- Trẻ tập trung quanh cô", "- Trẻ đi tham quan các góc chơi", "- Nghe nhóm bạn giới thiệu", "- Trẻ giới thiệu", "- Trẻ nghe cô nhận xét", "- Cất đồ dùng đúng nơi quy định".
 - RIÊNG ĐỐI VỚI HOẠT ĐỘNG NGOÀI TRỜI:
   + Nếu là HOẠT ĐỘNG NGOÀI TRỜI (BẢN CŨ / TRUYỀN THỐNG 3 BƯỚC): Áp dụng 3 bước chuẩn mực theo mẫu khôi phục: "1. Trước khi chơi" (Kiểm tra sĩ số/trang phục, trò chuyện đàm thoại dẫn dắt, giới thiệu nội dung hoạt động và dặn dò quy tắc an toàn), "2. Trong khi chơi" (Bao gồm 2 phần: * Quan sát/trò chơi có mục đích với hệ thống câu hỏi đàm thoại chi tiết, và * Chơi tự do với đồ chơi ngoài trời), "3. Sau khi chơi" (Kiểm tra sĩ số, đàm thoại củng cố cảm nhận, cô nhận xét tuyên dương, hướng dẫn vệ sinh rửa tay và xếp hàng đi nhẹ nhàng về lớp).
   + Nếu là HOẠT ĐỘNG NGOÀI TRỜI 1 (QUAN SÁT) (MẪU MỚI 3 BƯỚC):
@@ -4953,6 +5042,11 @@ ${isPreschool
     }
     if (isPreschool) {
       parsed.duration = preschoolAgeProfile?.recommendedDuration || parsed.duration || '30 – 35 phút';
+      if (config.lessonTitle) parsed.lessonTitle = config.lessonTitle;
+      if (config.subject) parsed.subject = config.subject;
+      if (config.preschoolMainTheme) parsed.mainTheme = config.preschoolMainTheme;
+      if (config.preschoolSubTheme) parsed.subTheme = config.preschoolSubTheme;
+      if (config.preschoolClassSize) parsed.classSize = config.preschoolClassSize;
     }
     parsed.generatedAt = new Date().toISOString();
     parsed.imageSlotsUsed = config.imageSlots || [];
@@ -5101,6 +5195,12 @@ app.post('/api/gemini/refine-activity', async (req, res) => {
     const isIntegratedSubject = (isMathSubject || isMiddleOrHighSchool) && !isTinHoc;
     const isMath4Column = tableLayout === 'math_4_column';
 
+    const refineCorners = parseCornersFromLessonTitle(lessonTitle || '', subject || '');
+    const refineCornerPrompt = refineCorners.length > 0 ? `
+    * DANH SÁCH CÁC GÓC BẮT BUỘC ĐÃ NÊU Ở ĐẦU ĐỀ:
+${refineCorners.map((c, i) => `      ${i + 1}. ${c.name}: ${c.activity}${c.isFocus ? ' [GÓC TRỌNG TÂM]' : ''}`).join('\n')}
+    * BẮT BUỘC: NỘI DUNG HOẠT ĐỘNG CỦA CÔ PHẢI ĐỀ CẬP ĐẦY ĐỦ VÀ CHI TIẾT CÁC GÓC TRÊN, ĐỒNG NHẤT 100% VỚI ĐẦU ĐỀ BÀI DẠY!` : '';
+
     let prompt = '';
     if (isPreschool) {
       prompt = `Bạn là Chuyên gia Giáo dục Mầm non hàng đầu. Hãy biên soạn lại / nâng cấp Hoạt động sau đây cho giáo án Mầm non (${subject || 'Giáo dục Mầm non'} - ${grade || 'Mầm non'}${lessonTitle ? ` - Bài: "${lessonTitle}"` : ''}${mainTheme ? ` - Chủ đề: "${mainTheme}"` : ''}) đúng theo yêu cầu chỉ đạo của giáo viên:
@@ -5138,7 +5238,10 @@ CÁC NGUYÊN TẮC BẮT BUỘC ĐỐI VỚI GIÁO ÁN MẦM NON:
      + Sau khi quan sát / Sau khi chơi: Cô nhận xét, cho trẻ rửa tay, vào lớp; Trẻ cùng cô thu dọn và vệ sinh sạch sẽ.
 
    - ĐỐI VỚI HOẠT ĐỘNG VUI CHƠI TRONG LỚP (HOẠT ĐỘNG GÓC):
-     + Thỏa thuận trước khi chơi -> Theo dõi quá trình chơi ở các góc (Góc Nghệ thuật, Góc Học tập - Khám phá, Góc Phân vai...) -> Nhận xét sau khi chơi.
+     + BẮT BUỘC ĐỌC KỸ TIÊU ĐỀ BÀI DẠY (${lessonTitle ? `"${lessonTitle}"` : 'đầu đề bài'}) VÀ YÊU CẦU ĐIỀU CHỈNH ĐỂ ĐỀ CẬP CHÍNH XÁC CÁC GÓC CHƠI (Góc Xây dựng, Góc Phân vai, Góc Nghệ thuật, Góc Sách/Học tập, Góc Thiên nhiên... đúng theo đầu đề). TUYỆT ĐỐI KHÔNG tự bịa các góc chơi không có trong đầu đề.
+     + Đồng nhất 100% với tên chủ đề (${mainTheme ? `"${mainTheme}"` : 'chủ đề'}), chủ điểm (${subTheme ? `"${subTheme}"` : 'chủ điểm'}) và tên bài dạy.
+${refineCornerPrompt}
+     + Thỏa thuận trước khi chơi -> Theo dõi quá trình chơi ở đúng các góc của bài -> Nhận xét sau khi chơi.
 
    - ĐỐI VỚI CÁC BÀI HỌC MẦM NON KHÁC (Âm nhạc, LQVT, LQCC, Thể dục, Tạo hình, Thơ/Truyện):
      + Trình bày sư phạm mầm non chuẩn mực, mỗi ý một dòng bắt đầu bằng dấu gạch ngang (-), giàu lời thoại tương tác cô - trẻ.

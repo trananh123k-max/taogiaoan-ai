@@ -716,8 +716,8 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
           </div>
 
           <div className="space-y-3.5">
-            {/* HÀNG 1: 1. CẤP HỌC, 2. ĐỘ TUỔI / KHỐI LỚP, 3. TÊN BÀI HỌC / CHỦ ĐỀ (SONG SONG 3 CỘT) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
+            {/* HÀNG 1: 1. CẤP HỌC, 2. ĐỘ TUỔI / KHỐI LỚP (VÀ 3. MÔN HỌC NẾU LÀ PHỔ THÔNG) */}
+            <div className={`grid grid-cols-1 ${config.schoolLevel === 'Mầm non' ? 'sm:grid-cols-2' : 'md:grid-cols-3'} gap-3 items-start`}>
               {/* 1. CẤP HỌC */}
               <div className="form-group flex flex-col gap-1.5">
                 <div className="flex items-center justify-between min-h-[26px]">
@@ -854,427 +854,533 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                 )}
               </div>
 
-              {/* 3. TÊN BÀI HỌC / CHỦ ĐỀ */}
-              <div className="form-group flex flex-col gap-1.5">
-                <div className="flex items-center justify-between min-h-[26px]">
-                  <label className="text-xs font-bold text-red-600">
-                    3. TÊN BÀI HỌC / CHỦ ĐỀ <span className="text-rose-500">*</span>
-                  </label>
-                  {availableLessons.length > 0 && (
+              {/* 3. MÔN HỌC / LĨNH VỰC (Chỉ hiển thị ở Hàng 1 khi là Phổ thông: Tiểu học / THCS / THPT) */}
+              {config.schoolLevel !== 'Mầm non' && (
+                <div className="form-group flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between min-h-[26px]">
+                    <label className="text-xs font-bold text-red-600 flex items-center gap-1">
+                      <span>3. MÔN HỌC / LĨNH VỰC <span className="text-rose-500">*</span></span>
+                    </label>
                     <button
                       type="button"
                       onClick={() => {
-                        if (!isCustomLessonInput) {
-                          setIsCustomLessonInput(true);
-                          onChangeConfig({ lessonTitle: '' });
+                        if (!isCustomSubject) {
+                          setIsCustomSubject(true);
+                          setCustomSubjectText('');
+                          onChangeConfig({ subject: '', lessonTitle: '' });
                         } else {
-                          setIsCustomLessonInput(false);
-                          onChangeConfig({ lessonTitle: availableLessons[0] || '' });
+                          setIsCustomSubject(false);
+                          const activeList = config.schoolLevel === 'Tiểu học' ? TIEU_HOC_SUBJECTS_LIST : config.schoolLevel === 'THCS' ? THCS_SUBJECTS_LIST : THPT_SUBJECTS_LIST;
+                          const defaultSubj = activeList[0] || '';
+                          setCustomSubjectText('');
+                          onChangeConfig({ subject: defaultSubj, lessonTitle: '' });
                         }
                       }}
                       className="text-[11px] text-amber-800 hover:underline font-semibold cursor-pointer"
                     >
-                      {isCustomLessonInput ? 'Chọn bài từ SGK' : '✍️ Tự nhập'}
+                      {isCustomSubject ? '← Chọn môn có sẵn' : '✍️ Nhập môn khác...'}
                     </button>
-                  )}
-                </div>
-
-                {availableLessons.length > 0 && !isCustomLessonInput ? (
-                  <div className="relative">
-                    <select
-                      value={config.lessonTitle}
-                      onChange={(e) => {
-                        if (e.target.value === '__custom__') {
-                          setIsCustomLessonInput(true);
-                          onChangeConfig({ lessonTitle: '' });
-                        } else {
-                          onChangeConfig({ lessonTitle: e.target.value });
-                        }
-                      }}
-                      className="w-full h-[38px] bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 appearance-none focus:bg-white focus:outline-none focus:border-amber-600 cursor-pointer pr-8 shadow-xs"
-                    >
-                      <option value="" disabled>-- Chọn bài học từ danh mục SGK --</option>
-                      {availableLessons.map((les, idx) => (
-                        <option key={idx} value={les} className="bg-white text-slate-900 py-1">
-                          {les}
-                        </option>
-                      ))}
-                      <option value="__custom__">✍️ Nhập tên bài học khác...</option>
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
                   </div>
-                ) : (
-                  <input
-                    type="text"
-                    value={config.lessonTitle}
-                    onChange={(e) => onChangeConfig({ lessonTitle: e.target.value })}
-                    placeholder="Nhập tên bài học / chủ đề..."
-                    className="w-full h-[38px] bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-amber-600 shadow-xs"
-                  />
-                )}
-              </div>
-            </div>
 
-        {/* 4. MÔN HỌC / LĨNH VỰC HOẠT ĐỘNG */}
-        {config.schoolLevel === 'Mầm non' ? (
-          /* MẦM NON: PHÂN TÁCH RÕ RÀNG GIỮA "LĨNH VỰC PHÁT TRIỂN" VÀ "8 HOẠT ĐỘNG PHÁT TRIỂN MỚI (QĐ 388)" */
-          <div className="form-group flex flex-col gap-2 p-3 bg-gradient-to-br from-amber-50/40 via-white to-orange-50/20 border border-amber-200/80 rounded-xl shadow-2xs">
-            <div className="flex items-center justify-between flex-wrap gap-1">
-              <label className="text-xs font-bold text-red-600 flex items-center gap-1.5">
-                <span>4. LĨNH VỰC / HOẠT ĐỘNG MẦM NON <span className="text-rose-500">*</span></span>
-              </label>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!isCustomSubject) {
-                    setIsCustomSubject(true);
-                    setCustomSubjectText('');
-                    onChangeConfig({ subject: '', lessonTitle: '' });
-                  } else {
-                    setIsCustomSubject(false);
-                    const defaultSubj = MAM_NON_TRADITIONAL_DOMAINS[0];
-                    setCustomSubjectText('');
-                    onChangeConfig({ subject: defaultSubj, lessonTitle: '' });
-                  }
-                }}
-                className="text-[11px] text-amber-800 hover:underline font-semibold cursor-pointer"
-              >
-                {isCustomSubject ? '← Chọn hoạt động có sẵn' : '✍️ Nhập hoạt động khác...'}
-              </button>
-            </div>
+                  {isCustomSubject ? (
+                    <input
+                      type="text"
+                      value={customSubjectText}
+                      onChange={(e) => {
+                        setCustomSubjectText(e.target.value);
+                        onChangeConfig({ subject: e.target.value, lessonTitle: '' });
+                      }}
+                      placeholder="Nhập tên môn học..."
+                      className="w-full h-[38px] bg-[#f8fafc] border border-amber-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
+                    />
+                  ) : (
+                    <div className="relative">
+                      {(() => {
+                        const currentSubjects = config.schoolLevel === 'Tiểu học'
+                          ? TIEU_HOC_SUBJECTS_LIST
+                          : config.schoolLevel === 'THCS'
+                          ? THCS_SUBJECTS_LIST
+                          : THPT_SUBJECTS_LIST;
 
-            {/* Segmented Category Buttons for Preschool: 3 options */}
-            {!isCustomSubject && (() => {
-              const currentPreschoolMode: 'traditional' | 'new_8' | 'theme' = 
-                config.preschoolCategoryMode || 
-                (MAM_NON_NEW_ACTIVITIES.includes(config.subject) ? 'new_8' : 'traditional');
-
-              return (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {/* Option 1: Lĩnh vực phát triển */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newSubj = MAM_NON_TRADITIONAL_DOMAINS.includes(config.subject) ? config.subject : MAM_NON_TRADITIONAL_DOMAINS[0];
-                      onChangeConfig({
-                        preschoolCategoryMode: 'traditional',
-                        subject: newSubj,
-                        lessonTitle: '',
-                      });
-                    }}
-                    className={`p-2.5 rounded-lg text-left transition-all border cursor-pointer flex items-start gap-2 ${
-                      currentPreschoolMode === 'traditional'
-                        ? 'bg-emerald-50/90 border-emerald-400 ring-2 ring-emerald-500/30 text-emerald-950 shadow-xs'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
-                    }`}
-                  >
-                    <div className={`p-1.5 rounded-md shrink-0 mt-0.5 ${currentPreschoolMode === 'traditional' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                      <BookOpen className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-xs font-bold leading-tight uppercase">LĨNH VỰC PHÁT TRIỂN</div>
-                      <div className="text-[10.5px] text-slate-500 leading-tight mt-0.5 truncate">Văn học, Âm nhạc...</div>
-                    </div>
-                  </button>
-
-                  {/* Option 2: Hoạt động phát triển mới theo QĐ 388 */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newSubj = MAM_NON_NEW_ACTIVITIES.includes(config.subject) ? config.subject : MAM_NON_NEW_ACTIVITIES[0];
-                      const defaultCodes = getDefaultQD388ForSubject(newSubj);
-                      onChangeConfig({
-                        preschoolCategoryMode: 'new_8',
-                        subject: newSubj,
-                        lessonTitle: '',
-                        ...(defaultCodes && config.preschoolIndicatorMode !== 'custom'
-                          ? { preschoolIndicatorMode: 'default_388', preschoolCustomCodes: defaultCodes.summary }
-                          : {}),
-                      });
-                    }}
-                    className={`p-2.5 rounded-lg text-left transition-all border cursor-pointer flex items-start gap-2 ${
-                      currentPreschoolMode === 'new_8'
-                        ? 'bg-blue-50/90 border-blue-400 ring-2 ring-blue-500/30 text-blue-950 shadow-xs'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
-                    }`}
-                  >
-                    <div className={`p-1.5 rounded-md shrink-0 mt-0.5 ${currentPreschoolMode === 'new_8' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                      <Sparkles className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-xs font-bold leading-tight flex items-center gap-1 uppercase">
-                        <span>HĐ MỚI</span>
-                        <span className="px-1 py-0.2 rounded bg-blue-100 text-blue-800 text-[8.5px] font-extrabold uppercase border border-blue-200">QĐ 388</span>
-                      </div>
-                      <div className="text-[10.5px] text-slate-500 leading-tight mt-0.5 truncate">Ngoài trời, Vui chơi...</div>
-                    </div>
-                  </button>
-
-                  {/* Option 3: Chủ đề */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const defaultTheme = config.preschoolMainTheme || '';
-                      const defaultSubject = MAM_NON_TRADITIONAL_DOMAINS.includes(config.subject) ? config.subject : MAM_NON_TRADITIONAL_DOMAINS[0];
-                      onChangeConfig({
-                        preschoolCategoryMode: 'theme',
-                        preschoolMainTheme: defaultTheme,
-                        preschoolSubTheme: config.preschoolSubTheme || '',
-                        subject: defaultSubject,
-                      });
-                    }}
-                    className={`p-2.5 rounded-lg text-left transition-all border cursor-pointer flex items-start gap-2 ${
-                      currentPreschoolMode === 'theme'
-                        ? 'bg-amber-50/90 border-amber-400 ring-2 ring-amber-500/30 text-amber-950 shadow-xs'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
-                    }`}
-                  >
-                    <div className={`p-1.5 rounded-md shrink-0 mt-0.5 ${currentPreschoolMode === 'theme' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                      <Layers className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-xs font-bold leading-tight flex items-center gap-1 uppercase">
-                        <span>CHỦ ĐỀ</span>
-                        <span className="px-1 py-0.2 rounded bg-amber-100 text-amber-800 text-[8.5px] font-extrabold uppercase border border-amber-200">Mới</span>
-                      </div>
-                      <div className="text-[10.5px] text-slate-500 leading-tight mt-0.5 truncate">Trường MN, Bản thân...</div>
-                    </div>
-                  </button>
-                </div>
-              );
-            })()}
-
-            {/* Selector or input */}
-            {isCustomSubject ? (
-              <input
-                type="text"
-                value={customSubjectText}
-                onChange={(e) => {
-                  setCustomSubjectText(e.target.value);
-                  onChangeConfig({ subject: e.target.value, lessonTitle: '' });
-                }}
-                placeholder="Nhập tên lĩnh vực / hoạt động..."
-                className="w-full bg-white border border-amber-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
-              />
-            ) : (() => {
-              const currentPreschoolMode: 'traditional' | 'new_8' | 'theme' = 
-                config.preschoolCategoryMode || 
-                (MAM_NON_NEW_ACTIVITIES.includes(config.subject) ? 'new_8' : 'traditional');
-
-              if (currentPreschoolMode === 'theme') {
-                return (
-                  <div className="space-y-3 pt-1">
-                    {/* Dòng 1: Input trực tiếp Tên chủ đề lớn kèm mũi tên chọn chủ đề mẫu có sẵn */}
-                    <div className="space-y-1.5" ref={themeDropdownRef}>
-                      <div className="flex items-center justify-between">
-                        <label className="text-[11.5px] font-bold text-slate-800 flex items-center gap-1">
-                          <span>🌸 Tên chủ đề lớn:</span>
-                          <span className="text-rose-500">*</span>
-                        </label>
-                        <span className="text-[10.5px] text-amber-800 font-semibold italic">
-                          (Chọn trong danh sách hoặc gõ tự do)
-                        </span>
-                      </div>
-
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={config.preschoolMainTheme || ''}
-                          onChange={(e) => {
-                            onChangeConfig({ preschoolMainTheme: e.target.value });
-                          }}
-                          placeholder="Nhập hoặc chọn chủ đề lớn (ví dụ: Trường mầm non, Bản thân, Gia đình...)"
-                          className="w-full bg-white border border-amber-400 rounded-lg pl-3 pr-9 py-2 text-xs font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setIsThemeDropdownOpen((prev) => !prev)}
-                          className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-amber-100/80 text-amber-800 transition-colors cursor-pointer"
-                          title="Bấm để chọn chủ đề mẫu có sẵn"
-                        >
-                          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isThemeDropdownOpen ? 'rotate-180 text-amber-900' : ''}`} />
-                        </button>
-
-                        {/* Menu danh sách các chủ đề mẫu có sẵn */}
-                        {isThemeDropdownOpen && (
-                          <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-amber-300 rounded-xl shadow-xl z-30 max-h-60 overflow-y-auto py-1 animate-in fade-in zoom-in-95 duration-100">
-                            <div className="px-3 py-1.5 text-[10.5px] font-bold text-amber-900/80 bg-amber-50/80 border-b border-amber-100 flex items-center justify-between">
-                              <span>CHỦ ĐỀ MẪU CÓ SẴN:</span>
-                              <span className="text-[9.5px] font-normal text-slate-500">(Bấm chọn nhanh)</span>
-                            </div>
-                            {MAM_NON_MAIN_THEMES.map((theme) => {
-                              const isSelected = config.preschoolMainTheme === theme;
-                              return (
-                                <button
-                                  key={theme}
-                                  type="button"
-                                  onClick={() => {
-                                    onChangeConfig({ preschoolMainTheme: theme });
-                                    setIsThemeDropdownOpen(false);
-                                  }}
-                                  className={`w-full text-left px-3 py-2 text-xs transition-colors flex items-center justify-between cursor-pointer ${
-                                    isSelected
-                                      ? 'bg-amber-100 text-amber-950 font-bold'
-                                      : 'text-slate-700 hover:bg-amber-50 font-medium'
-                                  }`}
-                                >
-                                  <span>{theme}</span>
-                                  {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-amber-700 shrink-0" />}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Dòng 2: Ô input Chủ đề nhỏ (tự do nhập 1 dòng) */}
-                    <div className="space-y-1">
-                      <label className="text-[11.5px] font-bold text-slate-800 flex items-center justify-between">
-                        <span className="flex items-center gap-1">
-                          <span>🌿 Chủ đề nhỏ (Chủ đề nhánh / sự kiện):</span>
-                        </span>
-                        <span className="text-[10.5px] text-slate-500 font-normal italic">(Cô tự do gõ tên chủ đề nhỏ)</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={config.preschoolSubTheme || ''}
-                        onChange={(e) => {
-                          onChangeConfig({ preschoolSubTheme: e.target.value });
-                        }}
-                        placeholder="Ví dụ: Một số loại hoa đẹp quanh bé, Gia đình thân yêu của bé, Các loại quả..."
-                        className="w-full bg-white border border-amber-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
-                      />
-                    </div>
-
-                    {/* Dòng 3: Hoạt động / Lĩnh vực bài dạy của chủ đề */}
-                    <div className="space-y-1">
-                      <label className="text-[11.5px] font-bold text-slate-800 flex items-center justify-between">
-                        <span className="flex items-center gap-1">
-                          <span>📚 Hoạt động / Phân môn theo chủ đề:</span>
-                          <span className="text-rose-500">*</span>
-                        </span>
-                      </label>
-                      <CustomSubjectSelect
-                        value={config.subject || MAM_NON_TRADITIONAL_DOMAINS[0]}
-                        onChange={(newSubj) => {
+                        const handleSubjectChange = (newSubj: string) => {
+                          const isNewHDTN = newSubj.toLowerCase().includes('hoạt động trải nghiệm') || newSubj.toLowerCase().includes('hđtn');
                           onChangeConfig({
                             subject: newSubj,
                             lessonTitle: '',
+                            ...(isNewHDTN ? { enableAI: false, enableNLS: false, enableSTEM: false } : {}),
                           });
-                        }}
-                        subjects={[...MAM_NON_TRADITIONAL_DOMAINS, ...MAM_NON_NEW_ACTIVITIES]}
-                        schoolLevel={config.schoolLevel}
-                      />
+                        };
+
+                        return (
+                          <CustomSubjectSelect
+                            value={config.subject}
+                            onChange={handleSubjectChange}
+                            subjects={currentSubjects}
+                            schoolLevel={config.schoolLevel}
+                          />
+                        );
+                      })()}
                     </div>
-                  </div>
-                );
-              }
-
-              // Mode traditional or new_8
-              const isCurrentNew = currentPreschoolMode === 'new_8';
-              const activeList = isCurrentNew ? MAM_NON_NEW_ACTIVITIES : MAM_NON_TRADITIONAL_DOMAINS;
-
-              const handleSubjectChange = (newSubj: string) => {
-                let preschoolCodeUpdate: Partial<LessonPlanConfig> = {};
-                const defaultCodes = getDefaultQD388ForSubject(newSubj);
-                if (defaultCodes) {
-                  if (config.preschoolIndicatorMode !== 'custom') {
-                    preschoolCodeUpdate = {
-                      preschoolIndicatorMode: 'default_388',
-                      preschoolCustomCodes: defaultCodes.summary,
-                    };
-                  }
-                }
-                onChangeConfig({
-                  subject: newSubj,
-                  lessonTitle: '',
-                  ...preschoolCodeUpdate,
-                });
-              };
-
-              return (
-                <div className="space-y-2">
-                  <div className="relative">
-                    <CustomSubjectSelect
-                      value={config.subject}
-                      onChange={handleSubjectChange}
-                      subjects={activeList}
-                      schoolLevel={config.schoolLevel}
-                    />
-                  </div>
+                  )}
                 </div>
-              );
-            })()}
-          </div>
-        ) : (
-          /* CẤP TIỂU HỌC / THCS / THPT */
-          <div className="form-group flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-red-600 flex items-center gap-1">
-                <span>4. MÔN HỌC / LĨNH VỰC <span className="text-rose-500">*</span></span>
-              </label>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!isCustomSubject) {
-                    setIsCustomSubject(true);
-                    setCustomSubjectText('');
-                    onChangeConfig({ subject: '', lessonTitle: '' });
-                  } else {
-                    setIsCustomSubject(false);
-                    const activeList = config.schoolLevel === 'Tiểu học' ? TIEU_HOC_SUBJECTS_LIST : config.schoolLevel === 'THCS' ? THCS_SUBJECTS_LIST : THPT_SUBJECTS_LIST;
-                    const defaultSubj = activeList[0] || '';
-                    setCustomSubjectText('');
-                    onChangeConfig({ subject: defaultSubj, lessonTitle: '' });
-                  }
-                }}
-                className="text-[11px] text-amber-800 hover:underline font-semibold cursor-pointer"
-              >
-                {isCustomSubject ? '← Chọn môn có sẵn' : '✍️ Nhập môn khác...'}
-              </button>
+              )}
             </div>
 
-            {isCustomSubject ? (
-              <input
-                type="text"
-                value={customSubjectText}
-                onChange={(e) => {
-                  setCustomSubjectText(e.target.value);
-                  onChangeConfig({ subject: e.target.value, lessonTitle: '' });
-                }}
-                placeholder="Nhập tên môn học..."
-                className="w-full bg-[#f8fafc] border border-amber-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
-              />
-            ) : (
-              <div className="relative">
-                {(() => {
-                  const currentSubjects = config.schoolLevel === 'Tiểu học'
-                    ? TIEU_HOC_SUBJECTS_LIST
-                    : config.schoolLevel === 'THCS'
-                    ? THCS_SUBJECTS_LIST
-                    : THPT_SUBJECTS_LIST;
+        {/* 3 & 4 & 5. CẤU HÌNH LĨNH VỰC, HOẠT ĐỘNG, CHỦ ĐỀ & TÊN BÀI HỌC (DÀNH CHO MẦM NON) */}
+        {config.schoolLevel === 'Mầm non' ? (
+          /* MẦM NON: PHÂN TÁCH RÕ RÀNG GIỮA 3. LĨNH VỰC/HĐ, 4. CHỌN CỤ THỂ VÀ 5. TÊN BÀI HỌC/CHỦ ĐỀ */
+          <div className="space-y-3.5">
+            {/* 3. LĨNH VỰC / HOẠT ĐỘNG MẦM NON */}
+            <div className="form-group flex flex-col gap-2 p-3.5 bg-gradient-to-br from-amber-50/40 via-white to-orange-50/20 border border-amber-200/80 rounded-xl shadow-2xs">
+              <div className="flex items-center justify-between flex-wrap gap-1">
+                <label className="text-xs font-bold text-red-600 flex items-center gap-1.5">
+                  <span>3. LĨNH VỰC / HOẠT ĐỘNG MẦM NON <span className="text-rose-500">*</span></span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!isCustomSubject) {
+                      setIsCustomSubject(true);
+                      setCustomSubjectText('');
+                      onChangeConfig({ subject: '', lessonTitle: '' });
+                    } else {
+                      setIsCustomSubject(false);
+                      const defaultSubj = MAM_NON_TRADITIONAL_DOMAINS[0];
+                      setCustomSubjectText('');
+                      onChangeConfig({ subject: defaultSubj, lessonTitle: '' });
+                    }
+                  }}
+                  className="text-[11px] text-amber-800 hover:underline font-semibold cursor-pointer"
+                >
+                  {isCustomSubject ? '← Chọn hoạt động có sẵn' : '✍️ Nhập hoạt động khác...'}
+                </button>
+              </div>
+
+              {/* Segmented Category Buttons for Preschool: 3 options */}
+              {!isCustomSubject && (() => {
+                const currentPreschoolMode: 'traditional' | 'new_8' | 'theme' = 
+                  config.preschoolCategoryMode || 
+                  (MAM_NON_NEW_ACTIVITIES.includes(config.subject) ? 'new_8' : 'traditional');
+
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {/* Option 1: Lĩnh vực phát triển */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newSubj = MAM_NON_TRADITIONAL_DOMAINS.includes(config.subject) ? config.subject : MAM_NON_TRADITIONAL_DOMAINS[0];
+                        onChangeConfig({
+                          preschoolCategoryMode: 'traditional',
+                          subject: newSubj,
+                          lessonTitle: '',
+                        });
+                      }}
+                      className={`p-2.5 rounded-lg text-left transition-all border cursor-pointer flex items-start gap-2 ${
+                        currentPreschoolMode === 'traditional'
+                          ? 'bg-emerald-50/90 border-emerald-400 ring-2 ring-emerald-500/30 text-emerald-950 shadow-xs'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className={`p-1.5 rounded-md shrink-0 mt-0.5 ${currentPreschoolMode === 'traditional' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                        <BookOpen className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold leading-tight uppercase">LĨNH VỰC PHÁT TRIỂN</div>
+                        <div className="text-[10.5px] text-slate-500 leading-tight mt-0.5 truncate">Văn học, Âm nhạc...</div>
+                      </div>
+                    </button>
+
+                    {/* Option 2: Hoạt động phát triển mới theo QĐ 388 */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newSubj = MAM_NON_NEW_ACTIVITIES.includes(config.subject) ? config.subject : MAM_NON_NEW_ACTIVITIES[0];
+                        const defaultCodes = getDefaultQD388ForSubject(newSubj);
+                        onChangeConfig({
+                          preschoolCategoryMode: 'new_8',
+                          subject: newSubj,
+                          lessonTitle: '',
+                          ...(defaultCodes && config.preschoolIndicatorMode !== 'custom'
+                            ? { preschoolIndicatorMode: 'default_388', preschoolCustomCodes: defaultCodes.summary }
+                            : {}),
+                        });
+                      }}
+                      className={`p-2.5 rounded-lg text-left transition-all border cursor-pointer flex items-start gap-2 ${
+                        currentPreschoolMode === 'new_8'
+                          ? 'bg-blue-50/90 border-blue-400 ring-2 ring-blue-500/30 text-blue-950 shadow-xs'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className={`p-1.5 rounded-md shrink-0 mt-0.5 ${currentPreschoolMode === 'new_8' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                        <Sparkles className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold leading-tight flex items-center gap-1 uppercase">
+                          <span>HĐ MỚI</span>
+                          <span className="px-1 py-0.2 rounded bg-blue-100 text-blue-800 text-[8.5px] font-extrabold uppercase border border-blue-200">QĐ 388</span>
+                        </div>
+                        <div className="text-[10.5px] text-slate-500 leading-tight mt-0.5 truncate">Ngoài trời, Vui chơi...</div>
+                      </div>
+                    </button>
+
+                    {/* Option 3: Chủ đề */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const defaultTheme = config.preschoolMainTheme || '';
+                        const defaultSubject = MAM_NON_TRADITIONAL_DOMAINS.includes(config.subject) ? config.subject : MAM_NON_TRADITIONAL_DOMAINS[0];
+                        onChangeConfig({
+                          preschoolCategoryMode: 'theme',
+                          preschoolMainTheme: defaultTheme,
+                          preschoolSubTheme: config.preschoolSubTheme || '',
+                          subject: defaultSubject,
+                        });
+                      }}
+                      className={`p-2.5 rounded-lg text-left transition-all border cursor-pointer flex items-start gap-2 ${
+                        currentPreschoolMode === 'theme'
+                          ? 'bg-amber-50/90 border-amber-400 ring-2 ring-amber-500/30 text-amber-950 shadow-xs'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className={`p-1.5 rounded-md shrink-0 mt-0.5 ${currentPreschoolMode === 'theme' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                        <Layers className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold leading-tight flex items-center gap-1 uppercase">
+                          <span>CHỦ ĐỀ</span>
+                          <span className="px-1 py-0.2 rounded bg-amber-100 text-amber-800 text-[8.5px] font-extrabold uppercase border border-amber-200">Mới</span>
+                        </div>
+                        <div className="text-[10.5px] text-slate-500 leading-tight mt-0.5 truncate">Trường MN, Bản thân...</div>
+                      </div>
+                    </button>
+                  </div>
+                );
+              })()}
+
+              {/* 4. CHỌN LĨNH VỰC / HOẠT ĐỘNG / CHỦ ĐỀ CỤ THỂ */}
+              <div className="pt-2 border-t border-amber-200/60 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-red-600 flex items-center gap-1.5">
+                    <span>
+                      4. {isCustomSubject
+                        ? 'NHẬP TÊN HOẠT ĐỘNG'
+                        : (config.preschoolCategoryMode === 'theme'
+                          ? 'CHỌN CHỦ ĐỀ & PHÂN MÔN CỤ THỂ'
+                          : config.preschoolCategoryMode === 'new_8'
+                          ? 'CHỌN HOẠT ĐỘNG MỚI (QĐ 388)'
+                          : 'CHỌN LĨNH VỰC PHÁT TRIỂN CỤ THỂ')} <span className="text-rose-500">*</span>
+                    </span>
+                  </label>
+                </div>
+
+                {isCustomSubject ? (
+                  <input
+                    type="text"
+                    value={customSubjectText}
+                    onChange={(e) => {
+                      setCustomSubjectText(e.target.value);
+                      onChangeConfig({ subject: e.target.value, lessonTitle: '' });
+                    }}
+                    placeholder="Nhập tên lĩnh vực / hoạt động..."
+                    className="w-full bg-white border border-amber-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
+                  />
+                ) : (() => {
+                  const currentPreschoolMode: 'traditional' | 'new_8' | 'theme' = 
+                    config.preschoolCategoryMode || 
+                    (MAM_NON_NEW_ACTIVITIES.includes(config.subject) ? 'new_8' : 'traditional');
+
+                  if (currentPreschoolMode === 'theme') {
+                    return (
+                      <div className="space-y-3 pt-1">
+                        {/* Dòng 1: Input trực tiếp Tên chủ đề lớn kèm mũi tên chọn chủ đề mẫu có sẵn */}
+                        <div className="space-y-1.5" ref={themeDropdownRef}>
+                          <div className="flex items-center justify-between">
+                            <label className="text-[11.5px] font-bold text-slate-800 flex items-center gap-1">
+                              <span>🌸 Tên chủ đề lớn:</span>
+                              <span className="text-rose-500">*</span>
+                            </label>
+                            <span className="text-[10.5px] text-amber-800 font-semibold italic">
+                              (Chọn trong danh sách hoặc gõ tự do)
+                            </span>
+                          </div>
+
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={config.preschoolMainTheme || ''}
+                              onChange={(e) => {
+                                onChangeConfig({ preschoolMainTheme: e.target.value });
+                              }}
+                              placeholder="Nhập hoặc chọn chủ đề lớn (ví dụ: Trường mầm non, Bản thân, Gia đình...)"
+                              className="w-full bg-white border border-amber-400 rounded-lg pl-3 pr-9 py-2 text-xs font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setIsThemeDropdownOpen((prev) => !prev)}
+                              className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-amber-100/80 text-amber-800 transition-colors cursor-pointer"
+                              title="Bấm để chọn chủ đề mẫu có sẵn"
+                            >
+                              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isThemeDropdownOpen ? 'rotate-180 text-amber-900' : ''}`} />
+                            </button>
+
+                            {/* Menu danh sách các chủ đề mẫu có sẵn */}
+                            {isThemeDropdownOpen && (
+                              <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-amber-300 rounded-xl shadow-xl z-30 max-h-60 overflow-y-auto py-1 animate-in fade-in zoom-in-95 duration-100">
+                                <div className="px-3 py-1.5 text-[10.5px] font-bold text-amber-900/80 bg-amber-50/80 border-b border-amber-100 flex items-center justify-between">
+                                  <span>CHỦ ĐỀ MẪU CÓ SẴN:</span>
+                                  <span className="text-[9.5px] font-normal text-slate-500">(Bấm chọn nhanh)</span>
+                                </div>
+                                {MAM_NON_MAIN_THEMES.map((theme) => {
+                                  const isSelected = config.preschoolMainTheme === theme;
+                                  return (
+                                    <button
+                                      key={theme}
+                                      type="button"
+                                      onClick={() => {
+                                        onChangeConfig({ preschoolMainTheme: theme });
+                                        setIsThemeDropdownOpen(false);
+                                      }}
+                                      className={`w-full text-left px-3 py-2 text-xs transition-colors flex items-center justify-between cursor-pointer ${
+                                        isSelected
+                                          ? 'bg-amber-100 text-amber-950 font-bold'
+                                          : 'text-slate-700 hover:bg-amber-50 font-medium'
+                                      }`}
+                                    >
+                                      <span>{theme}</span>
+                                      {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-amber-700 shrink-0" />}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Dòng 2: Ô input Chủ đề nhỏ (tự do nhập 1 dòng) */}
+                        <div className="space-y-1">
+                          <label className="text-[11.5px] font-bold text-slate-800 flex items-center justify-between">
+                            <span className="flex items-center gap-1">
+                              <span>🌿 Chủ đề nhỏ (Chủ đề nhánh / sự kiện):</span>
+                            </span>
+                            <span className="text-[10.5px] text-slate-500 font-normal italic">(Cô tự do gõ tên chủ đề nhỏ)</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={config.preschoolSubTheme || ''}
+                            onChange={(e) => {
+                              onChangeConfig({ preschoolSubTheme: e.target.value });
+                            }}
+                            placeholder="Ví dụ: Một số loại hoa đẹp quanh bé, Gia đình thân yêu của bé, Các loại quả..."
+                            className="w-full bg-white border border-amber-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
+                          />
+                        </div>
+
+                        {/* Dòng 3: Hoạt động / Lĩnh vực bài dạy của chủ đề */}
+                        <div className="space-y-1">
+                          <label className="text-[11.5px] font-bold text-slate-800 flex items-center justify-between">
+                            <span className="flex items-center gap-1">
+                              <span>📚 Hoạt động / Phân môn theo chủ đề:</span>
+                              <span className="text-rose-500">*</span>
+                            </span>
+                          </label>
+                          <CustomSubjectSelect
+                            value={config.subject || MAM_NON_TRADITIONAL_DOMAINS[0]}
+                            onChange={(newSubj) => {
+                              onChangeConfig({
+                                subject: newSubj,
+                                lessonTitle: '',
+                              });
+                            }}
+                            subjects={[...MAM_NON_TRADITIONAL_DOMAINS, ...MAM_NON_NEW_ACTIVITIES]}
+                            schoolLevel={config.schoolLevel}
+                          />
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // Mode traditional or new_8
+                  const isCurrentNew = currentPreschoolMode === 'new_8';
+                  const activeList = isCurrentNew ? MAM_NON_NEW_ACTIVITIES : MAM_NON_TRADITIONAL_DOMAINS;
 
                   const handleSubjectChange = (newSubj: string) => {
-                    const isNewHDTN = newSubj.toLowerCase().includes('hoạt động trải nghiệm') || newSubj.toLowerCase().includes('hđtn');
+                    let preschoolCodeUpdate: Partial<LessonPlanConfig> = {};
+                    const defaultCodes = getDefaultQD388ForSubject(newSubj);
+                    if (defaultCodes) {
+                      if (config.preschoolIndicatorMode !== 'custom') {
+                        preschoolCodeUpdate = {
+                          preschoolIndicatorMode: 'default_388',
+                          preschoolCustomCodes: defaultCodes.summary,
+                        };
+                      }
+                    }
                     onChangeConfig({
                       subject: newSubj,
                       lessonTitle: '',
-                      ...(isNewHDTN ? { enableAI: false, enableNLS: false, enableSTEM: false } : {}),
+                      ...preschoolCodeUpdate,
                     });
                   };
 
                   return (
-                    <CustomSubjectSelect
-                      value={config.subject}
-                      onChange={handleSubjectChange}
-                      subjects={currentSubjects}
-                      schoolLevel={config.schoolLevel}
-                    />
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <CustomSubjectSelect
+                          value={config.subject}
+                          onChange={handleSubjectChange}
+                          subjects={activeList}
+                          schoolLevel={config.schoolLevel}
+                        />
+                      </div>
+                    </div>
                   );
                 })()}
               </div>
-            )}
+            </div>
+
+            {/* 5. TÊN BÀI HỌC / CHỦ ĐỀ (DÀNH CHO MẦM NON) */}
+            <div className="form-group flex flex-col gap-1.5 p-3.5 bg-white border border-slate-200 rounded-xl shadow-2xs">
+              <div className="flex items-center justify-between min-h-[26px]">
+                <label className="text-xs font-bold text-red-600 flex items-center gap-1">
+                  <span>5. TÊN BÀI HỌC / CHỦ ĐỀ <span className="text-rose-500">*</span></span>
+                </label>
+                {availableLessons.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isCustomLessonInput) {
+                        setIsCustomLessonInput(true);
+                        onChangeConfig({ lessonTitle: '' });
+                      } else {
+                        setIsCustomLessonInput(false);
+                        onChangeConfig({ lessonTitle: availableLessons[0] || '' });
+                      }
+                    }}
+                    className="text-[11px] text-amber-800 hover:underline font-semibold cursor-pointer"
+                  >
+                    {isCustomLessonInput ? 'Chọn bài có sẵn' : '✍️ Tự nhập'}
+                  </button>
+                )}
+              </div>
+
+              {availableLessons.length > 0 && !isCustomLessonInput ? (
+                <div className="relative">
+                  <select
+                    value={config.lessonTitle}
+                    onChange={(e) => {
+                      if (e.target.value === '__custom__') {
+                        setIsCustomLessonInput(true);
+                        onChangeConfig({ lessonTitle: '' });
+                      } else {
+                        onChangeConfig({ lessonTitle: e.target.value });
+                      }
+                    }}
+                    className="w-full h-[38px] bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 appearance-none focus:bg-white focus:outline-none focus:border-amber-600 cursor-pointer pr-8 shadow-xs"
+                  >
+                    <option value="" disabled>-- Chọn bài học / đề tài mẫu --</option>
+                    {availableLessons.map((les, idx) => (
+                      <option key={idx} value={les} className="bg-white text-slate-900 py-1">
+                        {les}
+                      </option>
+                    ))}
+                    <option value="__custom__">✍️ Nhập tên bài học khác...</option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  value={config.lessonTitle}
+                  onChange={(e) => onChangeConfig({ lessonTitle: e.target.value })}
+                  placeholder="Nhập tên bài học / đề tài (Ví dụ: Thơ: Cô và Mẹ, Truyện: Tích Chu, Dạy hát: Cháu yêu bà, Khám phá nước...)"
+                  className="w-full h-[38px] bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-amber-600 shadow-xs"
+                />
+              )}
+            </div>
+          </div>
+        ) : (
+          /* CẤP TIỂU HỌC / THCS / THPT: 4. BỘ SÁCH VÀ 5. TÊN BÀI HỌC */
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
+            {/* 4. BỘ SÁCH / CHƯƠNG TRÌNH */}
+            <div className="form-group flex flex-col gap-1.5">
+              <div className="flex items-center justify-between min-h-[26px]">
+                <label className="text-xs font-bold text-red-600 flex items-center gap-1">
+                  <span>4. BỘ SÁCH / CHƯƠNG TRÌNH <span className="text-rose-500">*</span></span>
+                </label>
+              </div>
+              <div className="relative">
+                <select
+                  value={config.bookSeries || 'Kết nối tri thức với cuộc sống'}
+                  onChange={(e) => onChangeConfig({ bookSeries: e.target.value as any })}
+                  className="w-full h-[38px] bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 appearance-none focus:bg-white focus:outline-none focus:border-amber-600 cursor-pointer pr-8 shadow-xs"
+                >
+                  <option value="Kết nối tri thức với cuộc sống">Kết nối tri thức với cuộc sống</option>
+                  <option value="Cánh diều">Cánh diều</option>
+                  <option value="Chân trời sáng tạo">Chân trời sáng tạo</option>
+                  <option value="Chương trình 2018 chung">Chương trình GDPT 2018 chung</option>
+                </select>
+                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* 5. TÊN BÀI HỌC / CHỦ ĐỀ */}
+            <div className="form-group flex flex-col gap-1.5">
+              <div className="flex items-center justify-between min-h-[26px]">
+                <label className="text-xs font-bold text-red-600 flex items-center gap-1">
+                  <span>5. TÊN BÀI HỌC / CHỦ ĐỀ <span className="text-rose-500">*</span></span>
+                </label>
+                {availableLessons.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isCustomLessonInput) {
+                        setIsCustomLessonInput(true);
+                        onChangeConfig({ lessonTitle: '' });
+                      } else {
+                        setIsCustomLessonInput(false);
+                        onChangeConfig({ lessonTitle: availableLessons[0] || '' });
+                      }
+                    }}
+                    className="text-[11px] text-amber-800 hover:underline font-semibold cursor-pointer"
+                  >
+                    {isCustomLessonInput ? 'Chọn bài từ SGK' : '✍️ Tự nhập'}
+                  </button>
+                )}
+              </div>
+
+              {availableLessons.length > 0 && !isCustomLessonInput ? (
+                <div className="relative">
+                  <select
+                    value={config.lessonTitle}
+                    onChange={(e) => {
+                      if (e.target.value === '__custom__') {
+                        setIsCustomLessonInput(true);
+                        onChangeConfig({ lessonTitle: '' });
+                      } else {
+                        onChangeConfig({ lessonTitle: e.target.value });
+                      }
+                    }}
+                    className="w-full h-[38px] bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 appearance-none focus:bg-white focus:outline-none focus:border-amber-600 cursor-pointer pr-8 shadow-xs"
+                  >
+                    <option value="" disabled>-- Chọn bài học từ danh mục SGK --</option>
+                    {availableLessons.map((les, idx) => (
+                      <option key={idx} value={les} className="bg-white text-slate-900 py-1">
+                        {les}
+                      </option>
+                    ))}
+                    <option value="__custom__">✍️ Nhập tên bài học khác...</option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  value={config.lessonTitle}
+                  onChange={(e) => onChangeConfig({ lessonTitle: e.target.value })}
+                  placeholder="Nhập tên bài học / chủ đề..."
+                  className="w-full h-[38px] bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-amber-600 shadow-xs"
+                />
+              )}
+            </div>
           </div>
         )}
 
@@ -1291,15 +1397,15 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
           </div>
         )}
 
-        {/* 5 & 6. SỐ TIẾT & TIẾT PPCT (ẨN KHI LÀ MẦM NON) - CÙNG HÀNG SONG SONG */}
+        {/* 6 & 7. SỐ TIẾT & TIẾT PPCT (ẨN KHI LÀ MẦM NON) - CÙNG HÀNG SONG SONG */}
         {!(config.schoolLevel || '').toLowerCase().includes('mầm non') && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
-              {/* 5. SỐ TIẾT CẦN SOẠN */}
+              {/* 6. SỐ TIẾT CẦN SOẠN */}
               <div className="form-group flex flex-col gap-1.5">
                 <div className="flex items-center justify-between min-h-[26px]">
                   <label className="text-xs font-bold text-red-600 flex items-center gap-1">
-                    <span>5. Số tiết cần soạn <span className="text-rose-500">*</span></span>
+                    <span>6. Số tiết cần soạn <span className="text-rose-500">*</span></span>
                   </label>
                 </div>
                 <input
@@ -1326,11 +1432,11 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
                 />
               </div>
 
-              {/* 6. TIẾT CỦA BÀI (PPCT) */}
+              {/* 7. TIẾT CỦA BÀI (PPCT) */}
               <div className="form-group flex flex-col gap-1.5">
                 <div className="flex items-center justify-between min-h-[26px]">
                   <label className="text-xs font-bold text-red-600 flex items-center gap-1">
-                    <span>6. Tiết của bài (PPCT)</span>
+                    <span>7. Tiết của bài (PPCT)</span>
                   </label>
                 </div>
                 <input
@@ -1343,10 +1449,10 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
               </div>
             </div>
 
-            {/* 7. MẪU BẢNG GIÁO ÁN */}
+            {/* 8. MẪU BẢNG GIÁO ÁN */}
             <div className="form-group flex flex-col gap-1.5">
               <label className="text-xs font-bold text-red-600">
-                7. Mẫu bảng giáo án
+                8. Mẫu bảng giáo án
               </label>
               <div className="relative">
                 <select
@@ -1362,11 +1468,11 @@ export const LeftConfigPanel: React.FC<LeftConfigPanelProps> = ({
               </div>
             </div>
 
-            {/* 8. ĐỊNH DẠNG CÔNG THỨC TOÁN TRONG WORD (Chỉ hiển thị khi là môn Toán) */}
+            {/* 9. ĐỊNH DẠNG CÔNG THỨC TOÁN TRONG WORD (Chỉ hiển thị khi là môn Toán) */}
             {/toán|math/i.test(config.subject || '') && (
               <div className="form-group flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-red-600 flex items-center justify-between">
-                  <span>8. Công thức Toán trong Word</span>
+                  <span>9. Công thức Toán trong Word</span>
                   <span className="text-[10px] font-normal text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">Mới</span>
                 </label>
                 <div className="relative">

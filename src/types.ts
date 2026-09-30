@@ -111,6 +111,20 @@ export interface ActivityDetail {
   aiFocus?: string;  // Điểm nhấn Năng lực AI
 }
 
+export interface AiRefineProgress {
+  isRefining: boolean;
+  targetId?: string;
+  targetIndex?: number;
+  targetName?: string;
+  targetType?: 'activity' | 'objectives' | 'equipment';
+  instruction?: string;
+  progressPercent: number; // 0 to 100
+  stageText: string;
+  elapsedSeconds: number;
+  status: 'idle' | 'refining' | 'success' | 'error';
+  errorMessage?: string;
+}
+
 export interface CompetencyMatrixItem {
   id?: string;
   activityIndex?: number;
@@ -135,6 +149,7 @@ export interface PreschoolPreparationData {
 }
 
 export interface LessonPlanOutput {
+  id?: string;
   schoolName: string;
   teacherName: string;
   lessonTitle: string;

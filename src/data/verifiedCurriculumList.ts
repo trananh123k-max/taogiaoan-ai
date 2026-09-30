@@ -152,8 +152,38 @@ export const VERIFIED_KNTT_CURRICULUM: Record<string, CurriculumItem> = {
   'Lĩnh vực Phát triển nhận thức_Mẫu giáo lớn (5-6 tuổi)': {
     themes: ['Chương trình Mầm non'],
     lessons: [
-      'Tách gộp nhóm 10 đối tượng; Đo độ dài bằng thước đo',
-      'Khám phá quy trình công nghệ đơn giản; Thí nghiệm STEM'
+      'Ôn số lượng trong phạm vi 5 và nhận biết số 5',
+      'Đếm đến 5, nhận biết nhóm có 5 đối tượng, nhận biết số 5',
+      'Tách gộp trong phạm vi 5',
+      'Đếm đến 6, nhận biết nhóm có 6 đối tượng, nhận biết số 6',
+      'Đếm đến 7, nhận biết nhóm có 7 đối tượng, nhận biết số 7',
+      'Đếm đến 8, nhận biết nhóm có 8 đối tượng, nhận biết số 8',
+      'Đếm đến 9, nhận biết nhóm có 9 đối tượng, nhận biết số 9',
+      'Đếm đến 10, nhận biết nhóm có 10 đối tượng, nhận biết số 10',
+      'Tách gộp nhóm 10 đối tượng',
+      'So sánh số lượng 2 nhóm đối tượng trong phạm vi 10',
+      'Đo độ dài bằng thước đo',
+      'Khám phá quy trình công nghệ đơn giản; Thí nghiệm STEM',
+      'Nhận biết, phân biệt các khối: khối cầu, khối trụ, khối vuông, khối chữ nhật',
+      'Xác định vị trí của đồ vật so với bản thân và so với bạn khác'
+    ]
+  },
+  'PHÁT TRIỂN NHẬN THỨC (TOÁN)_Mẫu giáo lớn (5-6 tuổi)': {
+    themes: ['Chương trình Mầm non'],
+    lessons: [
+      'Ôn số lượng trong phạm vi 5 và nhận biết số 5',
+      'Đếm đến 5, nhận biết nhóm có 5 đối tượng, nhận biết số 5',
+      'Tách gộp trong phạm vi 5',
+      'Đếm đến 6, nhận biết nhóm có 6 đối tượng, nhận biết số 6',
+      'Đếm đến 7, nhận biết nhóm có 7 đối tượng, nhận biết số 7',
+      'Đếm đến 8, nhận biết nhóm có 8 đối tượng, nhận biết số 8',
+      'Đếm đến 9, nhận biết nhóm có 9 đối tượng, nhận biết số 9',
+      'Đếm đến 10, nhận biết nhóm có 10 đối tượng, nhận biết số 10',
+      'Tách gộp nhóm 10 đối tượng',
+      'So sánh số lượng 2 nhóm đối tượng trong phạm vi 10',
+      'Đo độ dài bằng thước đo',
+      'Nhận biết, phân biệt các khối: khối cầu, khối trụ, khối vuông, khối chữ nhật',
+      'Xác định vị trí của đồ vật so với bản thân và so với bạn khác'
     ]
   },
   'Lĩnh vực Phát triển nghệ thuật_Mẫu giáo lớn (5-6 tuổi)': {

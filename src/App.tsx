@@ -7,6 +7,7 @@ import {
   CustomUploadedBook,
   CombineWeekConfig,
   SavedCombineItem,
+  AiRefineProgress,
 } from './types';
 import {
 
@@ -59,6 +60,7 @@ import {
 } from 'lucide-react';
 import { exportLessonPlanToDocx, exportMultipleMergedLessonPlansToDocx } from './utils/docxExporter';
 import { CombineLessonPlansTab } from './components/CombineLessonPlansTab';
+import { isPreschoolPlan, formatPreschoolActivities } from './utils/preschoolUtils';
 
 export type StepProgress = 'pending' | 'start' | 'done';
 
@@ -163,6 +165,15 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isRefiningActivity, setIsRefiningActivity] = useState(false);
+  const [aiRefineProgress, setAiRefineProgress] = useState<AiRefineProgress>({
+    isRefining: false,
+    progressPercent: 0,
+    stageText: '',
+    elapsedSeconds: 0,
+    status: 'idle',
+  });
+  const refineIntervalRef = useRef<any>(null);
+  const lastRefineArgsRef = useRef<{ activity: ActivityDetail; instruction: string } | null>(null);
   const [progressSteps, setProgressSteps] = useState<Record<number, StepProgress>>({
     1: 'pending', 2: 'pending', 3: 'pending', 4: 'pending'
   });
@@ -455,8 +466,46 @@ export default function App() {
     showToast(`Đăng nhập thành công! Xin chào ${account.fullName}`, 'success');
   };
 
-  const handleUpdateConfig = (newConfig: Partial<LessonPlanConfig>) => {
-    setConfig((prev) => ({ ...prev, ...newConfig }));
+  const handleUpdateConfig = (patch: Partial<LessonPlanConfig>) => {
+    setConfig((prev) => ({ ...prev, ...patch }));
+    if (currentPlan) {
+      setCurrentPlan((prevPlan) => {
+        if (!prevPlan) return prevPlan;
+        const updated: any = { ...prevPlan };
+        if (patch.lessonTitle !== undefined) updated.lessonTitle = patch.lessonTitle;
+        if (patch.preschoolMainTheme !== undefined) {
+          updated.mainTheme = patch.preschoolMainTheme;
+          updated.preschoolMainTheme = patch.preschoolMainTheme;
+        }
+        if (patch.preschoolSubTheme !== undefined) {
+          updated.subTheme = patch.preschoolSubTheme;
+          updated.preschoolSubTheme = patch.preschoolSubTheme;
+        }
+        if (patch.subject !== undefined) updated.subject = patch.subject;
+        if (patch.grade !== undefined) updated.grade = patch.grade;
+        return updated;
+      });
+      setCombineList((prev) =>
+        prev.map((item) => {
+          if (item.plan.id === currentPlan.id || item.plan.lessonTitle === currentPlan.lessonTitle) {
+            const updatedPlan: any = { ...item.plan };
+            if (patch.lessonTitle !== undefined) updatedPlan.lessonTitle = patch.lessonTitle;
+            if (patch.preschoolMainTheme !== undefined) {
+              updatedPlan.mainTheme = patch.preschoolMainTheme;
+              updatedPlan.preschoolMainTheme = patch.preschoolMainTheme;
+            }
+            if (patch.preschoolSubTheme !== undefined) {
+              updatedPlan.subTheme = patch.preschoolSubTheme;
+              updatedPlan.preschoolSubTheme = patch.preschoolSubTheme;
+            }
+            if (patch.subject !== undefined) updatedPlan.subject = patch.subject;
+            if (patch.grade !== undefined) updatedPlan.grade = patch.grade;
+            return { ...item, plan: updatedPlan };
+          }
+          return item;
+        })
+      );
+    }
   };
 
   const handleCancelGenerate = () => {
@@ -768,6 +817,17 @@ export default function App() {
       }
 
       if (finalPlan) {
+        if (isPreschoolPlan(finalPlan) || (finalPlan as any)?.schoolLevel === 'Mầm non') {
+          finalPlan = {
+            ...finalPlan,
+            mainTheme: config.preschoolMainTheme || (finalPlan as any).mainTheme || (finalPlan as any).preschoolMainTheme || '',
+            subTheme: config.preschoolSubTheme || (finalPlan as any).subTheme || (finalPlan as any).preschoolSubTheme || '',
+            lessonTitle: config.lessonTitle || finalPlan.lessonTitle || '',
+            subject: config.subject || finalPlan.subject || '',
+            grade: config.grade || finalPlan.grade || '',
+            activities: formatPreschoolActivities(finalPlan.activities || [], config.lessonTitle || finalPlan.lessonTitle || '', config.subject || finalPlan.subject || '', (finalPlan as any).oldPlanContent || '')
+          };
+        }
         setCurrentPlan(finalPlan);
         setProgressSteps({ 1: 'done', 2: 'done', 3: 'done', 4: 'done' });
         // Automatically save newly generated lesson plan into Tab 3 list
@@ -793,7 +853,7 @@ export default function App() {
     }
   };
 
-  // Refine single activity via AI
+  // Refine single activity via AI with real-time progression & location tracking
   const handleRefineActivity = async (activity: ActivityDetail, instruction: string) => {
     if (!currentPlan) return;
 
@@ -810,8 +870,54 @@ export default function App() {
     }
     // --------------------------------------
 
+    lastRefineArgsRef.current = { activity, instruction };
+    if (refineIntervalRef.current) {
+      clearInterval(refineIntervalRef.current);
+      refineIntervalRef.current = null;
+    }
+
+    const actName = activity.name || `Hoạt động ${activity.index || 1}`;
     setIsRefiningActivity(true);
-    showToast(`Đang tinh chỉnh Hoạt động ${activity.index} bằng AI...`, 'info');
+    setAiRefineProgress({
+      isRefining: true,
+      targetId: activity.id,
+      targetIndex: activity.index,
+      targetName: actName,
+      targetType: 'activity',
+      instruction,
+      progressPercent: 15,
+      stageText: `Đang kết nối AI để tinh chỉnh ${actName}...`,
+      elapsedSeconds: 0,
+      status: 'refining',
+    });
+
+    let secCount = 0;
+    let percent = 15;
+    refineIntervalRef.current = setInterval(() => {
+      secCount += 0.25;
+      const roundedSec = Math.floor(secCount);
+
+      let stage = `Đang phân tích yêu cầu: "${instruction}"...`;
+      if (secCount >= 1.5 && secCount < 3.5) {
+        stage = 'Đang tái cấu trúc hoạt động và cập nhật phương pháp dạy học...';
+        percent = Math.min(65, percent + 4);
+      } else if (secCount >= 3.5 && secCount < 6.5) {
+        stage = 'Đang hoàn thiện nội dung chi tiết các bước & sản phẩm học tập...';
+        percent = Math.min(88, percent + 3);
+      } else if (secCount >= 6.5) {
+        stage = 'Đang kiểm tra tính nhất quán sư phạm và chuẩn hóa định dạng...';
+        percent = Math.min(96, percent + 1);
+      } else {
+        percent = Math.min(38, percent + 5);
+      }
+
+      setAiRefineProgress((prev) => ({
+        ...prev,
+        elapsedSeconds: roundedSec,
+        progressPercent: Math.round(percent),
+        stageText: stage,
+      }));
+    }, 250);
 
     try {
       const response = await fetch('/api/gemini/refine-activity', {
@@ -847,32 +953,96 @@ export default function App() {
         data = { success: false, error: text.slice(0, 150) || 'Lỗi kết nối' };
       }
 
+      if (refineIntervalRef.current) {
+        clearInterval(refineIntervalRef.current);
+        refineIntervalRef.current = null;
+      }
+
       if (data.requiresCustomApiKey) {
         setIsApiKeyModalOpen(true);
       }
+
       if (data.success && data.activity) {
-        const updatedActivities = currentPlan.activities.map((act) =>
-          act.id === activity.id || act.index === activity.index ? data.activity : act
+        const updatedActivities = (currentPlan.activities || []).map((act, idx) =>
+          act.id === activity.id || act.index === activity.index || idx === (activity.index ? activity.index - 1 : -1)
+            ? data.activity
+            : act
         );
-        setCurrentPlan({ ...currentPlan, activities: updatedActivities });
-        showToast(`Đã nâng cấp xong Hoạt động ${activity.index}!`, 'success');
+        const newPlan = { ...currentPlan, activities: updatedActivities };
+        setCurrentPlan(newPlan);
+        setCombineList((prev) =>
+          prev.map((item) => (item.plan.id === newPlan.id || item.plan.lessonTitle === newPlan.lessonTitle ? { ...item, plan: newPlan } : item))
+        );
+
+        setAiRefineProgress((prev) => ({
+          ...prev,
+          isRefining: false,
+          status: 'success',
+          progressPercent: 100,
+          stageText: `✅ Đã hoàn thành biên soạn và cập nhật xong ${actName}!`,
+        }));
+
+        showToast(`Đã nâng cấp xong ${actName}!`, 'success');
+
+        // Automatically hide success badge after 6 seconds
+        setTimeout(() => {
+          setAiRefineProgress((prev) => (prev.status === 'success' ? { ...prev, status: 'idle' } : prev));
+        }, 6000);
       } else {
         throw new Error(data.error || 'Lỗi tinh chỉnh hoạt động');
       }
     } catch (err: any) {
       console.error('Error refining activity:', err);
+      if (refineIntervalRef.current) {
+        clearInterval(refineIntervalRef.current);
+        refineIntervalRef.current = null;
+      }
+      setAiRefineProgress((prev) => ({
+        ...prev,
+        isRefining: false,
+        status: 'error',
+        progressPercent: 100,
+        errorMessage: err.message || 'Lỗi tinh chỉnh hoạt động',
+        stageText: 'Chưa thể hoàn tất biên soạn.',
+      }));
       showToast('Lỗi tinh chỉnh: ' + err.message, 'error');
     } finally {
       setIsRefiningActivity(false);
     }
   };
 
+  const handleRetryRefine = () => {
+    if (lastRefineArgsRef.current) {
+      handleRefineActivity(lastRefineArgsRef.current.activity, lastRefineArgsRef.current.instruction);
+    }
+  };
+
+  const handleDismissRefineProgress = () => {
+    if (refineIntervalRef.current) {
+      clearInterval(refineIntervalRef.current);
+      refineIntervalRef.current = null;
+    }
+    setAiRefineProgress({
+      isRefining: false,
+      progressPercent: 0,
+      stageText: '',
+      elapsedSeconds: 0,
+      status: 'idle',
+    });
+  };
+
   const handleManualEditActivity = (updatedActivity: ActivityDetail) => {
     if (!currentPlan) return;
-    const updatedActivities = currentPlan.activities.map((act) =>
-      act.id === updatedActivity.id || act.index === updatedActivity.index ? updatedActivity : act
+    const updatedActivities = (currentPlan.activities || []).map((act, idx) =>
+      act.id === updatedActivity.id || act.index === updatedActivity.index || idx === (updatedActivity.index ? updatedActivity.index - 1 : -1)
+        ? updatedActivity
+        : act
     );
-    setCurrentPlan({ ...currentPlan, activities: updatedActivities });
+    const newPlan = { ...currentPlan, activities: updatedActivities };
+    setCurrentPlan(newPlan);
+    setCombineList((prev) =>
+      prev.map((item) => (item.plan.id === newPlan.id || item.plan.lessonTitle === newPlan.lessonTitle ? { ...item, plan: newPlan } : item))
+    );
     showToast(`Đã lưu thay đổi Hoạt động ${updatedActivity.index}!`, 'success');
   };
 
@@ -1105,7 +1275,7 @@ export default function App() {
       })()}
 
       {/* Main Full-Screen Layout per Tab */}
-      <main className="flex-1 w-full max-w-[1850px] mx-auto px-2 sm:px-4 lg:px-6 py-3 sm:py-5 flex flex-col min-h-[calc(100vh-140px)] pb-16 sm:pb-24">
+      <main className="flex-1 w-full max-w-[1850px] mx-auto px-2 sm:px-4 lg:px-6 py-3 sm:py-5 flex flex-col min-h-[calc(100vh-140px)] pb-14 sm:pb-16">
         {activeTab === 'config' ? (
           /* TAB 1: Cấu hình soạn bài dạy độc lập (Full screen / Mở to hết màn hình) */
           <div className="w-full animate-in fade-in duration-300">
@@ -1136,12 +1306,26 @@ export default function App() {
             <RightResultEditor
               plan={currentPlan}
               config={config}
-              onChangeConfig={(patch) => setConfig((prev) => ({ ...prev, ...patch }))}
+              onUpdatePlan={(updated) => {
+                setCurrentPlan(updated);
+                setCombineList((prev) =>
+                  prev.map((item) =>
+                    item.plan.id === updated.id || item.plan.lessonTitle === updated.lessonTitle
+                      ? { ...item, plan: updated }
+                      : item
+                  )
+                );
+              }}
+              onChangeConfig={handleUpdateConfig}
               imageSlots={config.imageSlots}
               onOpenAiSuggestions={() => setActiveModal('ai_suggestions')}
               onRefineActivity={handleRefineActivity}
               onManualEditActivity={handleManualEditActivity}
               isRefiningActivity={isRefiningActivity}
+              aiRefineProgress={aiRefineProgress}
+              onRetryRefine={handleRetryRefine}
+              onDismissRefineProgress={handleDismissRefineProgress}
+              onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
               isExpanded={true}
               onToggleExpand={() => {}}
               isGenerating={isGenerating}
@@ -1174,8 +1358,8 @@ export default function App() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-amber-900/60 bg-gradient-to-r from-[#7c2d12] via-[#9a3412] to-[#78350f] py-1.5 mt-auto shadow-sm relative z-10 shrink-0">
+      {/* Fixed Sticky Footer: Cố định tab tác giả ở đáy màn hình khi cuộn trang */}
+      <footer className="fixed bottom-0 left-0 right-0 z-50 border-t border-amber-900/60 bg-gradient-to-r from-[#7c2d12] via-[#9a3412] to-[#78350f] py-1.5 shadow-lg backdrop-blur-sm print:hidden">
         <div className="max-w-[1700px] mx-auto px-3 flex items-center justify-center">
           <div className="font-medium text-[10px] sm:text-[11px] text-amber-300 flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
             <span className="flex items-center gap-1 hover:text-white transition-colors cursor-default">

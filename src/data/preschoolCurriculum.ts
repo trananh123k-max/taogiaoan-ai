@@ -1,54 +1,40 @@
 export const PRESCHOOL_CURRICULUM_MATRIX = `
-BẢNG TỔNG HỢP PHÂN PHỐI CHƯƠNG TRÌNH THEO 4 KHỐI LỚP VÀ 5 LĨNH VỰC
-CHUẨN HÓA MỤC TIÊU VÀ YÊU CẦU CẦN ĐẠT CỦA CÁC ĐỘ TUỔI TRUYỀN THỐNG (GIỮ NGUYÊN ĐỊNH DẠNG BAN ĐẦU, TUYỆT ĐỐI KHÔNG GẮN MÃ):
+BẢNG VÍ DỤ MINH HỌA PHÂN PHỐI CHƯƠNG TRÌNH THAM KHẢO THEO 4 KHỐI LỚP VÀ 5 LĨNH VỰC
+(LƯU Ý TỐI THƯỢNG: Các đề tài dưới đây chỉ là các VÍ DỤ MINH HỌA về các bài học trong năm học mầm non. Khi giáo viên nhập tên bài dạy nào, AI BẮT BUỘC PHẢI SOẠN ĐÚNG 100% THEO ĐỀ TÀI BÀI DẠY ĐÓ CỦA GIÁO VIÊN. TUYỆT ĐỐI KHÔNG ĐƯỢC ÉP HAY ĐỔI SANG CÁC BÀI VÍ DỤ DƯỚI ĐÂY!):
 
 1. KHỐI NHÀ TRẺ (12 – 36 THÁNG TUỔI)
-- Phát triển thể chất: Đi trong đường hẹp mang vật trên tay; Bật tại chỗ. YÊU CẦU: Giữ thăng bằng di chuyển và bật nhảy chân.
-- Phát triển thể chất: Lăn bóng, bắt bóng cùng cô; Xâu vòng hoa to. YÊU CẦU: Phối hợp tay - mắt, khéo léo cơ ngón tay.
-- Phát triển tình cảm - xã hội: Bé nhận biết tên mình, đồ dùng cá nhân của bé. YÊU CẦU: Nhận biết bản thân, gọi tên đồ dùng cá nhân.
-- Phát triển tình cảm - xã hội: Bé chơi ngoan cùng bạn, chào hỏi lễ phép. YÊU CẦU: Chơi cạnh bạn không tranh giành; biết chào cô.
-- Phát triển ngôn ngữ: Nghe và phát âm các từ đơn giản; Xem sách tranh. YÊU CẦU: Phát âm rõ tiếng quen thuộc; chủ động lật sách.
-- Phát triển ngôn ngữ: Thơ/Đồng dao: Lời chào của bé, Giờ ăn. YÊU CẦU: Đọc theo nhịp điệu, dùng từ ngữ lễ phép.
-- Phát triển nhận thức: Nhận biết đồ vật màu Đỏ - Vàng; Hình tròn. YÊU CẦU: Nhận biết màu sắc nổi bật và hình phẳng.
-- Phát triển nhận thức: Nhận biết số lượng: 1 và nhiều; Đồ vật To - Nhỏ. YÊU CẦU: Phân biệt kích thước và số lượng đơn giản.
-- Phát triển nghệ thuật: Hát và nhún nhảy theo nhạc: Bé đi nhà trẻ. YÊU CẦU: Hát theo bài ngắn, vận động nhún nhảy.
-- Phát triển nghệ thuật: Di màu tự do, vò giấy, chấm màu trang trí. YÊU CẦU: Thao tác tạo hình cơ bản với sáp màu/giấy.
+- Phát triển thể chất: Đi trong đường hẹp mang vật trên tay; Bật tại chỗ; Lăn bắt bóng cùng cô; Xâu vòng hoa to.
+- Phát triển tình cảm - xã hội: Bé nhận biết tên mình, đồ dùng cá nhân của bé; Bé chơi ngoan cùng bạn, chào hỏi lễ phép.
+- Phát triển ngôn ngữ: Nghe và phát âm các từ đơn giản; Xem sách tranh; Thơ/Đồng dao: Lời chào của bé, Giờ ăn.
+- Phát triển nhận thức: Nhận biết đồ vật màu Đỏ - Vàng; Hình tròn; Nhận biết số lượng: 1 và nhiều; Đồ vật To - Nhỏ.
+- Phát triển nghệ thuật: Hát và nhún nhảy theo nhạc: Bé đi nhà trẻ; Di màu tự do, vò giấy, chấm màu trang trí.
 
 2. KHỐI MẪU GIÁO BÉ (3 – 4 TUỔI)
-- Phát triển thể chất: Đi thăng bằng trên ghế thể dục; Bò chui qua cổng. YÊU CẦU: Giữ thăng bằng thân người; phối hợp tay chân.
-- Phát triển thể chất: Tung bóng lên cao và bắt bóng; Rửa tay bằng xà phòng. YÊU CẦU: Bắt bóng khéo léo; thực hành vệ sinh cá nhân.
-- Phát triển tình cảm - xã hội: Nhận biết cảm xúc Vui - Buồn của bản thân và bạn. YÊU CẦU: Gọi tên cảm xúc cơ bản của mình và người khác.
-- Phát triển tình cảm - xã hội: Bé cất đồ chơi đúng nơi quy định, biết xin phép. YÊU CẦU: Chấp hành quy định của lớp; ứng xử thân thiện.
-- Phát triển ngôn ngữ: Truyện: Đôi bạn nhỏ, Gấu con chia quà. YÊU CẦU: Lắng nghe, trả lời được câu hỏi và kể lại sự việc.
-- Phát triển ngôn ngữ: Làm quen tư thế ngồi xem sách, lật giở từng trang. YÊU CẦU: Giở sách đúng cách từ trước ra sau.
-- Phát triển nhận thức: Nhận biết phân biệt: Hình vuông - Hình chữ nhật. YÊU CẦU: Chỉ ra đặc điểm phẳng của các hình cơ bản.
-- Phát triển nhận thức: Đếm đến 3, nhận biết chữ số 3; So sánh Cao - Thấp. YÊU CẦU: Đếm số lượng trong phạm vi 3; so sánh kích thước.
-- Phát triển nghệ thuật: Dạy hát: Trường chúng cháu là trường mầm non. YÊU CẦU: Hát đúng giai điệu, thể hiện tình cảm vui tươi.
-- Phát triển nghệ thuật: Xé dán dải màu, nặn quả tròn quen thuộc. YÊU CẦU: Kỹ năng nặn, xé dán tạo sản phẩm theo gợi ý.
+- Phát triển thể chất: Đi thăng bằng trên ghế thể dục; Bò chui qua cổng; Tung bóng lên cao và bắt bóng; Rửa tay bằng xà phòng.
+- Phát triển tình cảm - xã hội: Nhận biết cảm xúc Vui - Buồn của bản thân và bạn; Bé cất đồ chơi đúng nơi quy định, biết xin phép.
+- Phát triển ngôn ngữ: Truyện: Đôi bạn nhỏ, Gấu con chia quà; Làm quen tư thế ngồi xem sách, lật giở từng trang.
+- Phát triển nhận thức: Nhận biết phân biệt: Hình vuông - Hình chữ nhật; Đếm đến 3, nhận biết chữ số 3; So sánh Cao - Thấp; To - Nhỏ.
+- Phát triển nghệ thuật: Dạy hát: Trường chúng cháu là trường mầm non; Xé dán dải màu, nặn quả tròn quen thuộc.
 
 3. KHỐI MẪU GIÁO NHỠ (4 – 5 TUỔI)
-- Phát triển thể chất: Bật liên tục về phía trước; Tung và bắt bóng 2 tay. YÊU CẦU: Bật tiến liên tục giữ thăng bằng; bắt bóng chính xác.
-- Phát triển thể chất: Trèo lên xuống thang dây; Rèn kỹ năng tự phục vụ. YÊU CẦU: Phối hợp tay chân trèo mô hình; tự lau mặt, xúc ăn.
-- Phát triển tình cảm - xã hội: Bé tìm hiểu công việc của cô giáo, bác cấp dưỡng. YÊU CẦU: Nhận biết nghề nghiệp người thân trong trường.
-- Phát triển tình cảm - xã hội: Thực hành chia sẻ đồ chơi và xếp hàng chờ đến lượt. YÊU CẦU: Hợp tác cùng bạn, chờ đến lượt trong hoạt động.
-- Phát triển ngôn ngữ: Thơ: Nghe lời cô giáo, Lời cảm ơn. YÊU CẦU: Đọc diễn cảm; sử dụng chuẩn từ ngữ nghi thức.
-- Phát triển ngôn ngữ: Làm quen quy ước đọc viết: từ trái sang phải. YÊU CẦU: Theo dõi tranh chữ từ trái qua phải, trên xuống dưới.
-- Phát triển nhận thức: Xếp tương ứng 1 - 1; Đếm đến 4, tạo nhóm trong PV 4. YÊU CẦU: Ghép đôi tương ứng; đếm thành thạo trong PV 4.
-- Phát triển nhận thức: Phân loại đồ dùng học tập theo 2 dấu hiệu màu sắc/hình. YÊU CẦU: Phân loại đối tượng theo dấu hiệu chung.
-- Phát triển nghệ thuật: Gõ đệm theo tiết tấu chậm bài hát; Hát múa tự nhiên. YÊU CẦU: Vận động nhịp nhàng và gõ đệm đúng tiết tấu.
-- Phát triển nghệ thuật: Trang trí khung tranh, hoa tặng cô từ vật liệu tái chế. YÊU CẦU: Sử dụng đa dạng vật liệu làm đẹp môi trường.
+- Phát triển thể chất: Bật liên tục về phía trước; Tung và bắt bóng 2 tay; Trèo lên xuống thang dây; Rèn kỹ năng tự phục vụ.
+- Phát triển tình cảm - xã hội: Bé tìm hiểu công việc của cô giáo, bác cấp dưỡng; Thực hành chia sẻ đồ chơi và xếp hàng chờ đến lượt.
+- Phát triển ngôn ngữ: Thơ: Nghe lời cô giáo, Lời cảm ơn; Làm quen quy ước đọc viết: từ trái sang phải.
+- Phát triển nhận thức: Xếp tương ứng 1 - 1; Đếm đến 4 hoặc 5, tạo nhóm trong PV 4 hoặc 5; Phân loại đồ dùng học tập theo 2 dấu hiệu màu sắc/hình.
+- Phát triển nghệ thuật: Gõ đệm theo tiết tấu chậm bài hát; Hát múa tự nhiên; Trang trí khung tranh, hoa tặng cô từ vật liệu tái chế.
 
 4. KHỐI MẪU GIÁO LỚN (5 – 6 TUỔI) - CHUẨN BỊ VÀO LỚP 1
-- Phát triển thể chất: Ném trúng đích thẳng đứng xa 2m; Bật sâu 30cm. YÊU CẦU: Thực hiện vận động thử thách có độ chính xác cao.
-- Phát triển thể chất: Chuyền bắt bóng qua đầu qua chân; Chuỗi liên hoàn 3 vận động. YÊU CẦU: Phối hợp nhóm; thực hiện chuỗi vận động liền mạch.
-- Phát triển tình cảm - xã hội: Bé chuẩn bị tâm thế vào lớp Một; Ý thức trách nhiệm. YÊU CẦU: Thích ứng môi trường mới; hiểu quyền và bổn phận.
-- Phát triển tình cảm - xã hội: Hợp tác làm việc nhóm, thương lượng giải quyết mâu thuẫn. YÊU CẦU: Kỹ năng thương lượng, hòa giải tích cực không bạo lực.
-- Phát triển ngôn ngữ: Làm quen 29 chữ cái tiếng Việt: Chữ O, Ô, Ơ, A, Ă, Â... YÊU CẦU: Nhận biết chữ cái, hiểu chữ viết thay thế lời nói.
-- Phát triển ngôn ngữ: Tập tô nét cơ bản, sao chép tên của mình đúng dòng kẻ. YÊU CẦU: Cầm bút chuẩn, sao chép chữ từ trái sang phải.
-- Phát triển nhận thức: Tách gộp nhóm 10 đối tượng; Đo độ dài bằng thước đo. YÊU CẦU: Thành thạo tách gộp trong PV 10; kỹ năng đo lường.
-- Phát triển nhận thức: Khám phá quy trình công nghệ đơn giản; Thí nghiệm STEM. YÊU CẦU: Ứng dụng khoa học kỹ thuật giải quyết vấn đề.
-- Phát triển nghệ thuật: Hát ngẫu hứng, sáng tạo lời ca mới theo bài quen thuộc. YÊU CẦU: Sáng tạo âm nhạc, múa ngẫu hứng bộc lộ ý tưởng.
-- Phát triển nghệ thuật: Đóng kịch phân vai theo cốt truyện sáng tạo của nhóm. YÊU CẦU: Biểu cảm diễn xuất, tự chủ đạo cụ và lời thoại vai kịch.
+- Phát triển thể chất: Ném trúng đích thẳng đứng xa 2m; Bật sâu 30cm; Chuyền bắt bóng qua đầu qua chân; Chuỗi liên hoàn 3 vận động.
+- Phát triển tình cảm - xã hội: Bé chuẩn bị tâm thế vào lớp Một; Ý thức trách nhiệm; Hợp tác làm việc nhóm, thương lượng giải quyết mâu thuẫn.
+- Phát triển ngôn ngữ: Làm quen 29 chữ cái tiếng Việt: Chữ O, Ô, Ơ, A, Ă, Â...; Tập tô nét cơ bản, sao chép tên của mình đúng dòng kẻ.
+- Phát triển nhận thức (Toán & Khoa học):
+  + Ôn số lượng trong phạm vi 5 và nhận biết chữ số 5; Đếm thành thạo trong phạm vi 5; So sánh các nhóm trong phạm vi 5.
+  + Đếm đến 6, 7, 8, 9, 10 và nhận biết các chữ số tương ứng; Nhận biết các nhóm có số lượng tương ứng.
+  + Tách gộp các nhóm đối tượng trong phạm vi 5, 6, 7, 8, 9, 10 theo các cách khác nhau.
+  + So sánh chiều dài, chiều rộng, chiều cao của các đối tượng; Làm quen các phép đo lường bằng các thước đo đơn giản.
+  + Nhận biết phân biệt các hình khối (khối cầu, khối trụ, khối vuông, khối chữ nhật); Định hướng không gian.
+  + Khám phá khoa học, công nghệ đơn giản; Thí nghiệm STEM; Khám phá thiên nhiên và xã hội.
+- Phát triển nghệ thuật: Hát ngẫu hứng, sáng tạo lời ca mới theo bài quen thuộc; Đóng kịch phân vai theo cốt truyện sáng tạo của nhóm.
 
 5. BẢNG MÃ TIÊU CHÍ YÊU CẦU CẦN ĐẠT THEO QUYẾT ĐỊNH SỐ 388/QĐ-BGDĐT (CHỈ ÁP DỤNG DUY NHẤT CHO 8 HOẠT ĐỘNG MỚI TÍCH HỢP):
 * QUY TẮC BẮT BUỘC: Đối với 8 nội dung mới tích hợp, đưa các tiêu chí yêu cầu cần đạt của bài vào các gạch đầu dòng của mục tiêu theo đúng mã chỉ báo (ví dụ NT 1.1, NT 1.2, TC 1.1, TC 1.2, TX 4.4...). TUYỆT ĐỐI KHÔNG ÁP DỤNG MÃ NÀY CHO CÁC MẪU GIÁO ÁN MẦM NON CŨ.

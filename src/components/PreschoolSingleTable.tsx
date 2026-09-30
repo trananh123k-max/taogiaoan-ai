@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ActivityDetail, ImageSlot } from '../types';
+import { ActivityDetail, ImageSlot, AiRefineProgress } from '../types';
 import { MathRenderer } from './MathRenderer';
+import { AiRefineProgressBar } from './AiRefineProgressBar';
 import { cleanPreschoolBulletLine, expandPreschoolTextLines } from '../utils/preschoolUtils';
 import { Edit3, Sparkles, Check, X, Loader2, Wand2 } from 'lucide-react';
 
@@ -10,6 +11,10 @@ interface PreschoolSingleTableProps {
   onRefineActivity?: (activity: ActivityDetail, instruction: string) => void;
   onManualEditActivity?: (activity: ActivityDetail) => void;
   isRefining?: boolean;
+  aiRefineProgress?: AiRefineProgress;
+  onRetryRefine?: () => void;
+  onDismissRefineProgress?: () => void;
+  onOpenApiKeyModal?: () => void;
 }
 
 export const PreschoolSingleTable: React.FC<PreschoolSingleTableProps> = ({
@@ -18,6 +23,10 @@ export const PreschoolSingleTable: React.FC<PreschoolSingleTableProps> = ({
   onRefineActivity,
   onManualEditActivity,
   isRefining = false,
+  aiRefineProgress,
+  onRetryRefine,
+  onDismissRefineProgress,
+  onOpenApiKeyModal,
 }) => {
   const slotMap = new Map<string, ImageSlot>();
   (imageSlots || []).forEach((slot) => {
@@ -107,6 +116,17 @@ export const PreschoolSingleTable: React.FC<PreschoolSingleTableProps> = ({
               {safeActivities.map((act, actIdx) => {
                 const isCurrentEditing = editingActIdx === actIdx;
                 const isCurrentRefining = refiningActIdx === actIdx;
+                const isThisActTarget = Boolean(
+                  aiRefineProgress &&
+                  aiRefineProgress.status !== 'idle' &&
+                  (aiRefineProgress.targetIndex === (act.index || actIdx + 1) ||
+                    (aiRefineProgress.targetId && aiRefineProgress.targetId === act.id))
+                );
+                const isCurrentlyRefiningThis = Boolean(
+                  (isRefining && refiningActIdx === actIdx) ||
+                  (isThisActTarget && aiRefineProgress?.status === 'refining')
+                );
+
                 const actTitle = (act.name || `Hoạt động ${act.index || actIdx + 1}`).replace(/\[TIẾT\s*\d+\]\s*/i, '').trim();
                 const teacherRaw = (act.step1?.teacherAction || '').trim();
                 const studentRaw = (act.step1?.studentAction || '').trim();
@@ -175,151 +195,190 @@ export const PreschoolSingleTable: React.FC<PreschoolSingleTableProps> = ({
                   );
                 }
 
-                // Cả 5 bước liền mạch hoàn toàn: KHÔNG có dòng kẻ ngang ngăn cách giữa các bước
                 return (
-                  <tr
-                    key={act.id || `act-row-${actIdx}`}
-                    className="border-b-0 hover:bg-slate-50/30 transition-colors"
-                  >
-                    {/* Cột Hoạt động của Cô (60%) */}
-                    <td className={`w-7/12 p-3.5 sm:p-4 border-r-2 border-slate-400 align-top text-slate-900 text-justify text-[14pt] leading-relaxed space-y-2 ${actIdx > 0 ? 'pt-5' : 'pt-3.5'}`}>
-                      {/* Tiêu đề bước và nút tác vụ tinh chỉnh / sửa - hoàn toàn không có đường viền gạch ngang bên dưới */}
-                      {actTitle && (
-                        <div className="flex flex-wrap items-center justify-between gap-2 pb-1 mb-1">
-                          <span className="font-bold text-slate-900 text-[14pt] text-left">
-                            {actTitle}
-                          </span>
-                          <div className="flex items-center gap-1.5 print:hidden">
-                            {onManualEditActivity && (
-                              <button
-                                type="button"
-                                onClick={() => handleStartEdit(act, actIdx)}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white border border-slate-300 hover:border-amber-500 hover:bg-amber-50 text-slate-700 hover:text-amber-800 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
-                                title="Chỉnh sửa nội dung hoạt động của Cô và Trẻ thủ công"
-                              >
-                                <Edit3 className="w-3 h-3 text-amber-700" />
-                                <span>Sửa</span>
-                              </button>
-                            )}
+                  <React.Fragment key={act.id || `act-row-${actIdx}`}>
+                    {/* INLINE AI PROGRESS NOTIFICATION ROW: Directly above this specific preschool activity */}
+                    {isThisActTarget && aiRefineProgress && (
+                      <tr className="border-b border-amber-200">
+                        <td colSpan={2} className="p-0">
+                          <AiRefineProgressBar
+                            progress={aiRefineProgress}
+                            onRetry={onRetryRefine}
+                            onDismiss={onDismissRefineProgress}
+                            onOpenApiKeyModal={onOpenApiKeyModal}
+                            variant="inline"
+                          />
+                        </td>
+                      </tr>
+                    )}
 
-                            {onRefineActivity && (
-                              <button
-                                type="button"
-                                onClick={() => handleStartRefine(actIdx)}
-                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-xs font-semibold transition-all cursor-pointer shadow-2xs ${
-                                  isCurrentRefining
-                                    ? 'bg-amber-600 border-amber-600 text-white'
-                                    : 'bg-white border-slate-300 hover:border-amber-500 hover:bg-amber-50 text-slate-700 hover:text-amber-800'
-                                }`}
-                                title="Dùng AI tinh chỉnh hoạt động này"
-                              >
-                                <Sparkles className="w-3 h-3 text-amber-500" />
-                                <span>AI</span>
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Dropdown tinh chỉnh AI nếu đang mở */}
-                      {isCurrentRefining && (
-                        <div className="mb-3 p-2.5 bg-amber-50 border border-amber-300 rounded-lg space-y-2 print:hidden animate-fadeIn">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-amber-900 flex items-center gap-1">
-                              <Wand2 className="w-3.5 h-3.5 text-amber-600" />
-                              Tinh chỉnh {actTitle} bằng AI:
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => setRefiningActIdx(null)}
-                              className="text-slate-400 hover:text-slate-600 cursor-pointer"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-
-                          <div className="flex flex-wrap gap-1">
-                            {refineSuggestions.map((sug, sIdx) => (
-                              <button
-                                key={sIdx}
-                                type="button"
-                                onClick={() => setRefinePrompt(sug)}
-                                className="text-[10px] font-medium px-1.5 py-0.5 bg-white hover:bg-amber-100 text-amber-900 border border-amber-200 rounded transition-colors cursor-pointer"
-                              >
-                                + {sug}
-                              </button>
-                            ))}
-                          </div>
-
-                          <div className="flex gap-1.5">
-                            <input
-                              type="text"
-                              value={refinePrompt}
-                              onChange={(e) => setRefinePrompt(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  e.preventDefault();
-                                  handleApplyRefine(act);
-                                }
-                              }}
-                              placeholder="Nhập yêu cầu điều chỉnh..."
-                              className="flex-1 bg-white border border-slate-300 rounded px-2.5 py-1 text-xs font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleApplyRefine(act)}
-                              disabled={isRefining || !refinePrompt.trim()}
-                              className="px-2.5 py-1 rounded bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shrink-0"
-                            >
-                              {isRefining ? (
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                              ) : (
-                                <Sparkles className="w-3 h-3" />
+                    <tr
+                      id={`preschool-activity-${act.index || actIdx + 1}`}
+                      className={`border-b-0 transition-colors ${
+                        isThisActTarget && aiRefineProgress?.status === 'refining'
+                          ? 'bg-amber-50/40'
+                          : isThisActTarget && aiRefineProgress?.status === 'success'
+                          ? 'bg-emerald-50/30'
+                          : isThisActTarget && aiRefineProgress?.status === 'error'
+                          ? 'bg-rose-50/30'
+                          : 'hover:bg-slate-50/30'
+                      }`}
+                    >
+                      {/* Cột Hoạt động của Cô (60%) */}
+                      <td className={`w-7/12 p-3.5 sm:p-4 border-r-2 border-slate-400 align-top text-slate-900 text-justify text-[14pt] leading-relaxed space-y-2 ${actIdx > 0 ? 'pt-5' : 'pt-3.5'}`}>
+                        {/* Tiêu đề bước và nút tác vụ tinh chỉnh / sửa */}
+                        {actTitle && (
+                          <div className="flex flex-wrap items-center justify-between gap-2 pb-1 mb-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-900 text-[14pt] text-left">
+                                {actTitle}
+                              </span>
+                              {isThisActTarget && aiRefineProgress?.status === 'refining' && (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                                  <Loader2 className="w-3 h-3 animate-spin text-amber-700" />
+                                  <span>AI đang soạn {aiRefineProgress.progressPercent}%</span>
+                                </span>
                               )}
-                              <span>Áp dụng</span>
-                            </button>
+                            </div>
+                            <div className="flex items-center gap-1.5 print:hidden">
+                              {onManualEditActivity && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEdit(act, actIdx)}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white border border-slate-300 hover:border-amber-500 hover:bg-amber-50 text-slate-700 hover:text-amber-800 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
+                                  title="Chỉnh sửa nội dung hoạt động của Cô và Trẻ thủ công"
+                                >
+                                  <Edit3 className="w-3 h-3 text-amber-700" />
+                                  <span>Sửa</span>
+                                </button>
+                              )}
+
+                              {onRefineActivity && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartRefine(actIdx)}
+                                  disabled={isCurrentlyRefiningThis}
+                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-xs font-semibold transition-all cursor-pointer shadow-2xs ${
+                                    isCurrentlyRefiningThis
+                                      ? 'bg-amber-100 text-amber-900 border-amber-300 cursor-wait'
+                                      : isCurrentRefining
+                                      ? 'bg-amber-600 border-amber-600 text-white'
+                                      : 'bg-white border-slate-300 hover:border-amber-500 hover:bg-amber-50 text-slate-700 hover:text-amber-800'
+                                  }`}
+                                  title="Dùng AI tinh chỉnh hoạt động này"
+                                >
+                                  {isCurrentlyRefiningThis ? (
+                                    <Loader2 className="w-3 h-3 animate-spin text-amber-700" />
+                                  ) : (
+                                    <Sparkles className="w-3 h-3 text-amber-500" />
+                                  )}
+                                  <span>{isCurrentlyRefiningThis ? 'Đang sửa...' : 'AI'}</span>
+                                </button>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
-                      {/* Các ý hành động của Cô */}
-                      {tLines.map((line, lIdx) => {
-                        const isTeacherSentence = /^[-•*+\s–—]*(?:Cô|Giáo viên|Mời|Hỏi|Cho trẻ|Hướng dẫn|Tổ chức cho trẻ|Bao quát|Tuyên dương|Trẻ|Cả lớp)\b/i.test(line);
-                        const isGameHeader = !isTeacherSentence && /^[-•*+\s–—]*(?:Trò chơi|\*\*Trò chơi)\s*\d*[:\s]/i.test(line);
-                        const isSubheader = !isTeacherSentence && (
-                          /^([ab][\.\)]\s*.*)$/i.test(line) ||
-                          /^[-•*+\s–—]*(?:Bài tập phát triển chung|Vận động cơ bản|BTPTC|VĐCB)/i.test(line) ||
-                          isGameHeader
-                        );
+                        {/* Dropdown tinh chỉnh AI nếu đang mở */}
+                        {isCurrentRefining && (
+                          <div className="mb-3 p-2.5 bg-amber-50 border border-amber-300 rounded-lg space-y-2 print:hidden animate-fadeIn">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-amber-900 flex items-center gap-1">
+                                <Wand2 className="w-3.5 h-3.5 text-amber-600" />
+                                Tinh chỉnh {actTitle} bằng AI:
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setRefiningActIdx(null)}
+                                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
 
-                        if (isSubheader) {
+                            <div className="flex flex-wrap gap-1">
+                              {refineSuggestions.map((sug, sIdx) => (
+                                <button
+                                  key={sIdx}
+                                  type="button"
+                                  onClick={() => setRefinePrompt(sug)}
+                                  className="text-[10px] font-medium px-1.5 py-0.5 bg-white hover:bg-amber-100 text-amber-900 border border-amber-200 rounded transition-colors cursor-pointer"
+                                >
+                                  + {sug}
+                                </button>
+                              ))}
+                            </div>
+
+                            <div className="flex gap-1.5">
+                              <input
+                                type="text"
+                                value={refinePrompt}
+                                onChange={(e) => setRefinePrompt(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleApplyRefine(act);
+                                  }
+                                }}
+                                placeholder="Nhập yêu cầu điều chỉnh..."
+                                className="flex-1 bg-white border border-slate-300 rounded px-2.5 py-1 text-xs font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleApplyRefine(act)}
+                                disabled={isCurrentlyRefiningThis || !refinePrompt.trim()}
+                                className="px-2.5 py-1 rounded bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shrink-0"
+                              >
+                                {isCurrentlyRefiningThis ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <Sparkles className="w-3 h-3" />
+                                )}
+                                <span>Áp dụng</span>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Các ý hành động của Cô */}
+                        {tLines.map((line, lIdx) => {
+                          const isTeacherSentence = /^[-•*+\s–—]*(?:Cô|Giáo viên|Mời|Hỏi|Cho trẻ|Hướng dẫn|Tổ chức cho trẻ|Bao quát|Tuyên dương|Trẻ|Cả lớp)\b/i.test(line);
+                          const isGameHeader = !isTeacherSentence && /^[-•*+\s–—]*(?:Trò chơi|\*\*Trò chơi)\s*\d*[:\s]/i.test(line);
+                          const isSubheader = !isTeacherSentence && (
+                            /^([ab][\.\)]\s*.*)$/i.test(line) ||
+                            /^[-•*+\s–—]*(?:Bài tập phát triển chung|Vận động cơ bản|BTPTC|VĐCB)/i.test(line) ||
+                            isGameHeader
+                          );
+
+                          if (isSubheader) {
+                            return (
+                              <div key={`t-sub-${lIdx}`} className={`${isGameHeader ? 'pt-3 pb-1' : 'pt-2 pb-0.5'} text-left text-[14pt]`}>
+                                <MathRenderer text={cleanPreschoolBulletLine(line)} slotMap={slotMap} />
+                              </div>
+                            );
+                          }
                           return (
-                            <div key={`t-sub-${lIdx}`} className={`${isGameHeader ? 'pt-3 pb-1' : 'pt-2 pb-0.5'} text-left text-[14pt]`}>
+                            <div key={`t-line-${lIdx}`} className="text-justify leading-relaxed">
                               <MathRenderer text={cleanPreschoolBulletLine(line)} slotMap={slotMap} />
                             </div>
                           );
-                        }
-                        return (
-                          <div key={`t-line-${lIdx}`} className="text-justify leading-relaxed">
+                        })}
+                      </td>
+
+                      {/* Cột Hoạt động của Trẻ (40%) */}
+                      <td className={`w-5/12 p-3.5 sm:p-4 align-top text-slate-900 text-justify text-[14pt] leading-relaxed space-y-2 ${actIdx > 0 ? 'pt-5' : 'pt-3.5'}`}>
+                        {/* Khoảng trống trên cùng tương đương với dòng tiêu đề của Cô để giữ cân đối */}
+                        {actTitle && (
+                          <div className="h-[28px] hidden sm:block select-none" aria-hidden="true" />
+                        )}
+                        {sLines.map((line, lIdx) => (
+                          <div key={`s-line-${lIdx}`} className="text-justify">
                             <MathRenderer text={cleanPreschoolBulletLine(line)} slotMap={slotMap} />
                           </div>
-                        );
-                      })}
-                    </td>
-
-                    {/* Cột Hoạt động của Trẻ (40%) */}
-                    <td className={`w-5/12 p-3.5 sm:p-4 align-top text-slate-900 text-justify text-[14pt] leading-relaxed space-y-2 ${actIdx > 0 ? 'pt-5' : 'pt-3.5'}`}>
-                      {/* Khoảng trống trên cùng tương đương với dòng tiêu đề của Cô để giữ cân đối */}
-                      {actTitle && (
-                        <div className="h-[28px] hidden sm:block select-none" aria-hidden="true" />
-                      )}
-                      {sLines.map((line, lIdx) => (
-                        <div key={`s-line-${lIdx}`} className="text-justify">
-                          <MathRenderer text={cleanPreschoolBulletLine(line)} slotMap={slotMap} />
-                        </div>
-                      ))}
-                    </td>
-                  </tr>
+                        ))}
+                      </td>
+                    </tr>
+                  </React.Fragment>
                 );
               })}
             </tbody>

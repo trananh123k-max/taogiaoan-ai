@@ -5,6 +5,7 @@ import {
   ActivityDetail,
   MathFormulaFormatType,
   LessonPlanConfig,
+  AiRefineProgress,
 } from '../types';
 import {
   Download,
@@ -22,9 +23,13 @@ import {
   XCircle,
   Zap,
   Sliders,
+  Edit3,
+  Save,
+  X,
 } from 'lucide-react';
 import { PedagogicalTable } from './PedagogicalTable';
 import { PreschoolSingleTable } from './PreschoolSingleTable';
+import { AiRefineProgressBar } from './AiRefineProgressBar';
 import { CompetencyMatrixView } from './CompetencyMatrixView';
 import { exportLessonPlanToDocx, getPreschoolHeaderInfo, formatHomeworkText, formatMathPeriodHeader, parseMathLessonHeader } from '../utils/docxExporter';
 import { formatPreschoolActivities, formatPreschoolMusicActivities, isPreschoolPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, getPreschoolPreparation, sortPreschoolObjectivesByAge, sortPreschoolCompetencies } from '../utils/preschoolUtils';
@@ -37,12 +42,17 @@ import { StepProgress } from '../App';
 interface RightResultEditorProps {
   plan: LessonPlanOutput | null;
   config?: LessonPlanConfig;
+  onUpdatePlan?: (plan: LessonPlanOutput) => void;
   onChangeConfig?: (newConfig: Partial<LessonPlanConfig>) => void;
   imageSlots: ImageSlot[];
   onOpenAiSuggestions: () => void;
   onRefineActivity: (activity: ActivityDetail, instruction: string) => void;
   onManualEditActivity?: (activity: ActivityDetail) => void;
   isRefiningActivity?: boolean;
+  aiRefineProgress?: AiRefineProgress;
+  onRetryRefine?: () => void;
+  onDismissRefineProgress?: () => void;
+  onOpenApiKeyModal?: () => void;
   isExpanded?: boolean;
   onToggleExpand?: () => void;
   isGenerating?: boolean;
@@ -152,12 +162,17 @@ const renderSubjectCompetencyItem = (text: string) => {
 export const RightResultEditor: React.FC<RightResultEditorProps> = ({
   plan,
   config,
+  onUpdatePlan,
   onChangeConfig,
   imageSlots,
   onOpenAiSuggestions,
   onRefineActivity,
   onManualEditActivity,
   isRefiningActivity = false,
+  aiRefineProgress,
+  onRetryRefine,
+  onDismissRefineProgress,
+  onOpenApiKeyModal,
   isExpanded = false,
   onToggleExpand,
   isGenerating = false,
@@ -171,6 +186,153 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
   onBackToConfig,
 }) => {
   const [isExportingDocx, setIsExportingDocx] = useState(false);
+
+  const handleScrollToTargetActivity = (targetIndex?: number) => {
+    if (!targetIndex) return;
+    const el =
+      document.getElementById(`activity-card-${targetIndex}`) ||
+      document.getElementById(`preschool-activity-${targetIndex}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  // Header inline edit state
+  const [isEditingHeader, setIsEditingHeader] = useState(false);
+  const [editLessonTitle, setEditLessonTitle] = useState('');
+  const [editMainTheme, setEditMainTheme] = useState('');
+  const [editSubTheme, setEditSubTheme] = useState('');
+  const [editSubject, setEditSubject] = useState('');
+  const [editGrade, setEditGrade] = useState('');
+  const [editDuration, setEditDuration] = useState('');
+  const [editClassSize, setEditClassSize] = useState('');
+
+  const handleStartEditHeader = () => {
+    setEditLessonTitle(plan?.lessonTitle || config?.lessonTitle || '');
+    setEditMainTheme(plan?.mainTheme || (plan as any)?.preschoolMainTheme || config?.preschoolMainTheme || '');
+    setEditSubTheme(plan?.subTheme || (plan as any)?.preschoolSubTheme || config?.preschoolSubTheme || '');
+    setEditSubject(plan?.subject || config?.subject || '');
+    setEditGrade(plan?.grade || config?.grade || '');
+    setEditDuration(plan?.duration || '');
+    setEditClassSize(plan?.classSize || (plan as any)?.preschoolClassSize || '');
+    setIsEditingHeader(true);
+  };
+
+  const handleSaveEditHeader = () => {
+    if (!plan) return;
+    const updatedPlan: LessonPlanOutput = {
+      ...plan,
+      lessonTitle: editLessonTitle.trim(),
+      mainTheme: editMainTheme.trim(),
+      subTheme: editSubTheme.trim(),
+      subject: editSubject.trim(),
+      grade: editGrade.trim(),
+      duration: editDuration.trim(),
+      classSize: editClassSize.trim(),
+    };
+    (updatedPlan as any).preschoolMainTheme = editMainTheme.trim();
+    (updatedPlan as any).preschoolSubTheme = editSubTheme.trim();
+    (updatedPlan as any).preschoolClassSize = editClassSize.trim();
+
+    if (onUpdatePlan) {
+      onUpdatePlan(updatedPlan);
+    }
+    if (onChangeConfig) {
+      onChangeConfig({
+        lessonTitle: editLessonTitle.trim(),
+        preschoolMainTheme: editMainTheme.trim(),
+        preschoolSubTheme: editSubTheme.trim(),
+        subject: editSubject.trim(),
+        grade: editGrade.trim(),
+      });
+    }
+    setIsEditingHeader(false);
+  };
+
+  // Objectives edit state
+  const [isEditingObjectives, setIsEditingObjectives] = useState(false);
+  const [editKnowledge, setEditKnowledge] = useState('');
+  const [editSkills, setEditSkills] = useState('');
+  const [editQualities, setEditQualities] = useState('');
+  const [editCompetencies, setEditCompetencies] = useState('');
+
+  const handleStartEditObjectives = () => {
+    setEditKnowledge((plan?.objectives?.knowledge || []).join('\n'));
+    setEditSkills((plan?.objectives?.subjectCompetencies || []).join('\n'));
+    setEditQualities((plan?.objectives?.qualities || []).join('\n'));
+    setEditCompetencies((plan?.objectives?.generalCompetencies || []).join('\n'));
+    setIsEditingObjectives(true);
+  };
+
+  const handleSaveEditObjectives = () => {
+    if (!plan) return;
+    const updatedPlan: LessonPlanOutput = {
+      ...plan,
+      objectives: {
+        ...plan.objectives,
+        knowledge: editKnowledge.split('\n').map(s => s.trim()).filter(Boolean),
+        subjectCompetencies: editSkills.split('\n').map(s => s.trim()).filter(Boolean),
+        qualities: editQualities.split('\n').map(s => s.trim()).filter(Boolean),
+        generalCompetencies: editCompetencies.split('\n').map(s => s.trim()).filter(Boolean),
+      },
+    };
+    if (onUpdatePlan) onUpdatePlan(updatedPlan);
+    setIsEditingObjectives(false);
+  };
+
+  // Preparation edit state
+  const [isEditingPrep, setIsEditingPrep] = useState(false);
+  const [editTeacherEnv, setEditTeacherEnv] = useState('');
+  const [editTeacherTools, setEditTeacherTools] = useState('');
+  const [editStudentCostume, setEditStudentCostume] = useState('');
+  const [editStudentTools, setEditStudentTools] = useState('');
+  const [editStudentPsy, setEditStudentPsy] = useState('');
+  const [editParentCollab, setEditParentCollab] = useState('');
+
+  const handleStartEditPrep = () => {
+    const prep = getPreschoolPreparation(plan?.equipment, {
+      lessonTitle: plan?.lessonTitle,
+      subject: plan?.subject,
+      grade: plan?.grade,
+      mainTheme: plan?.mainTheme,
+      subTheme: plan?.subTheme,
+    });
+    setEditTeacherEnv((prep.teacherEnvironment || []).map(e => e.replace(/^môi trường\s*:\s*/i, '')).join('\n'));
+    setEditTeacherTools((prep.teacherTools || []).map(t => t.replace(/^đồ dùng của cô\s*:\s*/i, '')).join('\n'));
+    setEditStudentCostume((prep.studentCostume || []).map(c => c.replace(/^trang phục\s*:\s*/i, '')).join('\n'));
+    setEditStudentTools((prep.studentTools || []).map(t => t.replace(/^đồ dùng của trẻ\s*:\s*/i, '')).join('\n'));
+    setEditStudentPsy((prep.studentPsychology || []).map(p => p.replace(/^(tâm sinh lý của trẻ|tâm sinh lý|tâm thế)\s*:\s*/i, '')).join('\n'));
+    setEditParentCollab((prep.parentCollaboration || []).join('\n'));
+    setIsEditingPrep(true);
+  };
+
+  const handleSaveEditPrep = () => {
+    if (!plan) return;
+    const teacherLines = [
+      ...editTeacherEnv.split('\n').map(s => s.trim()).filter(Boolean).map(s => s.startsWith('Môi trường:') ? s : `Môi trường: ${s}`),
+      ...editTeacherTools.split('\n').map(s => s.trim()).filter(Boolean).map(s => s.startsWith('Đồ dùng của cô:') ? s : `Đồ dùng của cô: ${s}`),
+    ];
+    const studentLines = [
+      ...editStudentCostume.split('\n').map(s => s.trim()).filter(Boolean).map(s => s.startsWith('Trang phục:') ? s : `Trang phục: ${s}`),
+      ...editStudentTools.split('\n').map(s => s.trim()).filter(Boolean).map(s => s.startsWith('Đồ dùng của trẻ:') ? s : `Đồ dùng của trẻ: ${s}`),
+      ...editStudentPsy.split('\n').map(s => s.trim()).filter(Boolean).map(s => s.startsWith('Tâm sinh lý của trẻ:') ? s : `Tâm sinh lý của trẻ: ${s}`),
+    ];
+    const parentLines = editParentCollab.split('\n').map(s => s.trim()).filter(Boolean);
+
+    const updatedPlan: LessonPlanOutput = {
+      ...plan,
+      equipment: {
+        ...(plan.equipment || {}),
+        teacher: teacherLines,
+        student: studentLines,
+        digitalAssets: plan.equipment?.digitalAssets || [],
+        stemMaterials: plan.equipment?.stemMaterials || [],
+        parentCollaboration: parentLines,
+      },
+    };
+    if (onUpdatePlan) onUpdatePlan(updatedPlan);
+    setIsEditingPrep(false);
+  };
 
   const currentSubject = config?.subject || plan?.subject || '';
   const currentTitle = config?.lessonTitle || plan?.lessonTitle || '';
@@ -446,6 +608,20 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
         style={{ fontFamily: '"Times New Roman", Times, serif' }}
       >
         <div className={`mx-auto space-y-8 text-justify leading-relaxed text-[13pt] w-full ${isExpanded ? 'max-w-6xl' : 'max-w-5xl'}`}>
+          {/* FLOATING AI EDIT HUD: Prominent sticky notification bar when AI is editing/refining */}
+          {aiRefineProgress && aiRefineProgress.status !== 'idle' && (
+            <div className="sticky top-2 z-40 mb-4 print:hidden">
+              <AiRefineProgressBar
+                progress={aiRefineProgress}
+                onRetry={onRetryRefine}
+                onDismiss={onDismissRefineProgress}
+                onOpenApiKeyModal={onOpenApiKeyModal}
+                onScrollToTarget={() => handleScrollToTargetActivity(aiRefineProgress.targetIndex)}
+                variant="floating-hud"
+              />
+            </div>
+          )}
+
           {/* Document Standard Header */}
           {(plan as any)?.schoolLevel === 'Mầm non' ? (() => {
             const preschoolInfo = getPreschoolHeaderInfo(plan);
@@ -453,6 +629,7 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
               preschoolInfo.lessonTitle,
               preschoolInfo.domainLine,
               preschoolInfo.themeLine,
+              preschoolInfo.subThemeLine,
               preschoolInfo.gradeLine,
               preschoolInfo.classSizeLine,
               preschoolInfo.timeLine,
@@ -478,12 +655,148 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
               );
             };
 
+            if (isEditingHeader) {
+              return (
+                <div className="bg-amber-50/80 border-2 border-amber-300 rounded-xl p-5 sm:p-6 shadow-sm space-y-4 font-sans">
+                  <div className="flex items-center justify-between border-b border-amber-200 pb-3">
+                    <div className="flex items-center gap-2">
+                      <Edit3 className="w-5 h-5 text-amber-700" />
+                      <h3 className="font-bold text-base text-amber-950 uppercase tracking-wide">
+                        Chỉnh sửa tiêu đề, chủ đề & thông tin bài dạy
+                      </h3>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingHeader(false)}
+                        className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold cursor-pointer transition-colors"
+                      >
+                        Hủy
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveEditHeader}
+                        className="px-4 py-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold shadow-xs cursor-pointer flex items-center gap-1.5 transition-colors"
+                      >
+                        <Save className="w-3.5 h-3.5" />
+                        <span>Lưu thông tin</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-medium">
+                    <div className="md:col-span-2 space-y-1">
+                      <label className="font-bold text-slate-800">
+                        Tên bài dạy / Đề tài (bao gồm các góc chơi nếu là hoạt động góc):
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={editLessonTitle}
+                        onChange={(e) => setEditLessonTitle(e.target.value)}
+                        placeholder="Ví dụ: Chơi, hoạt động ở các góc: Góc XD: Xây công viên; Góc PV: Bán hàng, phòng khám; Góc NT: Vẽ hoa..."
+                        className="w-full bg-white border border-amber-300 rounded-lg p-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs resize-y"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-800">
+                        Chủ đề lớn (Chủ đề chính):
+                      </label>
+                      <input
+                        type="text"
+                        value={editMainTheme}
+                        onChange={(e) => setEditMainTheme(e.target.value)}
+                        placeholder="Ví dụ: Thế giới thực vật, Trường mầm non..."
+                        className="w-full bg-white border border-amber-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-800">
+                        Chủ điểm (Chủ đề nhánh):
+                      </label>
+                      <input
+                        type="text"
+                        value={editSubTheme}
+                        onChange={(e) => setEditSubTheme(e.target.value)}
+                        placeholder="Ví dụ: Một số loại hoa đẹp quanh bé, Gia đình của bé..."
+                        className="w-full bg-white border border-amber-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-800">
+                        Lĩnh vực phát triển / Môn học:
+                      </label>
+                      <input
+                        type="text"
+                        value={editSubject}
+                        onChange={(e) => setEditSubject(e.target.value)}
+                        placeholder="Ví dụ: HOẠT ĐỘNG VUI CHƠI TRONG LỚP, GIÁO ÁN ÂM NHẠC..."
+                        className="w-full bg-white border border-amber-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-800">
+                        Độ tuổi / Lớp:
+                      </label>
+                      <input
+                        type="text"
+                        value={editGrade}
+                        onChange={(e) => setEditGrade(e.target.value)}
+                        placeholder="Ví dụ: Mẫu giáo lớn (5-6 tuổi), Mẫu giáo nhỡ (4-5 tuổi)..."
+                        className="w-full bg-white border border-amber-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-800">
+                        Thời gian thực hiện:
+                      </label>
+                      <input
+                        type="text"
+                        value={editDuration}
+                        onChange={(e) => setEditDuration(e.target.value)}
+                        placeholder="Ví dụ: 30 - 35 phút"
+                        className="w-full bg-white border border-amber-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-800">
+                        Số lượng trẻ (nếu có):
+                      </label>
+                      <input
+                        type="text"
+                        value={editClassSize}
+                        onChange={(e) => setEditClassSize(e.target.value)}
+                        placeholder="Ví dụ: 25 - 30 trẻ"
+                        className="w-full bg-white border border-amber-300 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
             return (
-              <div className="bg-white border border-slate-300 rounded-xl p-6 shadow-xs space-y-4">
-                <div className="text-center">
-                  <span className="bg-[#00FF00] text-black font-bold text-base sm:text-lg px-4 py-1.5 rounded inline-block tracking-wide uppercase">
-                    {preschoolInfo.mainHeader}
-                  </span>
+              <div className="bg-white border border-slate-300 rounded-xl p-6 shadow-xs space-y-4 relative group">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 text-center">
+                    <span className="bg-[#00FF00] text-black font-bold text-base sm:text-lg px-4 py-1.5 rounded inline-block tracking-wide uppercase">
+                      {preschoolInfo.mainHeader}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleStartEditHeader}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs rounded-lg border border-amber-300 shadow-2xs cursor-pointer transition-all active:scale-95 font-sans"
+                    title="Chỉnh sửa tiêu đề, chủ đề, chủ điểm và thông tin bài dạy"
+                  >
+                    <Edit3 className="w-3.5 h-3.5 text-amber-700" />
+                    <span>Sửa tiêu đề & chủ đề</span>
+                  </button>
                 </div>
                 <div className="space-y-1.5 text-[13.5pt] text-slate-900 leading-relaxed font-normal">
                   {subLines.map((line, idx) => renderSubLine(line, idx))}
@@ -526,13 +839,86 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
 
           {/* I. MỤC TIÊU (Standard CV 5512: Knowledge, General & Subject Competencies, Qualities) */}
           <section className="bg-white border border-slate-300 rounded-xl p-5 sm:p-6 shadow-xs space-y-4">
-            <div className="border-b border-slate-200 pb-2.5">
+            <div className="border-b border-slate-200 pb-2.5 flex items-center justify-between">
               <h3 className="font-bold text-base text-slate-900 uppercase tracking-wider">
                 {(plan as any)?.schoolLevel === 'Mầm non' ? 'I. Mục đích - yêu cầu' : 'I. Mục tiêu bài dạy'}
               </h3>
+              {(plan as any)?.schoolLevel === 'Mầm non' && !isEditingObjectives && (
+                <button
+                  type="button"
+                  onClick={handleStartEditObjectives}
+                  className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs rounded-lg border border-amber-300 shadow-2xs cursor-pointer transition-all active:scale-95 font-sans"
+                  title="Chỉnh sửa mục đích - yêu cầu"
+                >
+                  <Edit3 className="w-3.5 h-3.5 text-amber-700" />
+                  <span>Sửa mục đích - yêu cầu</span>
+                </button>
+              )}
             </div>
 
-            {(plan as any)?.schoolLevel === 'Mầm non' ? (
+            {(plan as any)?.schoolLevel === 'Mầm non' && isEditingObjectives ? (
+              <div className="bg-amber-50/70 border border-amber-300 rounded-xl p-4 sm:p-5 space-y-4 font-sans text-xs">
+                <div className="flex items-center justify-between border-b border-amber-200 pb-2.5">
+                  <span className="font-bold text-amber-950 uppercase">Chỉnh sửa Mục đích - Yêu cầu</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingObjectives(false)}
+                      className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold cursor-pointer"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveEditObjectives}
+                      className="px-4 py-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold shadow-xs cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Lưu mục tiêu</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1">1. Kiến thức (Mỗi ý 1 dòng):</label>
+                    <textarea
+                      rows={3}
+                      value={editKnowledge}
+                      onChange={(e) => setEditKnowledge(e.target.value)}
+                      className="w-full bg-white border border-amber-300 rounded-lg p-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1">2. Kỹ năng (Mỗi ý 1 dòng):</label>
+                    <textarea
+                      rows={3}
+                      value={editSkills}
+                      onChange={(e) => setEditSkills(e.target.value)}
+                      className="w-full bg-white border border-amber-300 rounded-lg p-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1">3. Phẩm chất (Mỗi ý 1 dòng):</label>
+                    <textarea
+                      rows={3}
+                      value={editQualities}
+                      onChange={(e) => setEditQualities(e.target.value)}
+                      className="w-full bg-white border border-amber-300 rounded-lg p-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1">4. Năng lực (Mỗi ý 1 dòng):</label>
+                    <textarea
+                      rows={3}
+                      value={editCompetencies}
+                      onChange={(e) => setEditCompetencies(e.target.value)}
+                      className="w-full bg-white border border-amber-300 rounded-lg p-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (plan as any)?.schoolLevel === 'Mầm non' ? (
               <>
                 {/* 1. Kiến thức */}
                 <div className="space-y-1.5 text-[13pt]">
@@ -780,13 +1166,100 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
 
           {/* II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU / CHUẨN BỊ */}
           <section className="bg-white border border-slate-300 rounded-xl p-5 sm:p-6 shadow-xs space-y-3">
-            <div className="border-b border-slate-200 pb-2.5">
+            <div className="border-b border-slate-200 pb-2.5 flex items-center justify-between">
               <h3 className="font-bold text-base text-slate-900 uppercase tracking-wider">
                 {(isPreschoolPlan(plan) || (plan as any)?.schoolLevel === 'Mầm non') ? 'II. Chuẩn bị:' : 'II. Thiết bị dạy học và học liệu'}
               </h3>
+              {(isPreschoolPlan(plan) || (plan as any)?.schoolLevel === 'Mầm non') && !isEditingPrep && (
+                <button
+                  type="button"
+                  onClick={handleStartEditPrep}
+                  className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs rounded-lg border border-amber-300 shadow-2xs cursor-pointer transition-all active:scale-95 font-sans"
+                  title="Chỉnh sửa chuẩn bị"
+                >
+                  <Edit3 className="w-3.5 h-3.5 text-amber-700" />
+                  <span>Sửa chuẩn bị</span>
+                </button>
+              )}
             </div>
 
-            {(isPreschoolPlan(plan) || (plan as any)?.schoolLevel === 'Mầm non') ? (
+            {(isPreschoolPlan(plan) || (plan as any)?.schoolLevel === 'Mầm non') && isEditingPrep ? (
+              <div className="bg-amber-50/70 border border-amber-300 rounded-xl p-4 sm:p-5 space-y-4 font-sans text-xs">
+                <div className="flex items-center justify-between border-b border-amber-200 pb-2.5">
+                  <span className="font-bold text-amber-950 uppercase">Chỉnh sửa Chuẩn bị & Học liệu</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingPrep(false)}
+                      className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold cursor-pointer"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveEditPrep}
+                      className="px-4 py-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold shadow-xs cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Lưu chuẩn bị</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1">1. Chuẩn bị của cô - Môi trường:</label>
+                    <textarea
+                      rows={2}
+                      value={editTeacherEnv}
+                      onChange={(e) => setEditTeacherEnv(e.target.value)}
+                      placeholder="Không gian bài trí theo chủ đề, an toàn, sạch sẽ..."
+                      className="w-full bg-white border border-amber-300 rounded-lg p-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1">1. Chuẩn bị của cô - Đồ dùng của cô:</label>
+                    <textarea
+                      rows={2}
+                      value={editTeacherTools}
+                      onChange={(e) => setEditTeacherTools(e.target.value)}
+                      placeholder="Giáo án điện tử, tranh ảnh, đồ chơi học cụ..."
+                      className="w-full bg-white border border-amber-300 rounded-lg p-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1">2. Chuẩn bị của trẻ - Trang phục & Tâm sinh lý:</label>
+                    <textarea
+                      rows={2}
+                      value={editStudentCostume}
+                      onChange={(e) => setEditStudentCostume(e.target.value)}
+                      placeholder="Trang phục gọn gàng, tâm thế hào hứng sẵn sàng..."
+                      className="w-full bg-white border border-amber-300 rounded-lg p-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1">2. Chuẩn bị của trẻ - Đồ dùng của trẻ:</label>
+                    <textarea
+                      rows={2}
+                      value={editStudentTools}
+                      onChange={(e) => setEditStudentTools(e.target.value)}
+                      placeholder="Mỗi trẻ/nhóm trẻ có đủ rổ học cụ, đồ dùng trải nghiệm..."
+                      className="w-full bg-white border border-amber-300 rounded-lg p-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1">3. Phối hợp với phụ huynh (Mỗi ý 1 dòng):</label>
+                    <textarea
+                      rows={2}
+                      value={editParentCollab}
+                      onChange={(e) => setEditParentCollab(e.target.value)}
+                      placeholder="Phụ huynh cùng con ôn tập, phối hợp chuẩn bị học liệu mở..."
+                      className="w-full bg-white border border-amber-300 rounded-lg p-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (isPreschoolPlan(plan) || (plan as any)?.schoolLevel === 'Mầm non') ? (
               (() => {
                 const prep = getPreschoolPreparation(plan.equipment, {
                   lessonTitle: plan.lessonTitle,
@@ -1054,18 +1527,26 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
               </h3>
               <span className="text-xs text-slate-900 font-bold bg-white px-2 py-0.5 rounded border border-slate-300">
                 {((isPreschoolPlan(plan) || (plan as any)?.schoolLevel === 'Mầm non')
-                  ? formatPreschoolActivities(plan.activities || [], plan.lessonTitle || '', plan.subject || '', (plan as any).oldPlanContent || '').length
+                  ? (plan.activities && plan.activities.length > 0 ? plan.activities.length : formatPreschoolActivities(plan.activities || [], plan.lessonTitle || '', plan.subject || '', (plan as any).oldPlanContent || '').length)
                   : (plan.activities || []).length)} Hoạt động
               </span>
             </div>
 
             {(isPreschoolPlan(plan) || (plan as any)?.schoolLevel === 'Mầm non') ? (
               <PreschoolSingleTable
-                activities={formatPreschoolActivities(plan.activities || [], plan.lessonTitle || '', plan.subject || '', (plan as any).oldPlanContent || '')}
+                activities={
+                  plan.activities && plan.activities.length > 0 && plan.activities[0]?.step1
+                    ? plan.activities
+                    : formatPreschoolActivities(plan.activities || [], plan.lessonTitle || '', plan.subject || '', (plan as any).oldPlanContent || '')
+                }
                 imageSlots={imageSlots}
                 onRefineActivity={onRefineActivity}
                 onManualEditActivity={onManualEditActivity}
                 isRefining={isRefiningActivity}
+                aiRefineProgress={aiRefineProgress}
+                onRetryRefine={onRetryRefine}
+                onDismissRefineProgress={onDismissRefineProgress}
+                onOpenApiKeyModal={onOpenApiKeyModal}
               />
             ) : (
               (plan.activities || []).map((activity, actIdx) => (
@@ -1088,6 +1569,10 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                     onRefineActivity={onRefineActivity}
                     onManualEditActivity={onManualEditActivity}
                     isRefining={isRefiningActivity}
+                    aiRefineProgress={aiRefineProgress}
+                    onRetryRefine={onRetryRefine}
+                    onDismissRefineProgress={onDismissRefineProgress}
+                    onOpenApiKeyModal={onOpenApiKeyModal}
                     isPreschool={false}
                     tableLayout={tableLayout}
                   />

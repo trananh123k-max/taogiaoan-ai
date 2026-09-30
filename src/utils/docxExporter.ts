@@ -3009,6 +3009,7 @@ export interface PreschoolHeaderInfo {
   gradeLine: string;
   timeLine: string;
   themeLine?: string;
+  subThemeLine?: string;
   classSizeLine?: string;
 }
 
@@ -3419,8 +3420,14 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
   const mainT = (plan.mainTheme || (plan as any).preschoolMainTheme || '').trim();
   const subT = (plan.subTheme || (plan as any).preschoolSubTheme || '').trim();
   let themeLine = '';
-  if (mainT) {
-    themeLine = subT ? `Chủ đề: ${mainT} - ${subT}` : `Chủ đề: ${mainT}`;
+  let subThemeLine = '';
+  if (mainT && subT) {
+    themeLine = `Chủ đề: ${mainT}`;
+    subThemeLine = `Chủ điểm: ${subT}`;
+  } else if (mainT) {
+    themeLine = `Chủ đề: ${mainT}`;
+  } else if (subT) {
+    themeLine = `Chủ đề: ${subT}`;
   }
 
   const rawClassSize = (plan.classSize || (plan as any).preschoolClassSize || '').trim();
@@ -3435,6 +3442,7 @@ export function getPreschoolHeaderInfo(plan: any): PreschoolHeaderInfo {
     gradeLine,
     timeLine,
     themeLine,
+    subThemeLine,
     classSizeLine
   };
 }
@@ -3472,6 +3480,7 @@ function buildPreschoolDocxElements(
     preschoolInfo.lessonTitle,
     preschoolInfo.domainLine,
     preschoolInfo.themeLine,
+    preschoolInfo.subThemeLine,
     preschoolInfo.gradeLine,
     preschoolInfo.classSizeLine,
     preschoolInfo.timeLine,
@@ -3677,7 +3686,9 @@ function buildPreschoolActivitiesTable(
     ],
   }));
 
-  const formattedActivities = formatPreschoolActivities(plan.activities, plan.lessonTitle || '', plan.subject || '', (plan as any).oldPlanContent || '');
+  const formattedActivities = (plan.activities && Array.isArray(plan.activities) && plan.activities.length > 0 && plan.activities[0]?.step1)
+    ? plan.activities
+    : formatPreschoolActivities(plan.activities, plan.lessonTitle || '', plan.subject || '', (plan as any).oldPlanContent || '');
 
   const allTeacherParas: Paragraph[] = [];
   const allStudentParas: Paragraph[] = [];
