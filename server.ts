@@ -2194,9 +2194,9 @@ function enforcePPCTCompetencies(
   if (!Array.isArray(plan.objectives.generalCompetencies) || plan.objectives.generalCompetencies.length === 0) {
     plan.objectives.generalCompetencies = isPreschool
       ? [
-          'Giao tiếp: Trẻ tự tin trả lời câu hỏi, diễn đạt suy nghĩ rõ ràng, mạch lạc.',
-          'Hợp tác: Biết phối hợp cùng bạn trong nhóm, chia sẻ đồ dùng học tập.',
-          'Tự lực: Tự giác tham gia các hoạt động và tự thu dọn đồ dùng sau khi học.'
+          'Tự lực: Tự giác tham gia các hoạt động và tự thu dọn đồ dùng sau khi học.',
+          'Thích ứng: Linh hoạt thích ứng với các hoạt động trải nghiệm và phối hợp cùng bạn.',
+          'Giải quyết vấn đề: Biết quan sát, suy nghĩ và tìm cách giải quyết tình huống/thử thách đơn giản trong bài học.'
         ]
       : [
           'Năng lực tự chủ và tự học: Tự giác tìm tòi, nghiên cứu nội dung bài học trong SGK và tài liệu.',
@@ -2925,28 +2925,28 @@ MỤC ĐÍCH DUY NHẤT: BẢO TỒN NGUYÊN VẸN NỘI DUNG, HÌNH ẢNH, BÀI
     ${customCodesFromUser ? `"${customCodesFromUser}"` : 'Các mã chuẩn theo QĐ 388 (ví dụ: NT 3.1, TX 4.4, TC 1.2, NN 2.2...)'}
   + BẮT BUỘC ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng các mã chỉ báo trên.
   + 1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ biết/nhận biết... (Mã: NT 1.1)")
-${isMixedAgeClass ? `    * BẮT BUỘC ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): TÁCH RIÊNG KIẾN THỨC CHO TỪNG ĐỘ TUỔI TRONG 1 BÀI DẠY (Ví dụ nếu lớp ghép 3-4-5 tuổi: kiến thức 3 tuổi riêng, 4 tuổi riêng, 5 tuổi riêng):
-      - 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X, nhận biết chữ số... (Mã: NT 3.1)
+${isMixedAgeClass ? `    * BẮT BUỘC ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): TÁCH RIÊNG KIẾN THỨC CHO TỪNG ĐỘ TUỔI THEO THỨ TỰ TỪ THẤP ĐẾN CAO (3 tuổi ➔ 4 tuổi ➔ 5 tuổi):
+      - 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô, đếm cùng các bạn... (Mã: NT 1.1)
       - 4 tuổi: Trẻ biết đếm đến X, nhận biết nhóm X đối tượng, tạo nhóm... (Mã: NT 1.2)
-      - 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô, đếm cùng các bạn... (Mã: NT 1.1)` : ''}
+      - 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X, nhận biết chữ số... (Mã: NT 3.1)` : ''}
   + 2. Kỹ năng: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)")
-${isMixedAgeClass ? `    * BẮT BUỘC ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): TÁCH RIÊNG KỸ NĂNG CHO TỪNG ĐỘ TUỔI TRONG 1 BÀI DẠY (Kỹ năng 3 tuổi riêng, 4 tuổi riêng, 5 tuổi riêng):
-      - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh, thêm bớt... (Mã: TC 3.1)
+${isMixedAgeClass ? `    * BẮT BUỘC ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): TÁCH RIÊNG KỸ NĂNG CHO TỪNG ĐỘ TUỔI THEO THỨ TỰ TỪ THẤP ĐẾN CAO (3 tuổi ➔ 4 tuổi ➔ 5 tuổi):
+      - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay đếm theo cô... (Mã: TC 1.1)
       - 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1, đếm theo thứ tự... (Mã: TC 1.2)
-      - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay đếm theo cô... (Mã: TC 1.1)` : ''}`
+      - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh, thêm bớt... (Mã: TC 3.1)` : ''}`
     : `- ĐỐI VỚI GIÁO ÁN MẦM NON CŨ/TRUYỀN THỐNG (Văn học thơ/truyện, Làm quen chữ cái, Khám phá khoa học, Xã hội, Toán, Tạo hình, Âm nhạc, Thể chất, Tình cảm - KNXH...):
   + BẮT BUỘC LẤY LẠI ĐÚNG MẪU GIÁO ÁN BAN ĐẦU TRƯỚC KHI CẬP NHẬT 8 LĨNH VỰC MỚI, GIỮ NGUYÊN ĐỊNH DẠNG BAN ĐẦU.
   + TUYỆT ĐỐI KHÔNG ĐIỀN MÃ TIÊU CHÍ NÀO: KHÔNG ghi "(Mã: NN 5.1)", KHÔNG ghi "(Mã: NT 1.1)", KHÔNG ghi bất kỳ mã chỉ báo nào trong phần Kiến thức và Kỹ năng.
   + 1. Kiến thức: Các gạch đầu dòng mô tả những gì trẻ biết, hiểu (TUYỆT ĐỐI KHÔNG GẮN MÃ).
-${isMixedAgeClass ? `    * ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): BẮT BUỘC PHÂN HÓA RÕ RÀNG KIẾN THỨC THEO TỪNG ĐỘ TUỔI (Ví dụ nếu lớp ghép 3-4-5 tuổi:
-      - 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X, nhận biết chữ số X biểu thị cho các nhóm có số lượng X. Trẻ đếm từ 1 đến X, đọc được số X và các số nhỏ hơn X. So sánh 2 nhóm đối tượng, biết thêm bớt để có số lượng bằng nhau.
+${isMixedAgeClass ? `    * ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): BẮT BUỘC PHÂN HÓA RÕ RÀNG KIẾN THỨC THEO TỪNG ĐỘ TUỔI TỪ THẤP ĐẾN CAO (3 tuổi ➔ 4 tuổi ➔ 5 tuổi):
+      - 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô, đếm cùng các bạn.
       - 4 tuổi: Trẻ biết đếm đến X, nhận biết các nhóm có X đối tượng. Trẻ biết tạo nhóm, xếp tương ứng 1- 1, biết so sánh 2 nhóm đồ vật, biết đếm đúng số lượng và sử dụng đúng chữ số tương ứng theo cô và các bạn.
-      - 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô, đếm cùng các bạn.)` : '    Ví dụ: "- Trẻ biết tên bài thơ/bài hát...", "- Trẻ hiểu nội dung bài...".'}
+      - 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X, nhận biết chữ số X biểu thị cho các nhóm có số lượng X. Trẻ đếm từ 1 đến X, đọc được số X và các số nhỏ hơn X. So sánh 2 nhóm đối tượng, biết thêm bớt để có số lượng bằng nhau.)` : '    Ví dụ: "- Trẻ biết tên bài thơ/bài hát...", "- Trẻ hiểu nội dung bài...".'}
   + 2. Kỹ năng: Các gạch đầu dòng rèn luyện kỹ năng (TUYỆT ĐỐI KHÔNG GẮN MÃ).
-${isMixedAgeClass ? `    * ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): BẮT BUỘC PHÂN HÓA RÕ RÀNG KỸ NĂNG THEO TỪNG ĐỘ TUỔI (Ví dụ nếu lớp ghép 3-4-5 tuổi:
-      - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh số lượng giữa 2 nhóm, thêm bớt tạo sự bằng nhau trong phạm vi X, chọn và gắn thẻ số X chính xác, nhanh nhẹn.
+${isMixedAgeClass ? `    * ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): BẮT BUỘC PHÂN HÓA RÕ RÀNG KỸ NĂNG THEO TỪNG ĐỘ TUỔI TỪ THẤP ĐẾN CAO (3 tuổi ➔ 4 tuổi ➔ 5 tuổi):
+      - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay và đếm theo cô, phát âm rõ từ chỉ số lượng.
       - 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1 thẳng hàng từ trái sang phải, đếm theo thứ tự không bỏ sót đối tượng, tìm đúng thẻ số X theo cô và bạn.
-      - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay và đếm theo cô, phát âm rõ từ chỉ số lượng.)` : '    Ví dụ: "- Rèn kỹ năng phát âm...", "- Phát triển kỹ năng vận động...".'}`;
+      - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh số lượng giữa 2 nhóm, thêm bớt tạo sự bằng nhau trong phạm vi X, chọn và gắn thẻ số X chính xác, nhanh nhẹn.)` : '    Ví dụ: "- Rèn kỹ năng phát âm...", "- Phát triển kỹ năng vận động...".'}`;
   const ageSpecificInstruction = preschoolAgeProfile ? `
 =============================================================================
 ĐẶC BIỆT CHÚ Ý - PHÂN TÍCH VÀ CĂN CHỈNH TOÀN BỘ GIÁO ÁN THEO ĐỘ TUỔI: "${preschoolAgeProfile.rawGrade}" (${preschoolAgeProfile.standardName})
@@ -3296,18 +3296,18 @@ YÊU CẦU BẮT BUỘC:
 - Kỹ năng (subjectCompetencies): Các kỹ năng vận động, kỹ năng tư duy, thao tác... gắn với mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)", "- Trẻ phối hợp khéo léo... (Mã: TC 1.2, TX 4.4)").
 `}
 ${isMixedAgeClass ? `
-BẮT BUỘC ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): TÁCH RIÊNG KIẾN THỨC VÀ KỸ NĂNG CHO TỪNG ĐỘ TUỔI TRONG 1 BÀI DẠY (Ví dụ nếu lớp ghép 3-4-5 tuổi: Kiến thức 3 tuổi riêng, 4 tuổi riêng, 5 tuổi riêng; Kỹ năng 3 tuổi riêng, 4 tuổi riêng, 5 tuổi riêng và gắn mã QĐ 388 phù hợp).
+BẮT BUỘC ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${grade}): TÁCH RIÊNG KIẾN THỨC VÀ KỸ NĂNG CHO TỪNG ĐỘ TUỔI TRONG 1 BÀI DẠY THEO THỨ TỰ TỪ THẤP ĐẾN CAO (3 tuổi ➔ 4 tuổi ➔ 5 tuổi).
 Ví dụ chuẩn phân hóa mảng knowledge trong JSON:
 [
-  "- 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X... (Mã: NT 3.1)",
+  "- 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô... (Mã: NT 1.1)",
   "- 4 tuổi: Trẻ biết đếm đến X, nhận biết nhóm X đối tượng... (Mã: NT 1.2)",
-  "- 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô... (Mã: NT 1.1)"
+  "- 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X... (Mã: NT 3.1)"
 ]
 Ví dụ chuẩn phân hóa mảng subjectCompetencies trong JSON:
 [
-  "- 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh... (Mã: TC 3.1)",
+  "- 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay và đếm theo cô... (Mã: TC 1.1)",
   "- 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1... (Mã: TC 1.2)",
-  "- 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay và đếm theo cô... (Mã: TC 1.1)"
+  "- 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh... (Mã: TC 3.1)"
 ]
 ` : ''}
 - Phẩm chất (qualities): BẮT BUỘC gắn với 4 phẩm chất cốt lõi (Yêu thương, Tôn trọng, Trung thực, Trách nhiệm). Ví dụ: "Yêu thương: ...", "Tôn trọng: ...".
@@ -3325,7 +3325,7 @@ Yêu cầu: Trả về JSON với cấu trúc:
   "objectives": {
     "knowledge": ["- ... (Mã: NT 1.1)"],
     "subjectCompetencies": ["- ... (Mã: TC 1.1)"],
-    "generalCompetencies": ["Tự lực: ...", "Thích ứng: ...", "Giao tiếp: ..."],
+    "generalCompetencies": ["Tự lực: ...", "Thích ứng: ...", "Giải quyết vấn đề: ..."],
     "qualities": ["Yêu thương: ...", "Tôn trọng: ...", "Trung thực: ...", "Trách nhiệm: ..."],
     "digitalCompetencies": ${config.enableNLS ? '["Mô tả hoạt động tích hợp Năng lực số (NLS) cho trẻ..."]' : '[]'},
     "aiCompetencies": ${config.enableAI ? '["Mô tả hoạt động ứng dụng Trí tuệ nhân tạo (AI)..."]' : '[]'},
@@ -4441,9 +4441,9 @@ Trả về JSON dạng:
       generalCompetencies: (Array.isArray(res1.objectives?.generalCompetencies) && res1.objectives.generalCompetencies.length > 0)
         ? res1.objectives.generalCompetencies
         : [
-            'Giao tiếp: Trẻ tự tin trả lời câu hỏi, diễn đạt suy nghĩ rõ ràng, mạch lạc.',
-            'Hợp tác: Biết phối hợp cùng bạn trong nhóm, chia sẻ đồ dùng học tập.',
-            'Tự lực: Tự giác tham gia các hoạt động và tự thu dọn đồ dùng sau khi học.'
+            'Tự lực: Tự giác tham gia các hoạt động và tự thu dọn đồ dùng sau khi học.',
+            'Thích ứng: Linh hoạt thích ứng với các hoạt động trải nghiệm và phối hợp cùng bạn.',
+            'Giải quyết vấn đề: Biết quan sát, suy nghĩ và tìm cách giải quyết tình huống/thử thách đơn giản trong bài học.'
           ],
       qualities: (Array.isArray(res1.objectives?.qualities) && res1.objectives.qualities.length > 0)
         ? res1.objectives.qualities
@@ -4640,28 +4640,28 @@ const handleGenerateKHBD = async (req: express.Request, res: express.Response) =
     ${customCodesFromUser ? `"${customCodesFromUser}"` : 'Các mã chuẩn theo QĐ 388 (ví dụ: NT 3.1, TX 4.4, TC 1.2, NN 2.2...)'}
   + BẮT BUỘC ĐƯA CÁC TIÊU CHÍ YÊU CẦU CẦN ĐẠT CỦA BÀI VÀO CÁC GẠCH ĐẦU DÒNG CỦA MỤC TIÊU theo đúng các mã chỉ báo trên.
   + 1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ biết/nhận biết... (Mã: NT 1.1)")
-${isMixedAgeClass ? `    * BẮT BUỘC ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${config.grade}): TÁCH RIÊNG KIẾN THỨC CHO TỪNG ĐỘ TUỔI TRONG 1 BÀI DẠY (Ví dụ nếu lớp ghép 3-4-5 tuổi: kiến thức 3 tuổi riêng, 4 tuổi riêng, 5 tuổi riêng):
-      - 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X... (Mã: NT 3.1)
+${isMixedAgeClass ? `    * BẮT BUỘC ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${config.grade}): TÁCH RIÊNG KIẾN THỨC CHO TỪNG ĐỘ TUỔI THEO THỨ TỰ TỪ THẤP ĐẾN CAO (3 tuổi ➔ 4 tuổi ➔ 5 tuổi):
+      - 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô... (Mã: NT 1.1)
       - 4 tuổi: Trẻ biết đếm đến X, nhận biết nhóm X đối tượng... (Mã: NT 1.2)
-      - 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô... (Mã: NT 1.1)` : ''}
+      - 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X... (Mã: NT 3.1)` : ''}
   + 2. Kỹ năng: Gắn mã tiêu chí yêu cầu cần đạt (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)")
-${isMixedAgeClass ? `    * BẮT BUỘC ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${config.grade}): TÁCH RIÊNG KỸ NĂNG CHO TỪNG ĐỘ TUỔI TRONG 1 BÀI DẠY (Kỹ năng 3 tuổi riêng, 4 tuổi riêng, 5 tuổi riêng):
-      - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh, thêm bớt... (Mã: TC 3.1)
+${isMixedAgeClass ? `    * BẮT BUỘC ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${config.grade}): TÁCH RIÊNG KỸ NĂNG CHO TỪNG ĐỘ TUỔI THEO THỨ TỰ TỪ THẤP ĐẾN CAO (3 tuổi ➔ 4 tuổi ➔ 5 tuổi):
+      - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay đếm theo cô... (Mã: TC 1.1)
       - 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1, đếm theo thứ tự... (Mã: TC 1.2)
-      - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay đếm theo cô... (Mã: TC 1.1)` : ''}`
+      - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh, thêm bớt... (Mã: TC 3.1)` : ''}`
       : `- ĐỐI VỚI GIÁO ÁN MẦM NON CŨ/TRUYỀN THỐNG (Văn học thơ/truyện, Làm quen chữ cái, Khám phá khoa học, Xã hội, Toán, Tạo hình, Âm nhạc, Thể chất, Tình cảm - KNXH...):
   + BẮT BUỘC LẤY LẠI ĐÚNG MẪU GIÁO ÁN BAN ĐẦU TRƯỚC KHI CẬP NHẬT 8 LĨNH VỰC MỚI, GIỮ NGUYÊN ĐỊNH DẠNG BAN ĐẦU.
   + TUYỆT ĐỐI KHÔNG ĐIỀN MÃ TIÊU CHÍ NÀO: KHÔNG ghi "(Mã: NN 5.1)", KHÔNG ghi "(Mã: NT 1.1)", KHÔNG ghi bất kỳ mã chỉ báo nào trong phần Kiến thức và Kỹ năng.
   + 1. Kiến thức: Các gạch đầu dòng mô tả những gì trẻ biết, hiểu (TUYỆT ĐỐI KHÔNG GẮN MÃ).
-${isMixedAgeClass ? `    * ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${config.grade}): BẮT BUỘC PHÂN HÓA RÕ RÀNG KIẾN THỨC THEO TỪNG ĐỘ TUỔI (Ví dụ nếu lớp ghép 3-4-5 tuổi:
-      - 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X, nhận biết chữ số X biểu thị cho các nhóm có số lượng X. Trẻ đếm từ 1 đến X, đọc được số X và các số nhỏ hơn X. So sánh 2 nhóm đối tượng, biết thêm bớt để có số lượng bằng nhau.
+${isMixedAgeClass ? `    * ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${config.grade}): BẮT BUỘC PHÂN HÓA RÕ RÀNG KIẾN THỨC THEO TỪNG ĐỘ TUỔI TỪ THẤP ĐẾN CAO (3 tuổi ➔ 4 tuổi ➔ 5 tuổi):
+      - 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô, đếm cùng các bạn.
       - 4 tuổi: Trẻ biết đếm đến X, nhận biết các nhóm có X đối tượng. Trẻ biết tạo nhóm, xếp tương ứng 1- 1, biết so sánh 2 nhóm đồ vật, biết đếm đúng số lượng và sử dụng đúng chữ số tương ứng theo cô và các bạn.
-      - 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô, đếm cùng các bạn.)` : '    Ví dụ: "- Trẻ biết tên bài thơ/bài hát...", "- Trẻ hiểu nội dung bài...".'}
+      - 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X, nhận biết chữ số X biểu thị cho các nhóm có số lượng X. Trẻ đếm từ 1 đến X, đọc được số X và các số nhỏ hơn X. So sánh 2 nhóm đối tượng, biết thêm bớt để có số lượng bằng nhau.)` : '    Ví dụ: "- Trẻ biết tên bài thơ/bài hát...", "- Trẻ hiểu nội dung bài...".'}
   + 2. Kỹ năng: Các gạch đầu dòng rèn luyện kỹ năng (TUYỆT ĐỐI KHÔNG GẮN MÃ).
-${isMixedAgeClass ? `    * ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${config.grade}): BẮT BUỘC PHÂN HÓA RÕ RÀNG KỸ NĂNG THEO TỪNG ĐỘ TUỔI (Ví dụ nếu lớp ghép 3-4-5 tuổi:
-      - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh số lượng giữa 2 nhóm, thêm bớt tạo sự bằng nhau trong phạm vi X, chọn và gắn thẻ số X chính xác, nhanh nhẹn.
+${isMixedAgeClass ? `    * ĐỐI VỚI LỚP GHÉP / ĐA ĐỘ TUỔI (${config.grade}): BẮT BUỘC PHÂN HÓA RÕ RÀNG KỸ NĂNG THEO TỪNG ĐỘ TUỔI TỪ THẤP ĐẾN CAO (3 tuổi ➔ 4 tuổi ➔ 5 tuổi):
+      - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay và đếm theo cô, phát âm rõ từ chỉ số lượng.
       - 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1 thẳng hàng từ trái sang phải, đếm theo thứ tự không bỏ sót đối tượng, tìm đúng thẻ số X theo cô và bạn.
-      - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay và đếm theo cô, phát âm rõ từ chỉ số lượng.)` : '    Ví dụ: "- Rèn kỹ năng phát âm...", "- Phát triển kỹ năng vận động...".'}`;
+      - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh số lượng giữa 2 nhóm, thêm bớt tạo sự bằng nhau trong phạm vi X, chọn và gắn thẻ số X chính xác, nhanh nhẹn.)` : '    Ví dụ: "- Rèn kỹ năng phát âm...", "- Phát triển kỹ năng vận động...".'}`;
     const ageSpecificInstruction = preschoolAgeProfile ? `
 =============================================================================
 ĐẶC BIỆT CHÚ Ý - PHÂN TÍCH VÀ CĂN CHỈNH TOÀN BỘ GIÁO ÁN THEO ĐỘ TUỔI: "${preschoolAgeProfile.rawGrade}" (${preschoolAgeProfile.standardName})
@@ -4697,13 +4697,14 @@ ${preschoolObjectivesInstruction}
   4. Năng lực:
   - Tự lực: ...
   - Thích ứng: ...
+  - Giải quyết vấn đề: ...
 - CẤU TRÚC GIÁO ÁN PHẢI TUÂN THỦ NGHIÊM NGẶT FORM SAU:
 I. Mục đích - yêu cầu
 ${isNew8Activity ? `1. Kiến thức: Gắn mã tiêu chí yêu cầu cần đạt theo QĐ 388 (ví dụ: "- Trẻ biết/nhận biết... (Mã: NT 1.1)")
 2. Kỹ năng: Gắn mã tiêu chí yêu cầu cần đạt theo QĐ 388 (ví dụ: "- Trẻ thực hiện được kỹ năng... (Mã: TC 1.1)")` : `1. Kiến thức: (TUYỆT ĐỐI KHÔNG GẮN MÃ CHỈ BÁO, giữ nguyên định dạng mẫu giáo án ban đầu)
 2. Kỹ năng: (TUYỆT ĐỐI KHÔNG GẮN MÃ CHỈ BÁO, giữ nguyên định dạng mẫu giáo án ban đầu)`}
 3. Phẩm chất (Gắn với Yêu thương, Tôn trọng...):
-4. Năng lực (Gắn với Tự lực, Thích ứng...):
+4. Năng lực (Gắn với Tự lực, Thích ứng, Giải quyết vấn đề...):
 5. Tích hợp Năng lực số (NLS): (Đưa vào trường digitalCompetencies nếu người dùng chọn tích hợp NLS, nếu không chọn để [])
 6. Tích hợp Trí tuệ nhân tạo (AI): (Đưa vào trường aiCompetencies nếu người dùng chọn tích hợp AI, nếu không chọn để [])
 II. Chuẩn bị: (BẮT BUỘC ĐÚNG 100% CẤU TRÚC 3 MỤC SAU)

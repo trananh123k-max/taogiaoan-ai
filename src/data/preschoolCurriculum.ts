@@ -92,32 +92,32 @@ CHUẨN HÓA MỤC TIÊU VÀ YÊU CẦU CẦN ĐẠT CỦA CÁC ĐỘ TUỔI TRU
   + Kỹ năng: Phản xạ nhanh khi nghe âm thanh/nhìn nét đoán chữ; Phát âm to, rõ ràng; Phối hợp tiếp sức đồng đội (MÃ: NN 2.2, TC 1.2, TX 4.4).
   + Phẩm chất: Tự tin, hào hứng thi đua lành mạnh, trung thực và đoàn kết.
   + Năng lực: Nhận diện ngôn ngữ chữ viết, hợp tác nhóm và giải quyết thử thách trí tuệ.
-- NHẬN BIẾT TẬP NÓI (HOẠT ĐỘNG NHẬN BIẾT TẬP NÓI):
-  + Kiến thức: Nghe hiểu và nhận biết chính xác tên gọi, đặc điểm nổi bật (màu sắc, hình dạng, công dụng/tiếng kêu) của đồ vật, con vật, hoa quả (MÃ: NT 1.1, NN 1.1, NN 1.2).
-  + Kỹ năng: Phát âm rõ ràng, chuẩn xác; Tập nói từ đơn, từ ghép, câu ngắn 3-4 từ để trả lời câu hỏi của cô; Chỉ và lấy đúng đối tượng khi nghe yêu cầu (MÃ: NN 2.1, NN 2.2, TC 1.1).
-  + Phẩm chất: Hào hứng tham gia hoạt động, chăm chú lắng nghe cô và bạn nói; Giữ gìn đồ dùng, yêu quý con vật/đồ vật (MÃ: TX 4.4, TX 1.1).
+- NHẬN BIẾT TẬP NÓI (THUỘC TAB LĨNH VỰC - KHÔNG DÙNG MÃ 388):
+  + Kiến thức: Nghe hiểu và nhận biết chính xác tên gọi, đặc điểm nổi bật (màu sắc, hình dạng, công dụng/tiếng kêu) của đồ vật, con vật, hoa quả (TUYỆT ĐỐI KHÔNG GẮN MÃ).
+  + Kỹ năng: Phát âm rõ ràng, chuẩn xác; Tập nói từ đơn, từ ghép, câu ngắn 3-4 từ để trả lời câu hỏi của cô; Chỉ và lấy đúng đối tượng khi nghe yêu cầu (TUYỆT ĐỐI KHÔNG GẮN MÃ).
+  + Phẩm chất: Hào hứng tham gia hoạt động, chăm chú lắng nghe cô và bạn nói; Giữ gìn đồ dùng, yêu quý con vật/đồ vật.
   + Năng lực: Giao tiếp ngôn ngữ, nhận biết khám phá thế giới xung quanh, tự tin biểu đạt ý muốn.
-- LĨNH VỰC NHẬN BIẾT PHÂN BIỆT (NHẬN BIẾT PHÂN BIỆT):
-  + Kiến thức: Nhận biết và phân biệt rõ ràng màu sắc (đỏ - vàng - xanh), kích thước (to - nhỏ), hình dạng khối (tròn - vuông), số lượng (1 và nhiều), vị trí trong không gian (MÃ: NT 1.1, NT 1.2).
-  + Kỹ năng: Quan sát, so sánh đối chiếu đặc điểm; Chọn đúng đồ dùng đồ chơi theo dấu hiệu nhận biết; Phát âm và nói rõ tên màu sắc, kích thước, hình dạng (MÃ: NT 2.1, NN 1.1, NN 2.1).
-  + Phẩm chất: Hứng thú tìm tòi khám phá, tập trung chú ý lắng nghe và thực hiện đúng yêu cầu; Biết giữ gìn đồ chơi cẩn thận (MÃ: TX 1.1, TX 4.4).
+- LĨNH VỰC NHẬN BIẾT PHÂN BIỆT (THUỘC TAB LĨNH VỰC - KHÔNG DÙNG MÃ 388):
+  + Kiến thức: Nhận biết và phân biệt rõ ràng màu sắc (đỏ - vàng - xanh), kích thước (to - nhỏ), hình dạng khối (tròn - vuông), số lượng (1 và nhiều), vị trí trong không gian (TUYỆT ĐỐI KHÔNG GẮN MÃ).
+  + Kỹ năng: Quan sát, so sánh đối chiếu đặc điểm; Chọn đúng đồ dùng đồ chơi theo dấu hiệu nhận biết; Phát âm và nói rõ tên màu sắc, kích thước, hình dạng (TUYỆT ĐỐI KHÔNG GẮN MÃ).
+  + Phẩm chất: Hứng thú tìm tòi khám phá, tập trung chú ý lắng nghe và thực hiện đúng yêu cầu; Biết giữ gìn đồ chơi cẩn thận.
   + Năng lực: Năng lực nhận thức tư duy trực quan, so sánh phân loại đối tượng, giao tiếp ngôn ngữ.
-- LĨNH VỰC PT THỂ CHẤT (HĐ VỚI ĐỒ VẬT) / HOẠT ĐỘNG VỚI ĐỒ VẬT:
-  + Kiến thức: Nhận biết tên gọi, đặc điểm, màu sắc, kích thước và công dụng của đồ vật, đồ chơi (MÃ: NT 1.1, NT 2.1).
-  + Kỹ năng: Thực hiện thành thạo các thao tác vận động tinh: cầm, nắm, đặt, xếp chồng, lồng hộp, xâu hạt, đóng mở nắp, ghép hình; Phối hợp khéo léo tay - mắt (MÃ: TC 1.1, TC 1.2).
-  + Phẩm chất: Kiên trì hoàn thành thao tác; Thích thú khám phá đồ chơi; Có ý thức cất dọn đồ chơi gọn gàng sau khi chơi (MÃ: TX 1.1, TX 4.4).
+- LĨNH VỰC PT THỂ CHẤT (HĐ VỚI ĐỒ VẬT) / HOẠT ĐỘNG VỚI ĐỒ VẬT (THUỘC TAB LĨNH VỰC - KHÔNG DÙNG MÃ 388):
+  + Kiến thức: Nhận biết tên gọi, đặc điểm, màu sắc, kích thước và công dụng của đồ vật, đồ chơi (TUYỆT ĐỐI KHÔNG GẮN MÃ).
+  + Kỹ năng: Thực hiện thành thạo các thao tác vận động tinh: cầm, nắm, đặt, xếp chồng, lồng hộp, xâu hạt, đóng mở nắp, ghép hình; Phối hợp khéo léo tay - mắt (TUYỆT ĐỐI KHÔNG GẮN MÃ).
+  + Phẩm chất: Kiên trì hoàn thành thao tác; Thích thú khám phá đồ chơi; Có ý thức cất dọn đồ chơi gọn gàng sau khi chơi.
   + Năng lực: Vận động tinh và khéo léo của bàn tay ngón tay, thao tác tư duy trực quan hành động.
 `;
 
 export const PRESCHOOL_LESSON_PLAN_DOMAINS_GUIDE = `
 QUY CHUẨN MẪU GIÁO ÁN THEO TỪNG LĨNH VỰC GIÁO DỤC MẦM NON (BẮT BUỘC TUÂN THỦ 100%):
 
-1. NGUYÊN TẮC PHÂN BIỆT MẪU GIÁO ÁN MẦM NON CŨ VÀ 8 NỘI DUNG MỚI TÍCH HỢP:
+1. NGUYÊN TẮC PHÂN BIỆT MẪU GIÁO ÁN MẦM NON TAB LĨNH VỰC VÀ 8 NỘI DUNG MỚI TÍCH HỢP:
 
-A. ĐỐI VỚI CÁC MẪU GIÁO ÁN MẦM NON CŨ/TRUYỀN THỐNG (Văn học thơ, truyện; Ngôn ngữ chữ cái / Làm quen chữ cái; Khám phá khoa học; Nhận thức - Toán; Tạo hình; Âm nhạc; Thể chất; Tình cảm - xã hội...):
-- GIỮ NGUYÊN ĐỊNH DẠNG BAN ĐẦU TRƯỚC ĐÂY.
-- TUYỆT ĐỐI KHÔNG ĐIỀN MÃ TIÊU CHÍ CHỈ BÁO (KHÔNG ghi "(Mã: ...)", KHÔNG ghi "(Mã: NN 5.1)", KHÔNG ghi "(Mã: NT 1.1)"... trong phần Kiến thức và Kỹ năng).
-- Cấu trúc Mục I cho giáo án cũ:
+A. ĐỐI VỚI CÁC MẪU GIÁO ÁN MẦM NON THUỘC TAB "LĨNH VỰC PHÁT TRIỂN" (Văn học thơ, truyện; Ngôn ngữ chữ cái; Khám phá khoa học; Khám phá xã hội; Nhận thức - Toán; Tạo hình; Âm nhạc; Lĩnh vực Phát triển thể chất; Nhận biết tập nói; Lĩnh vực Nhận biết phân biệt; Lĩnh vực PT Thể chất (HĐ với đồ vật); Hoạt động với đồ vật; Giáo án Tình cảm - Xã hội / KNXH...):
+- GIỮ NGUYÊN ĐỊNH DẠNG BAN ĐẦU TRUYỀN THỐNG.
+- TUYỆT ĐỐI KHÔNG ĐIỀN MÃ TIÊU CHÍ CHỈ BÁO THEO QĐ 388 (KHÔNG ghi "(Mã: ...)", KHÔNG ghi "(Mã: NN 5.1)", KHÔNG ghi "(Mã: NT 1.1)"... trong bất kỳ phần nào của Mục I).
+- Cấu trúc Mục I cho giáo án thuộc tab Lĩnh vực:
 I. Mục đích - yêu cầu
 1. Kiến thức:
 - Trẻ biết/nhận biết... (TUYỆT ĐỐI KHÔNG GẮN MÃ).
@@ -128,9 +128,11 @@ I. Mục đích - yêu cầu
 3. Phẩm chất:
 - Yêu thương: [Mô tả biểu hiện tình cảm, quan tâm, chia sẻ...]
 - Tôn trọng: [Mô tả biểu hiện tôn trọng cô, bạn, lắng nghe, bảo vệ môi trường/đồ dùng...]
-4. Năng lực:
-- Tự lực: [Mô tả biểu hiện trẻ tự thực hiện thao tác, tự phục vụ...]
+4. Năng lực: (BẮT BUỘC ĐỦ CÁC NỘI DUNG THEO ĐÚNG TRÌNH TỰ CHO MỌI MẪU BÀI KHỐI MẦM NON)
+- Tự lực: [Mô tả biểu hiện trẻ tự thực hiện thao tác, tự phục vụ, chủ động...]
 - Thích ứng: [Mô tả biểu hiện linh hoạt tham gia, thích ứng môi trường/hoạt động...]
+- Giải quyết vấn đề: [Mô tả biểu hiện trẻ biết quan sát, suy nghĩ, tìm cách giải quyết khó khăn/tình huống đơn giản trong bài học...]
+- Giao tiếp và hợp tác: [Mô tả biểu hiện trao đổi, chia sẻ, lắng nghe và hợp tác cùng cô và bạn...] (hoặc tách riêng Giao tiếp:... và Hợp tác:...)
 
 B. ĐỐI VỚI 8 NỘI DUNG MỚI TÍCH HỢP (Hoạt động vui chơi trong lớp, Hoạt động ngoài trời, Trò chơi vận động, Hoạt động giáo dục kỹ năng, Trò chơi dân gian, Hoạt động tăng cường tiếng Việt, Hoạt động tập tô chữ cái, Hoạt động trò chơi chữ cái):
 - ÁP DỤNG CHUẨN YÊU CẦU THEO QUYẾT ĐỊNH SỐ 388/QĐ-BGDĐT:
@@ -139,8 +141,12 @@ B. ĐỐI VỚI 8 NỘI DUNG MỚI TÍCH HỢP (Hoạt động vui chơi trong l
 I. Mục đích - yêu cầu
 1. Kiến thức: Gắn mã chỉ báo theo QĐ 388 (ví dụ: Mã: NT..., TX...)
 2. Kỹ năng: Gắn mã chỉ báo theo QĐ 388 (ví dụ: Mã: TC..., NN...)
-3. Phẩm chất: Yêu thương, Tôn trọng...
-4. Năng lực: Tự lực, Thích ứng...
+3. Phẩm chất: Yêu thương, Tôn trọng, Trung thực, Trách nhiệm...
+4. Năng lực: BẮT BUỘC ĐỦ 4 NỘI DUNG THEO ĐÚNG TRÌNH TỰ (Tự lực, Thích ứng, Giải quyết vấn đề, Giao tiếp và hợp tác):
+- Tự lực: [Mô tả biểu hiện...]
+- Thích ứng: [Mô tả biểu hiện...]
+- Giải quyết vấn đề: [Mô tả biểu hiện...]
+- Giao tiếp và hợp tác: [Mô tả biểu hiện...]
 
 QUY ĐỊNH ĐẶC BIỆT VỀ MỤC TÍCH HỢP CHO 8 HOẠT ĐỘNG MỚI VÀ TOÀN BỘ GIÁO ÁN MẦM NON:
 - NẾU NGƯỜI DÙNG CHỌN TÍCH HỢP NĂNG LỰC SỐ (NLS): BẮT BUỘC ĐỂ RIÊNG THÀNH MỤC 5:
@@ -1203,14 +1209,14 @@ Giáo viên thực hiện: ...
 
 I. MỤC ĐÍCH - YÊU CẦU:
 1. Kiến thức:
-- 5 tuổi: Trẻ nhận biết nhóm có số lượng 7, đếm đến 7, nhận biết chữ số 7 biểu thị cho các nhóm có số lượng 7. Trẻ đếm từ 1 đến 7, đọc được số 7 và các số nhỏ hơn 7. So sánh 2 nhóm đối tượng, biết thêm bớt để có số lượng bằng nhau
-- 4 tuổi: Trẻ biết đếm đến 7, nhận biết các nhóm có 7 đối tượng. Trẻ biết tạo nhóm, xếp tương ứng 1- 1, biết so sánh 2 nhóm đồ vật, biết đếm đúng số lượng và sử dụng đúng chữ số tương ứng theo cô và các bạn
-- 3 tuổi: Trẻ đếm số lượng trong phạm vi 7 theo cô, đếm cùng các bạn.
+- 3 tuổi: Trẻ đếm số lượng trong phạm vi 7 theo cô, đếm cùng các bạn, nhận biết tên gọi số 7.
+- 4 tuổi: Trẻ biết đếm đến 7, nhận biết các nhóm có 7 đối tượng. Trẻ biết tạo nhóm, xếp tương ứng 1- 1, biết so sánh 2 nhóm đồ vật, biết đếm đúng số lượng và sử dụng đúng chữ số tương ứng theo cô và các bạn.
+- 5 tuổi: Trẻ nhận biết nhóm có số lượng 7, đếm đến 7, nhận biết chữ số 7 biểu thị cho các nhóm có số lượng 7. Trẻ đếm từ 1 đến 7, đọc được số 7 và các số nhỏ hơn 7. So sánh 2 nhóm đối tượng, biết thêm bớt để có số lượng bằng nhau.
 
 2. Kỹ năng:
-- 5 tuổi: Rèn kỹ năng đếm thành thạo từ 1 đến 7 từ trái sang phải, so sánh số lượng giữa 2 nhóm, thêm bớt tạo sự bằng nhau trong phạm vi 7. Rèn kỹ năng chọn và gắn thẻ số 7 chính xác, nhanh nhẹn.
-- 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1 thẳng hàng từ trái sang phải, đếm theo thứ tự không bỏ sót đối tượng, tìm đúng thẻ số 7 gắn theo bạn và cô.
 - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay và đếm theo cô, phát âm rõ từ chỉ số lượng "số 7", "bảy".
+- 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1 thẳng hàng từ trái sang phải, đếm theo thứ tự không bỏ sót đối tượng, tìm đúng thẻ số 7 gắn theo bạn và cô.
+- 5 tuổi: Rèn kỹ năng đếm thành thạo từ 1 đến 7 từ trái sang phải, so sánh số lượng giữa 2 nhóm, thêm bớt tạo sự bằng nhau trong phạm vi 7. Rèn kỹ năng chọn và gắn thẻ số 7 chính xác, nhanh nhẹn.
 
 3. Phẩm chất:
 - Yêu thương: Biết chia sẻ đồ dùng, giúp đỡ các em nhỏ 3-4 tuổi trong khi học và chơi.
@@ -1221,6 +1227,7 @@ I. MỤC ĐÍCH - YÊU CẦU:
 4. Năng lực:
 - Tự lực: Tự lấy và cất rổ đồ dùng của mình, chủ động thực hiện nhiệm vụ xếp và đếm theo độ tuổi.
 - Thích ứng: Phối hợp linh hoạt khi tham gia các hoạt động tập thể và trò chơi theo nhóm tuổi.
+- Giải quyết vấn đề: Biết quan sát, phán đoán, tìm cách thêm hoặc bớt đối tượng để tạo sự bằng nhau theo yêu cầu bài học.
 - Giao tiếp: Tự tin trả lời câu hỏi của cô, diễn đạt câu trọn vẹn mạch lạc theo khả năng ngôn ngữ của lứa tuổi.
 - Hợp tác: Trẻ 5 tuổi biết phối hợp và hướng dẫn các em 3-4 tuổi trong các trò chơi nhóm.
 
@@ -1281,6 +1288,7 @@ I. MỤC TIÊU
 4. Năng lực:
 - Tự lực: Tự giác xếp hàng, tự chỉnh trang trang phục giày dép, tự chọn đồ chơi yêu thích và tự vệ sinh rửa tay sau khi chơi.
 - Thích ứng: Thích nghi tốt với môi trường thiên nhiên ngoài trời, phản xạ linh hoạt với các tình huống chơi.
+- Giải quyết vấn đề: Biết quan sát, phán đoán và xử lý các tình huống phát sinh đơn giản khi tham gia hoạt động ngoài trời.
 - Giao tiếp và hợp tác: Biết trao đổi, thảo luận cùng bạn trong quá trình quan sát và hợp tác nhịp nhàng khi chơi trò chơi.
 
 II. CHUẨN BỊ
@@ -1333,7 +1341,8 @@ I. MỤC TIÊU
 4. Năng lực:
 - Tự lực: Tự tin tham gia các trò chơi vận động, chủ động lựa chọn đồ chơi ngoài trời phù hợp với khả năng.
 - Thích ứng: Linh hoạt thích ứng với các hiệu lệnh chuyển tiếp và không gian vận động ngoài trời.
-- Hợp tác: Phối hợp nhịp nhàng với đồng đội để đưa bóng về đích nhanh nhất.
+- Giải quyết vấn đề: Biết điều chỉnh hướng chuyền và phối hợp khắc phục khi bị rơi bóng để hoàn thành lượt chơi.
+- Giao tiếp và hợp tác: Phối hợp nhịp nhàng với đồng đội để đưa bóng về đích nhanh nhất.
 
 II. CHUẨN BỊ
 1. Chuẩn bị của cô:
@@ -1387,7 +1396,8 @@ I. MỤC TIÊU
 4. Năng lực:
 - Tự lực: Chủ động lựa chọn góc chơi và vai chơi mình yêu thích; tự thao tác thực hiện nhiệm vụ của vai chơi.
 - Thích ứng: Linh hoạt xử lý các tình huống phát sinh trong quá trình chơi và liên kết giữa các góc.
-- Hợp tác: Biết phối hợp nhịp nhàng với các bạn trong góc để hoàn thành mục tiêu chung.
+- Giải quyết vấn đề: Biết tìm kiếm nguyên vật liệu thay thế, thảo luận tìm cách giải quyết khi gặp khó khăn trong quá trình tạo hình và xây dựng.
+- Giao tiếp và hợp tác: Biết phối hợp nhịp nhàng với các bạn trong góc để hoàn thành mục tiêu chung.
 
 II. CHUẨN BỊ
 1. Chuẩn bị của cô:
@@ -1445,6 +1455,7 @@ I. MỤC TIÊU
 4. Năng lực:
 - Tự lực: Tự chọn góc chơi, tự giác nhận vai và hoàn thành sản phẩm/công trình của nhóm.
 - Thích ứng: Linh hoạt tương tác với các tình huống giao lưu giữa các góc chơi.
+- Giải quyết vấn đề: Biết xử lý tình huống phát sinh trong vai chơi (bác sĩ chẩn đoán, người bán hàng tính tiền và đổi đồ chơi).
 - Giao tiếp và hợp tác: Biết trao đổi, trò chuyện mạch lạc và phối hợp ăn ý cùng bạn bè.
 
 II. CHUẨN BỊ

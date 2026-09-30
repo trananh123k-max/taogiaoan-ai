@@ -321,7 +321,7 @@ export const CombineLessonPlansTab: React.FC<CombineLessonPlansTabProps> = ({
         let nextDays: string[];
         if (hasAllWeekdays) {
           // Nếu đã chọn cả tuần -> gỡ hết 5 ngày trong tuần
-          nextDays = currentDays.filter((d) => !allWeekdays.includes(d));
+          nextDays = currentDays.filter((d) => !(allWeekdays as string[]).includes(d));
         } else {
           // Thêm toàn bộ các ngày Thứ 2..Thứ 6 vào
           const set = new Set([...currentDays, ...allWeekdays]);

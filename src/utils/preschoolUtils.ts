@@ -2987,10 +2987,7 @@ export const MAM_NON_8_NEW_ACTIVITIES_LIST = [
   'TRÒ CHƠI DÂN GIAN',
   'HOẠT ĐỘNG TĂNG CƯỜNG TIẾNG VIỆT',
   'HOẠT ĐỘNG TẬP TÔ CHỮ CÁI',
-  'HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI',
-  'HOẠT ĐỘNG NHẬN BIẾT TẬP NÓI',
-  'NHẬN BIẾT TẬP NÓI',
-  'HOẠT ĐỘNG VỚI ĐỒ VẬT'
+  'HOẠT ĐỘNG TRÒ CHƠI CHỮ CÁI'
 ];
 
 export const PRESCHOOL_NEW_8_DOMAINS: PreschoolDomainType[] = [
@@ -3002,9 +2999,7 @@ export const PRESCHOOL_NEW_8_DOMAINS: PreschoolDomainType[] = [
   'FOLK_GAME',
   'VIETNAMESE_ENHANCE',
   'LETTER_TRACING',
-  'LETTER_GAME',
-  'TALK_RECOGNIZE',
-  'OBJECT_PLAY'
+  'LETTER_GAME'
 ];
 
 /**
@@ -3021,14 +3016,7 @@ export function isPreschoolNew8Activity(
   const t = (lessonTitle || '').trim();
   const text = `${s} ${t} ${extraText}`.toLowerCase();
 
-  // 1. Direct match against MAM_NON_8_NEW_ACTIVITIES_LIST
-  for (const act of MAM_NON_8_NEW_ACTIVITIES_LIST) {
-    if (s.toLowerCase() === act.toLowerCase() || s.toLowerCase().includes(act.toLowerCase())) {
-      return true;
-    }
-  }
-
-  // 2. Clear exclusions: Old traditional preschool subjects must NOT be classified as new 8
+  // 1. Clear exclusions: All traditional preschool domains (including NHẬN BIẾT TẬP NÓI, NHẬN BIẾT PHÂN BIỆT, HĐ VỚI ĐỒ VẬT, KNXH, THỂ CHẤT...) MUST NOT use QĐ 388 codes!
   const isOldSubject = 
     s.includes('VĂN HỌC') || s.includes('văn học') ||
     s.includes('THƠ') || s.includes('thơ') ||
@@ -3038,10 +3026,17 @@ export function isPreschoolNew8Activity(
     s.includes('TOÁN') || s.includes('toán') ||
     s.includes('TẠO HÌNH') || s.includes('tạo hình') ||
     s.includes('ÂM NHẠC') || s.includes('âm nhạc') ||
+    s.includes('TÌNH CẢM') || s.includes('tình cảm') ||
+    s.includes('KNXH') || s.includes('knxh') ||
+    s.includes('KỸ NĂNG XÃ HỘI') || s.includes('kỹ năng xã hội') ||
+    s.includes('NHẬN BIẾT TẬP NÓI') || s.includes('nhận biết tập nói') || s.includes('nbtn') ||
+    s.includes('NHẬN BIẾT PHÂN BIỆT') || s.includes('nhận biết phân biệt') || s.includes('nbpb') ||
+    s.includes('ĐỒ VẬT') || s.includes('đồ vật') ||
+    s.includes('LĨNH VỰC') || s.includes('lĩnh vực') ||
     (s.includes('thể chất') && !text.includes('trò chơi'));
 
   if (isOldSubject) {
-    // If the subject explicitly selected is an old subject, only treat as new if title clearly specifies one of the 8 new activities
+    // If the subject explicitly selected is an old/traditional domain, only treat as new if title clearly specifies one of the 8 new activities
     const isExplicitNewTitle = 
       t.includes('vui chơi trong lớp') || t.includes('hoạt động góc') ||
       t.includes('ngoài trời') ||
@@ -3055,6 +3050,13 @@ export function isPreschoolNew8Activity(
     
     if (!isExplicitNewTitle) {
       return false;
+    }
+  }
+
+  // 2. Direct match against MAM_NON_8_NEW_ACTIVITIES_LIST
+  for (const act of MAM_NON_8_NEW_ACTIVITIES_LIST) {
+    if (s.toLowerCase() === act.toLowerCase() || s.toLowerCase().includes(act.toLowerCase())) {
+      return true;
     }
   }
 
@@ -3101,19 +3103,121 @@ export function stripPreschoolCodes(text: string): string {
     .trim();
 }
 
+/**
+ * Sorts preschool objective bullet points (knowledge, skills, etc.) for mixed-age classes
+ * strictly in ascending order from lowest age to highest age (e.g. 24-36 tháng -> 3 tuổi -> 4 tuổi -> 5 tuổi).
+ */
+export function sortPreschoolObjectivesByAge(lines: string[]): string[] {
+  if (!Array.isArray(lines) || lines.length <= 1) return lines || [];
+
+  function getAgeScore(str: string): number {
+    const s = (str || '').toLowerCase().trim();
+    if (!s) return 99;
+
+    // 1. Check leading age indicators (e.g. "- 3 tuổi:", "3 tuổi:", "Trẻ 3 tuổi:", "Nhóm 3 tuổi:", "24-36 tháng:")
+    const matchPrefix = s.match(/^[-*•\s]*(?:trẻ|nhóm|lứa tuổi)?\s*(\d+)(?:\s*[-–]\s*(\d+))?\s*(tháng|tuổi)/i);
+    if (matchPrefix) {
+      const num1 = parseInt(matchPrefix[1], 10);
+      const unit = matchPrefix[3].toLowerCase();
+      if (unit === 'tháng') {
+        return num1 <= 18 ? 0.5 : 1;
+      }
+      return num1;
+    }
+
+    // 2. Exact keywords check
+    if (s.includes('nhà trẻ') || s.includes('24-36 tháng') || s.includes('24 - 36 tháng') || s.includes('18-24 tháng') || s.includes('12-18 tháng') || s.includes('nhóm trẻ')) return 1;
+    if (s.includes('2 tuổi') || s.includes('2-3 tuổi') || s.includes('2 - 3 tuổi')) return 2;
+    if (s.includes('3 tuổi') || s.includes('3 - 4 tuổi') || s.includes('3-4 tuổi') || s.includes('mẫu giáo bé') || s.includes('mg bé') || s.includes('lớp bé') || s.includes('lớp mầm')) return 3;
+    if (s.includes('4 tuổi') || s.includes('4 - 5 tuổi') || s.includes('4-5 tuổi') || s.includes('mẫu giáo nhỡ') || s.includes('mg nhỡ') || s.includes('lớp nhỡ') || s.includes('lớp chồi')) return 4;
+    if (s.includes('5 tuổi') || s.includes('5 - 6 tuổi') || s.includes('5-6 tuổi') || s.includes('mẫu giáo lớn') || s.includes('mg lớn') || s.includes('lớp lớn') || s.includes('lớp lá')) return 5;
+    if (s.includes('6 tuổi')) return 6;
+    return 99; // Non-age specific lines stay in original relative position or at the end
+  }
+
+  // Check if there are distinct age scores in the list (e.g. 3, 4, 5)
+  const scores = lines.map(getAgeScore);
+  const hasAgeSpecific = scores.some(sc => sc < 99);
+  if (!hasAgeSpecific) return lines;
+
+  // Stable sort by age score ascending (thấp đến cao: 3 tuổi -> 4 tuổi -> 5 tuổi)
+  return [...lines].sort((a, b) => {
+    const scoreA = getAgeScore(a);
+    const scoreB = getAgeScore(b);
+    return scoreA - scoreB;
+  });
+}
+
+/**
+ * Sorts preschool competencies in standard sequence:
+ * 1. Tự lực (Tự phục vụ)
+ * 2. Thích ứng
+ * 3. Giải quyết vấn đề
+ * 4. Giao tiếp
+ * 5. Hợp tác / Giao tiếp và hợp tác
+ */
+export function sortPreschoolCompetencies(lines: string[]): string[] {
+  if (!Array.isArray(lines) || lines.length <= 1) return lines || [];
+
+  function getCompScore(str: string): number {
+    const s = (str || '').toLowerCase().trim();
+    if (!s) return 99;
+    if (s.includes('tự lực') || s.includes('tự phục vụ')) return 1;
+    if (s.includes('thích ứng')) return 2;
+    if (s.includes('giải quyết vấn đề') || s.includes('gqvđ')) return 3;
+    if (s.includes('giao tiếp và hợp tác') || s.includes('hợp tác')) return 5;
+    if (s.includes('giao tiếp')) return 4;
+    return 99;
+  }
+
+  const scores = lines.map(getCompScore);
+  const hasCompSpecific = scores.some(sc => sc < 99);
+  if (!hasCompSpecific) return lines;
+
+  return [...lines].sort((a, b) => {
+    const scoreA = getCompScore(a);
+    const scoreB = getCompScore(b);
+    return scoreA - scoreB;
+  });
+}
+
 export function sanitizePreschoolObjectives(objectives: any, isNew8Activity: boolean = false): any {
-  if (!objectives || isNew8Activity) return objectives;
+  if (!objectives) return objectives;
   if (Array.isArray(objectives.knowledge)) {
-    objectives.knowledge = objectives.knowledge.map((k: string) => stripPreschoolCodes(k));
+    let list = objectives.knowledge;
+    if (!isNew8Activity) {
+      list = list.map((k: string) => stripPreschoolCodes(k));
+    }
+    objectives.knowledge = sortPreschoolObjectivesByAge(list);
   }
   if (Array.isArray(objectives.subjectCompetencies)) {
-    objectives.subjectCompetencies = objectives.subjectCompetencies.map((c: string) => stripPreschoolCodes(c));
+    let list = objectives.subjectCompetencies;
+    if (!isNew8Activity) {
+      list = list.map((c: string) => stripPreschoolCodes(c));
+    }
+    objectives.subjectCompetencies = sortPreschoolObjectivesByAge(list);
   }
   if (Array.isArray(objectives.generalCompetencies)) {
-    objectives.generalCompetencies = objectives.generalCompetencies.map((g: string) => stripPreschoolCodes(g));
+    let list = objectives.generalCompetencies;
+    if (!isNew8Activity) {
+      list = list.map((g: string) => stripPreschoolCodes(g));
+    }
+    const hasAge = list.some(item => {
+      const s = (item || '').toLowerCase();
+      return s.includes('tuổi') || s.includes('tháng') || s.includes('nhà trẻ') || s.includes('mẫu giáo');
+    });
+    if (hasAge) {
+      objectives.generalCompetencies = sortPreschoolObjectivesByAge(list);
+    } else {
+      objectives.generalCompetencies = sortPreschoolCompetencies(list);
+    }
   }
   if (Array.isArray(objectives.qualities)) {
-    objectives.qualities = objectives.qualities.map((q: string) => stripPreschoolCodes(q));
+    let list = objectives.qualities;
+    if (!isNew8Activity) {
+      list = list.map((q: string) => stripPreschoolCodes(q));
+    }
+    objectives.qualities = sortPreschoolObjectivesByAge(list);
   }
   return objectives;
 }
@@ -3168,24 +3272,25 @@ export function analyzePreschoolAgeProfile(grade: string = ''): PreschoolAgeProf
       pedagogicalStrategy: 'DẠY HỌC PHÂN HÓA ĐỘ TUỔI: Chung chủ đề/đề tài nhưng phân hóa mức độ yêu cầu và nhiệm vụ theo từng độ tuổi. Cô luân phiên hướng dẫn trực tiếp nhóm nhỏ (3 tuổi) và bao quát, kích thích nhóm lớn (4-5 tuổi) tự lập, hợp tác.',
       promptGuidance: `BẮT BUỘC THIẾT KẾ GIÁO ÁN PHÂN HÓA ĐỘ TUỔI CHO LỚP GHÉP (${g}):
 - Trong phần I. MỤC ĐÍCH - YÊU CẦU:
-  + 1. Kiến thức: BẮT BUỘC PHÂN HÓA RÕ TỪNG ĐỘ TUỔI THEO ĐÚNG MẪU CHUẨN:
-${is345 ? `    - 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X, nhận biết chữ số X biểu thị cho các nhóm có số lượng X. Trẻ đếm từ 1 đến X, đọc được số X và các số nhỏ hơn X. So sánh 2 nhóm đối tượng, biết thêm bớt để có số lượng bằng nhau...
+  + BẮT BUỘC SẮP XẾP THỨ TỰ CÁC ĐỘ TUỔI TỪ THẤP ĐẾN CAO (3 tuổi ➔ 4 tuổi ➔ 5 tuổi):
+  + 1. Kiến thức: BẮT BUỘC PHÂN HÓA RÕ TỪNG ĐỘ TUỔI THEO THỨ TỰ TỪ THẤP ĐẾN CAO:
+${is345 ? `    - 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô, đếm cùng các bạn, nhận biết tên gọi cơ bản...
     - 4 tuổi: Trẻ biết đếm đến X, nhận biết các nhóm có X đối tượng. Trẻ biết tạo nhóm, xếp tương ứng 1- 1, biết so sánh 2 nhóm đồ vật, biết đếm đúng số lượng và sử dụng đúng chữ số tương ứng theo cô và các bạn...
-    - 3 tuổi: Trẻ đếm số lượng trong phạm vi X theo cô, đếm cùng các bạn.` : `    - Phân hóa rõ theo từng độ tuổi có trong lớp (ví dụ: - [Độ tuổi lớn]: ...; - [Độ tuổi nhỏ]: ...).`}
-  + 2. Kỹ năng: BẮT BUỘC PHÂN HÓA RÕ TỪNG ĐỘ TUỔI THEO ĐÚNG MẪU CHUẨN:
-${is345 ? `    - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh số lượng giữa 2 nhóm, thêm bớt tạo sự bằng nhau trong phạm vi X, chọn và gắn thẻ số X chính xác, nhanh nhẹn.
-    - 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1 thẳng hàng từ trái sang phải, đếm theo thứ tự, tìm đúng thẻ số X theo cô và bạn.
-    - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay và đếm theo cô, phát âm rõ từ chỉ số lượng.` : `    - Phân hóa rõ kỹ năng cho từng độ tuổi tương ứng trong lớp.`}
+    - 5 tuổi: Trẻ nhận biết nhóm có số lượng X, đếm đến X, nhận biết chữ số X biểu thị cho các nhóm có số lượng X. Trẻ đếm từ 1 đến X, đọc được số X và các số nhỏ hơn X. So sánh 2 nhóm đối tượng, biết thêm bớt để có số lượng bằng nhau...` : `    - Phân hóa rõ theo từng độ tuổi có trong lớp theo thứ tự từ thấp đến cao (ví dụ: - [Độ tuổi nhỏ]: ...; - [Độ tuổi lớn]: ...).`}
+  + 2. Kỹ năng: BẮT BUỘC PHÂN HÓA RÕ TỪNG ĐỘ TUỔI THEO THỨ TỰ TỪ THẤP ĐẾN CAO:
+${is345 ? `    - 3 tuổi: Rèn kỹ năng chú ý quan sát, chỉ tay và đếm theo cô, phát âm rõ từ chỉ số lượng...
+    - 4 tuổi: Rèn kỹ năng xếp tương ứng 1-1 thẳng hàng từ trái sang phải, đếm theo thứ tự, tìm đúng thẻ số X theo cô và bạn...
+    - 5 tuổi: Rèn kỹ năng đếm thành thạo, so sánh số lượng giữa 2 nhóm, thêm bớt tạo sự bằng nhau trong phạm vi X, chọn và gắn thẻ số X chính xác, nhanh nhẹn...` : `    - Phân hóa rõ kỹ năng cho từng độ tuổi tương ứng trong lớp theo thứ tự từ thấp đến cao.`}
   + 3. Phẩm chất: Yêu thương, Tôn trọng, Trung thực, Trách nhiệm (Nêu rõ tinh thần trẻ lớn biết yêu thương, chia sẻ, giúp đỡ các em nhỏ; trẻ nhỏ tôn trọng, học tập các anh chị lớn).
   + 4. Năng lực: Tự lực, Thích ứng, Giao tiếp, Hợp tác (Trẻ lớn biết phối hợp và hỗ trợ em nhỏ).
 - Trong phần II. CHUẨN BỊ:
-  + Đồ dùng của cô và trẻ phải ghi rõ học liệu chuẩn bị phân hóa cho từng nhóm tuổi (trẻ 5 tuổi, 4 tuổi, 3 tuổi).
+  + Đồ dùng của cô và trẻ phải ghi rõ học liệu chuẩn bị phân hóa cho từng nhóm tuổi (trẻ 3 tuổi, 4 tuổi, 5 tuổi).
 - Trong phần III. TIẾN TRÌNH HOẠT ĐỘNG (Bảng 2 cột: Hoạt động của giáo viên & Hoạt động của trẻ):
   + Ở các bước (Đặc biệt Bước 2 Khám phá - Trải nghiệm, Bước 3 Chia sẻ - Thảo luận, Bước 4 Vận dụng - Mở rộng):
-  + BẮT BUỘC PHÂN CHIA RÕ RÀNG HOẠT ĐỘNG CỦA CÔ VÀ TRẺ THEO TỪNG ĐỘ TUỔI:
-    * Hoạt động cho trẻ 5 tuổi: Thao tác nhiệm vụ nâng cao (xếp nhóm, so sánh, thêm bớt, gắn số, giải thích...).
+  + BẮT BUỘC PHÂN CHIA RÕ RÀNG HOẠT ĐỘNG CỦA CÔ VÀ TRẺ THEO TỪNG ĐỘ TUỔI TỪ THẤP ĐẾN CAO:
+    * Hoạt động cho trẻ 3 tuổi: Thao tác đếm cùng cô, quan sát và bắt chước các anh chị lớn...
     * Hoạt động cho trẻ 4 tuổi: Thao tác nhiệm vụ cơ bản (xếp tương ứng 1-1, đếm, chọn số theo bạn...).
-    * Hoạt động cho trẻ 3 tuổi: Thao tác đếm cùng cô, quan sát và bắt chước các anh chị lớn.`
+    * Hoạt động cho trẻ 5 tuổi: Thao tác nhiệm vụ nâng cao (xếp nhóm, so sánh, thêm bớt, gắn số, giải thích...).`
     };
   }
 

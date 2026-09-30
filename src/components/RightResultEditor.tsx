@@ -27,7 +27,7 @@ import { PedagogicalTable } from './PedagogicalTable';
 import { PreschoolSingleTable } from './PreschoolSingleTable';
 import { CompetencyMatrixView } from './CompetencyMatrixView';
 import { exportLessonPlanToDocx, getPreschoolHeaderInfo, formatHomeworkText, formatMathPeriodHeader, parseMathLessonHeader } from '../utils/docxExporter';
-import { formatPreschoolActivities, formatPreschoolMusicActivities, isPreschoolPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, getPreschoolPreparation } from '../utils/preschoolUtils';
+import { formatPreschoolActivities, formatPreschoolMusicActivities, isPreschoolPlan, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, getPreschoolPreparation, sortPreschoolObjectivesByAge, sortPreschoolCompetencies } from '../utils/preschoolUtils';
 import { MAM_NON_NEW_ACTIVITIES } from '../data/curriculumData';
 import { MathRenderer } from './MathRenderer';
 import { WorksheetRenderer } from './WorksheetRenderer';
@@ -538,7 +538,7 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                 <div className="space-y-1.5 text-[13pt]">
                   <h4 className="font-bold text-slate-900">1. Kiến thức:</h4>
                   <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
-                    {(plan.objectives?.knowledge || []).map((k, i) => (
+                    {sortPreschoolObjectivesByAge(plan.objectives?.knowledge || []).map((k, i) => (
                       <div key={i} className="text-justify leading-relaxed">
                         <span className="font-bold text-slate-900">- </span>
                         <MathRenderer text={cleanItem(k)} />
@@ -551,7 +551,7 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                 <div className="space-y-1.5 text-[13pt] pt-2">
                   <h4 className="font-bold text-slate-900">2. Kỹ năng:</h4>
                   <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
-                    {(plan.objectives?.subjectCompetencies || []).map((c, i) => (
+                    {sortPreschoolObjectivesByAge(plan.objectives?.subjectCompetencies || []).map((c, i) => (
                       <div key={i} className="text-justify leading-relaxed">
                         <span className="font-bold text-slate-900">- </span>
                         <MathRenderer text={cleanItem(c)} />
@@ -564,7 +564,7 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                 <div className="space-y-1.5 text-[13pt] pt-2">
                   <h4 className="font-bold text-slate-900">3. Phẩm chất:</h4>
                   <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
-                    {(plan.objectives?.qualities || []).map((q, i) => (
+                    {sortPreschoolObjectivesByAge(plan.objectives?.qualities || []).map((q, i) => (
                       <div key={i} className="text-justify leading-relaxed">
                         <span className="font-bold text-slate-900">- </span>
                         <MathRenderer text={cleanItem(q)} />
@@ -577,7 +577,7 @@ export const RightResultEditor: React.FC<RightResultEditorProps> = ({
                 <div className="space-y-1.5 text-[13pt] pt-2">
                   <h4 className="font-bold text-slate-900">4. Năng lực:</h4>
                   <div className="space-y-1.5 text-slate-800 text-justify leading-relaxed">
-                    {(plan.objectives?.generalCompetencies || []).map((c, i) => (
+                    {sortPreschoolCompetencies(sortPreschoolObjectivesByAge(plan.objectives?.generalCompetencies || [])).map((c, i) => (
                       <div key={i} className="text-justify leading-relaxed">
                         <span className="font-bold text-slate-900">- </span>
                         <MathRenderer text={cleanItem(c)} />

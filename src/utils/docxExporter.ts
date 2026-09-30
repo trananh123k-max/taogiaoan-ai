@@ -19,7 +19,7 @@ import fileSaver from 'file-saver';
 const saveAs = (fileSaver as any)?.saveAs || fileSaver;
 import { LessonPlanOutput, ImageSlot, StepDetail, MathFormulaFormatType, CombineWeekConfig } from '../types';
 import { PRESCHOOL_ACTIVITY_SECTIONS, USER_PRESCHOOL_ACTIVITY_SECTIONS, getStandardFixedSectionContent } from '../data/preschoolWeekActivities';
-import { formatPreschoolActivities, formatPreschoolMusicActivities, parseActivityPairs, detectPreschoolDomain, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, analyzePreschoolAgeProfile, cleanPreschoolBulletLine, expandPreschoolTextLines, getPreschoolPreparation, cleanPreschoolSubjectDisplay, isPreschoolPlan, getPreschoolSectionCHeaderInfo } from './preschoolUtils';
+import { formatPreschoolActivities, formatPreschoolMusicActivities, parseActivityPairs, detectPreschoolDomain, sanitizeStandardActivity, isPreschoolNew8Activity, stripPreschoolCodes, analyzePreschoolAgeProfile, cleanPreschoolBulletLine, expandPreschoolTextLines, getPreschoolPreparation, cleanPreschoolSubjectDisplay, isPreschoolPlan, getPreschoolSectionCHeaderInfo, sortPreschoolObjectivesByAge, sortPreschoolCompetencies } from './preschoolUtils';
 import { latexToDocxMath, splitTextAndMath } from './latexToDocxMath';
 import {
   normalizeWorksheetMarkdown,
@@ -3534,16 +3534,16 @@ function buildPreschoolDocxElements(
   };
 
   elements.push(createSubHeading('1. Kiến thức:', fontName));
-  plan.objectives.knowledge.forEach(k => elements.push(createDashListItem(cleanPreschoolText(k), fontName)));
+  sortPreschoolObjectivesByAge(plan.objectives.knowledge || []).forEach(k => elements.push(createDashListItem(cleanPreschoolText(k), fontName)));
 
   elements.push(createSubHeading('2. Kỹ năng:', fontName));
-  plan.objectives.subjectCompetencies.forEach(c => elements.push(createDashListItem(cleanPreschoolText(c), fontName)));
+  sortPreschoolObjectivesByAge(plan.objectives.subjectCompetencies || []).forEach(c => elements.push(createDashListItem(cleanPreschoolText(c), fontName)));
 
   elements.push(createSubHeading('3. Phẩm chất:', fontName));
-  plan.objectives.qualities.forEach(q => elements.push(createDashListItem(cleanPreschoolText(q), fontName)));
+  sortPreschoolObjectivesByAge(plan.objectives.qualities || []).forEach(q => elements.push(createDashListItem(cleanPreschoolText(q), fontName)));
 
   elements.push(createSubHeading('4. Năng lực:', fontName));
-  plan.objectives.generalCompetencies.forEach(c => elements.push(createDashListItem(cleanPreschoolText(c), fontName)));
+  sortPreschoolCompetencies(sortPreschoolObjectivesByAge(plan.objectives.generalCompetencies || [])).forEach(c => elements.push(createDashListItem(cleanPreschoolText(c), fontName)));
 
   // 5. Tích hợp Năng lực số (NLS) và 6. Tích hợp Trí tuệ nhân tạo (AI) nếu người dùng chọn tích hợp
   const hasNLS = (plan.objectives.digitalCompetencies || []).length > 0;
